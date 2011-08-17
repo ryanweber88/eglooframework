@@ -45,10 +45,26 @@ class DynamicObject {
 	public function __construct() {
 		
 	}
+	
+	/** CRUD METHOD DECLARATIONS/DEFINITIONS */ 
+	
+	public function create() { 
+		
+	}
+	
+	public function find() { 
+		
+	}
+	
+	public function update() { 
+		
+	}
+	
+	public function delete() { 
+		
+	}
 
-	// public function __clone() {
-	// 	
-	// }
+	/** AUTOMAGIC METHODS */
 
 	public function __call( $name, $arguments ) {
 		$log_message = 'Mock Method Call: Attempted invocation of concrete method "' .

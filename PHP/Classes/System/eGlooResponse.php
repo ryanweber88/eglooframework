@@ -46,6 +46,7 @@ class eGlooResponse {
 		$requestInfoBean = RequestInfoBean::getInstance();
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );
 
+
 		if ( !$dispatchClass ) {
 			$dispatchClass = $requestInfoBean->getRequestClass();
 		}

@@ -2214,5 +2214,17 @@ final class eGlooConfiguration {
 
 		return $retVal;
 	}
+	
+	/**
+	 * 
+	 * Convenience to get configuration options automagically
+	 * @param string $name
+	 * @param mixed* $arguments
+	 */
+	public static function __callStatic($name, $arguments) { 
+		if (preg_match('/^get/', $name)) { 	
+			return self::$configuration_options[preg_replace('/^get/', null, $name)];
+		}
+	}
 
 }

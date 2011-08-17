@@ -1,5 +1,5 @@
 <?php
-/**
+/***
  * eGloo Framework Bootstrap File 
  *
  * This file contains the bootstrap for the eGloo framework
@@ -35,6 +35,9 @@ if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	include( 'PHP/Includes/eGlooAutoload.php' );
 }
 
+$product = new \eGloo\DP\Product();
+$product->asdf();
+
 // Check for Memcache
 if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
 	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
@@ -52,6 +55,8 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
 }
+
+
 
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
