@@ -1,0 +1,7 @@
+
+Parse error: syntax error, unexpected ';', expecting T_STRING or T_NS_SEPARATOR or '{' in /var/tmp/com.egloo.cache/ddpns/Product.php on line 2
+
+Call Stack:
+    0.0003     637704   1. {main}() /usr/share/php/eglooframework/DocRoot/index.php:0
+    0.0377    3134032   2. eglooAutoload() /usr/share/php/eglooframework/PHP/Includes/eGlooAutoload.php:0
+
