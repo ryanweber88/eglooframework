@@ -648,6 +648,7 @@ final class eGlooConfiguration {
 	}
 
 	public static function loadApplicationConfigurationXML( $application_name, $overwrite = true, $config_xml_filename = 'Config.xml' ) {
+		
 		if ( self::getApplicationPath() !== $application_name ) {
 			$config_xml_path = $application_name . 'Configuration/' . $config_xml_filename;
 		} else {
@@ -705,6 +706,7 @@ final class eGlooConfiguration {
 			}
 
 		} else {
+			echo $config_xml_path; exit;
 			trigger_error("Configuration XML for eGloo application not found");
 		}
 	}
