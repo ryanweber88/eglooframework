@@ -124,7 +124,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		// Iterate over the RequestAttributeSet nodes so that we can parse each request attribute set definition
 		foreach( $requestXMLObject->xpath( '/tns:Requests/RequestAttributeSet' ) as $attributeSet ) {
 			// Grab the ID for this particular RequestAttributeSet
-			$attributeSetID = isset($attributeSet['id']) ? (string) $attributeSet['id'] : NULL;
+			$attributeSetID = isset($attributeSet['id']) ? (string) $attributeSet['id'] : null;
 
 			// If no ID is set for this RequestAttributeSet, this is not a valid Requests.xml and we should get out of here
 			if ( !$attributeSetID || trim($attributeSetID) === '' ) {
@@ -313,7 +313,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		// Iterate over the RequestClass nodes so that we can parse each request definition
 		foreach( $requestXMLObject->xpath( '/tns:Requests/RequestClass' ) as $requestClass ) {
 			// Grab the ID for this particular RequestClass
-			$requestClassID = isset($requestClass['id']) ? (string) $requestClass['id'] : NULL;
+			$requestClassID = isset($requestClass['id']) ? (string) $requestClass['id'] : null;
 
 			// If no ID is set for this RequestClass, this is not a valid Requests.xml and we should get out of here
 			if ( !$requestClassID || trim($requestClassID) === '' ) {
@@ -326,19 +326,19 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			// Iterate over the Request nodes for this RequestClass so that we can parse each request definition
 			foreach( $requestClass->xpath( 'child::Request' ) as $request ) {
 				// Grab the ID for this particular Request
-				$requestID = isset($request['id']) ? (string) $request['id'] : NULL;
+				$requestID = isset($request['id']) ? (string) $request['id'] : null;
 
 				// Grab the name of the RequestProcessor specified to handle this particular Request
 				// Example:
 				// $requestProcessor = new $processorID();
 				// $requestProcessor->processRequest();
-				$processorID = isset($request['processorID']) ? (string) $request['processorID'] : NULL;
+				$processorID = isset($request['processorID']) ? (string) $request['processorID'] : null;
 
 				// Grab the name of the RequestProcessor specified to handle errors for this particular Request
 				// Example:
 				// $errorRequestProcessor = new $errorProcessorID();
 				// $errorRequestProcessor->processErrorRequest();
-				$errorProcessorID = isset($request['errorProcessorID']) ? (string) $request['errorProcessorID'] : NULL;
+				$errorProcessorID = isset($request['errorProcessorID']) ? (string) $request['errorProcessorID'] : null;
 
 				// If no ID is set for this Request, this is not a valid Requests.xml and we should get out of here
 				if ( !$requestID || trim($requestID) === '' ) {
@@ -537,13 +537,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $boolArguments as $boolArgument ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['boolArguments'][$boolArgument['id']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting bool argument ' . $boolArgument['id'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['boolArguments'][$boolArgument['id']] = $boolArgument;
 						} else if ( isset($requestClasses[$requestClassID]['requests'][$requestID]['boolArguments'][$boolArgument['id']]['priority']) &&
 								$requestClasses[$requestClassID]['requests'][$requestID]['boolArguments'][$boolArgument['id']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence bool argument ' . $boolArgument['id'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['boolArguments'][$boolArgument['id']] = $boolArgument;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence bool argument ' . $boolArgument['id'] .
@@ -554,13 +554,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $selectArguments as $selectArgument ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['selectArguments'][$selectArgument['id']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting select argument ' . $selectArgument['id'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['selectArguments'][$selectArgument['id']] = $selectArgument;
 						} else if ( isset($requestClasses[$requestClassID]['requests'][$requestID]['selectArguments'][$selectArgument['id']]['priority']) &&
 								$requestClasses[$requestClassID]['requests'][$requestID]['selectArguments'][$selectArgument['id']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence select argument ' . $selectArgument['id'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['selectArguments'][$selectArgument['id']] = $selectArgument;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence select argument ' . $selectArgument['id'] .
@@ -571,13 +571,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $variableArguments as $variableArgument ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['variableArguments'][$variableArgument['id']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting variable argument ' . $variableArgument['id'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['variableArguments'][$variableArgument['id']] = $variableArgument;
 						} else if ( isset($requestClasses[$requestClassID]['requests'][$requestID]['variableArguments'][$variableArgument['id']]['priority']) &&
 								$requestClasses[$requestClassID]['requests'][$requestID]['variableArguments'][$variableArgument['id']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence variable argument ' . $variableArgument['id'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['variableArguments'][$variableArgument['id']] = $variableArgument;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence variable argument ' . $variableArgument['id'] .
@@ -588,13 +588,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $complexArguments as $complexArgument ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['complexArguments'][$complexArgument['id']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting complex argument ' . $complexArgument['id'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['complexArguments'][$complexArgument['id']] = $complexArgument;
 						} else if ( isset($requestClasses[$requestClassID]['requests'][$requestID]['complexArguments'][$complexArgument['id']]['priority']) &&
 								$requestClasses[$requestClassID]['requests'][$requestID]['complexArguments'][$complexArgument['id']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence complex argument ' . $complexArgument['id'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['complexArguments'][$complexArgument['id']] = $complexArgument;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence complex argument ' . $complexArgument['id'] .
@@ -605,13 +605,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $depends as $depend ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['depends'][$depend['id']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting depend ' . $depend['id'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['depends'][$depend['id']] = $depend;
 						} else if ( isset($requestClasses[$requestClassID]['requests'][$requestID]['depends'][$depend['id']]['priority']) &&
 								$requestClasses[$requestClassID]['requests'][$requestID]['depends'][$depend['id']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence depend ' . $depend['id'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['depends'][$depend['id']] = $depend;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence depend ' . $depend['id'] .
@@ -624,7 +624,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					foreach( $decorators as $decorator ) {
 						if ( !isset($requestClasses[$requestClassID]['requests'][$requestID]['decorators'][$decorator['decoratorID']]) ) {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Inserting decorator ' . $decorator['decoratorID'] .
-								' from attribute set ' . $requestAttributeSetID , 'Security' );
+								' from attribute set ' . $requestAttributeSetID, 'Security' );
 
 							$decorator['order'] += $existingDecoratorCount;
 							$requestClasses[$requestClassID]['requests'][$requestID]['decorators'][$decorator['decoratorID']] = $decorator;
@@ -632,7 +632,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 								$requestClasses[$requestClassID]['requests'][$requestID]['decorators'][$decorator['decoratorID']]['priority'] < $priority ) {
 
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Replacing lower precedence decorator ' . $decorator['decoratorID'] .
-								' with higher precedence from attribute set ' . $requestAttributeSetID , 'Security' );
+								' with higher precedence from attribute set ' . $requestAttributeSetID, 'Security' );
 							$requestClasses[$requestClassID]['requests'][$requestID]['decorators'][$decorator['decoratorID']] = $decorator;
 						} else {
 							eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Higher precedence decorator ' . $decorator['decoratorID'] .
