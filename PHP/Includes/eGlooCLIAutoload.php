@@ -40,6 +40,8 @@ if ( !class_exists( 'eGlooLogger', false ) ) {
 
 global $egloo_script_arguments;
 
+var_export($egloo_script_arguments); exit;
+
 if ( in_array('-v', $egloo_script_arguments) ) {
 	$logging_level = eGlooLogger::STAGING;
 } else if ( in_array('-vv', $egloo_script_arguments) ) {
@@ -181,7 +183,7 @@ function eglooAutoload($class_name) {
 	if ($sanityCheckClassLoading) {
 		$instances = array();
 	}
-
+	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();

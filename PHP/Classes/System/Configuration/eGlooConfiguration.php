@@ -1243,6 +1243,7 @@ final class eGlooConfiguration {
 			} else if (!is_file($system_xml_path)) {
 				trigger_error("Expected path for System XML for eGloo Framework exists but is not a valid file.");
 			} else if (!is_readable($system_xml_path)) {
+				echo $system_xml_path;
 				trigger_error("System XML for eGloo Framework file exists but cannot be read.  Check file permissions.");
 			} else {
 				trigger_error("Unknown Error Reading System XML for eGloo Framework.");
