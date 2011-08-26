@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Bash script for controlling EAS (eGloo Application Server) instances
+#
+# Disclaimer: This script in reality wraps Server/server.php script
+
+
+# first find which PHP binary to use
+if test "x$PHP_PEAR_PHP_BIN" != "x"; then
+  PHP="$PHP_PEAR_PHP_BIN"
+else
+  PHP=`pear config-get php_bin`
+fi
+
+# Path to server control
+
+SERVER="/usr/share/php/eglooframework/Server/server.php"
+
+# Execute server control
+
+exec $PHP $SERVER "$@"
