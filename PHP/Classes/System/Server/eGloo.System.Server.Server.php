@@ -8,7 +8,7 @@ namespace eGloo\System\Server;
  * Responsible for polling 
  * @author Christian Calloway
  */
-class eGlooServer extends \photon\server\Server implements \eGloo\Server\Servable { 
+class Server extends \photon\server\Server implements \eGloo\System\Server\Servable { 
 	
 	/**
 	 * Loads eGloo environment into persistent scope and polls for connections
@@ -17,7 +17,8 @@ class eGlooServer extends \photon\server\Server implements \eGloo\Server\Servabl
 	 */
 	public function start() { 
 		
-		// TODO : load egloo configuration into persistent scope
+		// TODO : load egloo configuration into persistent scope 
+		// (? should it be done here, pre or post)
 		
 		// run parent method to poll for connections
 		parent::start();
@@ -30,4 +31,12 @@ class eGlooServer extends \photon\server\Server implements \eGloo\Server\Servabl
 	public function stop() { 
 		
 	}
+	
+    public function registerSignals()
+    {
+        if (!pcntl_signal(SIGTERM, array('\eGloo\System\Server\Server', 'signalHandler'))) {
+            Log::fatal('Cannot install the SIGTERM signal handler.');
+            die(1);
+        }
+    }	
 }

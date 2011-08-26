@@ -46,18 +46,19 @@ abstract class Command extends \eGloo\Dialect\Object {
 		// being present, so think more about this
 		
 		/*
-		$self = $this;
+		$self = &$this;
 		
 		// can't do this till 5.4 install - fucking closure has no access to object
 		// protected/private properties
-		//\eGloo\Utilities\Ruby\Iterator::rnew($this->options()).each(function($key, $methodName) use ($self) { 
-			//if ($self->methodExists($methodName)) { 
-			//	$self->$methodName();
-			//}
-		//});
-		 */
+		\eGloo\Utilities\Ruby\Iterator::rnew($this->options()).each(function($key, $methodName) use ($self) { 
+			if ($self->methodExists($methodName)) { 
+				$self->$methodName();
+			}
+		});
+		*/
 		
-		if (count($this->options)) { 
+		// cover your bases - make sure array is 
+		if ((is_array($this->options) || ($this->options instanceof ArrayAccess))  && count($this->options)) { 
 			foreach($this->options() as $option) {
 				$methodName =  'case' . ucfirst($option);
 				

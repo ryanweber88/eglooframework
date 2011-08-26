@@ -10,7 +10,7 @@
 // NAMESPACE //////////////////////////////////////////////////////////////////
 
 // you don't have to import java.lang
-use \eGloo\Dialect;
+use \eGloo\Dialect\Object;
 
 
 // SET INCLUDE PATHS //////////////////////////////////////////////////////////
@@ -35,8 +35,7 @@ set_include_path(
 
 // photon autoload
 spl_autoload_register(function($className) { 
-	
-	
+		
     $parts = array_filter(explode('\\', $className));
     if (1 < count($parts)) {
         // We have a namespace.
@@ -75,6 +74,7 @@ spl_autoload_register(function($className) {
 	
 });
 
+
 // PHOTON SUPPORT /////////////////////////////////////////////////////////////
 
 require_once 'photon.bridge.php';
@@ -86,12 +86,16 @@ require_once 'photon.bridge.php';
 
 // TODO: Configs
 
-// cli parameters - this uses photons cli parser
+// cli parameters used for underlying photon process
+// TODO: Remove and make native to EAS script
 
 $parser = \photon\getParser();
 $result = $parser->parse();
 $params = array('cwd' => getcwd());
 $params = $params + $result->options;
+$params += $result->command->command->options;
+$params['argv'] = $argv;
+
 
 // determine command and execute 
 
@@ -99,5 +103,5 @@ $params = $params + $result->options;
 	$argv[1]
 )
 ->options(array_slice($argv, 2))
-->parameters($params)
+->legacy($params)
 ->execute();

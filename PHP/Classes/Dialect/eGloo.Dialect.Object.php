@@ -84,6 +84,6 @@ abstract class Object {
 	}
 	
 	protected function propertyExists($propertyName) { 
-		return property_exists($this, $property);	
+		return property_exists($this, $propertyName);	
 	}
 }

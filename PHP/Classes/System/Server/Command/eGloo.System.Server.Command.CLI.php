@@ -23,6 +23,19 @@ abstract class CLI extends \eGloo\System\Server\Command {
 		}
 	}	
 	
+	public function execute() { 
+		// capture output of parent (or really child invoking 
+		// parent method and scrub 'Photon' for 'EAS'
+		// TODO: This is a cheap method to accomplish this 
+		// task; a more well thought out narative is in order
+		ob_start();
+		parent::execute();
+		
+		return preg_replace (
+			'/photon/i', 'EAS', ob_get_clean()
+		);
+	}
+	
 	/**
 	 * 
 	 * Stores legacy parameters to provide to underlying photon objects

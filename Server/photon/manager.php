@@ -312,6 +312,7 @@ class ServerManager extends Base
         Conf::load($this->getConfig());
         $n_children = ($this->params['children']) ? 
             $this->params['children'] : 3;
+                    
         // We have a double fork. First to create the master daemon,
         // then to get new children.
         $this->daemonize(); 
@@ -320,6 +321,7 @@ class ServerManager extends Base
         // We are the master daemon.
         $this->childcmd = $this->makeChildCmd($this->params['argv']);
         $this->taskcmd = $this->makeTaskCmd($this->params['argv']);
+                
         foreach (Conf::f('installed_tasks', array()) as $name => $class) {
             self::$tasks[] = $this->makeTask($name);
             usleep(20000); // sleep 20 ms between the forks to make
@@ -729,8 +731,9 @@ class ChildServer extends Base
             $this->verbose(sprintf('Include path is now: %s',
                                    get_include_path()));
         }
-
+        
         Conf::load($this->getConfig());
+        var_export(Conf::f('server_conf', array())); exit;
         $server = new \photon\server\Server(Conf::f('server_conf', array()));
 
         return $server->start();
