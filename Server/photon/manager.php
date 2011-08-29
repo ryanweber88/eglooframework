@@ -733,7 +733,6 @@ class ChildServer extends Base
         }
         
         Conf::load($this->getConfig());
-        var_export(Conf::f('server_conf', array())); exit;
         $server = new \photon\server\Server(Conf::f('server_conf', array()));
 
         return $server->start();
@@ -887,9 +886,9 @@ class CommandServer extends Base
         // subscribe to ALL and to their own id.
         $this->sendCommand('LIST');
         $answers = $this->parseAnswers($this->readAns());
+        
         if ($this->params['json']) {
             print json_encode($answers) . "\n";
-
             return 0;
         }
         $idlen = 0;

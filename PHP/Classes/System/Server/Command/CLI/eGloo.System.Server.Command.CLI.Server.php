@@ -30,12 +30,19 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	
 	
 	protected function caseNew() { 
-		
+		// adds an additional eas instance to stack
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
+		$commander->runStart();
+
+		exit(0);
 	} 
 	
 	protected function caseLess() { 
-		// you aint got no case!
+		// you aint got no case! Remove eas instance from stack
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
+		$commander->runLess();
 		
+		return false;
 	}
 	
 	protected function caseList() { 
@@ -43,28 +50,18 @@ class Server extends \eGloo\System\Server\Command\CLI {
 		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
 		$commander->runList();
 		
-		exit;
+		exit(0);
 	}
 	
 	protected function caseChildstart() { 
 		// process is (should be) already forked an daemonized; initiate
-		// childserver which is a wrapper of production server 
+		// childserver which is a wrapper of production server; this is an internally
+		// use case only
 		$process = new \eGloo\System\Server\ChildServer($this->legacy());
         $process->run();
 
-        exit;
-	}
-	
-	protected function caseTaskstart() { 
-		
-	}
-	
-	protected function caseSecretkey() { 
-		
-	}
-	
-	protected function casePackage() { 
-		
+        exit(0);
 	}
 
+	
 }

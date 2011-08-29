@@ -5,7 +5,7 @@ namespace eGloo\System\Server;
  * 
  * A bit of a misnomer, the ChildServer RUNS the production server (as opposed to
  * being a child instance of the production server) within a daemonized child
- * proxy
+ * fork
  * @author Christian Calloway
  *
  */
@@ -24,4 +24,8 @@ class ChildServer extends \photon\manager\ChildServer implements \eGloo\Utilitie
         
         return $server->start();
     }	
+    
+	public function info($message, $eol = PHP_EOL) { 
+		return parent::info(Utilities::rebrand($message), $eol);
+	}    
 }

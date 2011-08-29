@@ -15,7 +15,9 @@ class CommandServer extends \photon\manager\CommandServer {
 	 * Overrides base functionality to correctly brand
 	 * @see photon\manager.Base::info()
 	 */
-	public function info ($message, $eol = PHP_EOL) { 
-		return preg_replace ('/photon/i', 'EAS', $message) . $eol;
+	public function info($message, $eol = PHP_EOL) { 
+		return parent::info(Utilities::rebrand($message), $eol);
 	}
+	
+
 }

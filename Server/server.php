@@ -57,6 +57,8 @@ spl_autoload_register(function($className) {
 	
 	// assume classes are namespaced and remove top level domain "eGloo"
 	// as its a synonym for /root/PHP/Classes/
+	//echo "class = $className\n";
+	
 	
 	$parts = array_slice(
 		explode ('\\', $className), 1
@@ -70,7 +72,10 @@ spl_autoload_register(function($className) {
 	
 	
 	// load file into currently running context 	
-	require_once "$path/eGloo.$file"; 
+	if (!(@include_once "$path/eGloo.$file")) { 
+		
+		// log className which could not be loaded
+	} 
 	
 });
 
@@ -94,11 +99,11 @@ $result = $parser->parse();
 $params = array('cwd' => getcwd());
 $params = $params + $result->options;
 $params += $result->command->command->options;
-$params['argv'] = $argv;
+$params['argv'] = $argv; 
+$params['task'] = @$result->command->args['task'];
 
 
 // determine command and execute 
-
 \eGloo\System\Server\Command\CLI::factory(
 	$argv[1]
 )
