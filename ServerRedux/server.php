@@ -18,7 +18,6 @@ const NUMBER_CHILDREN = 4;
 
 set_include_path(
 	get_include_path()                      . ':' . 
-	realpath(__DIR__ .   '/m2php')          . ':' .
 	realpath(__DIR__ .   '/../')            . ':' . // egloo framework home
 	realpath(__DIR__ .   '/../PHP/Classes') . ':'   // egloo framework class library
 );
@@ -63,4 +62,15 @@ spl_autoload_register(function($className) {
 // EXECUTION //////////////////////////////////////////////////////////////////
 
 
-foreach ()
+// Run mongrel handler in children processes
+for ($counter = 0; $counter < NUMBER_CHILDREN; $counter++) { 
+	
+	System_Daemon::setOption("appName", "EAS_$counter");
+	System_Daemon::start();
+	
+
+	
+	//echo 'here';
+	//System_Daemon::stop();
+	
+}
