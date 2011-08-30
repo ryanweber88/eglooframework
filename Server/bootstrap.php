@@ -40,39 +40,23 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		$result = $parser->parse();
 		$params = array('cwd' => getcwd());
 		$params = $params + $result->options;
-		$params += $result->command->command->options;
-		$params['argv'] = $argv; 
+		$params += @$result->command->command->options;
+		$params['argv'] = $GLOBALS['argv'];
 		$params['task'] = @$result->command->args['task'];
+		
 		
 	}
 	
-	protected function _initEgloo() { 
-		// initialize eGloo resources
-		
-		// define autoloader for eGloo class library
-		// TODO : Remove and place into centralized 
+	protected function _initPEAR() {
 		spl_autoload_register(function($className) { 
-			
-			// assume classes are namespaced and remove top level domain "eGloo"
-			// as its a synonym for /root/PHP/Classes/
-			//echo "class = $className\n";
-			$parts = array_slice(
-				explode ('\\', $className), 1
-			);
-			
-			$path  = implode(
-				DIRECTORY_SEPARATOR, array_slice($parts, 0, count($parts) - 1)
-			);
+			@include_once str_ireplace('_', '/', $className) . '.php';
+		});
 		
-			$file = implode('.', $parts) . '.php';
-			
-			
-			// load file into currently running context 	
-			if (!(@include_once "$path/eGloo.$file")) { 
-				
-				// log className which could not be loaded
-			} 
-			
-		});		
+		$GLOBALS['log'] = \Log::factory('console', '', 'test');
+	}
+	
+	protected function _initEgloo() { 
+		// initialize eGloo resources	
+		
 	}
 }

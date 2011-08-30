@@ -20,9 +20,10 @@ set_include_path(
 	realpath(__DIR__ .   '/../PHP/Classes/System/Server') . ':'
 );
 
-// APPLICATION ////////////////////////////////////////////////////////////////
+// AUTOLOAD ///////////////////////////////////////////////////////////////////
 
-require_once 'eGloo.System.Server.Application.php';
+// TODO : remove when migrating to cli tool
+require_once 'autoload.php';
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
@@ -40,16 +41,14 @@ $application = new \eGloo\System\Server\Application(
 // run application bootstrap
 $application->bootstrap()
 ->bootstrap('photon')
-->bootstrap('egloo');
-
-exit;
-
+->bootstrap('egloo')
+->bootstrap('PEAR');
 
 // now that application-specific resources have been loaded; 
 // determine command and execute 
 \eGloo\System\Server\Command\CLI::factory(
 	$argv[1]
 )
-->options($GLOBALS['params'])
+->options(array_slice($argv, 2))
 ->legacy($GLOBALS['params'])
 ->execute();

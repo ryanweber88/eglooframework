@@ -57,7 +57,7 @@ abstract class Command extends \eGloo\Dialect\Object {
 		});
 		*/
 		
-		// cover your bases - make sure array is 
+		// cover your bases - make sure array is, well an array 
 		if ((is_array($this->options) || ($this->options instanceof ArrayAccess))  && count($this->options)) { 
 			foreach($this->options() as $option) {
 				$methodName =  'case' . ucfirst($option);

@@ -14,7 +14,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	protected function caseStart() { 
 		// forks process and initates production server instances
 		// within daemon child processes
-		$manager = new \eGloo\System\Server\Manager($this->options());
+		$manager = new \eGloo\System\Server\Manager($this->legacy());
 		$manager->run();
 		
 		exit;
@@ -22,7 +22,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	
 	protected function caseStop() {
 		// sends a stop signal to production servers
-		$commander = new \eGloo\System\Server\CommandServer($this->options());
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
 		$commander->runStop();
 
 		return false;
@@ -31,7 +31,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	
 	protected function caseNew() { 
 		// adds an additional eas instance to stack
-		$commander = new \eGloo\System\Server\CommandServer($this->options());
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
 		$commander->runStart();
 
 		exit(0);
@@ -39,7 +39,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	
 	protected function caseLess() { 
 		// you aint got no case! Remove eas instance from stack
-		$commander = new \eGloo\System\Server\CommandServer($this->options());
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
 		$commander->runLess();
 		
 		return false;
@@ -47,7 +47,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 	
 	protected function caseList() { 
 		// list running EAS instances
-		$commander = new \eGloo\System\Server\CommandServer($this->options());
+		$commander = new \eGloo\System\Server\CommandServer($this->legacy());
 		$commander->runList();
 		
 		exit(0);
@@ -57,7 +57,7 @@ class Server extends \eGloo\System\Server\Command\CLI {
 		// process is (should be) already forked an daemonized; initiate
 		// childserver which is a wrapper of production server; this is an internally
 		// use case only
-		$process = new \eGloo\System\Server\ChildServer($this->options());
+		$process = new \eGloo\System\Server\ChildServer($this->legacy());
         $process->run();
 
         exit(0);

@@ -72,7 +72,7 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 					}
 				}
 			} catch (\ZMQPollException $e) {
-				Log::fatal('Poll failed: ' . $e->getMessage());
+				//Log::fatal('Poll failed: ' . $e->getMessage());
 
 				return 1;
 			}
@@ -89,14 +89,14 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 					}
 				}
 			}
-			$this->updatePollStats($poll_time);
+			//@$this->updatePollStats($poll_time);
 			pcntl_signal_dispatch();
 		}
 	}
 	
     public function processRequest($conn)
     {
-		$uuid = request_uuid($this->phid);
+		$uuid = \photon\server\request_uuid($this->phid);
 		//Timer::start('photon.process_request');
 		$fp = fopen('php://temp/maxmemory:5242880', 'r+');
 		fputs($fp, $conn->reqs->recv());
@@ -105,10 +105,9 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		$mess = $conn->parse($fp);
 		$req = new \photon\http\Request($mess);
 		$req->uuid = $uuid;
-		$req->conn = $conn;
-		
-		
-		list($req, $response) = \photon\core\Dispatcher::dispatch($req);
+		$req->conn = $conn;		
+				
+		// list($req, $response) = \photon\core\Dispatcher::dispatch($req);
 		
 		
 		// If the response is false, the view is simply not

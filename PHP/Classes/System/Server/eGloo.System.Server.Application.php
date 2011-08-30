@@ -1,9 +1,10 @@
 <?php
-namespace \eGloo\System\Server;
+namespace eGloo\System\Server;
 
 /**
  * 
- * Represents the application end of the server; in reality provides a global context
+ * Represents the application end or context of the Application Server (similar in model to application
+ * context/scope within a servlet container); in reality provides a global context
  * which EAS instances will share - since each instance is forked, we are not sharing
  * the same application object in memory, but simply an imprint of the same object
  * @author petflowdeveloper
@@ -17,7 +18,7 @@ class Application extends \eGloo\Dialect\Object {
 		
 		// setup boostrap 
 		require_once "$path/bootstrap.php";
-		$this->bootstrap(new Bootstrap());
+		$this->bootstrap(new \Bootstrap());
 		
 		// setup config - this following photon model, which i don't
 		// really like (requires shouldn't return values, but place
@@ -38,6 +39,12 @@ class Application extends \eGloo\Dialect\Object {
 		return static::$instance;
 	}
 	
+	public function log($string) { 
+		$resource = fopen('test.log', 'w');
+		fwrite($string, $resource);
+		fclose($resource);
+	}
+	
 	/** @var \eGloo\Utilities\Bootstrap\BootstrapAbstract */
 	protected $bootstrap;
 	
@@ -53,6 +60,6 @@ class Application extends \eGloo\Dialect\Object {
 	 * Singleton access to Application instance (there should never be more than one instance)
 	 * @var Application
 	 */
-	private $instance;
+	private static $instance;
 	
 }
