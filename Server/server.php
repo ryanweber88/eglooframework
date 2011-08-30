@@ -7,11 +7,13 @@
 
 // CONSTANTS //////////////////////////////////////////////////////////////////
 
+
 // NAMESPACE //////////////////////////////////////////////////////////////////
 
-// you don't have to import java.lang
-use \eGloo\Dialect\Object;
 
+// BOOTSTRAP //////////////////////////////////////////////////////////////////
+
+require_once 'bootstrap.php';
 
 // SET INCLUDE PATHS //////////////////////////////////////////////////////////
 // TODO: Remove; this should be part of cli bootstrap
@@ -26,31 +28,9 @@ set_include_path(
 // DEFINE AUTOLOADERS /////////////////////////////////////////////////////////
 // TODO: Remove; this should be part of cli bootstrap
 
-// require_once 'photon/autoload.php'; // does not work; looking at pear autoload
-
-// require_once 'PHP/Includes/eGlooCLIAutoload.php' // doesn't work
-
-// Define autoloader for eGloo file naming convention to load from Server 
-// TODO: Remove, autload should occur is system autoload script
 
 // photon autoload
-spl_autoload_register(function($className) { 
-		
-    $parts = array_filter(explode('\\', $className));
-    if (1 < count($parts)) {
-        // We have a namespace.
-        $class_name = array_pop($parts);
-        $file = implode(DIRECTORY_SEPARATOR, $parts) . '.php';
-    } else {
-        $file = str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-    }
-    // As we load only once to have everything is the process, the
-    // require_once instead of require penalty is low. But the
-    // require_once will prevent double loading a file and will result
-    // in non confusing error messages.
-    // printf("Class: %s, file: %s\n", $class, $file);    
-    @include_once $file;
-});
+
 
 // egloo & server dir autoload
 spl_autoload_register(function($className) { 
@@ -82,7 +62,6 @@ spl_autoload_register(function($className) {
 
 // PHOTON SUPPORT /////////////////////////////////////////////////////////////
 
-require_once 'photon.bridge.php';
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
@@ -102,7 +81,18 @@ $params += $result->command->command->options;
 $params['argv'] = $argv; 
 $params['task'] = @$result->command->args['task'];
 
+// instantiate application object; a shared resource amongst EAS instances
+$application = new \eGloo\System\Server\Application(
+	__DIR__
+);
 
+// run application bootstrap
+$application->bootstrap()
+->bootstrap('photon')
+->bootstrap('egloo');
+
+
+// now that application-specific resources have been loaded; 
 // determine command and execute 
 \eGloo\System\Server\Command\CLI::factory(
 	$argv[1]
