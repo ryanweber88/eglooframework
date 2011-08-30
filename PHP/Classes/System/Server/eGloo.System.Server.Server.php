@@ -96,18 +96,28 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 	
     public function processRequest($conn)
     {
+    	// unique id for every request; useful for logging, but perhaps should
+    	// be abstracted into logger
 		$uuid = \photon\server\request_uuid($this->phid);
 		//Timer::start('photon.process_request');
+		
+		// I don't know why the recieved request is being written to temporary; 
+		// maybe as a log store??
 		$fp = fopen('php://temp/maxmemory:5242880', 'r+');
 		fputs($fp, $conn->reqs->recv());
 		$stats = fstat($fp);
 		rewind($fp);
-		$mess = $conn->parse($fp);
-		$req = new \photon\http\Request($mess);
+		$message = $conn->parse($fp);
+				
+		// instantiate egloo request objectz
+		$request = new Action\HTTP\Request($message);
 		$req->uuid = $uuid;
 		$req->conn = $conn;		
 				
-		// list($req, $response) = \photon\core\Dispatcher::dispatch($req);
+		//list($req, $response) = \photon\core\Dispatcher::dispatch($req);
+
+		// dispatch request to egloo handler/router
+		\eGloo\System\Server\Action\Dispatcher::dispatch($request);
 		
 		
 		// If the response is false, the view is simply not
@@ -115,9 +125,9 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		// another backend. Yes, you do not need to reply after a
 		// recv().
 		if (false !== $response) {
-		    $conn->reply($mess, $response->render());
+		    $conn->reply($message, $response->render());
 		}
-		unset($mess); // Cleans the memory with the __destruct call.
+		unset($message); // Cleans the memory with the __destruct call.
 		
 		/*
 		Log::perf(array(
