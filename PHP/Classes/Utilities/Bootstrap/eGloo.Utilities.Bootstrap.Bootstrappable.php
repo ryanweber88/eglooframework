@@ -7,7 +7,7 @@ interface Bootstrappable {
 	 * Bootstrap a single resource or many on null
 	 * @param string $resource
 	 */
-	public function bootstrap($resource = null);
+	public function &bootstrap($resource = null);
 	
 	/**
 	 * 

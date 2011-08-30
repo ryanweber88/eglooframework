@@ -5,11 +5,12 @@
 class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract { 
 
 	protected function _initPhoton() { 
-		// init photon resources
+		// init photon resources	
 		
-		// require bridge
-		require_once 'photon.bridge.php';
-		
+		// photon global namespace
+		$GLOBALS['photon'] = array(
+			'params'
+		);
 		
 		// define autoloader
 		spl_autoload_register(function($className) { 
@@ -28,10 +29,50 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		    // in non confusing error messages.
 		    // printf("Class: %s, file: %s\n", $class, $file);    
 		    @include_once $file;
-		});		
+		});	
+
+		// require bridge
+		require_once 'photon.bridge.php';		
+		
+		// command line parameters
+		$params = &$GLOBALS['params'];
+		$parser = \photon\getParser();
+		$result = $parser->parse();
+		$params = array('cwd' => getcwd());
+		$params = $params + $result->options;
+		$params += $result->command->command->options;
+		$params['argv'] = $argv; 
+		$params['task'] = @$result->command->args['task'];
+		
 	}
 	
 	protected function _initEgloo() { 
+		// initialize eGloo resources
 		
+		// define autoloader for eGloo class library
+		// TODO : Remove and place into centralized 
+		spl_autoload_register(function($className) { 
+			
+			// assume classes are namespaced and remove top level domain "eGloo"
+			// as its a synonym for /root/PHP/Classes/
+			//echo "class = $className\n";
+			$parts = array_slice(
+				explode ('\\', $className), 1
+			);
+			
+			$path  = implode(
+				DIRECTORY_SEPARATOR, array_slice($parts, 0, count($parts) - 1)
+			);
+		
+			$file = implode('.', $parts) . '.php';
+			
+			
+			// load file into currently running context 	
+			if (!(@include_once "$path/eGloo.$file")) { 
+				
+				// log className which could not be loaded
+			} 
+			
+		});		
 	}
 }

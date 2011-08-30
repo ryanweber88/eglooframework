@@ -25,6 +25,17 @@ class Application extends \eGloo\Dialect\Object {
 		// TODO : replace return config file
 		$this->config(require_once "$path/config.php");
 		
+		// set instance to self/this
+		static::$instance = &$this;
+	}
+	
+	/**
+	 * 
+	 * Provides singleton access to application instance
+	 * @return Application
+	 */
+	final public static function &instance() { 
+		return static::$instance;
 	}
 	
 	/** @var \eGloo\Utilities\Bootstrap\BootstrapAbstract */
@@ -36,5 +47,12 @@ class Application extends \eGloo\Dialect\Object {
 	 * @todo change to config object
 	 */
 	protected $config;
+	
+	/**
+	 * 
+	 * Singleton access to Application instance (there should never be more than one instance)
+	 * @var Application
+	 */
+	private $instance;
 	
 }

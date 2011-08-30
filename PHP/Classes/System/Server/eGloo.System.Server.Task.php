@@ -3,7 +3,7 @@ namespace eGloo\System\Server;
 
 /**
  * 
- * A task is an asynchronous, background (daemon) task, running in its own child
+ * A task is an (a)synchronous, background (daemon) task, running in its own child
  * process; this is similar to a server process, but unlike a server, a task
  * has a defined endpoint, as opposed to a continuous loop, polling for requests
  * @author Christian Calloway

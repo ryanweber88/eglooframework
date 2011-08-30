@@ -9,7 +9,7 @@ abstract class BootstrapAbstract extends \eGloo\Dialect\Object implements Bootst
 	 * (non-PHPdoc)
 	 * @see eGloo\Utilities\Bootstrap.Bootstrappable::bootstrap()
 	 */
-	public function bootstrap($resource = null) { 
+	public function &bootstrap($resource = null) { 
 		if (is_null($resource)) { 
 			$this->run();
 		}

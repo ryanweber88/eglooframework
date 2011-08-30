@@ -11,75 +11,26 @@
 // NAMESPACE //////////////////////////////////////////////////////////////////
 
 
-// BOOTSTRAP //////////////////////////////////////////////////////////////////
-
-require_once 'bootstrap.php';
-
 // SET INCLUDE PATHS //////////////////////////////////////////////////////////
-// TODO: Remove; this should be part of cli bootstrap
 
 set_include_path(
 	get_include_path() . ':' . 
-	realpath(__DIR__ .   '/../') . ':' .           // egloo framework home
-	realpath(__DIR__ .   '/../PHP/Classes') . ':'  // egloo framework class library
+	realpath(__DIR__ .   '/../') . ':' .              // egloo framework home
+	realpath(__DIR__ .   '/../PHP/Classes/') . ':' .  // egloo framework class 
+	realpath(__DIR__ .   '/../PHP/Classes/System/Server') . ':'
 );
 
+// APPLICATION ////////////////////////////////////////////////////////////////
 
-// DEFINE AUTOLOADERS /////////////////////////////////////////////////////////
-// TODO: Remove; this should be part of cli bootstrap
-
-
-// photon autoload
-
-
-// egloo & server dir autoload
-spl_autoload_register(function($className) { 
-	
-	// assume classes are namespaced and remove top level domain "eGloo"
-	// as its a synonym for /root/PHP/Classes/
-	//echo "class = $className\n";
-	
-	
-	$parts = array_slice(
-		explode ('\\', $className), 1
-	);
-	
-	$path  = implode(
-		DIRECTORY_SEPARATOR, array_slice($parts, 0, count($parts) - 1)
-	);
-
-	$file = implode('.', $parts) . '.php';
-	
-	
-	// load file into currently running context 	
-	if (!(@include_once "$path/eGloo.$file")) { 
-		
-		// log className which could not be loaded
-	} 
-	
-});
-
-
-// PHOTON SUPPORT /////////////////////////////////////////////////////////////
-
+require_once 'eGloo.System.Server.Application.php';
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
 
 // EXECUTION //////////////////////////////////////////////////////////////////
 
-// TODO: Configs
-
-// cli parameters used for underlying photon process
-// TODO: Remove and make native to EAS script
-
-$parser = \photon\getParser();
-$result = $parser->parse();
-$params = array('cwd' => getcwd());
-$params = $params + $result->options;
-$params += $result->command->command->options;
-$params['argv'] = $argv; 
-$params['task'] = @$result->command->args['task'];
+// NOTE : Everything defined in global context will exist in global context
+// amongst all EAS instances
 
 // instantiate application object; a shared resource amongst EAS instances
 $application = new \eGloo\System\Server\Application(
@@ -91,12 +42,14 @@ $application->bootstrap()
 ->bootstrap('photon')
 ->bootstrap('egloo');
 
+exit;
+
 
 // now that application-specific resources have been loaded; 
 // determine command and execute 
 \eGloo\System\Server\Command\CLI::factory(
 	$argv[1]
 )
-->options(array_slice($argv, 2))
-->legacy($params)
+->options($GLOBALS['params'])
+->legacy($GLOBALS['params'])
 ->execute();
