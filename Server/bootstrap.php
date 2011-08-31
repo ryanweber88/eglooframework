@@ -47,7 +47,8 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		
 	}
 	
-	protected function _initPEAR() {
+	protected function _initPear() {
+		// initialize pear resources - this will be eventually removed
 		spl_autoload_register(function($className) { 
 			@include_once str_ireplace('_', '/', $className) . '.php';
 		});
@@ -57,6 +58,8 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	
 	protected function _initEgloo() { 
 		// initialize eGloo resources	
+		
+		require_once 'PHP/Includes/eGlooAutoload.php';
 		
 	}
 }

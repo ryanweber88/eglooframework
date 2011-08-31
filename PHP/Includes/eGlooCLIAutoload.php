@@ -40,8 +40,6 @@ if ( !class_exists( 'eGlooLogger', false ) ) {
 
 global $egloo_script_arguments;
 
-var_export($egloo_script_arguments); exit;
-
 if ( in_array('-v', $egloo_script_arguments) ) {
 	$logging_level = eGlooLogger::STAGING;
 } else if ( in_array('-vv', $egloo_script_arguments) ) {
