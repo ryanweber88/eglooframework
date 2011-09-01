@@ -18,6 +18,8 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 	public function start()
 	{
 		$this->stats['start_time'] = time();
+		
+		// bootstrap
 
 		// Get a unique id for the process
 		$this->phid = sprintf('%s-%s-%s', gethostname(), posix_getpid(), time());
@@ -150,6 +152,14 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 			Log::fatal('Cannot install the SIGTERM signal handler.');
 			die(1);
 		}
-	}	
+	}
+
+	protected function loadEglooEnvironment() { 
+		$application = &\eGloo\System\Server\Application::instance();
+		
+		$application->bootstrap()
+			->bootstrap('egloo')
+			->bootstrap('pear');
+	}
 	
 }

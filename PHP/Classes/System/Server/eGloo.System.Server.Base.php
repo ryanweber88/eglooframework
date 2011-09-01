@@ -10,6 +10,7 @@ namespace eGloo\System\Server;
  */
 class Base extends \photon\manager\Base { 
 	
+	
 	public function info($message, $eol = PHP_EOL) { 
 		return parent::info(Utilities::rebrand($message), $eol);
 	}	

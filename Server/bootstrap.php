@@ -28,9 +28,13 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		    // require_once will prevent double loading a file and will result
 		    // in non confusing error messages.
 		    // printf("Class: %s, file: %s\n", $class, $file);   
-		    if (file_exists($file)) {  
-		    	include_once $file;
-		    }
+			$paths = explode(":", get_include_path());
+				
+			array_walk($paths, function($path) use ($file) { 
+				if (file_exists("$path/$file")) { 
+					require_once "$path/$file";
+				}
+			});
 		});	
 
 		// require bridge
@@ -40,7 +44,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		$params = &$GLOBALS['params'];
 		$parser = \photon\getParser();
 		$result = $parser->parse();
-		$params = array('cwd' => getcwd());
+		$params = array('cwd' => __DIR__);
 		$params = $params + $result->options;
 		$params += @$result->command->command->options;
 		$params['argv'] = $GLOBALS['argv'];
@@ -59,26 +63,24 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	}
 	
 	protected function _initEgloo() { 
-		// initialize eGloo resources
-
-		// 
+		// initialize eGloo resources 
 		$eglooApplicationPath = \eGloo\System\Server\Application::instance()
 			->target();
 		
-		
 		// change to application directory
+		// @todo I don't like having to change directories to allow for context; 
+		// this should be removed entirely
 		chdir($eglooApplicationPath);
 		
 		// read htaccess into $_SERVER
 		// @TODO this will eventually be replaced and put into configuration
 		\eGloo\System\Server\Bridge::htaccess("$eglooApplicationPath/.htaccess");
-
-		//var_export($_SERVER); exit;
 		
 		
+		// require eGloo autoloader
 		require_once 'PHP/Includes/eGlooAutoload.php';
 		
 		// change back to server directory
-		
+		chdir(__DIR__);
 	}
 }

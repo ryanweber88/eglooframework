@@ -7,19 +7,22 @@
 
 // CONSTANTS //////////////////////////////////////////////////////////////////
 
-
 // NAMESPACE //////////////////////////////////////////////////////////////////
-
 
 use \eGloo\System\Server;
 
 // SET INCLUDE PATHS //////////////////////////////////////////////////////////
 
+// @todo currently cwd is changing through course of this script which
+// bad bad bad
+
 set_include_path(
-	get_include_path() . ':' . 
-	realpath(__DIR__ .   '/../') . ':' .              // egloo framework home
-	realpath(__DIR__ .   '/../PHP/Classes/') . ':'   // egloo framework class 
+	get_include_path() . ':' .                      // EAS Server Path
+	realpath(__DIR__)  . ':' . 
+	realpath(__DIR__   . '/../') . ':' .            // egloo framework home
+	realpath(__DIR__   . '/../PHP/Classes/') . ':'  // egloo framework class 
 );
+
 
 // AUTOLOAD ///////////////////////////////////////////////////////////////////
 
@@ -33,7 +36,6 @@ $target = $argv[count($argv)-1];
 // EXECUTION //////////////////////////////////////////////////////////////////
 
 // TESTING
-// var_export ($argv); exit;
 
 // NOTE : Everything defined in global context will exist in global context
 // amongst all EAS instances
@@ -46,10 +48,9 @@ $application = new \eGloo\System\Server\Application(
 
 
 // run application bootstrap
-$application->bootstrap()
-->bootstrap('photon')
-->bootstrap('egloo')
-->bootstrap('pear');
+$bootstrap = &$application->bootstrap()
+->bootstrap('photon');
+
 
 // now that application-specific resources have been loaded; 
 // determine command and execute 
