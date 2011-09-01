@@ -27,8 +27,10 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		    // require_once instead of require penalty is low. But the
 		    // require_once will prevent double loading a file and will result
 		    // in non confusing error messages.
-		    // printf("Class: %s, file: %s\n", $class, $file);    
-		    @include_once $file;
+		    // printf("Class: %s, file: %s\n", $class, $file);   
+		    if (file_exists($file)) {  
+		    	include_once $file;
+		    }
 		});	
 
 		// require bridge
@@ -57,9 +59,26 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	}
 	
 	protected function _initEgloo() { 
-		// initialize eGloo resources	
+		// initialize eGloo resources
+
+		// 
+		$eglooApplicationPath = \eGloo\System\Server\Application::instance()
+			->target();
+		
+		
+		// change to application directory
+		chdir($eglooApplicationPath);
+		
+		// read htaccess into $_SERVER
+		// @TODO this will eventually be replaced and put into configuration
+		\eGloo\System\Server\Bridge::htaccess("$eglooApplicationPath/.htaccess");
+
+		//var_export($_SERVER); exit;
+		
 		
 		require_once 'PHP/Includes/eGlooAutoload.php';
+		
+		// change back to server directory
 		
 	}
 }

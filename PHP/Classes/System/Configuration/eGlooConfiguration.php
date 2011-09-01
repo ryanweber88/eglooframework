@@ -223,7 +223,7 @@ final class eGlooConfiguration {
 
 	public static function loadWebRootConfig( $overwrite = true ) {
 		$webRootConfigOptions = array();
-		$webRootConfigOptions['egApplication']		= $_SERVER['EG_APP'];
+		$webRootConfigOptions['egApplication']		    = @$_SERVER['EG_APP'];
 		$webRootConfigOptions['egApplicationName']		= preg_replace('~([a-zA-Z0-9/ ]*/)?([a-zA-Z0-9 ]*?)\.gloo~', '$2', $_SERVER['EG_APP']);
 		$webRootConfigOptions['egInterfaceBundle']		= $_SERVER['EG_UI'];
 
@@ -1121,6 +1121,7 @@ final class eGlooConfiguration {
 	}
 
 	public static function loadFrameworkSystemXML( $system_xml_path = './System.xml' ) {
+
 		if ( file_exists($system_xml_path) && is_file($system_xml_path) && is_readable($system_xml_path) ) {
 			$configXMLObject = simplexml_load_file( $system_xml_path );
 
@@ -1243,7 +1244,7 @@ final class eGlooConfiguration {
 			} else if (!is_file($system_xml_path)) {
 				trigger_error("Expected path for System XML for eGloo Framework exists but is not a valid file.");
 			} else if (!is_readable($system_xml_path)) {
-				echo $system_xml_path;
+				echo $system_xml_path; echo getcwd(); exit;
 				trigger_error("System XML for eGloo Framework file exists but cannot be read.  Check file permissions.");
 			} else {
 				trigger_error("Unknown Error Reading System XML for eGloo Framework.");

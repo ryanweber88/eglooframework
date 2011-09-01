@@ -10,24 +10,33 @@ namespace eGloo\System\Server;
  * @author petflowdeveloper
  *
  */
-class Application extends \eGloo\Dialect\Object { 
+class Application extends \eGloo\Dialect\Object implements Contextable { 
 	
-	function __construct($path) { 
+	/**
+	 * 
+	 * @TODO change parameters to hash? 
+	 * @TODO remove them entirely and get values from environment?
+	 */
+	function __construct($pathHandler, $pathTarget) { 
 		// loads bootstrap and configuration - this is by convention,
 		// so must follow ./config.php and ./bootstrap.php
 		
 		// setup boostrap 
-		require_once "$path/bootstrap.php";
+		require_once "$pathHandler/bootstrap.php";
 		$this->bootstrap(new \Bootstrap());
 		
 		// setup config - this following photon model, which i don't
 		// really like (requires shouldn't return values, but place
 		// them into context
 		// TODO : replace return config file
-		$this->config(require_once "$path/config.php");
+		$this->config(require_once "$pathHandler/config.php");
 		
 		// set instance to self/this
 		static::$instance = &$this;
+		
+		// set target, which is the target egloo application
+		// TODO : Remove this concept, find something more fluid
+		$this->target($pathTarget);
 	}
 	
 	/**
@@ -54,6 +63,19 @@ class Application extends \eGloo\Dialect\Object {
 	 * @todo change to config object
 	 */
 	protected $config;
+	
+	/** 
+	 * Represents path to egloo application
+	 * @var string
+	 */
+	protected $target;
+	
+	/**
+	 * 
+	 * Represents an applications "context" or scope
+	 * @var Context
+	 */
+	protected $context;
 	
 	/**
 	 * 

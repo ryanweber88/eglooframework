@@ -13,7 +13,9 @@ else
 fi
 
 # Path to server control
+APPLICATION=$1
 
+# TODO : Use an environment variable here
 SERVER="/usr/share/php/eglooframework/Server/server.php"
 
 # Execute server control

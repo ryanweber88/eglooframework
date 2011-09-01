@@ -11,6 +11,8 @@
 // NAMESPACE //////////////////////////////////////////////////////////////////
 
 
+use \eGloo\System\Server;
+
 // SET INCLUDE PATHS //////////////////////////////////////////////////////////
 
 set_include_path(
@@ -26,24 +28,28 @@ require_once 'autoload.php';
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
+$target = $argv[count($argv)-1];
 
 // EXECUTION //////////////////////////////////////////////////////////////////
+
+// TESTING
+// var_export ($argv); exit;
 
 // NOTE : Everything defined in global context will exist in global context
 // amongst all EAS instances
 
-
 // instantiate application object; a shared resource amongst EAS instances
 $application = new \eGloo\System\Server\Application(
-	__DIR__
+	__DIR__, $target
 );
+
+
 
 // run application bootstrap
 $application->bootstrap()
 ->bootstrap('photon')
 ->bootstrap('egloo')
 ->bootstrap('pear');
-
 
 // now that application-specific resources have been loaded; 
 // determine command and execute 

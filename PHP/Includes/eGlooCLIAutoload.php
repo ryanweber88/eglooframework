@@ -98,6 +98,7 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 	spl_autoload_register(array('Doctrine', 'autoload'));
 }
 
+
 /**
  * Defines the class and interface autoload runtime handler.
  * 
