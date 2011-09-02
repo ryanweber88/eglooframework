@@ -25,6 +25,7 @@
  * @version 1.0
  */
 
+/*
 // Check for the minimum PHP version to run the framework
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
@@ -52,9 +53,12 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
 }
+*/
 
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+
+//var_export($isValidRequest); exit;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {

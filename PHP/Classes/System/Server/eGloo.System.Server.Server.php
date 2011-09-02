@@ -118,13 +118,14 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 				
 		// instantiate egloo request objectz
 		$request = new Action\HTTP\Request($message);
-		$req->uuid = $uuid;
-		$req->conn = $conn;		
+		$request->uuid = $uuid;
+		$request->conn = $conn;		
 				
 		//list($req, $response) = \photon\core\Dispatcher::dispatch($req);
 		
 		// dispatch request to egloo handler/router
 		\eGloo\System\Server\Action\Dispatcher::dispatch($request);
+		return;
 		
 		
 		// If the response is false, the view is simply not

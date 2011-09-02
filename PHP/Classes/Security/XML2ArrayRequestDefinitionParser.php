@@ -764,13 +764,14 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 		// If we're in DEVELOPMENT mode, log what request we're getting so we can trace runtime flow
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Incoming Request Class and Request ID lookup is: "' . $requestLookup . '"', 'Security' );
-
+		
 		// Grab the cache handler specifically for this cache region.  We do this so that when we write to the cache for RequestProcessing
 		// we can also write some information to the caching system to better keep track of what is cached for the RequestProcessing system
 		// and do more granulated inspection and cache clearing
 		$requestProcessingCacheRegionHandler = CacheManagementDirector::getCacheRegionHandler('RequestProcessing');
 
 
+		
 		///////////////// TODO update comments below here
 
 
@@ -778,6 +779,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			'XML2ArrayRequestDefinitionParser::NodesCached', 'RequestValidation', true );
 		$requestNode = $requestProcessingCacheRegionHandler->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'XML2ArrayRequestDefinitionParserNodes::' .
 			$requestLookup, 'RequestValidation', true );
+
 
 		if ( !$requestNode && $allNodesCached ) {
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in cache, checking wildcards: ' . $requestLookup, 'Security' );

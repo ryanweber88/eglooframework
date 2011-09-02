@@ -815,7 +815,11 @@ final class eGlooConfiguration {
 			$cached_options_array_string = file_get_contents($config_cache_path);
 			
 			if ($cached_options_array_string) {
+
+				//echo 'return ' . file_get_contents($config_cache_path) .';'
+				
 				$cached_options = eval( 'return ' . file_get_contents($config_cache_path) .';' );
+				
 
 				if (isset($cached_options) && is_array($cached_options)) {
 					// Grab our environment variables to determine which application and deployment to run
