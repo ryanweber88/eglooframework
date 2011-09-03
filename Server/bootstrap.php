@@ -80,6 +80,24 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// require eGloo autoloader
 		require_once 'PHP/Includes/eGlooAutoload.php';
 		
+		if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
+			echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
+			exit;
+		}
+		
+		// below is for testing purposes only; flag monrel in global scope to denote context 
+		// and place requestInfoBean into global context, as it doesn't need to be
+		// reinstantiated each time
+		$GLOBALS['mongrel'] = true;
+		
+		// Build a request info bean
+		$GLOBALS['requestInfoBean'] = \RequestInfoBean::getInstance();
+		
+		// Get a request validator based on the current application and UI bundle
+		$GLOBALS['requestValidator'] =
+			\RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() );
+					
+		
 		// change back to server directory
 		chdir(__DIR__);
 	}

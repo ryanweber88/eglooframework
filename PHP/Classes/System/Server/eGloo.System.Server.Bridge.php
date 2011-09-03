@@ -26,9 +26,9 @@ class Bridge {
 		
 		// match all SetEnv and place into $_SERVER global context
 		preg_match_all (
-			'/SetEnv.+/', $buf = file_get_contents($path), $matches 
+			'/^SetEnv.+/im', $buf = file_get_contents($path), $matches 
 		);
-		
+				
 		foreach ($matches[0] as $match) { 
 			$parts = preg_split('/\s+/', $match);
 			$_SERVER[$parts[1]] = @$parts[2];
@@ -38,6 +38,8 @@ class Bridge {
 		$_SERVER['SCRIPT_NAME'] = '/index.php';
 		
 		// match all apache rewrite conditions
+		// @todo figure out how rewrites will work (seperate engine available?) - for
+		// now just record rewrite conditions 
 		preg_match_all (
 			'/^Rewrite/i', $buf, $matches
 		);
@@ -47,7 +49,7 @@ class Bridge {
 			$directives[] = Directive::factory($parts[0])
 				->value($parts[1]);
 		}
-		
+				
 		// @TODO : do something with directives
 
 	}

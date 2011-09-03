@@ -25,35 +25,43 @@
  * @version 1.0
  */
 
-/*
+
 // Check for the minimum PHP version to run the framework
-if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
-		'eGloo requires PHP version 5.3.0 or higher.';
-	exit;
-} else {
-	// Setup the OOP autoloader
-	include( 'PHP/Includes/eGlooAutoload.php' );
+
+if (!$GLOBALS['mongrel']) { 
+	if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+		echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
+			'eGloo requires PHP version 5.3.0 or higher.';
+		exit;
+	} else {
+		// Setup the OOP autoloader
+		include( 'PHP/Includes/eGlooAutoload.php' );
+	}
+	
+	// Check for Memcache
+	if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
+		echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
+		exit;
+	}
+	
+	// Build a request info bean
+	$requestInfoBean = RequestInfoBean::getInstance();
+	
+	// Get a request validator based on the current application and UI bundle
+	$requestValidator =
+		RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
 }
 
-// Check for Memcache
-if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
-	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
-	exit;
+else {
+	$requestInfoBean = &$GLOBALS['requestInfoBean'];
+	$requestValidator = &$GLOBALS['requestValidator'];	
 }
-
-// Build a request info bean
-$requestInfoBean = RequestInfoBean::getInstance();
-
-// Get a request validator based on the current application and UI bundle
-$requestValidator =
-	RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
 
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
 }
-*/
+
 
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );

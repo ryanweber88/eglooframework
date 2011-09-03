@@ -779,9 +779,12 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			'XML2ArrayRequestDefinitionParser::NodesCached', 'RequestValidation', true );
 		$requestNode = $requestProcessingCacheRegionHandler->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'XML2ArrayRequestDefinitionParserNodes::' .
 			$requestLookup, 'RequestValidation', true );
-
+			
+		//var_export($requestNode); exit('requestNode');
+		//var_export ($allNodesCached); exit;
 
 		if ( !$requestNode && $allNodesCached ) {
+						
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in cache, checking wildcards: ' . $requestLookup, 'Security' );
 			$useRequestIDDefaultHandler = eGlooConfiguration::getUseDefaultRequestIDHandler();
 			$useRequestClassDefaultHandler = eGlooConfiguration::getUseDefaultRequestClassHandler();
@@ -824,12 +827,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				}
 			}
 		} else if ( !$requestNode && !$allNodesCached ) {
+			
 			// We haven't found anything in cache, so let's read in the XML and recheck for the request class/ID pair
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request nodes not cached, loading: ' . $requestLookup, 'Security' );
 			$useRequestIDDefaultHandler = eGlooConfiguration::getUseDefaultRequestIDHandler();
 			$useRequestClassDefaultHandler = eGlooConfiguration::getUseDefaultRequestClassHandler();
 			$this->loadRequestNodes();
-
+			
 			// Same logic as above, except we're checking what we loaded from XML
 			if ( isset($this->requestNodes[ $requestLookup ]) ) {
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node found in XML: ' . $requestLookup, 'Security' );
@@ -967,7 +971,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				return false;
 			}
 		}
-
+		
 		// Build decorator array and set it in the requestInfoBean
 		$this->buildDecoratorArray( $requestNode, $requestInfoBean);
 

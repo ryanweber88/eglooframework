@@ -14,37 +14,24 @@ class Dispatcher extends \photon\core\Dispatcher {
 	 * 
 	 * Dispatches request to appropriate eGloo handler 
 	 * @param HTTP\Request $request
+	 * @return HTTP\Response $response
 	 */
 	static public function dispatch($request) { 
 		// Check for the minimum PHP version to run the framework
-
-		// Check for Memcache
-		if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
-			echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
-			exit;
-		}
 		
-		// Build a request info bean
-		$requestInfoBean = \RequestInfoBean::getInstance();
+		// falsify (motherfucker) request parameters for testing purposes
+		$_REQUEST['eg_requestClass'] = 'externalMainPage';
+		$_REQUEST['eg_requestID'] = 'extMainViewBase';
+		$_GET = &$_REQUEST;
 		
-		// Get a request validator based on the current application and UI bundle
-		$requestValidator =
-			\RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() );
+		// instantiate response object to return to mongrel2
+		$response = new HTTP\Response();
 		
-		if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
-			\eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
-			exit;
-		}		
-		
-		//var_export($requestInfoBean); exit;
-
+		// capture output of proxied dispatch and
 		ob_start();
-		echo 'here';
-		require_once '/var/www/admin/index.php';
+		require '/var/www/admin/index.php';
+		$response->content = ob_get_clean() ;
 		
-		echo ob_get_clean();
-		flush();
-		
-		exit;
+		return $response;
 	}
 }

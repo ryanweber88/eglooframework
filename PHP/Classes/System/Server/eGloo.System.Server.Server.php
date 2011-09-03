@@ -8,6 +8,8 @@ namespace eGloo\System\Server;
  * Responsible for polling 
  * @author Christian Calloway
  */
+use photon\log\Log;
+
 class Server extends \photon\server\Server implements \eGloo\System\Server\Servable { 
 	
 	/**
@@ -67,15 +69,18 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 
 		while (true) {
 			$events = 0;
+			
 			try {
 				// We poll and wait a maximum of 200ms. 
-				//Timer::start('photon.main_poll_time');
+				\photon\log\Timer::start('photon.main_poll_time');
+				
 				$events = $this->poll->poll($to_read, $to_write, 200000);
-				//$poll_time = Timer::stop('photon.main_poll_time');
+				$poll_time = \photon\log\Timer::stop('photon.main_poll_time');
 				$errors = $this->poll->getLastErrors();
 				if (count($errors) > 0) {
 					foreach ($errors as $error) {
-						Log::error('Error polling object: ' . $error);
+				
+						\photon\log\Log::error('Error polling object: ' . $error);
 					}
 				}
 			} catch (\ZMQPollException $e) {
@@ -96,7 +101,7 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 					}
 				}
 			}
-			//@$this->updatePollStats($poll_time);
+			@$this->updatePollStats($poll_time);
 			pcntl_signal_dispatch();
 		}
 	}
@@ -124,9 +129,8 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		//list($req, $response) = \photon\core\Dispatcher::dispatch($req);
 		
 		// dispatch request to egloo handler/router
-		\eGloo\System\Server\Action\Dispatcher::dispatch($request);
-		return;
-		
+		$response = \eGloo\System\Server\Action\Dispatcher::dispatch($request);
+				
 		
 		// If the response is false, the view is simply not
 		// sending an answer, most likely the work was pushed to
