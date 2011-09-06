@@ -28,35 +28,29 @@
 
 // Check for the minimum PHP version to run the framework
 
-if (!$GLOBALS['mongrel']) { 
-	if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-		echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
-			'eGloo requires PHP version 5.3.0 or higher.';
-		exit;
-	} else {
-		// Setup the OOP autoloader
-		include( 'PHP/Includes/eGlooAutoload.php' );
-	}
-	
-	// Check for Memcache
-	if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
-		echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
-		exit;
-	}
-	
-	// Build a request info bean
-	$requestInfoBean = RequestInfoBean::getInstance();
-	
-	// Get a request validator based on the current application and UI bundle
-	$requestValidator =
-		RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
+if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
+		'eGloo requires PHP version 5.3.0 or higher.';
+	exit;
+} else {
+	// Setup the OOP autoloader
+	include( 'PHP/Includes/eGlooAutoload.php' );
 }
 
-else {
-	$requestInfoBean = &$GLOBALS['requestInfoBean'];
-	$requestValidator = &$GLOBALS['requestValidator'];	
+// Check for Memcache
+if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
+	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
+	exit;
 }
 
+// Build a request info bean
+$requestInfoBean = RequestInfoBean::getInstance();
+
+// Get a request validator based on the current application and UI bundle
+$requestValidator =
+	RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
+
+	
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
@@ -66,7 +60,6 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
-//var_export($isValidRequest); exit;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
