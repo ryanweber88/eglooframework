@@ -1,0 +1,27 @@
+Incoming Request Class and Request ID lookup is: "egDefaultegDefault"
+eGlooDefaultRequestProcessor: Entered processRequest()
+XHTMLXML2ArrayDispatcher: Building Singleton
+XHTMLXML2ArrayDispatcher: Dispatch Nodes pulled from cache
+XHTMLXML2ArrayDispatcher: Request lookup "egDefaultegDefault"
+XHTMLXML2ArrayDispatcher: Processing Clients
+
+
+exception 'DefaultTemplateEngineException' with message 'Template Engine of type "XHTMLDefaultTemplateEngine" failed processing template file with cache ID "" at path: 
+/usr/lib/egloo/applications/Administration.gloo/InterfaceBundles/Default/XHTML/Default/Default.tpl
+
+XHTMLDefaultTemplateEngine error: mkdir(): Permission denied' in /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/TemplateProcessing/TemplateBuilder.php:176
+Stack trace:
+#0 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/TemplateProcessing/Builders/XHTMLBuilder.php(143): TemplateBuilder->processEngineFetchException(Object(ErrorException), '/usr/lib/egloo/...', NULL)
+#1 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/TemplateProcessing/Builders/XHTMLBuilder.php(131): XHTMLBuilder->__fetch('/usr/lib/egloo/...', NULL)
+#2 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/TemplateProcessing/Directors/eGlooInterfaceDirector.php(113): XHTMLBuilder->run()
+#3 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/RequestProcessing/Abstract/TemplatePatternRequestProcessor.php(109): eGlooInterfaceDirector->processTemplate()
+#4 /home/petflowdeveloper/Develop/eglooframework/DocRoot/index.php(64): TemplatePatternRequestProcessor->processRequest()
+#5 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/Action/eGloo.System.Server.Action.Dispatcher.php(39): require_once('/home/petflowde...')
+#6 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/eGloo.System.Server.Server.php(127): eGloo\System\Server\Action\Dispatcher::dispatch(Object(eGloo\System\Server\Action\HTTP\Request))
+#7 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/eGloo.System.Server.Server.php(90): eGloo\System\Server\Server->processRequest(Object(photon\mongrel2\Connection))
+#8 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/eGloo.System.Server.ChildServer.php(25): eGloo\System\Server\Server->start()
+#9 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/Command/CLI/eGloo.System.Server.Command.CLI.Server.php(61): eGloo\System\Server\ChildServer->run()
+#10 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/Utilities/eGloo.Utilities.Command.php(68): eGloo\System\Server\Command\CLI\Server->caseChildstart()
+#11 /home/petflowdeveloper/Develop/eglooframework/PHP/Classes/System/Server/Command/eGloo.System.Server.Command.CLI.php(39): eGloo\Utilities\Command->execute()
+#12 /home/petflowdeveloper/Develop/eglooframework/Server/server.php(62): eGloo\System\Server\Command\CLI->execute()
+#13 {main}
