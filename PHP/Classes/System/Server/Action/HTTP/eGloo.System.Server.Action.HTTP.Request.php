@@ -14,5 +14,7 @@ class Request extends \photon\http\Request {
 	
 	function __construct($message) { 
 		parent::__construct($message);
+		
+		//$this->headers['Accept-Encoding'] = 'gzip,deflate';		
 	}
 }

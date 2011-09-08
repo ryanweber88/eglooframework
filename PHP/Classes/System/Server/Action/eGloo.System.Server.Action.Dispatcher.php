@@ -26,11 +26,14 @@ class Dispatcher extends \photon\core\Dispatcher {
 		
 		// instantiate response object to return to mongrel2
 		$response = new HTTP\Response();
+		//return $response;
+		
+		//var_export($request); exit;
 		
 		// capture output of proxied dispatch and
 		ob_start();
-		require '/var/www/admin/index.php';
-		$response->content = ob_get_clean() ;
+		require '/var/www/client/dispatch.php';
+		$response->content = ob_get_clean(); // gzencode(ob_get_clean());
 		
 		return $response;
 	}
