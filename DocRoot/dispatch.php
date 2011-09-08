@@ -42,16 +42,17 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
+/*
 if (!isset($GLOBALS['static_content'])) {
-	echo 'here'; 
 	$GLOBALS['static_content'] = file_get_contents(
 		'/tmp/static'
 	);
 }
 
 echo $GLOBALS['static_content'];
+*/
 
-/*
+
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
@@ -68,4 +69,3 @@ if ( $isValidRequest ) {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'INVALID request!', 'RequestValidation', 'Security' );
 	}
 }
-*/
