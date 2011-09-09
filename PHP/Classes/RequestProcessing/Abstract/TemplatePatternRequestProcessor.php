@@ -63,7 +63,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$this->preProcessing();
 		$this->setTemplateBuilder();
 		$this->setCustomDispatch();
-
+		
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
 		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
 

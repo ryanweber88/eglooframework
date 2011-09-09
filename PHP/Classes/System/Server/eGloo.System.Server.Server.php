@@ -66,8 +66,6 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 
 		$to_write = array(); 
 		$to_read = array();
-		
-		
 
 		while (true) {
 			$events = 0;
@@ -94,7 +92,6 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 				foreach ($to_read as $r) {
 					if ($r === $this->conn->reqs) {
 						// We are receiving a request from Mongrel2
-						//$conn->reply($message, $response->render());
 						$this->processRequest($this->conn);
 						$this->stats['requests']++;
 					}
@@ -124,12 +121,10 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		rewind($fp);
 		$message = $conn->parse($fp);
 				
-				
-		// instantiate egloo request object
+		// instantiate egloo request objectz
 		$request = new Action\HTTP\Request($message);
 		$request->uuid = $uuid;
 		$request->conn = $conn;		
-			
 				
 		//list($req, $response) = \photon\core\Dispatcher::dispatch($req);
 		

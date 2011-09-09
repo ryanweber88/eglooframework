@@ -8,5 +8,10 @@ namespace eGloo\System\Server;
  *
  */
 interface Contextable {
-	
+	/**
+	 * 
+	 * Returns object representing context or scope of given implementor; for example,
+	 * context/scope within: Server, Application, Session, Request
+	 * @return Context
+	 */
 }

@@ -101,13 +101,14 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
  * @param string $class_name class or interface to load
  */
 function eglooAutoload($class_name) {
+	
 	$cacheGateway = CacheGateway::getCacheGateway();
 
 	if ( ( $autoload_hash = $cacheGateway->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include( $autoload_hash[$class_name] );
+				include_once( $autoload_hash[$class_name] );
 			}
 
 			return;
@@ -240,7 +241,7 @@ function eglooAutoload($class_name) {
 					}
 				}
 
-				include( $realPath );
+				include_once( $realPath );
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 				break;
@@ -258,7 +259,7 @@ function eglooAutoload($class_name) {
 		}
 
 		if ( $realPath !== null ) {
-			include( $realPath );
+			include_once ( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 		}

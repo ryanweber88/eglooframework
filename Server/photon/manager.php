@@ -311,7 +311,7 @@ class ServerManager extends Base
     {
         Conf::load($this->getConfig());
         $n_children = ($this->params['children']) ? 
-            $this->params['children'] : 5;
+            $this->params['children'] : 4;
                     
         // We have a double fork. First to create the master daemon,
         // then to get new children.

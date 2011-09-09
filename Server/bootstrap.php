@@ -59,7 +59,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			@include_once str_ireplace('_', '/', $className) . '.php';
 		});
 		
-		$GLOBALS['log'] = \Log::factory('console', '', 'test');
+		$GLOBALS['log'] = \Log::factory('file', '/home/petflowdeveloper/out.eglooautoload', 'test');
 	}
 	
 	protected function _initEgloo() { 

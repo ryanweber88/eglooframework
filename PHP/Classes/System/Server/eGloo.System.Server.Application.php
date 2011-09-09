@@ -37,6 +37,9 @@ class Application extends \eGloo\Dialect\Object implements Contextable {
 		// set target, which is the target egloo application
 		// TODO : Remove this concept, find something more fluid
 		$this->target($pathTarget);
+		
+		// set self as owner of context
+		$this->context(new Context($this));
 	}
 	
 	/**
@@ -48,11 +51,23 @@ class Application extends \eGloo\Dialect\Object implements Contextable {
 		return static::$instance;
 	}
 	
-	public function log($string) { 
-		$resource = fopen('test.log', 'w');
-		fwrite($string, $resource);
-		fclose($resource);
+	/**
+	 * 
+	 * May replace this; access current user session object
+	 */
+	public function session() { 
+		
 	}
+	
+	/**
+	 * 
+	 * May replace this; access current request
+	 */
+	public function request() { 
+		
+	}
+	
+	
 	
 	/** @var \eGloo\Utilities\Bootstrap\BootstrapAbstract */
 	protected $bootstrap;

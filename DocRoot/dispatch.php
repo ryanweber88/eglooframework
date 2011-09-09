@@ -42,22 +42,20 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
-/*
-if (!isset($GLOBALS['static_content'])) {
-	$GLOBALS['static_content'] = file_get_contents(
+
+if (!isset($GLOBALS['payload'])) {
+	$GLOBALS['payload'] = file_get_contents(
 		'/tmp/static'
 	);
 }
 
-echo $GLOBALS['static_content'];
-*/
 
-
+setcookie('testcookie', 'testvalue', null, '/');
+return;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
-	//var_export($requestProcessor); exit;
 	$requestProcessor->processRequest();
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );

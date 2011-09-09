@@ -9,12 +9,32 @@ namespace eGloo\System\Server\Action\HTTP;
  * @todo Separate from photon request and message
  *
  */
-class Request extends \photon\http\Request { 
+class Request extends \photon\http\Request implements \eGloo\System\Server\Contextable { 
 	
 	
 	function __construct($message) { 
 		parent::__construct($message);
 		
-		//$this->headers['Accept-Encoding'] = 'gzip,deflate';		
+		// custom headers
+		//$this->headers['Accept-Encoding'] = 'gzip,deflate';
+
+		// instantiate context for request lifetime
+		$this->context = new \eGloo\System\Server\Context($this);
 	}
+	
+	
+	function __destruct() { 
+		// clean-up context store
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see eGloo\System\Server.Contextable::context()
+	 */
+	public function &context() {
+		return $this->context;
+	}
+	
+	protected $context;
+	
 }
