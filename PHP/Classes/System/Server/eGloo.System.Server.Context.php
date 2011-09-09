@@ -6,6 +6,8 @@ namespace eGloo\System\Server;
  * Represents 'context' within stateful application : Request, Application, Server, Session etc;
  * used to store attribute values to that context; this was fully inspired by java servlet handling
  * of context state
+ * 
+ * Implements oberservable pattern s
  * @author Christian Calloway
  *
  */
@@ -17,7 +19,7 @@ class Context extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
-	 * Retrieve from context storage; a closure is provided to allow for setting
+	 * Retrieve binded value; a closure is provided to allow for setting
 	 * of default value
 	 * @param string $key
 	 */
@@ -28,9 +30,7 @@ class Context extends \eGloo\Dialect\Object {
 		
 		// else we call lambda with $key, and store value into 
 		else if (is_callable($lambda)) { 
-			$this->store[$key] = $lambda($this);
-			
-			return $this->store[$key];
+			return $this->bind($key, $lambda($this));			
 		}
 		
 		// throw exception if attempting to retrieve value that does not exist and
@@ -42,13 +42,22 @@ class Context extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
-	 * Place into context storage
+	 * Binds value to context 
 	 * @param string $key
 	 * @param mixed  $value
 	 */
-	public function store($key, $value) {
-		$this->store[$key] = $value;
-		//echo 'calling store ' . $value;
+	public function &bind($key, $value) {
+		$this->store[$key] = &$attribute;		
+		return $this;
+	}
+	
+	/**
+	 * Unbinds value from context
+	 */
+	public function &unbind($key) { 
+		if ($this->exists($key)) { 
+			unset($this->store[$key]);			
+		}
 		
 		return $this;
 	}
@@ -65,6 +74,34 @@ class Context extends \eGloo\Dialect\Object {
 		return false;
 	}
 	
-	protected $ower;
+	/** SplSubject (Observable) interface methods */
+	
+	/*
+	 * Attaches observer 
+	 */
+	public function attach(\SplObserver $observer) {
+		$this->observers[get_class($observer)] = $observer;
+	}
+	
+	/**
+	 * Detaches observer
+	 */
+	public function detach(\SplObserver $observer) { 
+		unset($this->observers[get_class($observer)]);
+	}
+	
+	/**
+	 * Notifies observers that an event has occured
+	 */
+	public function notify() { 
+		foreach($this->observers as $observer) { 
+			$observer->update($this);
+		}
+	}
+	
+	
+	
+	protected $owner;
 	protected $store = array();
+	protected $observers = array();
 }
