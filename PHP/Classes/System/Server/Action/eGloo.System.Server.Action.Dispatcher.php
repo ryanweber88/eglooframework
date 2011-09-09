@@ -35,6 +35,8 @@ class Dispatcher extends \photon\core\Dispatcher {
 		require '/var/www/client/dispatch.php';
 		$response->content = ob_get_clean(); // gzencode(ob_get_clean());
 		
+		// apply middle
+		
 		return $response;
 	}
 }

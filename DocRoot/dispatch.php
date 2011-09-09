@@ -50,12 +50,11 @@ if (!isset($GLOBALS['payload'])) {
 }
 
 
-setcookie('testcookie', 'testvalue', null, '/');
-return;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
+	//echo var_export($requestProcessor, true);return;
 	$requestProcessor->processRequest();
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );

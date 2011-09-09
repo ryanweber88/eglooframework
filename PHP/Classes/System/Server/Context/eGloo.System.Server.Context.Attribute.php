@@ -1,11 +1,18 @@
 <?php
 namespace eGloo\System\Server\Context;
 
+/**
+ * 
+ * Represents a bound values to a context
+ * @author Christian Calloway
+ *
+ */
 class Attribute extends \eGloo\Dialect\Object implements \SplSubject, \eGloo\Utilities\Stringable { 
 	
-	function __construct($name, $value) { 
-		$this->name = $name;
+	function __construct($name, $value, &$owner) { 
+		$this->name  = $name;
 		$this->value = $value;
+		$this->owner = &$owner;
 	}
 	
 	function __toString() { 
@@ -39,4 +46,6 @@ class Attribute extends \eGloo\Dialect\Object implements \SplSubject, \eGloo\Uti
 	
 	protected $name;
 	protected $value;
+	protected $owner;
+	protected $observers = array();
 }
