@@ -96,9 +96,16 @@ class Context extends \eGloo\Dialect\Object {
 	/**
 	 * Unbinds value from context
 	 */
-	public function &unbind($key) { 
-		if ($this->exists($key)) { 
+	public function unbind($key) { 
+		if (isset($this->store[$key])) { 
 			unset($this->store[$key]);			
+		}
+		
+		else {
+			// throw exception if attempting to unbind invalid key
+			throw \eGloo\Dialect\Exception(
+				"Attempted to unbind value that does not exist >>  $key"
+			);
 		}
 		
 		return $this;
