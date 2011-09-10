@@ -60,12 +60,19 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 	public function processRequest() {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Entered processRequest()" );
 
+		// begin - 10 t/ts  @ 600 t/s
 		$this->preProcessing();
 		$this->setTemplateBuilder();
 		$this->setCustomDispatch();
+		// end
+				
 		
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
-		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
+		// begin -100 t/s @ 500 t/s
+		//$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
+		// end		
+		
+		echo $GLOBALS['payload']; return;
 
 		try {
 			$templateDirector->preProcessTemplate();
@@ -176,9 +183,11 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 
 	// Defaults to XHTMLBuilder - override as needed
 	protected function setTemplateBuilder() {
+		return ;
 		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
 			$format = $this->decoratorInfoBean->getValue('Format', 'ManagedOutput');
 
+			// TODO preinstantiate these classes
 			switch( $format ) {
 				case 'csv' :
 					$this->_templateBuilder = new CSVBuilder();

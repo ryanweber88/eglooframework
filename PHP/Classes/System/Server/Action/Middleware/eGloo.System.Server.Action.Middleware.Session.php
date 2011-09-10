@@ -7,24 +7,12 @@ namespace eGloo\System\Server\Action\Middleware;
  * @author Christian Calloway
  *
  */
-abstract class Session extends \photon\session\Session implements \eGloo\System\Server\Contextable { 
+class Session extends \photon\session\Session { 
 	
-	function __construct() { 
-		// instantiate context for session lifetime
-		$this->context = new \eGloo\System\Server\Context($this);
-	}
 	
-	function __construct() { 
-		// clean-up context store
+	function __construct($store) {
+		parent::__construct($store); 
+		
 	}	
 	
-	/**
-	 * (non-PHPdoc)
-	 * @see eGloo\System\Server.Contextable::context()
-	 */
-	public function &context() { 
-		return $context;
-	}
-	
-	protected $context;
 }

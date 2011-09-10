@@ -10,7 +10,7 @@ namespace eGloo\System\Server;
  * @author petflowdeveloper
  *
  */
-class Application extends \eGloo\Dialect\Object implements Contextable { 
+class Application extends \eGloo\Dialect\Object implements Context\Contextable { 
 	
 	/**
 	 * 
@@ -40,6 +40,8 @@ class Application extends \eGloo\Dialect\Object implements Contextable {
 		
 		// set self as owner of context
 		$this->context(new Context($this));
+		
+		// place session into context
 	}
 	
 	/**
@@ -53,18 +55,18 @@ class Application extends \eGloo\Dialect\Object implements Contextable {
 	
 	/**
 	 * 
-	 * May replace this; access current user session object
+	 * Will replace; application should not be accessor for session instance
 	 */
 	public function session() { 
-		
+		return $this->context()->retrieve('session');
 	}
 	
 	/**
 	 * 
-	 * May replace this; access current request
+	 * Will replace; application should not be accessor for request instance
 	 */
-	public function request() { 
-		
+	public function &request() { 
+		return $this->context()->retrieve('request');
 	}
 	
 	
