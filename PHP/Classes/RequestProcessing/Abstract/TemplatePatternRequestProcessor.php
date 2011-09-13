@@ -65,17 +65,19 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$this->setTemplateBuilder();
 		$this->setCustomDispatch();
 		// end
-				
+
+		
 		
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
-		// begin -100 t/s @ 500 t/s
-		//$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
-		// end		
 		
-		echo $GLOBALS['payload']; return;
+		// -40 t/s after refactor (from -100)
+		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
+		
+		
 
 		try {
 			$templateDirector->preProcessTemplate();
+			echo $GLOBALS['payload']; return;
 		} catch (ErrorException $e) {
 			// TODO Error checking / branching should be more fine-tuned here
 			if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
@@ -183,11 +185,10 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 
 	// Defaults to XHTMLBuilder - override as needed
 	protected function setTemplateBuilder() {
-		return ;
+		// TODO use di framework to retrieve preinstantiated classes
 		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
 			$format = $this->decoratorInfoBean->getValue('Format', 'ManagedOutput');
 
-			// TODO preinstantiate these classes
 			switch( $format ) {
 				case 'csv' :
 					$this->_templateBuilder = new CSVBuilder();
@@ -211,7 +212,15 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 					break;
 			}
 		} else {
-			$this->_templateBuilder = new XHTMLBuilder();
+			// TODO replace test case with dynamic di load from app context
+			$application = &\eGloo\System\Server\Application::instance(); 
+			//echo get_class($application); return;
+			
+			$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
+				return new \XHTMLBuilder();
+			});
+			
+			//$this->_templateBuilder = new XHTMLBuilder();
 		}
 
 	}

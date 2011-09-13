@@ -26,6 +26,35 @@ class Context extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
+	 * Runs lambda in context, as opposed to inline (where run method as been called)
+	 * @param \Closure $lambda
+	 * @return boolean
+	 */
+	public function run (\Closure $lambda) { 
+		
+		// retrieve function signature (ie string) as means of an identifier
+		$reflection = new \ReflectionFunction($lambda);
+		$signature  = (string) $reflection;
+		
+		//return $this->retrieve($signature, $lambda);
+		// TODO this is oversimplified at the moment; needs cache support and
+		// check for boolean true
+		
+		if (!$this->exists($signature) || $this->store[$signature] === false) {
+			if (!is_null($value = $lambda($this, $signature))) { 	
+				$this->bind($signature, $value);
+			}
+			
+			return $value;
+		}
+		
+		return $this->retrieve($signature);
+		
+		
+	}
+	
+	/**
+	 * 
 	 * Enter expiration for a bound value 
 	 * @param string  $key
 	 * @param integer $expires
@@ -70,7 +99,7 @@ class Context extends \eGloo\Dialect\Object {
 		// a default "setter" closure is not provided; the reason this is done is
 		// to enforce the usage of 'exists' method and if retrieve is called, then
 		// a default closure must be provided
-		throw \eGloo\Dialect\Exception(
+		throw new \eGloo\Dialect\Exception(
 			"Attempted to access invalid storage key w/o providing default closure >> $key"
 		);
 	}

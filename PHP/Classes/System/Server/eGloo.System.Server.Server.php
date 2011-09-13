@@ -26,7 +26,8 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		
 		$application->bootstrap()
 			->bootstrap('egloo')
-			->bootstrap('pear');		
+			->bootstrap('pear')
+			->bootstrap('symphony');	
 
 		// Get a unique id for the process
 		$this->phid = sprintf('%s-%s-%s', gethostname(), posix_getpid(), time());

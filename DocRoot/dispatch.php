@@ -29,8 +29,8 @@
  */
 
 
-$requestInfoBean = &$GLOBALS['requestInfoBean'];
-$requestValidator = &$GLOBALS['requestValidator'];	
+$requestInfoBean = $application->context()->retrieve('requestInfoBean');
+$requestValidator = $application->context()->retrieve('requestValidator');
 
 
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
@@ -40,7 +40,25 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 
 
 // Validate this request and update the info bean accordingly
-$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+//$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+
+// TODO cache this based upon request passed, and if lambda return is boolean true, plus request
+// itself taken into account; caching at the moment to determine performance gain
+// TODO expire process is not working - bleeeh
+$isValidRequest = $application->context()->run(function(&$context, $key) use ($requestValidator, &$requestInfoBean) { 	
+	//echo 'run/lambda';
+	
+	// perform work on requestInfoBean (expensive process)
+	$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+	
+	// get unique request "signature" - bind to context attribute
+	//$signature = $requestInfoBean->signature();	
+	//$context->bind($signature, $isValidRequest);
+	//$context->expire($signature, 10);
+		
+	return $isValidRequest;
+});
+
 
 
 if (!isset($GLOBALS['payload'])) {
@@ -48,7 +66,6 @@ if (!isset($GLOBALS['payload'])) {
 		'/tmp/static'
 	);
 }
-
 
 
 // If the request is valid, process it.  Otherwise, log it and die

@@ -60,7 +60,7 @@ class XHTMLBuilder extends TemplateBuilder {
 		
 		foreach( $this->contentProcessors as $contentProcessor ) {
 			$contentProcessor->setTemplateEngine( $this->templateEngine );
-			$contentProcessor->prepareContent();
+			$contentProcessor->prepareConZtent();
 		}
 	}
 
@@ -115,7 +115,24 @@ class XHTMLBuilder extends TemplateBuilder {
 	}
 
 	public function setTemplateEngine() {
-		$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );	   
+		// huge -100 t/s hit with invocation of smarty engine
+		// TODO shallow copy/clone of instance; beware of reference issues
+		// TODO replace with dependency injection concept
+
+		$application = &\eGloo\System\Server\Application::instance();
+
+		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		
+		//$this->templateEngine = &$application->component(
+		//	'XHTMLDefaultTemplateEngine', $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' 
+		//);
+
+		$requestInfoBean = &$this->requestInfoBean;
+	
+		// TODO base context cache upon requestInfoBean signature
+		$this->templateEngine = clone $application->context()->retrieve('mongrel.test.templateEngine', function(&$context) use ($requestInfoBean) {
+			return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		});    
 	}
 
 	public function run() {

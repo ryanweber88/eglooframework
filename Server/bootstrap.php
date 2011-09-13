@@ -64,8 +64,8 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	
 	protected function _initEgloo() { 
 		// initialize eGloo resources 
-		$eglooApplicationPath = \eGloo\System\Server\Application::instance()
-			->target();
+		$application = & \eGloo\System\Server\Application::instance();
+		$eglooApplicationPath = $application->target();
 		
 		// change to application directory
 		// @todo I don't like having to change directories to allow for context; 
@@ -91,14 +91,38 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		$GLOBALS['mongrel'] = true;
 		
 		// Build a request info bean
-		$GLOBALS['requestInfoBean'] = \RequestInfoBean::getInstance();
+		$application->context()->bind('requestInfoBean', \RequestInfoBean::getInstance());
 		
 		// Get a request validator based on the current application and UI bundle
-		$GLOBALS['requestValidator'] =
-			\RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() );
-					
+		$application->context()->bind(
+			'requestValidator', \RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() )
+		);			
 		
 		// change back to server directory
 		chdir(__DIR__);
 	}
+	
+
+	
+	protected function _initSymphony() { 
+		// add symphony dependency injection compontents and autoloader
+		// TODO currently testing - add to valid path
+		set_include_path(
+			get_include_path() . ':/home/petflowdeveloper/Vendor'
+		);
+		
+		// include autoloader
+		require_once 'Symfony/Component/ClassLoader/UniversalClassLoader.php';
+		
+	}
+	
+	protected function _initComponents() { 
+		// class and system instances defined at application load time
+	
+		$container = Symfony\Component\DependencyInjection\ContainerBuilder;
+		$definition = Symfony\Component\DependencyInjection\Definition;		
+		
+	}	
+	
+
 }

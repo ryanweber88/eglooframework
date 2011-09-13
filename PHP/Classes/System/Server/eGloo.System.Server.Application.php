@@ -41,7 +41,9 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 		// set self as owner of context
 		$this->context(new Context($this));
 		
-		// place session into context
+		// bind components into context
+		// TODO change to full DI framework, instead of half-assed approached right now
+		//$this->context()->bind('components', new Component\Container());
 	}
 	
 	/**
@@ -51,6 +53,15 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 	 */
 	final public static function &instance() { 
 		return static::$instance;
+	}
+	
+	/**
+	 * 
+	 * Retrieve component from context
+	 * @param string $className
+	 */
+	public function component($class, \Closure $lambda = null) { 
+		
 	}
 	
 	/**
