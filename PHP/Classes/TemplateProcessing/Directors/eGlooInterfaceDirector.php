@@ -97,11 +97,12 @@ class eGlooInterfaceDirector extends TemplateDirector {
 		// expensive hit - 70 t/s
 		} else {
 			
-			
+			// begin refactored +30 t/s
 			$this->templateBuilder->setDispatchPath(); 
+			// end
+
 			$this->templateBuilder->resolveTemplateRoot();
 
-			
 
 			if ( $this->cacheID !== null ) {
 				$this->templateBuilder->setCacheID( $this->cacheID, $this->ttl );

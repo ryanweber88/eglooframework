@@ -24,34 +24,6 @@ class Context extends \eGloo\Dialect\Object {
 		
 	}
 	
-	/**
-	 * 
-	 * Runs lambda in context, as opposed to inline (where run method as been called)
-	 * @param \Closure $lambda
-	 * @return boolean
-	 */
-	public function run (\Closure $lambda) { 
-		
-		// retrieve function signature (ie string) as means of an identifier
-		$reflection = new \ReflectionFunction($lambda);
-		$signature  = (string) $reflection;
-		
-		//return $this->retrieve($signature, $lambda);
-		// TODO this is oversimplified at the moment; needs cache support and
-		// check for boolean true
-		
-		if (!$this->exists($signature) || $this->store[$signature] === false) {
-			if (!is_null($value = $lambda($this, $signature))) { 	
-				$this->bind($signature, $value);
-			}
-			
-			return $value;
-		}
-		
-		return $this->retrieve($signature);
-		
-		
-	}
 	
 	/**
 	 * 
@@ -74,19 +46,60 @@ class Context extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
+	 * Runs lambda in context, as opposed to inline (where run method as been called) -
+	 * php5.3 issue
+	 * @param \Closure $lambda
+	 * @return boolean
+	 */
+	public function run (\Closure $lambda) { 
+		
+		// retrieve function signature (ie string) as means of an identifier
+		$signature = $this->hashLambda($lambda);
+		
+		//return $this->retrieve($signature, $lambda);
+		// TODO this is oversimplified at the moment; needs cache support and
+		// check for boolean true
+		
+		if (!$this->exists($signature) || $this->store[$signature] === false) {
+			if (!is_null($value = $lambda($this, $signature))) { 	
+				$this->bind($signature, $value);
+			}
+			
+			//echo "\n\n$value";
+			
+			//return $value;
+		}
+		
+		// otherwise the value (should) exist, return it via a retrieve call
+		return $this->retrieve($signature);
+		
+		
+	}
+		
+	/**
+	 * 
 	 * Retrieve binded value; a closure is provided to allow for setting
 	 * of default value
 	 * @param string $key
 	 * @return mixed
 	 */
 	public function retrieve($key, \Closure $lambda = null) { 
+		
+		// generate unique key based on $key and $lambda toString - 
+		// this is done to avoid collisions (the lambda toString is
+		// unique to where function is defined, so it guarentees 
+		// a great deal of uniqueness
+		if (!is_null($lambda) && is_callable($lambda)) { 
+			$key = "$key/" . $this->hashLambda($lambda);
+		}
+		
 		if ($this->exists($key)) { 
 			return $this->store[$key]->value();
 		}
 		
 		// else we call lambda with $key, and store value into 
-		else if (is_callable($lambda)) { 
-			if (!is_null($value = $lambda($this))) { 
+		else if (is_callable($lambda)) { 			
+			if (!is_null($value = $lambda($this, $key))) { 
 				$this->bind($key, $value);
 			}
 
@@ -94,7 +107,7 @@ class Context extends \eGloo\Dialect\Object {
 			// (within lambda) or explicitly (by return value of lambda)
 			return $this->retrieve($key);
 		}
-		
+				
 		// throw exception if attempting to retrieve value that does not exist and
 		// a default "setter" closure is not provided; the reason this is done is
 		// to enforce the usage of 'exists' method and if retrieve is called, then
@@ -159,6 +172,18 @@ class Context extends \eGloo\Dialect\Object {
 		return false;
 	}
 	
+	
+	final private function hashLambda(\Closure &$lambda) { 
+		$reflection = new \ReflectionFunction($lambda);
+		
+		// fileName + startLine should ensure a unique ident (a function can't
+		// occupy the same space and time as another - future cop rules)
+		return $reflection->getFileName() . '/' . $reflection->getStartLine();
+		
+		// string comparison functions cause a huge hit in performance, so removing
+		// sure fire 
+		//return preg_replace('/\s/', null, (string) $reflection);
+	}
 	
 	
 	

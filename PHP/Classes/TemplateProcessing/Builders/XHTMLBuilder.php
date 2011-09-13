@@ -108,10 +108,26 @@ class XHTMLBuilder extends TemplateBuilder {
 	}
 	
 	public function setDispatchPath() {
-		$templateDispatcher =
-			XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
+		// cache dispatch path set based upon request bean signature + 20 t/s improvement
+		$application = &\eGloo\System\Server\Application::instance();
+		$requestInfoBean = &$this->requestInfoBean;
+		$userRequestID = &$this->userRequestID;
+		$userRequestClass = &$this->userRequestClass;
 
-		$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
+		$this->dispatchPath = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean, $userRequestID, $userRequestClass) { 
+
+			return XHTMLXML2ArrayDispatcher::getInstance( 
+				$requestInfoBean->getApplication(), $requestInfoBean->getInterfaceBundle() 
+			)
+			->dispatch($requestInfoBean, $userRequestID, $userRequestClass);
+
+		});
+
+		//$templateDispatcher =
+		//	XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
+
+
+		//$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
 	}
 
 	public function setTemplateEngine() {
@@ -128,9 +144,13 @@ class XHTMLBuilder extends TemplateBuilder {
 		//);
 
 		$requestInfoBean = &$this->requestInfoBean;
-	
-		// TODO base context cache upon requestInfoBean signature
-		$this->templateEngine = clone $application->context()->retrieve('mongrel.test.templateEngine', function(&$context) use ($requestInfoBean) {
+		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		//return ;
+
+		// TODO base context cache upon requestInfoBean signature - done, but make implicit
+		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which
+		// profiling has determined to be far more cpu efficient
+		$this->templateEngine = clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
 			return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
 		});    
 	}

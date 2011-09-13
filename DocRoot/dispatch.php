@@ -44,21 +44,22 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 
 // TODO cache this based upon request passed, and if lambda return is boolean true, plus request
 // itself taken into account; caching at the moment to determine performance gain
-// TODO expire process is not working - bleeeh
-$isValidRequest = $application->context()->run(function(&$context, $key) use ($requestValidator, &$requestInfoBean) { 	
+// TODO I hate having to pass the signature - I'd like to find a way to understand request context and
+// only pass lambda; right now this can't be done as request signature will obviously change
+// based upon request
+$isValidRequest = $application->context()->retrieve($requestInfoBean->signature(), function(&$context, $key) use ($requestValidator, &$requestInfoBean) { 	
 	//echo 'run/lambda';
 	
 	// perform work on requestInfoBean (expensive process)
 	$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 	
-	// get unique request "signature" - bind to context attribute
-	//$signature = $requestInfoBean->signature();	
-	//$context->bind($signature, $isValidRequest);
-	//$context->expire($signature, 10);
+	// bind value to $key (which is based on hash of request signature)
+	// and and expire value in 60
+	$context
+		->bind($key, $isValidRequest)
+		->expire($key, 10);
 		
-	return $isValidRequest;
 });
-
 
 
 if (!isset($GLOBALS['payload'])) {

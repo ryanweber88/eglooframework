@@ -66,18 +66,21 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$this->setCustomDispatch();
 		// end
 
+		$application = &\eGloo\System\Server\Application::instance();
+		$requestInfoBean = &$this->requestInfoBean;
 		
-		
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
-		
+		// save an instance of templateDirector per requestInfoBean 'type'
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	 
+		//$templateDirector = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) { 
+		//	return TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	
+		//});
+				
 		// -40 t/s after refactor (from -100)
 		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
-		
-		
+				
 
 		try {
 			$templateDirector->preProcessTemplate();
-			echo $GLOBALS['payload']; return;
 		} catch (ErrorException $e) {
 			// TODO Error checking / branching should be more fine-tuned here
 			if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
@@ -111,11 +114,18 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			}
 		}
 
+		// begin -200 t/s
 		$this->populateTemplateVariables();
-
+		// end
+		
+		//echo $GLOBALS['payload']; return;
+		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
 
-		$output = $templateDirector->processTemplate();
+		//$output = $templateDirector->processTemplate();
+		//echo $output;
+		echo $GLOBALS['payload'];
+		return ;
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
 
@@ -216,11 +226,14 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$application = &\eGloo\System\Server\Application::instance(); 
 			//echo get_class($application); return;
 			
-			$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
-				return new \XHTMLBuilder();
-			});
+			// preinstatiation proves useless in this instance and a memory succubus
+			// TODO profile with larger seige
+			//$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
+			//	echo 'templatebuilder';
+			//	return new \XHTMLBuilder();
+			//});
 			
-			//$this->_templateBuilder = new XHTMLBuilder();
+			$this->_templateBuilder = new XHTMLBuilder();
 		}
 
 	}
