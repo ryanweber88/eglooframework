@@ -139,6 +139,7 @@ class XHTMLBuilder extends TemplateBuilder {
 
 		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );
 		
+		// TODO replace with DI framework
 		//$this->templateEngine = &$application->component(
 		//	'XHTMLDefaultTemplateEngine', $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' 
 		//);
@@ -151,12 +152,12 @@ class XHTMLBuilder extends TemplateBuilder {
 		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which
 		// profiling has determined to be far more cpu efficient
 		$this->templateEngine = clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
+			//echo 'closure';
 			return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
 		});    
 	}
 
 	public function run() {
-		$retVal = null;
 
 		if (isset($this->hardCacheID) && $this->isHardCached) {
 			$retVal = $this->output;
@@ -174,8 +175,11 @@ class XHTMLBuilder extends TemplateBuilder {
 	protected function __fetch($dispatchPath, $cacheID) {
 		$retVal = null;
 
+
 		try {
+			echo "cacheid=$cacheID";
 			$retVal = $this->templateEngine->fetch( $dispatchPath, $cacheID );
+
 		} catch (Exception $e) {
 			$retVal = $this->processEngineFetchException( $e, $dispatchPath, $cacheID );
 		}

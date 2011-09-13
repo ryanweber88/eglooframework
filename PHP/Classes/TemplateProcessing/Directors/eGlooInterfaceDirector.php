@@ -101,6 +101,7 @@ class eGlooInterfaceDirector extends TemplateDirector {
 			$this->templateBuilder->setDispatchPath(); 
 			// end
 
+			// no/negligable hit
 			$this->templateBuilder->resolveTemplateRoot();
 
 
@@ -217,7 +218,6 @@ class eGlooInterfaceDirector extends TemplateDirector {
 		if ($userRequestClass !== null) {
 			$this->templateBuilder->setUserRequestClass($userRequestClass);
 		}
-
 
 		$this->templateBuilder->setTemplateEngine();
 	}

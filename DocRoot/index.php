@@ -35,13 +35,17 @@ if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 } else {
 	// Setup the OOP autoloader
 	include( 'PHP/Includes/eGlooAutoload.php' );
+	
+	
 }
+
 
 // Check for Memcache
 if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
 	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
 	exit;
 }
+
 
 // Build a request info bean
 $requestInfoBean = RequestInfoBean::getInstance();
@@ -60,7 +64,7 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
-//var_export($requestInfoB)
+//var_export($requestInfoBean); exit;
 
 
 // If the request is valid, process it.  Otherwise, log it and die

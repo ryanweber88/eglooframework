@@ -690,7 +690,7 @@ final class eGlooConfiguration {
 		} else {
 			$config_xml_path = self::getApplicationsPath() . '/' . self::getApplicationPath() . '/Configuration/' . $config_xml_filename;
 		}
-
+		
 		if ( file_exists($config_xml_path) && is_file($config_xml_path) && is_readable($config_xml_path) ) {
 			$configXMLObject = simplexml_load_file( $config_xml_path );
 
