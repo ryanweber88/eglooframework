@@ -258,7 +258,7 @@ function send($socket, $uuid, $conn_id, $msg)
 {
     $header = \sprintf('%s %d:%s,', $uuid, \strlen($conn_id), $conn_id);
     
-    return $socket->send($header . ' ' . $msg);
+    return $socket->sendmsg($header . ' ' . $msg);
 }
 
 /**

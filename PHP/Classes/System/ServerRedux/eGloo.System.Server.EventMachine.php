@@ -1,4 +1,5 @@
 <?php
+use eGloo\System\Server\EventMachine;
 namespace eGloo\System\Server;
 
 /**
@@ -49,8 +50,9 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 	 * @param integer $port
 	 * @param mixed $mixed
 	 * @throws EventMachine\Exception
+	 * @return EventMachine\Server
 	 */
-	static protected function startServer($port, $mixed) { 
+	static protected function startServer($host = self::LOCALHOST, $port, $handler) { 
 		// starts listening on specified port, throw exception if not available
 		// @todo check port availability
 			
@@ -60,14 +62,14 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 		
 		if ($mixed instanceof EventMachine\Connection) { 
 			// $mixed is connection - pass port to connection
-			$connection = &$mixed;
+			$connection = &$handler;
 			$connection->port($port);
 		}
 		
 		else { 
 			// otherwise $mixed is lamda, pass an empty instance to lambda
 			$connection = new EventMachine\Connection.rnew()->port($port);
-			$lambda = &$mixed;
+			$lambda = &$handler;
 			
 			// call lambda with connection instance
 			$lambda($connection);

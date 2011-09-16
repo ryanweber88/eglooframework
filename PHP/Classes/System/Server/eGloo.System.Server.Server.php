@@ -117,7 +117,7 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		// I don't know why the recieved request is being written to temporary; 
 		// maybe as a log store??
 		$fp = fopen('php://temp/maxmemory:5242880', 'r+');
-		fputs($fp, $conn->reqs->recv());
+		fputs($fp, $conn->reqs->recvmsg());
 		$stats = fstat($fp);
 		rewind($fp);
 		$message = $conn->parse($fp);

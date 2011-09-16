@@ -38,10 +38,36 @@
  * @package TemplateProcessing
  * @subpackage TemplateEngines
  */
-class XHTMLDefaultTemplateEngine extends DefaultTemplateEngine implements TemplateEngineInterface {
+class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngineBlitz implements TemplateEngineInterface {
 
 	protected $packagePrefix = 'XHTML';
 	protected $_custom_left_delimiter = '<!--{';
 	protected $_custom_right_delimiter = '}-->';
+	
+	/**
+	 * 
+	 * Process template and return to caller
+	 * @param string $path
+	 * @param string $cacheId
+	 */
+	public function fetch($path, $cacheId = null, $compileId = null, $parent = null, $display = false) { 
+		// load path into buffer
+		// TODO place into application state
+		$application = &\eGloo\System\Server\Application::instance();
+		
+		$body = $application->context()->retrieve($path, function() use ($path) { 
+			$body = file_get_contents($path);
+			
+			// TODO reaplce this and move to pre/post process 
+			return trim(preg_replace(
+				'/'. preg_quote('<!--{') . '.+?' . preg_quote('}-->') . '/is', null, $body
+			));
+		});
+		
+		$template = new blitz;
+		$template->load($body);
+		return $template->parse();
+	}
+	
 
 }

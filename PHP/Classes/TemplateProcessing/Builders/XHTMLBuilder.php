@@ -52,7 +52,8 @@ class XHTMLBuilder extends TemplateBuilder {
 
 	public function setTemplateVariables( $templateVariables ) {
 		$this->templateVariables = $templateVariables;
-		foreach( $templateVariables as $key => $value) $this->templateEngine->assign( $key, $value );		 
+		//$this->templateEngine->set($templateVariables);
+		//foreach( $templateVariables as $key => $value) $this->templateEngine->set( $key, $value );		 
 	}
 
 	public function setContentProcessors( $contentProcessors ) {
@@ -177,8 +178,11 @@ class XHTMLBuilder extends TemplateBuilder {
 
 
 		try {
-			echo "cacheid=$cacheID";
+			// this fetch call is sent directly to Smarty recieve 
 			$retVal = $this->templateEngine->fetch( $dispatchPath, $cacheID );
+
+			//return file_get_contents('/tmp/static');
+			//echo $GLOBALS['payload'];
 
 		} catch (Exception $e) {
 			$retVal = $this->processEngineFetchException( $e, $dispatchPath, $cacheID );
