@@ -68,8 +68,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->events = new EventManager;
 		
 		//$this->events->attachAggregate(new Listener\Logger);
-		$this->events->attachAggregate(new Listener\Call);
-		$this->events->attachAggregate(new Listener\Evaluation);
+		//$this->events->attachAggregate(new Listener\Call);
+		
+		$this->events->attachAggregate(new Listener\Evaluation([
+			'evaluate' => function() { 
+				return $this->evaluate();
+			}
+		]));
+		
 		//$this->events->attachAggregate(new Listener\Stat);
 		
 		// initialize stat trait
@@ -149,11 +155,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			// otherwise - retrieve singular 
 			else { 
 				// perform method call if entity is not found
-				$entity = $manager->find($entity, $key, function() { 
-					return DDL\Statement\Builder::build($entity, $entity->methods[__FUNCTION__]->call([
+				return $manager->find($entity, $key, function() use ($entity) { 
+					return DDL\Statement\Builder::build($entity, $entity->methods['find']([
 						new DDL\Statement\Argument('key', $key) 
-					]));
+					]);
 				});
+				
+				
 			}
 		}
 		
@@ -358,7 +366,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			$method = new Method($this);
 			$method->name = \eGloo\IO\File::basename($file);
 			
-			$methods[$method->name] = $method;
+			$methods[$method->name] = function($arguments) use ($method) { 
+				return $method->call($arguments);
+			};
 		}
 		
 		return $methods;

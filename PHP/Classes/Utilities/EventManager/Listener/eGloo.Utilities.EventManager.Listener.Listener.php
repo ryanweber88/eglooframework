@@ -24,5 +24,6 @@ abstract class Listener extends \eGloo\Dialect\Object {
 				);
 			}
 		}
+
 	}
 }
