@@ -5,6 +5,7 @@ namespace eGloo\System\Server\Context\Observer;
  * 
  * A 'Cache' observer - when notified, via update, checks if value
  * @author Christian Calloway
+ * @deprecated
  *
  */
 class AttributeCache extends \eGloo\Dialect\Object implements \SplObserver { 

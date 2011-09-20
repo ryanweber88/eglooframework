@@ -12,16 +12,19 @@ namespace eGloo\System\Server;
  * @author Christian Calloway
  *
  */
-use eGloo\System\Server\Context\Attribute;
-
-use eGloo\System\Server\Context\Observer\Cache;
-
-class Context extends \eGloo\Dialect\Object { 
+class Context extends \eGloo\Dialect\Object implements \SplSubject { 
+	
+	use \eGloo\Utilities\SubjectTrait;
 	
 	function __construct(&$owner) { 
 		// add reference to context's owner: application, request, session, etc
-		//$this->owner = &$owner;
+		$this->owner = &$owner;
 		
+		// add change observer
+		$this->attach(new Context\Observer\Change(function(&$context) { 
+			
+			// TODO do something with $context->owner
+		}));
 	}
 	
 	
@@ -183,7 +186,7 @@ class Context extends \eGloo\Dialect\Object {
 		// string comparison functions cause a huge hit in performance, so removing
 		// sure fire 
 		//return preg_replace('/\s/', null, (string) $reflection);
-	}
+	}	
 	
 	
 	

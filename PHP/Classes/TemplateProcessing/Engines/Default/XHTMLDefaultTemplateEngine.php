@@ -49,10 +49,13 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements Templ
 	 * Process template and return to caller
 	 * @param string $path
 	 * @param string $cacheId
-	 
+	 */
 	public function fetch($path, $cacheId = null, $compileId = null, $parent = null, $display = false) { 
 		// load path into buffer
 		// TODO place into application state
+		return file_get_contents('http://localhost:95/index.php');
+		
+		/*
 		$application = &\eGloo\System\Server\Application::instance();
 		
 		$body = $application->context()->retrieve($path, function() use ($path) { 
@@ -67,7 +70,8 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements Templ
 		$template = new blitz;
 		$template->load($body);
 		return $template->parse();
+		*/
 	}
-	*/
+	
 
 }
