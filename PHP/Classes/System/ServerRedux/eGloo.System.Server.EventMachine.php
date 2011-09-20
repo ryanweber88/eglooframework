@@ -1,5 +1,4 @@
 <?php
-use eGloo\System\Server\EventMachine;
 namespace eGloo\System\Server;
 
 /**
@@ -19,16 +18,20 @@ namespace eGloo\System\Server;
  * @author Christian Calloway
  *
  */
-class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Runnable { 
+class EventMachine extends \eGloo\Dialect\Object { 
+	
+	const LOCALHOST = '127.0.0.1';
 	
 	/**
 	 * 
 	 * Runs the EventMachine (ie an continuous loop) 
 	 * @param Closure $lambda
 	 */
-	static public function run(Closure $lambda = null) { 
+	static public function run(\Closure $lambda = null) { 
 		
 		// start continuous loop; loop can be controlled (exited) via run property within closure
+		// static::$run = true;
+		
 		while (static::$run) {
 			if (is_callable($lambda)) { 
 				$lambda();
@@ -52,30 +55,25 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 	 * @throws EventMachine\Exception
 	 * @return EventMachine\Server
 	 */
-	static protected function startServer($host = self::LOCALHOST, $port, $handler) { 
+	static public function startServer(EventMachine\Connection $connection, \Closure $handlerConnection = null) { 
 		// starts listening on specified port, throw exception if not available
 		// @todo check port availability
-			
-		// check mixed, which can either be a closure (to which a connection
-		// object is passed) or a connection instance itself
-		$connection = null;
+					
+		// instantiate connection 
+		$connection = new \eGloo\System\Server\EventMachine\Connection();
 		
-		if ($mixed instanceof EventMachine\Connection) { 
-			// $mixed is connection - pass port to connection
-			$connection = &$handler;
-			$connection->port($port);
+		if (!is_null($handlerConnection)) { 
+			$connection = $handlerConnection($connection);
 		}
 		
-		else { 
-			// otherwise $mixed is lamda, pass an empty instance to lambda
-			$connection = new EventMachine\Connection.rnew()->port($port);
-			$lambda = &$handler;
-			
-			// call lambda with connection instance
-			$lambda($connection);
-		}
+		static::$connection = $connection;
 	}
 	
 	/** @var boolean */
 	private static $run = true;
+	
+	/** @var EventMachine\Connection */
+	private static $connection;
+	
+
 }

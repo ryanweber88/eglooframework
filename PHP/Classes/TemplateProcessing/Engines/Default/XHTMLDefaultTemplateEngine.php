@@ -38,7 +38,7 @@
  * @package TemplateProcessing
  * @subpackage TemplateEngines
  */
-class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngineBlitz implements TemplateEngineInterface {
+class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements TemplateEngineInterface {
 
 	protected $packagePrefix = 'XHTML';
 	protected $_custom_left_delimiter = '<!--{';
@@ -49,7 +49,7 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngineBlitz implements 
 	 * Process template and return to caller
 	 * @param string $path
 	 * @param string $cacheId
-	 */
+	 
 	public function fetch($path, $cacheId = null, $compileId = null, $parent = null, $display = false) { 
 		// load path into buffer
 		// TODO place into application state
@@ -68,6 +68,6 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngineBlitz implements 
 		$template->load($body);
 		return $template->parse();
 	}
-	
+	*/
 
 }

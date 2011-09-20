@@ -12,6 +12,8 @@ namespace eGloo\System\Server;
  */
 class Application extends \eGloo\Dialect\Object implements Context\Contextable { 
 	
+	use \eGloo\Utilities\SingletonTrait;
+	
 	/**
 	 * 
 	 * @TODO change parameters to hash? 
@@ -29,7 +31,7 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 		// really like (requires shouldn't return values, but place
 		// them into context
 		// TODO : replace return config file
-		$this->config(require_once "$pathHandler/config.php");
+		$this->config((object)require_once "$pathHandler/config.php");
 		
 		// set instance to self/this
 		static::$instance = &$this;
@@ -105,11 +107,5 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 	 */
 	protected $context;
 	
-	/**
-	 * 
-	 * Singleton access to Application instance (there should never be more than one instance)
-	 * @var Application
-	 */
-	private static $instance;
 	
 }

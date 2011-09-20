@@ -35,6 +35,43 @@ abstract class Object {
 	 */
 	public function equals(\eGloo\Dialect\Object &$object) { }
 	
+	
+	/**
+	 * 
+	 * Copies 'attr_reader' ruby paradigm - allows for "public" access
+	 * to protected properties; will throw an exception if property
+	 * is not available
+	 * @param  string $name
+	 * @throws Exception
+	 * @return mixed
+	 */
+	public function __get($name) { 
+		try { 
+			return $this->$name();
+		}
+		catch (Exception $pass) {
+			throw $pass;
+		}		
+	}
+	
+	/**
+	 * 
+	 * Copies 'attr_writer' ruby paradigm - allows for public mutation pf protected properties; 
+	 * will throw an exception if property is non existent
+	 * @param  String $name
+	 * @param  mixed  $value
+	 * @throws Exception
+	 * @return void
+	 */
+	public function __set($name, $value) { 
+		try { 
+			$this->$name($value);
+		}
+		catch (Exception $pass) {
+			throw $pass;
+		}	
+	}
+	
 	/**
 	 * 
 	 * Taking a step away from the java world, and into ruby, (protected) properties 
