@@ -1,8 +1,8 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity\Statement;
 
-
-use eGloo\DataProcessing\DDL\Entity\Entity;
+use \eGloo\DataProcessing\DDL;
+use \eGloo\DataProcessing\DDL\Entity\Entity;
 
 
 /**
@@ -13,6 +13,16 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class Builder extends \eGloo\Dialect\Object { 
 	
+	
+	public static function create(Entity $entity, $content, array $arguments = [ ]) {
+		$builder = new Builder();
+		$builder->entity = $entity;
+		$builder->content = $content;
+		$builder->arguments = $arguments;
+		
+		return $builder->build();
+	}
+	
 	/**
 	 * 
 	 * Responsible for building/parsing statement, given entity
@@ -20,12 +30,12 @@ class Builder extends \eGloo\Dialect\Object {
 	 * @param Entity $entity
 	 * @param string $content
 	 */
-	public static function build(Entity $entity, $content, array $arguments = [ ]) { 
+	public function build() { 
 		
 		// type and array will be removed for variable interpolation
 		// the information is there for future cases in which
 		// work is needed based upon that data
-		$content = static::removeMetaData($string);
+		$content = $this->removeMetaData($this->content);
 		
 		// TODO cache parsed query based on key|value pairs
 		// passed in arguments
@@ -33,20 +43,20 @@ class Builder extends \eGloo\Dialect\Object {
 		// use blitz parser
 		$blitz = new \Blitz();
 		$blitz->load($content);
-		$blitz->parse(static::keyValueArguments(
-			$arguments
+		$blitz->parse($this->keyValueArguments(
+			$this->arguments
 		));
 		
 	}
 	
-	private static function removeMetaData($string) { 
+	private function removeMetaData($string) { 
 		// replace {{ name|type|[array] }} for {{ $name }}
 		return preg_replace (
 			'/\{\{.+?([a-zA-Z_].+?).+?\}\}/', '{{ $$0 }}', $string
 		);
 	}
 	
-	private static function keyValueArguments($arguments) { 
+	private function keyValueArguments($arguments) { 
 		$assoc = [ ];
 		
 		foreach ($arguments as $argument) { 

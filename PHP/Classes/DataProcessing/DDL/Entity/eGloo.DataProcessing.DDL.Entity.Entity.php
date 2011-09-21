@@ -50,6 +50,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->state = self::STATE_NEW;
 		
 		// BUILD ENTITY DEFINITION
+		// Defined in entities xml
 		try { 
 			$this->definition = Definition::factory($this);
 		}
@@ -58,11 +59,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		}
 		
 		// ENTITY/STATEMENT INTERFACE
-		// TODO abstract adding of interfaces 
-		$statementBundle = DDL/Statement/Bundle::factory($this);
-		
-		foreach($statementBundle->files as $file) { 
-			$this->definition->addInterface(explode('.', \eGloo\IO\File::basename($file))[0]);
+		// TODO abstract adding of interfaces 		
+		foreach(DDL\Statement\Bundle::create($this)->content as $name => statement) {
+			$this->methods[] = 1;//new Method($this, $name);
 		}
 
 		
@@ -83,7 +82,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			'call'     => function(Event $event) {
 				
 				// instantiate method, and provide callback details
-				$method = new Method(
+				$method = new DDL\Utility\Callback(
 					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
 				);
 				
@@ -390,23 +389,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// PRIVATE ------------------------------------------------------------- //
 	
 
-	
-	final private function parseMethods(array $files = [ ]) { 
-		// parses statement files available to this entity
-		// TODO parse actual files, including comments, parameters, etc
-		$methods = [ ];
-		
-		foreach ($files as $file) { 
-			$method = new Method($this);
-			$method->name = \eGloo\IO\File::basename($file);
-			
-			$methods[$method->name] = function($arguments) use ($method) { 
-				return $method->call($arguments);
-			};
-		}
-		
-		return $methods;
-	}
+
 
 	
 	// PROPERTIES ---------------------------------------------------------- // 
@@ -422,5 +405,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	/** Abstraction of configurable definition */
 	protected $definition;
-	 
+	
+	
+	private $methods = [ ]; 
 }

@@ -27,31 +27,30 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		// retrieve bundle content
 		foreach ($this->files as $file) {
-			$this->content[\eGloo\IO\File::basename($file)] = file_get_contents(
+			$this->content[$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0]] = file_get_contents(
 				$file
 			);
 		}
+
 	}
 	
 	/**
 	 * Retrieve a bundle instance based on
 	 * @todo limit_static 
 	 */
-	public static function factory(Entity $entity) { 
+	public static function create(Entity $entity) { 
 		return static::retrieve($entity->_class->name, function() use ($entity) { 
 			return new Bundle(DDL\Utility\Path::statements(
 				$entity
 			));		
 		});
 	}
-	
-	public function statement($name) {
-		return $this->content[$name];
-	}
+
 	
 	
 	
 	private   $path;
 	protected $files;
-	private   $content = [ ];
+	protected $names   = [ ];
+	protected $content = [ ];
 }

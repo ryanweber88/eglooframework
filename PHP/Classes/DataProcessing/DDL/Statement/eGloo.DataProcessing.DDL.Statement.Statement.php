@@ -7,7 +7,7 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
 /**
  * 
  * Represents a statement, or interface to underlying data layer; responsible
- * for executing statement on underlying data layer
+ * for executing a static SQL statement and returning the results it produces.
  * @author Christian Calloway
  * @todo   Entirely SQL oriented; an adapter layer must be build in order to 
  *         to deal with disparate data sources
@@ -35,4 +35,6 @@ class Statement extends \eGlooDPPrimitive {
 				->getDataPackage();
 	}
 
+	protected $name;
+	protected $content;
 }

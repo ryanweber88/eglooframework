@@ -12,8 +12,12 @@ use \eGloo\DataProcessing\DDL;
  * @author Christian Calloway
  *
  */
-class Method extends DDL\Utility\Callback {
+class Method extends \eGloo\Dialect\Object {
 	
+	
+	function __construct(Entity $entity, $name) { 
+		
+	}
 	
 	/**
 	 * Overrides parent method, because method is ultimately
@@ -26,30 +30,29 @@ class Method extends DDL\Utility\Callback {
 	public function call(array $arguments = [ ]) {
 		
 		// get statement content
-		$content = DDL\Statement\Group::statement(
-			$this->entity, $this->name
-		);
+		$content = DDL\Statement\Bundle::create($this->entity)
+			->statement(
+				$this->entity, $this->name
+			);
 		
-		echo $content;
 				
 		// build statement and pass to statement instance
 		$data = DDL\Statement\Statement::rnew()
-			->execute(DDL\Statement\Builder::build(
-				$this->entity, $content
+			->execute(DDL\Statement\Builder::create(
+				$this->entity, $content, $arguments
 			));
 				
 		
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity
 		// has requested evaluation.
+		// TODO how to do multiple data sets?? 
 		if ($data && is_array($data)) { 
 			$this->entity->data(Data/Builder::create(
 				$this->entity, $data
 			));
 		}
-		
-		// execute callback, if it exists
-		
+				
 	}
 	
 	/**
@@ -61,6 +64,8 @@ class Method extends DDL\Utility\Callback {
 	}
 	
 	
+	protected $arguments;
+	protected $name;
 	protected $comments;
 	protected $parameters;
 	protected $return;
