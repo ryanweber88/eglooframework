@@ -7,8 +7,8 @@ namespace eGloo\Utilities\HPHP\Target\HTTP;
  * @author Christian Calloway
  *
  */
-class Smarty extends \eGloo\Utilities\HPHP\Targe\HTTP { 
-
+class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP { 
+	
 	const PORT = 95;
 	
 	function __construct() { 
@@ -20,5 +20,6 @@ class Smarty extends \eGloo\Utilities\HPHP\Targe\HTTP {
 	}
 	
 	
-	
+	protected $path;
+	protected $cacheId;	
 }
