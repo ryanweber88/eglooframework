@@ -21,8 +21,8 @@
  * @author George Cooper
  * @copyright 2011 eGloo LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @package $package
- * @subpackage $subpackage
+ * @category Plugins
+ * @package XML
  * @version 1.0
  */
 
@@ -33,10 +33,30 @@
  *
  * $long_description
  *
- * @package $package
- * @subpackage $subpackage
+ * @category Plugins
+ * @package XML
  */
 class eGlooXML {
+
+	// Process flags
+	const PROCESS_ATTRIBUTES	= 0x01;
+	const PROCESS_CHILDREN		= 0x02;
+	const PROCESS_ALL			= 0xffff;
+
+	// Build flags
+	const BUILD_ATTRIBUTES		= 0x01;
+	const BUILD_CHILDREN		= 0x02;
+	const BUILD_STRUCTURE		= 0x04;
+	const BUILD_ALL				= 0xffff;
+
+	// Return flags
+	const RETURN_ARRAY			= 0x01;
+	const RETURN_FLATTENED		= 0x02;
+
+	/**
+	 * @var array Attributes of this XML node
+	 */
+	protected $_attributes = array();
 
 	/**
 	 * @var array Children of this XML DOM
@@ -48,8 +68,227 @@ class eGlooXML {
 	 */
 	protected $_simpleXMLObject = null;
 
-	public function __construct( $xml_location ) {
-		$this->_simpleXMLObject = simplexml_load_file( $xml_location );
+	public function __construct( $xml ) {
+		if ( is_string($xml) ) {
+			if ( file_exists($xml) && is_file($xml) && is_readable($xml) ) {
+				$this->_simpleXMLObject = simplexml_load_file( $xml );
+			} else {
+				$this->_simpleXMLObject = new SimpleXMLElement( $xml );
+			}
+		} else if ( $xml instanceof SimpleXMLElement ) {
+			$this->_simpleXMLObject = $xml;
+		} else {
+			throw new Exception( 'eGlooXML does not support instantiation from type ' . gettype($xml) . '.' );
+		}
+
+		if ( !$this->_simpleXMLObject ) {
+			eGlooLogger::writeLog( eGlooLogger::EMERGENCY,
+				'eGlooXML: simplexml_load_file( "' . $xml . '" ): ' . libxml_get_errors() );
+		}
+	}
+
+	/**
+	 * Executes a given XPath expression and returns the result
+	 *
+	 * @return mixed Result of XPath expression
+	 */
+	public function xpath( $xpath, $return = self::RETURN_ARRAY ) {
+		$retVal = null;
+
+		if ( $this->_simpleXMLObject->xpath( $xpath ) ) {
+			$retVal = array();
+
+			foreach( $this->_simpleXMLObject->xpath( $xpath ) as $xpath_result ) {
+				$retVal[] = new eGlooXML( $xpath_result );
+			}
+		}
+
+		if ( $return === self::RETURN_FLATTENED ) {
+			if ( empty($retVal) ) {
+				$retVal = null;
+			} else if ( count($retVal) === 1 ) {
+				$retVal = $retVal[0];
+			}
+		} else if ( empty($retVal) ) {
+			$retVal = array();
+		}
+
+		return $retVal;
+	}
+
+	/**
+	 * Returns XML node as a hydrated array
+	 *
+	 * @param $return_flags Flags specifying return format
+	 * @param $build_flags Flags specifying build options
+	 * @param $process_flags Flags specifying process options
+	 *
+	 * @return array Hydrated representation of this XML node
+	 */
+	public function getHydratedArray( $return_flags = self::RETURN_ARRAY, $build_flags = self::BUILD_ALL, $process_flags = self::PROCESS_ALL ) {
+		$retVal = null;
+
+		$retVal = array();
+
+		$objectName = $this->_simpleXMLObject->getName();
+
+		if ( $this->getChildCount() === 0 && $this->getAttributeCount() === 0 ) {
+			$retVal = (string) $this->_simpleXMLObject;
+		} else {
+			$children = array();
+
+			if ( $process_flags & self::PROCESS_CHILDREN ) {
+				foreach( $this->_simpleXMLObject->children() as $child ) {
+					if ( $build_flags & self::BUILD_STRUCTURE ) {
+						if ( $child->getName() !== eGlooInflector::pluralize($this->_simpleXMLObject->getName()) ) {
+							$elementGroup = eGlooInflector::pluralize($child->getName());
+						} else {
+							$elementGroup = $child->getName();
+						}
+
+						if ( isset($children[$child->getName()]) ) {
+							$children[$elementGroup] = array();
+						}
+
+						$childObjWrapper = new eGlooXML( $child );
+
+						// if ( isset($children[$elementGroup][$child->getName()]) ) {
+						// 	$children[$elementGroup][$child->getName()] = array();
+						// }
+
+						if ( $childObjWrapper->hasNodeID() ) {
+							$children[$elementGroup][$childObjWrapper->getNodeID()] = $childObjWrapper->getHydratedArray();
+						} else {
+							$children[$elementGroup][] = $childObjWrapper->getHydratedArray();
+						}
+
+						ksort($children[$elementGroup]);
+					} else {
+						$childObjWrapper = new eGlooXML( $child );
+
+						if ( $childObjWrapper->hasNodeID() ) {
+							$children[$childObjWrapper->getNodeID()] = $childObjWrapper->getHydratedArray();
+						} else {
+							$children[] = $childObjWrapper->getHydratedArray();
+						}
+					}
+				}
+
+				ksort($children);
+			}
+
+			$attributes = array();
+
+			if ( $process_flags & self::PROCESS_ATTRIBUTES ) {
+				foreach( $this->_simpleXMLObject->attributes() as $key => $value ) {
+					if ( isset($this->$key) ) {
+						$attributes[$key] = $this->$key->getValue();
+					} else if ( !isset($this->$key) && !isset($this->_attributes[$key]) && (string) $value !== '' ) {
+						$attributes[$key] = (string) $value;
+					}
+				}
+
+				ksort($attributes);
+			}
+
+			if ( $build_flags === self::BUILD_ALL ) {
+				$retVal = array_merge( $children, $attributes );
+			} else if ( $build_flags & self::BUILD_ATTRIBUTES ) {
+				$retVal = $attributes;
+			} else if ( $build_flags & self::BUILD_CHILDREN ) {
+				$retVal = $children;
+			}
+
+			ksort($retVal);
+		}
+
+		return $retVal;
+	}
+
+	/**
+	 * Returns the ID for this XML node
+	 *
+	 * @return string ID of this XML node
+	 */
+	public function getNodeID() {
+		$retVal = isset($this->_simpleXMLObject['id']) ? (string) $this->_simpleXMLObject['id'] : null;
+
+		return $retVal;
+	}
+
+	/**
+	 * Returns true if there is an ID for this XML node, false otherwise
+	 *
+	 * @return string ID of this XML node
+	 */
+	public function hasNodeID() {
+		$retVal = isset($this->_simpleXMLObject['id']) ? true : false;
+
+		return $retVal;
+	}
+
+	/**
+	 * Returns number of attributes for this XML node
+	 *
+	 * @return integer Count of attributes for this XML DOM
+	 */
+	public function getAttributeCount() {
+		return count( $this->_simpleXMLObject->attributes() );
+	}
+
+	/**
+	 * Returns protected class member $_attributes
+	 *
+	 * @return array Attributes of this XML node
+	 */
+	public function getAttributes() {
+		return $this->_attributes;
+	}
+
+	/**
+	 * Sets protected class member $_attributes
+	 *
+	 * @param attributes array Attributes of this XML node
+	 */
+	public function setAttributes( $attributes ) {
+		$this->_attributes = $attributes;
+	}
+
+	/**
+	 * Returns true or false if an attribute is set (processed)
+	 *
+	 * @return bool If the given attribute key is set
+	 */
+	public function issetAttribute( $key ) {
+		return isset( $this->_attributes[$key] );
+	}
+
+	/**
+	 * Returns attribute value requested by key from class member $_attributes
+	 *
+	 * @return string Attribute value by key
+	 */
+	public function getAttribute( $key ) {
+		return $this->_attributes[$key];
+	}
+
+	/**
+	 * Sets value for key in protected class member $_attributes
+	 *
+	 * @param key string Attribute key
+	 * @param value string Attribute value
+	 */
+	public function setAttribute( $key, $value ) {
+		$this->_attributes[$key] = $value;
+	}
+
+	/**
+	 * Returns number of children for this XML node
+	 *
+	 * @return integer Count of children for this XML DOM
+	 */
+	public function getChildCount() {
+		return $this->_simpleXMLObject->count();
 	}
 
 	/**
@@ -115,6 +354,79 @@ class eGlooXML {
 	 */
 	public function toArray() {
 		
+	}
+
+	public function __isset( $node_name ) {
+		$retVal = false;
+
+		if ( isset( $this->_attributes[$node_name] ) && $this->_attributes[$node_name]->getValue() !== null ) {
+			$retVal = true;
+		} else if ( isset( $this->_children[$node_name] ) && $this->_children[$node_name]->getValue() !== null ) {
+			$retVal = true;
+		} else if ( !isset( $this->_attributes[$node_name] ) && $this->_simpleXMLObject->xpath( '@' . $node_name) ) {
+			$attribute_values = $this->_simpleXMLObject->xpath( '@' . $node_name);
+			$attribute_value = (string) $attribute_values[0];
+
+			$this->_attributes[$node_name] = new eGlooXMLNode( $attribute_value, eGlooXMLNode::ATTRIBUTE );
+
+			$retVal = true;
+		} else if ( !isset( $this->_children[$node_name] ) && $this->_simpleXMLObject->xpath( $node_name) ) {
+			// TODO
+		} else {
+			// TODO
+		}
+
+		return $retVal;
+	}
+
+	public function __unset( $node_name ) {
+		if ( isset( $this->_attributes[$node_name] ) ) {
+			$this->_attributes[$node_name]->setValue(null);
+
+			if ( $this->_simpleXMLObject->xpath( '@' . $node_name) ) {
+				$this->_simpleXMLObject[$node_name] = null;
+			}
+		} else if ( isset( $this->_children[$node_name] ) ) {
+			$this->_children[$node_name]->setValue(null);
+
+			if ( $this->_simpleXMLObject->xpath( '@' . $node_name) ) {
+				// TODO
+			}
+		}
+	}
+
+	public function __get( $node_name ) {
+		$retVal = null;
+
+		if ( isset( $this->_attributes[$node_name] ) ) {
+			$retVal = $this->_attributes[$node_name];
+		} else if ( isset( $this->_children[$node_name] ) ) {
+			$retVal = $this->_children[$node_name];
+		} else if ( $this->_simpleXMLObject->xpath( '@' . $node_name) ) {
+			$attribute_values = $this->_simpleXMLObject->xpath( '@' . $node_name);
+			$attribute_value = (string) $attribute_values[0];
+
+			$this->_attributes[$node_name] = new eGlooXMLNode( $attribute_value, eGlooXMLNode::ATTRIBUTE );
+
+			$retVal = $this->_attributes[$node_name];
+		} else if ( $this->_simpleXMLObject->xpath( '@' . $node_name) ) {
+			// TODO
+		}
+
+		return $retVal;
+	}
+
+	public function __call( $method_name, $arguments ) {
+		
+	}
+
+	/**
+	 * Return the string representation of this XML object
+	 *
+	 * @return string String representation of this XML object
+	 */
+	public function __toString() {
+		return (string) $this->_simpleXMLObject;
 	}
 
 	// From http://recursive-design.com/blog/2007/04/05/format-xml-with-php/
