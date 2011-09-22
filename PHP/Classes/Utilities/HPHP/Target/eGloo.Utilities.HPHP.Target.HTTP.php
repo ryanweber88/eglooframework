@@ -24,13 +24,12 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 		
 		// using native curl methods to keep execution
 		// as efficient as possible
-		$this->curl = curl_init (
-			'http://' . self::HOST . ':' . self::PORT . '/' . self::CONTROLLER
-		);
-		
+		//$application = \eGloo\Dialect\
+		$this->curl = curl_init ($this->uri());
+				
 		// set curl headers - check if persistent connections are default
 		if ($this->curl) { 
-			
+			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 		}
 
 		// throw exception if connection failed
@@ -42,7 +41,17 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	
 	function __destruct() { 
 		// close curl connection (if still open)
-		curl_close($this->curl);		
+		//curl_close($this->curl);		
+	}
+	
+	/**
+	 * 
+	 * Enter description here ...
+	 */
+	protected function uri() { 
+		//return 'http://' . self::HOST . ':' . static::PORT . '/' . self::CONTROLLER;
+		
+		return 'http://localhost:95/index.php';
 	}
 	
 	
@@ -60,7 +69,17 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 * on address
 	 */
 	protected function call() { 
-		return curl_exec($this->curl);
+		//$content = curl_exec($this->curl);
+		return file_get_contents($this->uri());
+		//return $GLOBALS['payload'];
+		
+		
+		// check if an error was generated on curl request
+		if (curl_errno($this->curl)) { 
+			return false;
+		}
+				
+		return $content;
 	}
 	
 	protected $curl;

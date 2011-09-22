@@ -7,14 +7,11 @@ namespace eGloo\Utilities\HPHP\Target\HTTP;
  * @author Christian Calloway
  *
  */
-<<<<<<< HEAD
-class Smarty extends \eGloo\Utilities\HPHP\Targe\HTTP { 
-
-=======
 class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP { 
 	
->>>>>>> feature/hphp
 	const PORT = 95;
+	const DIR_ROOT = './SmartyStandAloneComplex';
+	const DIR_COMPILED = './templates_c';
 	
 	function __construct() { 
 		// call parent constructor with callback to access smarty native
@@ -23,12 +20,32 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 		// TODO change to configuration
 		$this->port = self::PORT;
 	}
+
+
+	/**
+	 * 
+	 * Registers a compiled template and flags re-comiplation
+	 * @param string $pathCompiled
+	 */
+	public static function registerCompiled($pathCompiled) { 
+		
+		// first copy file into binary "context"
+		$destination = \eGlooConfiguration::getFrameworkRootPath() . '/' . $this->root() . '/' . self::DIR_COMPILED;
+		
+		if (copy($pathCompiled,  $destination)) { 
+			// flags required compilation 
+			static::compile();
+		}
+		
+		throw new \eGloo\Dialect\Exception(
+			'FAILED copying compiled >> ' . $pathCompiled
+		);
+	}
 	
+
+	protected function root($path = null) { 
+		echo parent::root(self::DIR_ROOT . "/$path");
+		return parent::root(self::DIR_ROOT . "/$path"); 
+	}
 	
-<<<<<<< HEAD
-	
-=======
-	protected $path;
-	protected $cacheId;	
->>>>>>> feature/hphp
 }

@@ -19,16 +19,17 @@ trait ParametersTrait {
 		}
 		
 		// if key, value pair, assign to parameters hash
-		else if (!is_array($mixed) && !is_null($value)) { 
+		else { 
 			$this->parameters[$mixed] = $value;
 		}
 		
+		
 		// otherwise, a value hasn't been specified and we throw an exception
-		else { 
-			throw new \eGloo\Dialect\Exception(
-				"INVALID value passed to assign >>  $mixed = $value"
-			);
-		}
+		//else { 
+		//	throw new \eGloo\Dialect\Exception(
+		//		"INVALID value passed to assign >>  $mixed = $value"
+		//	);
+		//}
 	}
 	
 	protected $parameters = [];

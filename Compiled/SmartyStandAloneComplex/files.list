@@ -1,3 +1,6 @@
+./tools/generate_compiled.php
+./tools/templates_c/8f151cd6828fee622a44dc70d98df48723f50eb4.file.AdminIndex.tpl.php
+./tools/templates_c/5540d258c378af5e2dc4562d9683f703e85eb175.file.CouponEdit.tpl.php
 ./index.php
 ./Smarty/libs/sysplugins/smarty_internal_data.php
 ./Smarty/libs/sysplugins/smarty_internal_resource_registered.php
@@ -116,5 +119,8 @@
 ./Smarty/libs/plugins/modifier.spacify.php
 ./Smarty/libs/plugins/modifiercompiler.count_words.php
 ./Smarty/libs/plugins/modifiercompiler.from_charset.php
+./Smarty/libs/SmartyBC.class.php
 ./Smarty/libs/Smarty.class.php
 ./templates_c/f83ed04b0f30683e3826b23328c96a6e07015b85.file.test.tpl.php
+./templates_c/3c62ad5131b3a7b591a71b6c1aaac9e93e157278.file.test2.tpl.php
+./templates_c/69663185da0eb7d795075ff69aad8b9aa5ddb6e5.file.ExternalMainPageBaseForm.tpl.php

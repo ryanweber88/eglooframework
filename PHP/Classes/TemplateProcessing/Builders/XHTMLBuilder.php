@@ -145,17 +145,31 @@ class XHTMLBuilder extends TemplateBuilder {
 		//	'XHTMLDefaultTemplateEngine', $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' 
 		//);
 
-		$requestInfoBean = &$this->requestInfoBean;
-		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
-		//return ;
+		
+		//$requestInfoBean = &$this->requestInfoBean;
+				
+		//new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Smarty(); exit;
+		
+		$implementor = $application->context()->run(function() { 
+			return new XHTMLDefaultTemplateEngine( 
+				$this->requestInfoBean->getInterfaceBundle(), 'US', 'en'
+			);
+		});
+				
+		$this->templateEngine = new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Native(
+			$implementor
+		);
+		
+		
+		return ;
 
 		// TODO base context cache upon requestInfoBean signature - done, but make implicit
 		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which
 		// profiling has determined to be far more cpu efficient
-		$this->templateEngine = clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
+		//$this->templateEngine = //clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
 			//echo 'closure';
-			return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
-		});    
+			//return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		//});    
 	}
 
 	public function run() {

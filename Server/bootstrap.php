@@ -55,11 +55,13 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	
 	protected function _initPear() {
 		// initialize pear resources - this will be eventually removed
+		/*
 		spl_autoload_register(function($className) { 
 			@include_once str_ireplace('_', '/', $className) . '.php';
 		});
 		
 		$GLOBALS['log'] = \Log::factory('file', '/home/petflowdeveloper/out.eglooautoload', 'test');
+		*/
 	}
 	
 	protected function _initEgloo() { 

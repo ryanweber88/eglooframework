@@ -7,7 +7,7 @@ namespace eGloo\Utilities;
  */
 trait BridgeTrait { 	
 
-	public function __call($name, $arguments) { 
+	public function &__call($name, $arguments) { 
 		// use reflection on implementors interfaces to
 		// dynamically call interface methods
 		$reflectionClass = new ReflectionClass($this->implementor);
@@ -19,7 +19,10 @@ trait BridgeTrait {
 					return $method->invokeArgs($method, $arguments);
 				}
 			}
-		}			  
+		}
+		
+		// TODO replace this! calls object __call method, but this shouldn't be here
+		parent::__call($name, $arguments);
 		
 		throw new \eGloo\Dialect\Exception(
 			"FAILED finding implementor method >> $name"

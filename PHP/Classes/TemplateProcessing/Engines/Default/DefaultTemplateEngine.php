@@ -36,7 +36,7 @@
  * @package $package
  * @subpackage $subpackage
  */
-class DefaultTemplateEngine implements TemplateEngineInterface {
+class DefaultTemplateEngine extends \Smarty implements TemplateEngineInterface {
 
 	protected $templateRoots = null;
 	protected $packagePrefix = '';
@@ -47,16 +47,16 @@ class DefaultTemplateEngine implements TemplateEngineInterface {
 	protected $_language = 'en';
 
 	public function __construct( $interface_bundle, $locale = 'US', $language = 'en' ) {
-		//parent::__construct( $interface_bundle, $locale = 'US', $language = 'en' );
-
+		parent::__construct( $interface_bundle, $locale = 'US', $language = 'en' );
 		$this->_interface_bundle = $interface_bundle;
 		$this->_locale = $locale;
 		$this->_language = $language;
-		
-		$this->plugins_dir = array('/home/petflowdeveloper/Develop/eglooframework');
+		//$this->plugins_dir = array();
 
 		$this->init();
 	}
+	
+	
 
 	protected function init() {
 		$this->setErrorReporting();
@@ -202,6 +202,12 @@ class DefaultTemplateEngine implements TemplateEngineInterface {
 
 	public function getTemplatePaths() {
 		return $this->template_dir;
+	}
+	
+	public function getCompiledFilepath($path) { 
+		// used internally to perform operations on 
+       	$internal = new Smarty_Internal_Template($path, $this->smarty);
+       	return $internal->getCompiledFilepath();
 	}
 
 }

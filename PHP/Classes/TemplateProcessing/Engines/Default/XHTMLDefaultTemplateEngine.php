@@ -44,34 +44,9 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements Templ
 	protected $_custom_left_delimiter = '<!--{';
 	protected $_custom_right_delimiter = '}-->';
 	
-	/**
-	 * 
-	 * Process template and return to caller
-	 * @param string $path
-	 * @param string $cacheId
-	 */
-	public function fetch($path, $cacheId = null, $compileId = null, $parent = null, $display = false) { 
-		// load path into buffer
-		// TODO place into application state
-		return file_get_contents('http://localhost:95/index.php');
-		
-		/*
-		$application = &\eGloo\System\Server\Application::instance();
-		
-		$body = $application->context()->retrieve($path, function() use ($path) { 
-			$body = file_get_contents($path);
-			
-			// TODO reaplce this and move to pre/post process 
-			return trim(preg_replace(
-				'/'. preg_quote('<!--{') . '.+?' . preg_quote('}-->') . '/is', null, $body
-			));
-		});
-		
-		$template = new blitz;
-		$template->load($body);
-		return $template->parse();
-		*/
+	function __construct($interface_bundle, $locale = 'US', $language = 'en' ) { 
+		parent::__construct($interface_bundle, $locale, $language);
 	}
-	
+
 
 }

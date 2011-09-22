@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\TemplateProcessing\Bridge;
+namespace eGloo\TemplateProcessing\Engines\Bridge;
 
 /**
  * 
@@ -9,9 +9,13 @@ namespace eGloo\TemplateProcessing\Bridge;
  * @author Christian Calloway
  *
  */
-class TemplateEngine {
+class TemplateEngine extends \eGloo\Dialect\Object {
 	
-	function __construct()
+	use \eGloo\Utilities\BridgeTrait;
+	
+	function __construct(\TemplateEngineInterface $implementor) { 
+		$this->bridge($implementor);
+	}
 
-	protected $implementor;	
+	
 }
