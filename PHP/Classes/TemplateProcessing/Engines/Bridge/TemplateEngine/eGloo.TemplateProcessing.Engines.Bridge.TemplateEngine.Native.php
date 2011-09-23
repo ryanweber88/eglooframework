@@ -37,23 +37,23 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			
 			$smartyNative->assign('path', $path);
 			$smartyNative->assign('cache_id', $cacheId);
-			$smartyNative->assign($this->implementor->getTemplateVars());
+			
 			
 			return $smartyNative;
 		});
+		
+		$smartyNative->assign($this->implementor->getTemplateVars());
 				
 		
 		// provide callback if native execution fails
-		return $smartyNative->execute(array(false => function($content) use ($path, $cacheId) { 
+		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
 			
 			// get content from implementors fetch method
 			$content = $this->implementor->fetch($path, $cacheId);
-			
-			//echo "failure $path"; exit;
-			
+						
 			// move compiled php to Native Smarty compiled directory
 			// and trigger recompilication
-			\eGloo\Utilities\HPHP\Target\HTTP\Smarty::registerCompiled($this->implementor->getCompiledFilepath(
+			$this->registerCompiled($this->implementor->getCompiledFilepath(
 				$path 
 			));
 			

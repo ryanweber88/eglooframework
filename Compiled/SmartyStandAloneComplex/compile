@@ -1,4 +1,4 @@
 find . -name '*.php' > files.list
 
 #need to flag compilation
-hphp --input-list=files.list -k 1 --log=3   --include-path="." --force=1 --cluster-count=50   -v "AllDynamic=true" -v "AllVolatile=true" --output-dir=./bin
+#hphp --input-list=files.list -k 1 --log=3   --include-path="." --force=1 --cluster-count=50   -v "AllDynamic=true" -v "AllVolatile=true" --output-dir=./bin

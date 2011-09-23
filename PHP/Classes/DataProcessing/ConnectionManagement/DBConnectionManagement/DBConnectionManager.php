@@ -65,7 +65,10 @@ final class DBConnectionManager extends ConnectionManager {
 		// const REST			= 0x0b;
 		// const SOAP			= 0x0c;
 
+		//var_export($connection_info); exit;
+
 		if ($engine_mode !== null) {
+			
 			if ( $engine_mode === eGlooConfiguration::DOCTRINE ) {
 				if (!isset(self::$connections['Doctrine'])){
 					self::$connections['Doctrine'] = array();
@@ -100,6 +103,7 @@ final class DBConnectionManager extends ConnectionManager {
 				// No DB engine specified in config or no engine available
 			}
 		} else {
+
 			if ( $connection_info['engine'] === eGlooConfiguration::DOCTRINE ) {
 				if (!isset(self::$connections['Doctrine'])){
 					self::$connections['Doctrine'] = array();
@@ -122,8 +126,9 @@ final class DBConnectionManager extends ConnectionManager {
 				if (!isset(self::$connections['MySQLiOOP'])){
 					self::$connections['MySQLiOOP'] = array();
 				}
-
+				
 				$retVal = self::getMySQLiOOPConnection();
+				exit('adsf');
 			} else if ( $connection_info['engine'] === eGlooConfiguration::POSTGRESQL ) {
 				if (!isset(self::$connections['PostgreSQL'])){
 					self::$connections['PostgreSQL'] = array();
@@ -134,6 +139,8 @@ final class DBConnectionManager extends ConnectionManager {
 				// No DB engine specified in config or no engine available
 			}
 		}
+
+		var_export(self::$connections); exit('here');
 
 		return $retVal;
 	}
@@ -199,6 +206,7 @@ final class DBConnectionManager extends ConnectionManager {
 			$dbname 		= $connection_options['database'];
 			$user 			= $connection_options['user'];
 			$password	 	= $connection_options['password'];
+
 
 			$mysqli_conn = mysqli_connect($host, $user, $password, $dbname, $port);
 
@@ -346,6 +354,7 @@ final class DBConnectionManager extends ConnectionManager {
 	private static function getMySQLiOOPConnection( $connection_name = 'egPrimary' ) {
 		$retVal = null;
 
+
 		if (isset(self::$connections['MySQLiOOP'][$connection_name])) {
 			$retVal = self::$connections['MySQLiOOP'][$connection_name];
 		} else {
@@ -357,14 +366,18 @@ final class DBConnectionManager extends ConnectionManager {
 			$user 			= $connection_info['user'];
 			$password	 	= $connection_info['password'];
 
+			echo 'before instance';
 			$mysqli = new mysqli($host, $user, $password, $dbname, $port);
-
+			exit ('after instance');
 			if (mysqli_connect_errno()) {
+				exit ('error');
 				$exception_message = 'DBConnectionManager: Cannot connect to MySQL server via getMySQLiOOPConnection.  Error: '
 					. mysqli_connect_error();
 
 				throw new Exception($exception_message);
 			}
+
+			exit ('no error');
 
 			// This might not be what you want, but if it isn't, that's your problem.  Welcome to 2011.  Learn to UTF-8, kids
 			if ( !$mysqli->set_charset('utf8') ) {
@@ -375,6 +388,7 @@ final class DBConnectionManager extends ConnectionManager {
 			self::$connections['MySQLiOOP'][$connection_name] = new MySQLiOOPDBConnection( $mysqli );
 			$retVal = self::$connections['MySQLiOOP'][$connection_name];
 		}
+
 
 		return $retVal;
 	}

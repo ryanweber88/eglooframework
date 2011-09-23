@@ -30,6 +30,8 @@ trait ParametersTrait {
 		//		"INVALID value passed to assign >>  $mixed = $value"
 		//	);
 		//}
+		
+		return $this;
 	}
 	
 	protected $parameters = [];

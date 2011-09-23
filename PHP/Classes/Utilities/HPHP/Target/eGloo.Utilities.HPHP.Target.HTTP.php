@@ -9,7 +9,7 @@ namespace eGloo\Utilities\HPHP\Target;
  */
 abstract class HTTP extends \eGloo\Utilities\HPHP\Target { 
 	
-	const HOST = 'localhost';
+	const HOST = '127.0.0.1';
 	const CONTROLLER = 'index.php';
 	const PORT = 80;
 	
@@ -24,15 +24,27 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 		
 		// using native curl methods to keep execution
 		// as efficient as possible
-		//$application = \eGloo\Dialect\
-		$this->curl = curl_init ($this->uri());
+		//$application = &\eGloo\System\Server\Application::instance();
+		
+		$this->curl =  curl_init ($this->uri());
 				
 		// set curl headers - check if persistent connections are default
 		if ($this->curl) { 
 			curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($this->curl, CURLOPT_POST, true);
+			curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
+    		curl_setopt($this->curl, CURLOPT_SSL_VERIFYHOST, false);
+    		curl_setopt($this->curl, CURLOPT_HEADER, false);
+    		//curl_setopt($this->curl, CURLOPT_VERBOSE, true); 
+    		//curl_setopt($this->curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    		curl_setopt($this->curl, CURLOPT_HTTPHEADER, array(
+    			'Expect:',
+    			//'User-Agent: curl/7.19.7 (x86_64-pc-linux-gnu) libcurl/7.19.7 OpenSSL/0.9.8k zlib/1.2.3.3 libidn/1.15'    		
+    		));
+			
 		}
 
-		// throw exception if connection failed
+		// throw zasexception if connection failed
 		else { 
 			throw new \eGloo\Dialect\Exception('FAILED connection using >> ' . get_class($this));
 		}
@@ -49,9 +61,10 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 * Enter description here ...
 	 */
 	protected function uri() { 
-		//return 'http://' . self::HOST . ':' . static::PORT . '/' . self::CONTROLLER;
+		// TODO calling static to constant?
+		return 'http://' . self::HOST . ':' . static::PORT . '/' . self::CONTROLLER;
 		
-		return 'http://localhost:95/index.php';
+		//return 'http://localhost:95/index.php?path=' . $this->parameters['path'];
 	}
 	
 	
@@ -60,7 +73,10 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 * Override parent method to assign parameters to curl post parameters
 	 */
 	protected function preCall() { 
-		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->parameters);
+		// sets post fields; for whatever reason, passing as array
+		// sends data as multi-part/formdata, which is sig slower 
+		// than form urlenceded
+		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->buildPostQuery());
 	}
 	
 	/**
@@ -69,10 +85,7 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 * on address
 	 */
 	protected function call() { 
-		//$content = curl_exec($this->curl);
-		return file_get_contents($this->uri());
-		//return $GLOBALS['payload'];
-		
+		$content = curl_exec($this->curl);
 		
 		// check if an error was generated on curl request
 		if (curl_errno($this->curl)) { 
@@ -80,6 +93,42 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 		}
 				
 		return $content;
+	}
+	
+	protected function buildPostQuery($queryString = null) { 
+		// TODO turn this into recursive function
+		// builds post query string, taking into account
+		// urlencoding, arrays and objects
+		
+		$pieces = array();
+		
+		foreach ($this->parameters as $key => $value) { 
+			// handling string value is straight forward
+			if (!is_object($value) && !is_array($value)) { 
+				$pieces[] = "$key=" . urlencode($value);
+			}	
+			
+			// if value is array 
+			/*
+			else if (is_array($value)) { 
+				$key    = $key . '[]';
+				$values = &$value;
+				
+				foreach ($values as $value) { 
+					
+				}
+			}
+			
+			// check if object implement tostring method; otherwise
+			// fail this value
+			else { 
+				if 
+			}
+			*/
+			
+		}
+		
+		return implode('&', $pieces);
 	}
 	
 	protected $curl;

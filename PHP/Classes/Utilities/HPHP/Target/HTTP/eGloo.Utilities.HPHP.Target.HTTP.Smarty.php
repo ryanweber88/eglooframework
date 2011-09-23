@@ -27,7 +27,7 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 	 * Registers a compiled template and flags re-comiplation
 	 * @param string $pathCompiled
 	 */
-	public static function registerCompiled($pathCompiled) { 
+	public function registerCompiled($pathCompiled) { 
 		
 		// first copy file into binary "context"
 		$destination = \eGlooConfiguration::getFrameworkRootPath() . '/' . $this->root() . '/' . self::DIR_COMPILED;
@@ -44,7 +44,7 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 	
 
 	protected function root($path = null) { 
-		echo parent::root(self::DIR_ROOT . "/$path");
+		//echo parent::root(self::DIR_ROOT . "/$path");
 		return parent::root(self::DIR_ROOT . "/$path"); 
 	}
 	

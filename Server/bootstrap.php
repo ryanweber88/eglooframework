@@ -74,11 +74,11 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// this should be removed entirely
 		chdir($eglooApplicationPath);
 		
+		
 		// read htaccess into $_SERVER
 		// @TODO this will eventually be replaced and put into configuration
 		\eGloo\System\Server\Bridge::htaccess("$eglooApplicationPath/.htaccess");
-		
-		
+						
 		// require eGloo autoloader
 		require_once 'PHP/Includes/eGlooAutoload.php';
 		
