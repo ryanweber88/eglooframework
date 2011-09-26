@@ -102,15 +102,19 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	protected function buildPostQuery() { 
 		// TODO log instances that objects are passed to template
 	
-		$logger = $this->contextApplication()->retrieve('logger.smarty.object');
-		//exit ('buildPostQuery');	
+		// log instances where objects are passed directly to template 
+		$logger = static::contextApplication()->retrieve('logger.smarty.object');
+
 		if (\eGlooConfiguration::STAGING || \eGlooConfiguration::DEVELOPMENT) { 
-			if ($this->containsObject($this->parameters)) { 
-				$log->log(
-					"OBJECT instance found >>>\n\n" . print_r($this->parameters, true) 
-				);
-			}
+			$template  = $this->parameters['path'];
+			$offenders = implode(',', $this->objectOffenders(
+				$this->parameters
+			));
 			
+						
+			$logger->log(
+				"OBJECT offender found @ $template >>> $offenders"
+			);
 		}
 		
 		// encode parameters and set payload
@@ -118,23 +122,20 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	}
 	
 	
-	final private function containsObject($whatIsIt) { 
+	final private function objectOffenders($whatIsIt, array &$objects = array()) { 
 		// recursively search for object within parameters
 		if (is_object($whatIsIt)) { 
-			return true;
+			$objects[] = get_class($whatIsIt);
 		}
 		
 		else if (is_array($whatIsIt)) { 
 			foreach ($whatIsIt as $value) { 
-				if ($this->containsObject($value)) { 
-					return true;
-				}	
+				$this->objectOffenders($value, $objects);
 			}
 		}
 		
-		// otherwise parameter is scalar and thus we return
-		// the obvious
-		return false;
+		 
+		return $objects;
 		
 	}
 	

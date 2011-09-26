@@ -30,7 +30,17 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 	public function registerCompiled($pathCompiled) { 
 		
 		// first copy file into binary "context"
-		$destination = \eGlooConfiguration::getFrameworkRootPath() . '/' . $this->root() . '/' . self::DIR_COMPILED;
+		$fileName = array_pop(explode(
+			'/', $pathCompiled
+		));
+		
+		$destination = 
+			\eGlooConfiguration::getFrameworkRootPath() . '/' . 
+			$this->root() .                               '/' . 
+			self::DIR_COMPILED .                          '/' .
+			$fileName;
+		
+		echo "$pathCompiled vs $destination"; exit;
 		
 		if (copy($pathCompiled,  $destination)) { 
 			// flags required compilation 

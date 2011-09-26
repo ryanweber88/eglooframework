@@ -1,6 +1,10 @@
 <?php
 namespace eGloo\Utilities;
 
+/**
+ * Provides parameters hash/assoc with assign method, to allow for assigning
+ * key values pairs
+ */
 trait ParametersTrait { 
 	
 	/**
@@ -33,6 +37,8 @@ trait ParametersTrait {
 		
 		return $this;
 	}
+	
+	//public function r
 	
 	protected $parameters = [];
 }

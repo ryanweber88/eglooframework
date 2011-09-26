@@ -23,13 +23,11 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 	 */
 	public function fetch($path, $cacheId = null) { 
 				
-		// grab instance of application
-		$application = &\eGloo\System\Server\Application::instance();
 		
 						
 		// keep native interface alive throughout application run - associate/index
 		// to hash of path + cacheId
-		$smartyNative = $application->context()->retrieve("$path/$cacheId", function() use ($path, $cacheId) { 
+		$smartyNative = static::contextApplication()->retrieve("$path/$cacheId", function() use ($path, $cacheId) { 
 			$smartyNative = new \eGloo\Utilities\HPHP\Target\HTTP\Smarty();
 			
 			// this is fucked right now
@@ -43,14 +41,16 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			
 			return $smartyNative;
 		});
-		
-		$smartyNative->assign($this->implementor->getTemplateVars());
 				
+		// assign smarty template variables to native bridge
+		$smartyNative->assign($this->implementor->getTemplateVars());
+		
 		
 		// provide callback if native execution fails
 		return $smartyNative->execute(array(false => function($content) use ($path, $cacheId) { 
 			
 			// TODO log execution failure
+			exit ('fuckadoo');
 			
 			// get content from implementors fetch method
 			$content = $this->implementor->fetch($path, $cacheId);

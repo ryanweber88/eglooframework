@@ -38,7 +38,7 @@
  * @package TemplateProcessing
  * @subpackage TemplateEngines
  */
-class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements TemplateEngineInterface {
+class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine {
 
 	protected $packagePrefix = 'XHTML';
 	protected $_custom_left_delimiter = '<!--{';
@@ -46,6 +46,7 @@ class XHTMLDefaultTemplateEngine extends \DefaultTemplateEngine implements Templ
 	
 	function __construct($interface_bundle, $locale = 'US', $language = 'en' ) { 
 		parent::__construct($interface_bundle, $locale, $language);
+		
 	}
 
 

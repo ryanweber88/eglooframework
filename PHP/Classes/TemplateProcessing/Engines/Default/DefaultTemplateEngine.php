@@ -36,7 +36,7 @@
  * @package $package
  * @subpackage $subpackage
  */
-class DefaultTemplateEngine extends \Smarty implements TemplateEngineInterface {
+class DefaultTemplateEngine extends \Smarty implements \TemplateEngineInterface {
 
 	protected $templateRoots = null;
 	protected $packagePrefix = '';
@@ -56,7 +56,6 @@ class DefaultTemplateEngine extends \Smarty implements TemplateEngineInterface {
 		$this->init();
 	}
 	
-	
 
 	protected function init() {
 		$this->setErrorReporting();
@@ -65,6 +64,16 @@ class DefaultTemplateEngine extends \Smarty implements TemplateEngineInterface {
 		$this->setTemplatePaths();
 		$this->setDeploymentOptions();
 		$this->setCacheHandler();
+	}
+	
+	/**
+	 * (Unfortunately this method has to be defined, per TemplateEngineInterface contract, though
+	 * it is already defined in the parent; thus, simply lets parent do the heavy lifting while
+	 * providing method sig to satisfy interface contract)
+	 * @see Smarty_Internal_Data::assign()
+	 */
+	public function assign($tpl_var, $value = null, $nocache = false) {
+		return parent::assign($tpl_var, $value, $nocache);
 	}
 
 	public function setCacheHandler() {

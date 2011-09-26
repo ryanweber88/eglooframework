@@ -31,7 +31,9 @@ trait ContextTrait {
 		*/
 	}
 	
-	final private function contextApplication() { 
+	final private static function contextApplication() { 
 		return \eGloo\System\Server\Application::instance()->context();
 	}
+	
+	
 }

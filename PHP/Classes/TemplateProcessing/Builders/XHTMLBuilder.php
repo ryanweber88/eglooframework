@@ -52,8 +52,10 @@ class XHTMLBuilder extends TemplateBuilder {
 
 	public function setTemplateVariables( $templateVariables ) {
 		$this->templateVariables = $templateVariables;
-		//$this->templateEngine->set($templateVariables);
-		//foreach( $templateVariables as $key => $value) $this->templateEngine->set( $key, $value );		 
+
+		foreach( $templateVariables as $key => $value) {
+			$this->templateEngine->assign( $key, $value );
+		}		 
 	}
 
 	public function setContentProcessors( $contentProcessors ) {

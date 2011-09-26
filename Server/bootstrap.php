@@ -105,10 +105,10 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// bind smarty logger 
 		// TODO remove once templates are refactored/corrected (purging 
 		// object instances from templates)
-		// TODO centralize logging
-		$application->context()->bind(
-			'logger.smarty.object', \Log::factory('file', __DIR__ . '../Compiled/SmartyStandAloneComplex/log/object')
-		);
+		// TODO centralize logging and remove
+		$application->context()->bind('logger.smarty.object', \Log::factory(
+			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty'
+		));
 
 		$application->context()->bind(
 			'logger.smarty.template', \Log::factory('file', __DIR__ . '../Compiled/SmartyStandAloneComplex/log/template')

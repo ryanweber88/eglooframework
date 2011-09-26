@@ -39,6 +39,8 @@
 interface TemplateEngineInterface {
 
 	public function __construct( $interface_bundle, $locale = 'US', $language = 'en' );
+
+	public function assign($tpl_var, $value = null, $nocache = false);
 	
 	public function fetch($path, $cacheId);
 
