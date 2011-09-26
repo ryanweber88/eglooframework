@@ -13,7 +13,7 @@ abstract class Target extends \eGloo\Dialect\Object {
 	
 	const DIR_ROOT = './Compiled';
 	const FILE_BINARY = './bin/program';
-	const FILE_COMPILE = './compile';
+	const FILE_COMPILE = './make';
 	
 		
 
@@ -46,6 +46,7 @@ abstract class Target extends \eGloo\Dialect\Object {
 		$result = $this->postCall($this->call());
 		$status = ($result !== false);
 				
+		
 		// check handlers to determine if callback is required
 		if (!is_null($handler)) { 
 			if (is_array($handler)) { 

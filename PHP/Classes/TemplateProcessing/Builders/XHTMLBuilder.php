@@ -160,7 +160,6 @@ class XHTMLBuilder extends TemplateBuilder {
 			$implementor
 		);
 		
-		
 		return ;
 
 		// TODO base context cache upon requestInfoBean signature - done, but make implicit

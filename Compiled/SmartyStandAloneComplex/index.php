@@ -7,6 +7,7 @@
 
 // CONSTANTS //////////////////////////////////////////////////////////////////
 
+const VARIABLE_PAYLOAD = 'payload';
 
 // INI ////////////////////////////////////////////////////////////////////////
 
@@ -32,23 +33,22 @@ $smarty->caching = false;
 $smarty->left_delimiter  = '{';
 $smarty->right_delimiter = '}';
 
-// INSPECT/ASSIGN POST PARAMETERS /////////////////////////////////////////////
+// DECODE PAYLOAD /////////////////////////////////////////////////////////////
 
-foreach($_POST as $key => $value) { 
-	if (!in_array($key, $exclude)) { 
-		$smarty->assign($key, $value);
-	}
-}
 
 // PUSH TO STDOUT /////////////////////////////////////////////////////////////
 
 // if successful, push rendered template to stdout
-if (true) {
+if (isset($_POST[VARIABLE_PAYLOAD])) {
+	
+	// decode payload and assign to smarty
+	$smarty->assign(json_decode($_POST[VARIABLE_PAYLOAD]));
+	
 	//$smarty->display('/usr/lib/egloo/applications/Skeleton.gloo/InterfaceBundles/Default/XHTML/ExternalMainPage/ExternalMainPageBaseForm.tpl');
 	$content = $smarty->fetch($_POST['path'], $_POST['cache_id']);
 	
 	// compress content if post variable sent
-	// TODO replace this with header
+	// TODO replace this with header Accept:
 	//if (isset($_POST['compress'])) { 
 		//$content = gzencode($content, 1);
 	//}

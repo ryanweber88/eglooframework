@@ -119,13 +119,17 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		// end
 		
 		//echo $GLOBALS['payload']; return;
+
 		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
 
-		//$output = $templateDirector->processTemplate();
-		//echo $output;
-		echo $GLOBALS['payload'];
-		return ;
+		$output = $templateDirector->processTemplate();
+		
+		
+		echo $output;
+		echo 'here'; exit;
+		//echo $GLOBALS['payload'];
+		//return ;
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
 
@@ -133,7 +137,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
 			$this->setOutputHeaders();
-			echo $output;
+			//echo $output;
 		}
 
 		$this->postProcessing();

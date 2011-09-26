@@ -54,14 +54,16 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	}
 	
 	protected function _initPear() {
-		// initialize pear resources - this will be eventually removed
-		/*
-		spl_autoload_register(function($className) { 
-			@include_once str_ireplace('_', '/', $className) . '.php';
-		});
+		//initialize pear resources - this will be eventually removed
 		
-		$GLOBALS['log'] = \Log::factory('file', '/home/petflowdeveloper/out.eglooautoload', 'test');
-		*/
+		//spl_autoload_register(function($className) { 
+			//@include_once str_ireplace('_', '/', $className) . '.php';
+		//});
+		
+		//$GLOBALS['log'] = \Log::factory('file', DIR . '', 'test');
+		
+		//var_export($GLOBALS['log']); exit;
+		
 	}
 	
 	protected function _initEgloo() { 
@@ -100,6 +102,17 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			'requestValidator', \RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() )
 		);			
 		
+		// bind smarty logger 
+		// TODO remove once templates are refactored/corrected (purging 
+		// object instances from templates)
+		// TODO centralize logging
+		$application->context()->bind(
+			'logger.smarty.object', \Log::factory('file', __DIR__ . '../Compiled/SmartyStandAloneComplex/log/object')
+		);
+
+		$application->context()->bind(
+			'logger.smarty.template', \Log::factory('file', __DIR__ . '../Compiled/SmartyStandAloneComplex/log/template')
+		);
 		// change back to server directory
 		chdir(__DIR__);
 	}

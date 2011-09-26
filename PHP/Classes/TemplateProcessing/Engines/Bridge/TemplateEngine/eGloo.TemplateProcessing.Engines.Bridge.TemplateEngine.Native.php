@@ -9,7 +9,9 @@ namespace eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine;
  *
  */
 class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
-		
+
+	use \eGloo\System\Server\Context\ContextTrait;
+	
 	/**
 	 * 
 	 * Override implementor method to check if natively compiled
@@ -20,7 +22,7 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 	 * @return string
 	 */
 	public function fetch($path, $cacheId = null) { 
-		
+				
 		// grab instance of application
 		$application = &\eGloo\System\Server\Application::instance();
 		
@@ -46,16 +48,25 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 				
 		
 		// provide callback if native execution fails
-		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
+		return $smartyNative->execute(array(false => function($content) use ($path, $cacheId) { 
+			
+			// TODO log execution failure
 			
 			// get content from implementors fetch method
 			$content = $this->implementor->fetch($path, $cacheId);
+			echo $content; exit;
 						
 			// move compiled php to Native Smarty compiled directory
 			// and trigger recompilication
-			$this->registerCompiled($this->implementor->getCompiledFilepath(
+			$this->registerCompiled($compiledFilepath = $this->implementor->getCompiledFilepath(
 				$path 
 			));
+			
+			// log template addition
+			$logger = &$this->contextApplication()->retrieve('logger.smarty.template');
+			$logger->log (
+				"TEMPLATE addition >>> $path = $compiledFilepath"
+			);
 			
 
 			return $content;			
