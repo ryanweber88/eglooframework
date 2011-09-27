@@ -110,9 +110,9 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty'
 		));
 
-		$application->context()->bind(
-			'logger.smarty.template', \Log::factory('file', __DIR__ . '../Compiled/SmartyStandAloneComplex/log/template')
-		);
+		$application->context()->bind('logger.smarty.template', \Log::factory(
+			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty.template'
+		));
 		// change back to server directory
 		chdir(__DIR__);
 	}

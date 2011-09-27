@@ -8,9 +8,17 @@ namespace eGloo\IO;
  * @author Christian Calloway
  *
  */
-class File extends \eGloo\Dialect\File { 
+class File extends \eGloo\Dialect\Object { 
 	
 	function __construct($path, \Closure $handler = null) { 
+		$this->pointer = fopen();
+	}
+	
+	function __destruct() { 
+		fclose($this->pointer);
+	}
+	
+	public static function open($path, \Closure $handler = null) { 
 		
 	}
 	
@@ -18,4 +26,12 @@ class File extends \eGloo\Dialect\File {
 	public static function fileFiles(File $file, $pattern) { 
 		
 	}
+	
+	public static function basename($path) { 
+		$tmp = explode('/', $path);
+		return $tmp[count($tmp)-1];
+	}
+	
+	private $pointer;
+	
 }

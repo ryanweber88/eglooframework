@@ -147,6 +147,7 @@ class eGlooInterfaceDirector extends TemplateDirector {
 			}
 		}
 
+
 		$this->templateBuilder->setTemplateVariables( $tokenArray );
 	}
 

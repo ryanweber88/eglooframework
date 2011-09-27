@@ -28,23 +28,17 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 	 * @param string $pathCompiled
 	 */
 	public function registerCompiled($pathCompiled) { 
-		
-		// first copy file into binary "context"
-		$fileName = array_pop(explode(
-			'/', $pathCompiled
-		));
-		
+
+		// get "compiled" filename from filepath				
 		$destination = 
 			\eGlooConfiguration::getFrameworkRootPath() . '/' . 
 			$this->root() .                               '/' . 
 			self::DIR_COMPILED .                          '/' .
-			$fileName;
-		
-		echo "$pathCompiled vs $destination"; exit;
-		
+			\eGloo\IO\File::basename($pathCompiled);
+				
 		if (copy($pathCompiled,  $destination)) { 
 			// flags required compilation 
-			static::compile();
+			return $this->compile();
 		}
 		
 		throw new \eGloo\Dialect\Exception(
@@ -55,7 +49,7 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 
 	protected function root($path = null) { 
 		//echo parent::root(self::DIR_ROOT . "/$path");
-		return parent::root(self::DIR_ROOT . "/$path"); 
+		return parent::root(self::DIR_ROOT . $path); 
 	}
 	
 }

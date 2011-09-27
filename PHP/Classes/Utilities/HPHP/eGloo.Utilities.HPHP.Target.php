@@ -15,19 +15,6 @@ abstract class Target extends \eGloo\Dialect\Object {
 	const FILE_BINARY = './bin/program';
 	const FILE_COMPILE = './make';
 	
-		
-
-	/**
-	 * 
-	 * Flags compilation process
-	 */
-	public static function compile() { 
-		// TODO place this into a fork? memory concerns? if flag process is suitably in 
-		// a different context, we shouldn't have to worry about forking here
-		exec (
-			\eGlooConfiguration::getFrameworkRootPath() . '/' . $this->root() . '/' . self::FILE_COMPILE
-		);
-	}
 	
 	/**
 	 * 
@@ -40,6 +27,7 @@ abstract class Target extends \eGloo\Dialect\Object {
 	public function execute($handler = null) {
 		// perform pre-execute routines before calling target directly
 		$this->preCall();
+		
 		
 		// call handler with instance of self and retrieve
 		// value, if any, from callback
@@ -66,6 +54,18 @@ abstract class Target extends \eGloo\Dialect\Object {
 	}
 	
 
+	/**
+	 * 
+	 * Flags compilation process
+	 */
+	public function compile() { 
+		// TODO place this into a fork? memory concerns? if flag process is suitably in 
+		// a different context, we shouldn't have to worry about forking here		
+		exec (
+			\eGlooConfiguration::getFrameworkRootPath() . '/' . $this->root() . '/' . self::FILE_COMPILE
+		);
+		
+	}	
 	
 	/**
 	 * 

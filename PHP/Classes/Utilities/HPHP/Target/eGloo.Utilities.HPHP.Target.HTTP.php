@@ -111,12 +111,14 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 				$this->parameters
 			));
 			
-						
-			$logger->log(
-				"OBJECT offender found @ $template >>> $offenders"
-			);
+			
+			if (strlen($offenders)) { 			
+				$logger->log(
+					"OBJECT offender found @ $template >>> $offenders"
+				);
+			}
 		}
-		
+				
 		// encode parameters and set payload
 		return self::VARIABLE_PAYLOAD . '=' . json_encode($this->parameters);
 	}

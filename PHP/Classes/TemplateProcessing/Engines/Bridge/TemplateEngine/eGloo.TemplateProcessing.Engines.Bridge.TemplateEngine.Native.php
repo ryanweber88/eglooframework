@@ -42,39 +42,53 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			return $smartyNative;
 		});
 				
-		// assign smarty template variables to native bridge
+		// assign smarty template variables to native bridge		
 		$smartyNative->assign($this->implementor->getTemplateVars());
 		
 		
 		// provide callback if native execution fails
-		return $smartyNative->execute(array(false => function($content) use ($path, $cacheId) { 
+		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
 			
 			// TODO log execution failure
 			exit ('fuckadoo');
 			
 			// get content from implementors fetch method
 			$content = $this->implementor->fetch($path, $cacheId);
-			echo $content; exit;
 						
 			// move compiled php to Native Smarty compiled directory
 			// and trigger recompilication
-			$this->registerCompiled($compiledFilepath = $this->implementor->getCompiledFilepath(
+			$smartyNative->registerCompiled($compiledFilepath = $this->implementor->getCompiledFilepath(
 				$path 
 			));
 			
+			
 			// log template addition
-			$logger = &$this->contextApplication()->retrieve('logger.smarty.template');
+			$logger = static::contextApplication()->retrieve('logger.smarty.template');
 			$logger->log (
 				"TEMPLATE addition >>> $path = $compiledFilepath"
 			);
 			
-
 			return $content;			
 			
 		}));
-		
-		
+	}
 	
+	/**
+	 * 
+	 * Overrides implementors assign method to check for attempt
+	 * to assign object value; in which case, 
+	 * @param string|array $mixed
+	 * @param mixed        $value
+	 * @param boolean      $nocache
+	 */
+	public function assign($mixed, $value = null, $nocache = false) { 
+
+		if (!is_null($value) && $value instanceof \eGloo\Utilities\Templates\ObjectComplianceInterface) { 
+			$value = $value->toTemplateCompliant();
+		}
+		
+		return parent::assign($mixed, $value, $nocache);
+		
 	}
 	
 	
