@@ -54,12 +54,16 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	}
 	
 	protected function _initPear() {
-		// initialize pear resources - this will be eventually removed
-		spl_autoload_register(function($className) { 
-			@include_once str_ireplace('_', '/', $className) . '.php';
-		});
+		//initialize pear resources - this will be eventually removed
 		
-		$GLOBALS['log'] = \Log::factory('file', '/home/petflowdeveloper/out.eglooautoload', 'test');
+		//spl_autoload_register(function($className) { 
+			//@include_once str_ireplace('_', '/', $className) . '.php';
+		//});
+		
+		//$GLOBALS['log'] = \Log::factory('file', DIR . '', 'test');
+		
+		//var_export($GLOBALS['log']); exit;
+		
 	}
 	
 	protected function _initEgloo() { 
@@ -72,11 +76,11 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// this should be removed entirely
 		chdir($eglooApplicationPath);
 		
+		
 		// read htaccess into $_SERVER
 		// @TODO this will eventually be replaced and put into configuration
 		\eGloo\System\Server\Bridge::htaccess("$eglooApplicationPath/.htaccess");
-		
-		
+						
 		// require eGloo autoloader
 		require_once 'PHP/Includes/eGlooAutoload.php';
 		
@@ -98,6 +102,17 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			'requestValidator', \RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() )
 		);			
 		
+		// bind smarty logger 
+		// TODO remove once templates are refactored/corrected (purging 
+		// object instances from templates)
+		// TODO centralize logging and remove
+		$application->context()->bind('logger.smarty.object', \Log::factory(
+			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty'
+		));
+
+		$application->context()->bind('logger.smarty.template', \Log::factory(
+			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty.template'
+		));
 		// change back to server directory
 		chdir(__DIR__);
 	}

@@ -119,13 +119,16 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		// end
 		
 		//echo $GLOBALS['payload']; return;
+
 		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
-
-		//$output = $templateDirector->processTemplate();
+		$output = $templateDirector->processTemplate();
+		
+		
 		//echo $output;
-		echo $GLOBALS['payload'];
-		return ;
+		//echo 'here'; exit;
+		//echo $GLOBALS['payload'];
+		//return ;
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
 
@@ -223,7 +226,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			}
 		} else {
 			// TODO replace test case with dynamic di load from app context
-			$application = &\eGloo\System\Server\Application::instance(); 
+			//$application = &\eGloo\System\Server\Application::instance(); 
 			//echo get_class($application); return;
 			
 			// preinstatiation proves useless in this instance and a memory succubus

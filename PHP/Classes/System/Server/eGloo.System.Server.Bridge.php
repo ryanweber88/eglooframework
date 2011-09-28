@@ -9,8 +9,6 @@ namespace eGloo\System\Server;
  * @todo remove entirely
  *
  */
-use eGloo\System\Server\Rewrite\Directive;
-
 class Bridge {
 	
 	/**

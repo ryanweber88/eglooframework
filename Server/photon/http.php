@@ -497,8 +497,9 @@ class CookieHandler
      */
     public static function parse_cookie($cookie, $key)
     {
-        $c = \http_parse_cookie($cookie);
+        //$c = \http_parse_cookie($cookie);
         $cookies = array();
+        /*
         foreach ($c->cookies as $name => $val) {
             try {
                 $cookies[$name] = \photon\crypto\Sign::loads($val, $key);
@@ -506,7 +507,7 @@ class CookieHandler
                 // We simply ignore bad cookies.
             }
         }
-
+		*/
         return $cookies;
     }
 }
