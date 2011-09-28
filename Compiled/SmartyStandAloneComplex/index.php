@@ -21,19 +21,14 @@ require_once 'Smarty.class.php';
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
-$exclude = array(
-	'path',
-	'cache_id'
-);
+$smarty = new Smarty;
 
 // SETUP SMARTY INSTANCE //////////////////////////////////////////////////////
 
-$smarty = new Smarty;
 $smarty->caching = false;
 $smarty->left_delimiter  = '{';
 $smarty->right_delimiter = '}';
-
-// DECODE PAYLOAD /////////////////////////////////////////////////////////////
+$smarty->merge_compiled_includes = true;
 
 
 // PUSH TO STDOUT /////////////////////////////////////////////////////////////
@@ -42,10 +37,11 @@ $smarty->right_delimiter = '}';
 if (isset($_POST[VARIABLE_PAYLOAD])) {
 	
 	// decode payload and assign to smarty
-	$smarty->assign(json_decode($_POST[VARIABLE_PAYLOAD]));
+	$parameters = json_decode($_POST[VARIABLE_PAYLOAD]);
+	$smarty->assign($parameters);
 	
 	//$smarty->display('/usr/lib/egloo/applications/Skeleton.gloo/InterfaceBundles/Default/XHTML/ExternalMainPage/ExternalMainPageBaseForm.tpl');
-	$content = $smarty->fetch($_POST['path'], $_POST['cache_id']);
+	$content = $smarty->fetch($parameters['path']);
 	
 	// compress content if post variable sent
 	// TODO replace this with header Accept:

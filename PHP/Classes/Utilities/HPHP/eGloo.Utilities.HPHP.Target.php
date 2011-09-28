@@ -31,9 +31,8 @@ abstract class Target extends \eGloo\Dialect\Object {
 		
 		// call handler with instance of self and retrieve
 		// value, if any, from callback
-		$result = $this->postCall($this->call());
-		$status = ($result !== false);
-				
+		$result = (!$this->disabled) ? $this->postCall($this->call()) : false;
+		$status = ($result !== false && !empty($result));				
 		
 		// check handlers to determine if callback is required
 		if (!is_null($handler)) { 
@@ -105,4 +104,5 @@ abstract class Target extends \eGloo\Dialect\Object {
 	
 	
 	protected $handler;
+	protected $disabled = false;
 }

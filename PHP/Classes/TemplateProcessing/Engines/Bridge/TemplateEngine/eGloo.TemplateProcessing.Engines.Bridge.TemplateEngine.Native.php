@@ -23,13 +23,13 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 	 */
 	public function fetch($path, $cacheId = null) { 
 				
-		
-						
+		//echo $path; exit;
+								
 		// keep native interface alive throughout application run - associate/index
 		// to hash of path + cacheId
 		$smartyNative = static::contextApplication()->retrieve("$path/$cacheId", function() use ($path, $cacheId) { 
 			$smartyNative = new \eGloo\Utilities\HPHP\Target\HTTP\Smarty();
-			
+
 			// this is fucked right now
 			//$native->path($path);
 			//$native->cacheId($cacheId);
@@ -44,13 +44,17 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 				
 		// assign smarty template variables to native bridge		
 		$smartyNative->assign($this->implementor->getTemplateVars());
-		
+		//$smartyNative->disabled = true;
 		
 		// provide callback if native execution fails
 		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
 			
 			// TODO log execution failure
-			exit ('fuckadoo');
+			//return 'in failed callback';
+			
+			// set implementor merge compiled templates flag; this is needed
+			// for native smarty, as it can't do dynamic requires or evals
+			$this->implementor->merge_compiled_includes = true;
 			
 			// get content from implementors fetch method
 			$content = $this->implementor->fetch($path, $cacheId);
@@ -62,16 +66,25 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			));
 			
 			
+			
 			// log template addition
 			$logger = static::contextApplication()->retrieve('logger.smarty.template');
 			$logger->log (
 				"TEMPLATE addition >>> $path = $compiledFilepath"
 			);
 			
+			// TODO reset implementor merge option?
+			
 			return $content;			
 			
 		}));
+		
+		//echo $content; exit ('here we go');
+		exit;
+		echo 'in failed content';
 	}
+	
+
 	
 	/**
 	 * 
