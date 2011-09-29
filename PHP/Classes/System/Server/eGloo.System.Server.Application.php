@@ -48,6 +48,7 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 		//$this->context()->bind('components', new Component\Container());
 	}
 	
+	
 	/**
 	 * 
 	 * Provides singleton access to application instance

@@ -13,7 +13,7 @@ class Iterator extends \eGloo\Dialect\Object {
 	 * A copy of ruby's each iterator
 	 * @param unknown_type $block
 	 */
-	public function each(Closure $block) { 
+	public function each(\Closure $block) { 
 		foreach($this->array as $key => $value) { 
 			// we don't specifically have to specify a yield here
 			$block($key, $value);

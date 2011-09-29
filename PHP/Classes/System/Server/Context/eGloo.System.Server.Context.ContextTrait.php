@@ -8,7 +8,7 @@ namespace eGloo\System\Server\Context;
 trait ContextTrait { 
 
 	
-	final private function &factoryContext($type) { 
+	final protected function &factoryContext($type) { 
 		// traits cannot have contexts.. apparently
 		/*
 		switch ($type) { 
@@ -31,7 +31,8 @@ trait ContextTrait {
 		*/
 	}
 	
-	final private static function contextApplication() { 
+	final protected static function contextApplication() { 
+		// TODO figure out why return by reference is crashing
 		return \eGloo\System\Server\Application::instance()->context();
 	}
 	

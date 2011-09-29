@@ -3,6 +3,8 @@
  * Defines bootstrap and loads into application context
  */
 class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract { 
+	
+	use \eGloo\System\Server\Context\ContextTrait;
 
 	protected function _initPhoton() { 
 		// init photon resources	
@@ -68,7 +70,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	
 	protected function _initEgloo() { 
 		// initialize eGloo resources 
-		$application = & \eGloo\System\Server\Application::instance();
+		$application = &\eGloo\System\Server\Application::instance();
 		$eglooApplicationPath = $application->target();
 		
 		// change to application directory
@@ -94,11 +96,21 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// reinstantiated each time
 		$GLOBALS['mongrel'] = true;
 		
+		// change back to server directory
+		chdir(__DIR__);
+	}
+	
+	protected function _initComponents() { 
+		// bind necessary components (objects) to application context - these are required on
+		// every dispatch cycle, and we save on resources moving them to bootstrap
+		// TODO more elegant solution (some type of component architecture)
+		$context = static::contextApplication();
+		
 		// Build a request info bean
-		$application->context()->bind('requestInfoBean', \RequestInfoBean::getInstance());
+		static::contextApplication()->bind('requestInfoBean', \RequestInfoBean::getInstance());
 		
 		// Get a request validator based on the current application and UI bundle
-		$application->context()->bind(
+		static::contextApplication()->bind(
 			'requestValidator', \RequestValidator::getInstance( \eGlooConfiguration::getApplicationPath(), \eGlooConfiguration::getUIBundleName() )
 		);			
 		
@@ -106,16 +118,15 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// TODO remove once templates are refactored/corrected (purging 
 		// object instances from templates)
 		// TODO centralize logging and remove
-		$application->context()->bind('logger.smarty.object', \Log::factory(
+		static::contextApplication()->bind('logger.smarty.object', \Log::factory(
 			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty'
 		));
 
-		$application->context()->bind('logger.smarty.template', \Log::factory(
+		static::contextApplication()->bind('logger.smarty.template', \Log::factory(
 			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty.template'
-		));
-		// change back to server directory
-		chdir(__DIR__);
+		));		
 	}
+	
 	
 
 	
@@ -131,13 +142,6 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		
 	}
 	
-	protected function _initComponents() { 
-		// class and system instances defined at application load time
-	
-		$container = Symfony\Component\DependencyInjection\ContainerBuilder;
-		$definition = Symfony\Component\DependencyInjection\Definition;		
-		
-	}	
 	
 
 }

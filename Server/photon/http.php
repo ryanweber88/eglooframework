@@ -214,7 +214,7 @@ class Request
      *
      * @param &$mess Mongrel2 request message object.
      */
-    function __construct(&$mess)
+    function __construct($mess)
     {
         $this->mess = $mess;
         $this->path = $this->mess->path;

@@ -20,12 +20,11 @@ class Dispatcher extends \photon\core\Dispatcher {
 	 */
 	static public function dispatch($request) { 
 		// Check for the minimum PHP version to run the framework
+		//echo var_export($request->GET, true); exit;
 		
-		// falsify (motherfucker) request parameters for testing purposes
-		$_REQUEST['eg_requestClass'] = 'externalMainPage';
-		$_REQUEST['eg_requestID'] = 'extMainViewBase';
-		$_GET = &$_REQUEST;
-		
+		// place request parameters into appropriate php-centric holders
+		\eGloo\System\Server\Bridge::parameters($request);
+				
 		// instantiate response object to return to mongrel2
 		$response = new HTTP\Response();
 		//return $response;
@@ -55,5 +54,9 @@ class Dispatcher extends \photon\core\Dispatcher {
 		//$session->commit($response);
 		
 		return $response;
+	}
+	
+	final static private function something() { 
+		
 	}
 }

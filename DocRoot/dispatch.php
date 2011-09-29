@@ -28,7 +28,7 @@
  * @version 1.0
  */
 
-
+$application = &\eGloo\System\Server\Application::instance();
 $requestInfoBean = $application->context()->retrieve('requestInfoBean');
 $requestValidator = $application->context()->retrieve('requestValidator');
 
@@ -62,6 +62,7 @@ $isValidRequest = $application->context()->retrieve($requestInfoBean->signature(
 });
 
 
+$GLOBALS['payload'] = true;
 if (!isset($GLOBALS['payload'])) {
 	$GLOBALS['payload'] = file_get_contents(
 		'/tmp/static'

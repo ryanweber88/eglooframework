@@ -26,8 +26,9 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		
 		$application->bootstrap()
 			->bootstrap('egloo')
-			->bootstrap('pear')
-			->bootstrap('symphony');	
+			->bootstrap('components');
+			//->bootstrap('pear')
+			//->bootstrap('symphony');	
 
 		//exit ('here');
 		// Get a unique id for the process

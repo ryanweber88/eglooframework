@@ -22,9 +22,7 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 	 * @return string
 	 */
 	public function fetch($path, $cacheId = null) { 
-				
-		//echo $path; exit;
-								
+												
 		// keep native interface alive throughout application run - associate/index
 		// to hash of path + cacheId
 		$smartyNative = static::contextApplication()->retrieve("$path/$cacheId", function() use ($path, $cacheId) { 
@@ -41,19 +39,28 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			
 			return $smartyNative;
 		});
-				
+		
+		//return var_export($this->implementor->getTemplateVars(), true); exit;
+						
 		// assign smarty template variables to native bridge		
 		$smartyNative->assign($this->implementor->getTemplateVars());
-		//$smartyNative->disabled = true;
+		$smartyNative->disabled = true;
+		
+		//var_export($this->implementor->getTemplateVars()); exit;
 		
 		// provide callback if native execution fails
 		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
 			
 			// TODO log execution failure
-			//return 'in failed callback';
+			//echo 'in failed callback'; exit;
+			//var_export($_SERVER);exit;
+			
+			if ($smartyNative->disabled) { 
+				return $this->implementor->fetch($path, $cacheId);
+			}
 			
 			// set implementor merge compiled templates flag; this is needed
-			// for native smarty, as it can't do dynamic requires or evals
+			// for native smarty, as it can't do dynamic requires or evals			
 			$this->implementor->merge_compiled_includes = true;
 			
 			// get content from implementors fetch method
@@ -67,6 +74,7 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			
 			
 			
+			
 			// log template addition
 			$logger = static::contextApplication()->retrieve('logger.smarty.template');
 			$logger->log (
@@ -74,14 +82,13 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			);
 			
 			// TODO reset implementor merge option?
-			
+	
 			return $content;			
 			
 		}));
 		
 		//echo $content; exit ('here we go');
-		exit;
-		echo 'in failed content';
+
 	}
 	
 
