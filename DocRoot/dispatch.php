@@ -28,7 +28,7 @@
  * @version 1.0
  */
 
-$application = &\eGloo\System\Server\Application::instance();
+
 $requestInfoBean = $application->context()->retrieve('requestInfoBean');
 $requestValidator = $application->context()->retrieve('requestValidator');
 
