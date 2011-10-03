@@ -61,10 +61,10 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		
 		//return $this->retrieve($signature, $lambda);
 		// TODO this is oversimplified at the moment; needs cache support and
-		// check for boolean true
-		
+		// check for boolean true		
 		if (!$this->exists($signature) || $this->store[$signature] === false) {
-			if (!is_null($value = $lambda($this, $signature))) { 	
+			echo 'but signature doesnt exist?' . "\n";
+			if (!is_null($value = $lambda($this, $signature))) { 
 				$this->bind($signature, $value);
 			}
 			

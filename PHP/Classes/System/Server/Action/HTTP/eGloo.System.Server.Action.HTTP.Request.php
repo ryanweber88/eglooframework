@@ -20,6 +20,14 @@ class Request extends \photon\http\Request implements \eGloo\System\Server\Conte
 
 		// instantiate context for request lifetime
 		$this->context = new \eGloo\System\Server\Context($this);
+		
+		
+		// add requestInfoBean to request context
+		$requestInfoBean = &\eGloo\DataProcessing\Persistence\DataTransferObjects\Security\RequestInfoBean\Stateful::instance(
+			true
+		);
+		
+		$this->context->bind('requestInfoBean', $requestInfoBean);
 	}
 	
 	

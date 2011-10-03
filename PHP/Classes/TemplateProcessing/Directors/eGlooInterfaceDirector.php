@@ -108,6 +108,7 @@ class eGlooInterfaceDirector extends TemplateDirector {
 			if ( $this->cacheID !== null ) {
 				$this->templateBuilder->setCacheID( $this->cacheID, $this->ttl );
 			}
+
 		}
 	}
 

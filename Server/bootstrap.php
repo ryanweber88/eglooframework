@@ -107,7 +107,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		$context = static::contextApplication();
 		
 		// Build a request info bean
-		static::contextApplication()->bind('requestInfoBean', \RequestInfoBean::getInstance());
+		//static::contextApplication()->bind('requestInfoBean', \RequestInfoBean::getInstance());
 		
 		// Get a request validator based on the current application and UI bundle
 		static::contextApplication()->bind(
