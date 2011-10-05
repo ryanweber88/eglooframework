@@ -11,10 +11,11 @@ namespace eGloo\DataProcessing\DDL\Utility;
  */
 class Callback extends \Zend\Stdlib\CallbackHandler { 
 	
-	function __construct($name, $callback) { 
-		parent::__construct ($name, $callback, [ ]);
+	function __construct($name, $callback, array $arguments = [ ]) { 
+		parent::__construct ($name, $callback, $arguments);
 		
-		$this->name = $name;
+		$this->name      = &$this->event;
+		$this->arguments = &$this->options; 
 	}
 	
 	/**
@@ -24,6 +25,10 @@ class Callback extends \Zend\Stdlib\CallbackHandler {
 	 * stack, they also recieve the return of last pop
 	 */
 	public function call(array $arguments = [ ]) { 
+		if (count($arguments) === 0) {
+			$arguments = $this->arguments;	
+		}
+		
 		return parent::call($arguments);
 	}
 	

@@ -33,7 +33,31 @@ class Relationship extends \eGloo\Dialect\Object {
 		return $this->belongs == self::CARDINALITY_ONE;
 	}
 	
+	public function __toString() {
+		return $this->format();
+	}
+	
+	protected function format() { 
+		// as value will always be valid unless
+		// absolute false
+		if ($this->as !== false) {
+			return $this->as;
+		}
+		
+		// otherwise, determine plurality from
+		// relationship type
+		else {
+			return ucfirst($this->hasMany() 
+				? \eGloo\Utilities\Inflections::pluralize($this->to)
+				: \eGloo\Utilities\Inflections::singularize($this->to)
+			);
+		}
+			
+	}
+	
 	protected $to;
 	protected $has;
 	protected $belongs;
+	protected $through;
+	protected $as = false;
 }

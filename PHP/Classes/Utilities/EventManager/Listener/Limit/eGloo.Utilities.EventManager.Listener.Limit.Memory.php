@@ -13,7 +13,6 @@ use \Zend\EVentManager\EventCollection;
  */
 class Memory extends \eGloo\Utilities\EventManager\Limit {
 	
-	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
 	function __construct($limit, $pool) { 
 		// call parent constructor with theoretical max memory

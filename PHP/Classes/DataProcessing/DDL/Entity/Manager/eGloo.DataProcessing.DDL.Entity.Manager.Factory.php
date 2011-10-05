@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Manager;
+namespace eGloo\DataProcessing\DDL\Entity\Manager;
 
 use eGloo\DataProcessing\DDL;
 use eGloo\DataProcessing\DDL\Entity\Entity;
@@ -15,7 +15,13 @@ class Factory extends \eGloo\Dialect\Object {
 	// TODO key should be hex for faster lookup
 	const KEY = 'entity.manager';
 	
-	public static function &factory(\eGloo\System\Server\Context &$context = null) { 
+	/**
+	 * 
+	 * Retrieves an entity manager from assigned context, or application by default
+	 * @param \eGloo\System\Server\Context $context
+	 * @todo  Don't think entity managers should be stored by context
+	 */
+	public static function factory(\eGloo\System\Server\Context $context = null) { 
 		if (is_null($context)) { 
 			$context = \eGloo\System\Server\Application::instance()->context();
 		}
@@ -23,7 +29,7 @@ class Factory extends \eGloo\Dialect\Object {
 		if ($context->available()) { 
 			if (!$context->exists(self::KEY)) { 
 				$context->bind(
-					self::KEY, new Manager()
+					self::KEY, new DDL\Entity\Manager
 				);
 			}
 		}

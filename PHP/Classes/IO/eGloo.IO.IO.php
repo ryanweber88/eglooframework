@@ -8,5 +8,18 @@ namespace eGloo\IO;
  *
  */
 abstract class IO extends \eGloo\Dialect\Object { 
-	// pass
+
+	/**
+	 * 
+	 * Runs lambda and flushes to output
+	 * @param \Closure $lambda
+	 */
+	public static function buffer($lambda) { 
+		if (is_callable($lambda)) { 
+			ob_start();
+			$lambda();
+			
+			return ob_get_clean();
+		}
+	}
 }

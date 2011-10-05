@@ -24,6 +24,8 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 	 * @TODO remove them entirely and get values from environment?
 	 */
 	function __construct($pathHandler, $pathTarget) { 
+		parent::__construct();
+		
 		// loads bootstrap and configuration - this is by convention,
 		// so must follow ./config.php and ./bootstrap.php
 		

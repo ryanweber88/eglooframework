@@ -31,17 +31,15 @@ class Method extends \eGloo\Dialect\Object {
 	 */
 	public function call(array $arguments = [ ]) {
 				
-		// get statement content
-		$content = DDL\Statement\Bundle::create($this->entity)
-			->statementContent($this->name);
-			
-							
+		// instantiate statement and bundle classes
+		$bundle    = DDL\Statement\Bundle::create($this->entity);
+		$statement = new DDL\Statement\Statement;	
+		
 		// build statement and pass to statement instance
-		$data = DDL\Statement\Statement::rnew()
-			->execute(DDL\Statement\Builder::create(
-				$this->entity, $content, $arguments
-			));
-					
+		$data = $statement->execute(DDL\Statement\Builder::create(
+			$this->entity, $bundle->path($this->name), $arguments
+		));
+									
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity
 		// has requested evaluation.
@@ -49,7 +47,7 @@ class Method extends \eGloo\Dialect\Object {
 		if ($data && is_array($data)) { 
 			return $data;
 		}
-		
+				
 		return false;
 				
 	}
