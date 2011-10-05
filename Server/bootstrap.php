@@ -4,7 +4,7 @@
  */
 class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract { 
 	
-	use \eGloo\System\Server\Context\ContextTrait;
+	use \eGloo\System\Server\Context\ContextAccessTrait;
 
 	protected function _initPhoton() { 
 		// init photon resources	
@@ -95,6 +95,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		// and place requestInfoBean into global context, as it doesn't need to be
 		// reinstantiated each time
 		$GLOBALS['mongrel'] = true;
+		$GLOBALS['payload'] = file_get_contents('/tmp/static');
 		
 		// change back to server directory
 		chdir(__DIR__);

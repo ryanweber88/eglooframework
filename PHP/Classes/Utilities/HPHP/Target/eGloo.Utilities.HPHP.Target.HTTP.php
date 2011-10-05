@@ -9,7 +9,7 @@ namespace eGloo\Utilities\HPHP\Target;
  */
 abstract class HTTP extends \eGloo\Utilities\HPHP\Target { 
 	
-	use \eGloo\System\Server\Context\ContextTrait;
+	use \eGloo\System\Server\Context\ContextAccessTrait;
 	
 	const HOST = '127.0.0.1';
 	const CONTROLLER = 'index.php';

@@ -43,6 +43,7 @@ class SessionInitRoutine {
 			"SessionDecorator::requestPreProcessing - Starting session", 'Decorators' );
 
 		if ( !isset($_SESSION) ) {
+
 			// Initialize the session object
 			$sessionHandler = new SessionHandler();
 

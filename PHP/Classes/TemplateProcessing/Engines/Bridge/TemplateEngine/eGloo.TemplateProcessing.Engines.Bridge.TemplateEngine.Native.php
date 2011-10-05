@@ -10,7 +10,7 @@ namespace eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine;
  */
 class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 
-	use \eGloo\System\Server\Context\ContextTrait;
+	use \eGloo\System\Server\Context\ContextAccessTrait;
 	
 	/**
 	 * 

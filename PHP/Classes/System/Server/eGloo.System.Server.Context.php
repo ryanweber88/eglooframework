@@ -22,8 +22,10 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		
 		// add change observer
 		$this->attach(new Context\Observer\Change(function(&$context) { 
-			
 			// TODO do something with $context->owner
+			// for example, notify handlers data has been changed
+			// and pooled data must be updated accordingly
+			
 		}));
 	}
 	
@@ -36,7 +38,7 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 	 */
 	public function &expire($key, $expires) { 
 		if ($this->exists($key)) { 
-			$this->store[$key]->attach(new Context\Observer\AttributeCache(
+			$this->store[$key]->attach(new Context\Observer\Attribute\Cache(
 				$expires
 			));
 		
@@ -63,7 +65,7 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		// TODO this is oversimplified at the moment; needs cache support and
 		// check for boolean true		
 		if (!$this->exists($signature) || $this->store[$signature] === false) {
-			echo 'but signature doesnt exist?' . "\n";
+			//echo "i\n";
 			if (!is_null($value = $lambda($this, $signature))) { 
 				$this->bind($signature, $value);
 			}

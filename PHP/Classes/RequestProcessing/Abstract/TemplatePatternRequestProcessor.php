@@ -136,7 +136,9 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
 			$this->setOutputHeaders();
-			echo $output;
+			
+			// why the fuck this works - noone knows?
+			echo 'd'.$output;
 		}
 
 		$this->postProcessing();

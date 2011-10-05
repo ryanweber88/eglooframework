@@ -10,6 +10,6 @@ namespace eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine;
  */
 class Blitz extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 
-	use \eGloo\System\Server\Context\ContextTrait;
+	use \eGloo\System\Server\Context\ContextAccessTrait;
 	
 }
