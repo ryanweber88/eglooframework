@@ -1,13 +1,16 @@
 <?php
 namespace eGloo\System\Server\Context;
 
+use \Zend\EventManager\EventCollection;
+use \Zend\EventManager\EventManager;
+
 /**
  * 
  * Represents a bound values to a context
  * @author Christian Calloway
  *
  */
-class Attribute extends \eGloo\Dialect\Object implements \SplSubject { 
+class Attribute extends \eGloo\Dialect\Object { 
 	
 	use \eGloo\Utilities\SubjectTrait;
 	
@@ -17,6 +20,8 @@ class Attribute extends \eGloo\Dialect\Object implements \SplSubject {
 		$this->accessed = time();
 		$this->owner    = &$owner;
 		
+		// attach zf2 event manager
+		$this->events = new EventManager();
 	}
 	
 	public function __toString() { 
@@ -47,4 +52,5 @@ class Attribute extends \eGloo\Dialect\Object implements \SplSubject {
 	protected $value;
 	protected $owner;
 	protected $accessed;
+	protected $events;
 }

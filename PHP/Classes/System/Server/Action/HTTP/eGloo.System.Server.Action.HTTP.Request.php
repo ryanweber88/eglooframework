@@ -9,7 +9,7 @@ namespace eGloo\System\Server\Action\HTTP;
  * @todo Separate from photon request and message
  *
  */
-class Request extends \photon\http\Request implements \eGloo\System\Server\Context\Contextable { 
+class Request extends \photon\http\Request implements \eGloo\System\Server\Context\ContextInterface { 
 	
 	
 	function __construct($message) { 

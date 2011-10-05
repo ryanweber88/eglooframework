@@ -24,9 +24,11 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		// bootstrap egloo environment
 		$application = &\eGloo\System\Server\Application::instance();
 		
+		// TODO change to full-fledged component architecture - remove bootstrapping
 		$application->bootstrap()
-			->bootstrap('egloo')
-			->bootstrap('components');
+			->bootstrap('egloo')       // egloo environment
+			->bootstrap('components'); // egloo related components
+			
 			//->bootstrap('pear')
 			//->bootstrap('symphony');	
 

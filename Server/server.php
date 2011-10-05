@@ -26,8 +26,46 @@ set_include_path(
 
 // AUTOLOAD ///////////////////////////////////////////////////////////////////
 
-// TODO : remove when migrating to cli tool
-require_once 'autoload.php';
+
+
+// These autoloaders are required to load initial server environment; they
+// will be popped off the stack after environment has fully loaded
+// TODO remove and place into cli tool
+
+spl_autoload_register(function($className) { 
+
+	// assume classes are namespaced and remove top level domain "eGloo"
+	// as its a synonym for /root/PHP/Classes/
+	// echo "class = $className\n";
+	$parts = array_slice(
+		explode ('\\', $className), 1
+	);
+	
+	$path  = implode(
+		DIRECTORY_SEPARATOR, array_slice($parts, 0, count($parts) - 1)
+	);
+
+	$file = "$path/eGloo." . implode('.', $parts) . '.php';
+	
+	
+	// load file into currently running context 	
+	$paths = explode(":", get_include_path());
+		
+	array_walk($paths, function($path) use ($file) { 
+		if (file_exists("$path/$file")) { 
+			require_once "$path/$file";
+		}
+	});
+});
+
+spl_autoload_register(function ($className) {
+	// TODO change to configurable value
+	$pathZendFramework = '/usr/share/php/Zend2';
+	
+	if (strstr($className, 'Zend')!==false) { 
+		require_once "$pathZendFramework/" . str_ireplace('\\', '/', $className) . '.php';
+	}
+});
 
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
@@ -47,9 +85,11 @@ $application = new \eGloo\System\Server\Application(
 
 
 
-// run application bootstrap
+// run application bootstrap - load required dependencies
+// into current application context
 $bootstrap = &$application->bootstrap()
-->bootstrap('photon');
+->bootstrap('photon')
+->bootstrap('zend');
 
 
 // now that application-specific resources have been loaded; 

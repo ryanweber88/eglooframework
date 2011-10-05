@@ -14,7 +14,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			'params'
 		);
 		
-		// define autoloader
+		// define simple autoloader
 		spl_autoload_register(function($className) { 
 				
 		    $parts = array_filter(explode('\\', $className));
@@ -65,6 +65,20 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		//$GLOBALS['log'] = \Log::factory('file', DIR . '', 'test');
 		
 		//var_export($GLOBALS['log']); exit;
+		
+	}
+	
+	protected function _initZend() { 
+		exit('zend');
+		// autoloader for zf2 (only) resources 
+		spl_autolad_register(function ($className) {
+			// TODO change to configurable value
+			$pathZendFramework = '/usr/share/php/Zend2';
+			
+			if (strstr($className, 'Zend')!==false) { 
+				require_once "$pathZendFramework/" . str_ireplace('\\', '/', $className) . '.php';
+			}
+		});
 		
 	}
 	

@@ -12,7 +12,7 @@ namespace eGloo\System\Server\Context\Observer;
 class Limit extends \eGloo\Dialect\Object implements\SplObserver { 
 	
 	function __construct() {
-	
+		
 	}
 	
 	public function update(\SplSubject $context) { 
@@ -31,4 +31,5 @@ class Limit extends \eGloo\Dialect\Object implements\SplObserver {
 	}
 	
 	protected $handler;
+	protected $sizeof = 0;
 }

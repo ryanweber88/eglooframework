@@ -10,7 +10,7 @@ namespace eGloo\System\Server;
  * @author petflowdeveloper
  *
  */
-class Application extends \eGloo\Dialect\Object implements Context\Contextable { 
+class Application extends \eGloo\Dialect\Object implements Context\ContextInterface { 
 	
 	use \eGloo\Utilities\SingletonTrait;
 	
