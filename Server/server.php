@@ -91,7 +91,6 @@ $bootstrap = &$application->bootstrap()
 ->bootstrap('photon')
 ->bootstrap('zend');
 
-
 // now that application-specific resources have been loaded; 
 // determine command and execute 
 \eGloo\System\Server\Command\CLI::factory(

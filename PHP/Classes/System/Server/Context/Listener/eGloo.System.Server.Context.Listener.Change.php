@@ -1,8 +1,9 @@
 <?php
 namespace eGloo\System\Server\Context\Listener;
 
-use \Zend\EventManager\HandlerAggregate;
+use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
+use \Zend\EVentManager\EventCollection;
 
 /**
  * 
@@ -11,16 +12,16 @@ use \Zend\EventManager\Event;
  * @author Christian Calloway
  *
  */
-class Change extends \eGloo\Dialect\Object implements HandlerAggregate { 
+class Change extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
-	use \eGloo\Utilities\EventManager\HandlerAggregateTrait;
+	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
 	function __construct() { 
 		
 	}
 	
     public function attach(EventCollection $events) {
-    	// TODO attach change events
+	    // TODO attach change events
     }
 	
 }

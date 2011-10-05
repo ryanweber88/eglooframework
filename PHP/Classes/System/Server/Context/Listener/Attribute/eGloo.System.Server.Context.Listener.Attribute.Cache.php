@@ -1,8 +1,10 @@
 <?php
 namespace eGloo\System\Server\Context\Listener\Attribute;
 
-use \Zend\EventManager\HandlerAggregate;
+use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
+use \Zend\EVentManager\EventCollection;
+
 
 /**
  * 
@@ -10,9 +12,9 @@ use \Zend\EventManager\Event;
  * @author Christian Calloway
  *
  */
-class Cache extends \eGloo\Dialect\Object implements HandlerAggregate { 
+class Cache extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
-	use \eGloo\Utilities\EventManager\HandlerAggregateTrait;
+	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
     public function attach(EventCollection $events) {
     	$events->attach('valid', array($this, 'valid'));
@@ -23,7 +25,8 @@ class Cache extends \eGloo\Dialect\Object implements HandlerAggregate {
 		$this->expires = time()  + $expires;
 	}
 	
-	protected function valid(Event $event) { 
+	public function valid(Event $event) { 
+		echo 'in valid';
 		// checks if cache is still valid; if not, unbind the value from attributes
 		// owner (a context object)
 		if ($this->expired()) { 

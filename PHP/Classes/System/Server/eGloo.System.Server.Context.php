@@ -145,7 +145,7 @@ class Context extends \eGloo\Dialect\Object {
 		}
 		
 		// trigger bind event
-		$this->events()->trigger(__FUNCTION__, $this, $params);
+		$this->events()->trigger(__FUNCTION__, $this, compact('key', 'value'));
 				
 		return $this;
 	}
@@ -166,7 +166,7 @@ class Context extends \eGloo\Dialect\Object {
 		}
 		
 		// trigger unbind event
-		$this->events()->trigger(__FUNCTION__, $this, $params);
+		$this->events()->trigger(__FUNCTION__, $this, compact('key'));
 		
 		return $this;
 	}
@@ -179,7 +179,7 @@ class Context extends \eGloo\Dialect\Object {
 				
 		if (in_array($key, array_keys($this->store))) { 
 			// call cache listener on attribute to see if
-			$this->store[$key]->events->trigger('valid', $this->store[$key], null);
+			$this->store[$key]->events->trigger('valid', $this->store[$key], compact('key'));
 			
 			// determine if value @ $key index exists/isset - it will be
 			// invalidated by call above if attribute has cache listener

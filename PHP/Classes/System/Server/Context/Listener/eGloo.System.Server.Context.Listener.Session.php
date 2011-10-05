@@ -1,8 +1,10 @@
 <?php
 namespace eGloo\System\Server\Context\Listener;
 
-use \Zend\EventManager\HandlerAggregate;
+use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
+use \Zend\EVentManager\EventCollection;
+
 
 /**
  * 
@@ -12,7 +14,7 @@ use \Zend\EventManager\Event;
  *
  */
 
-class Session extends \eGloo\Dialect\Object implements HandlerAggregate { 
+class Session extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
 	use \eGloo\Utilities\EventManager\HandlerAggregateTrait;
 	

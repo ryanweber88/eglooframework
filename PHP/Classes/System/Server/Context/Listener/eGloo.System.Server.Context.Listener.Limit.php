@@ -1,8 +1,10 @@
 <?php
 namespace eGloo\System\Server\Context\Listener;
 
-use \Zend\EventManager\HandlerAggregate;
+use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
+use \Zend\EVentManager\EventCollection;
+
 
 /**
  * 
@@ -12,9 +14,9 @@ use \Zend\EventManager\Event;
  * @author Christian Calloway
  *
  */
-class Limit extends \eGloo\Dialect\Object implements HandlerAggregate { 
+class Limit extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
-	use \eGloo\Utilities\EventManager\HandlerAggregateTrait;
+	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
 	function __construct() { 
 		// TODO determine limits - will these change in respect to

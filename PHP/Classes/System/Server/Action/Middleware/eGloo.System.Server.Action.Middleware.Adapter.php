@@ -35,6 +35,7 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 		if (empty($_REQUEST['eg_requestID'])) { 
 			$_GET['eg_requestID'] = 'index';
 		}
+		
 	
 		
 		// return empty response, which will be basis for post processing
@@ -50,11 +51,18 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 
 		// get reference to application instance
 		$application = &\eGloo\System\Server\Application::instance();
-		
-		
+				
 		$requestInfoBean =  $request->context()->retrieve('requestInfoBean');
 		$requestValidator = $application->context()->retrieve('requestValidator');
 		
+		$application->context()->run(function(&$context, $key) use (&$response) { 			
+			$context
+				->bind($key, 'test')
+				->expire($key, 10);
+				
+		});
+		
+		return $response;
 		
 		if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 			eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );

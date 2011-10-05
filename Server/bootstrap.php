@@ -69,7 +69,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 	}
 	
 	protected function _initZend() { 
-		exit('zend');
+		/*
 		// autoloader for zf2 (only) resources 
 		spl_autolad_register(function ($className) {
 			// TODO change to configurable value
@@ -79,6 +79,7 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 				require_once "$pathZendFramework/" . str_ireplace('\\', '/', $className) . '.php';
 			}
 		});
+		*/
 		
 	}
 	
