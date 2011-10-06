@@ -172,7 +172,7 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 			die(1);
 		}
 	}
-	
+
 	final private function resetClassVariables() {
 		return ;
 		// resets class variables, for all declared classes

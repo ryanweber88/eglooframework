@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\System\Server\Action\Middleware;
 
+use eGloo\System\Server\Environment\Environment;
+
 use \eGloo\System\Server;
 use \eGloo\System\Server\Action\HTTP\Request;
 use \eGloo\System\Server\Action\HTTP\Response;
@@ -17,6 +19,10 @@ use \eGloo\System\Server\Action\HTTP\Response;
  *
  */
 class Adapter extends Middleware { 
+	
+	function __construct(EnvironmentInterface $environment) {
+		$this->environment = $environment;
+	}
 
 	/**
 	 * (non-PHPdoc)
@@ -139,4 +145,6 @@ class Adapter extends Middleware {
 		
 		return $response;
 	}	
+	
+	protected $environment;
 }
