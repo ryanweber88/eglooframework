@@ -24,8 +24,9 @@ class Dispatcher extends \photon\core\Dispatcher {
 	 */
 	static public function dispatch($request) { 
 		
-		$respone = null;
-
+		$response = null;
+		
+		
 		// TODO set middleware components in configuration
 		// TODO make adapter middleware component REQUIRED
 		$middleware = [

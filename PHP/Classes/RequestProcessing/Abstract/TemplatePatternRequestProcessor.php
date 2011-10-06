@@ -124,7 +124,6 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
 		$output = $templateDirector->processTemplate();
 		
-		
 		//echo $output;
 		//echo 'here'; exit;
 		//echo $GLOBALS['payload'];

@@ -222,7 +222,7 @@ class Request
         $this->sender = $this->mess->sender;
         $this->client = $this->mess->conn_id;
         $this->headers = $this->mess->headers;
-
+        
         if (isset($this->mess->headers->QUERY)) {
             \mb_parse_str($this->mess->headers->QUERY, $this->GET);
             $this->query = $this->mess->headers->QUERY;
@@ -497,9 +497,9 @@ class CookieHandler
      */
     public static function parse_cookie($cookie, $key)
     {
-        //$c = \http_parse_cookie($cookie);
+        $c = \http_parse_cookie($cookie);
         $cookies = array();
-        /*
+        
         foreach ($c->cookies as $name => $val) {
             try {
                 $cookies[$name] = \photon\crypto\Sign::loads($val, $key);
@@ -507,7 +507,7 @@ class CookieHandler
                 // We simply ignore bad cookies.
             }
         }
-		*/
+		
         return $cookies;
     }
 }

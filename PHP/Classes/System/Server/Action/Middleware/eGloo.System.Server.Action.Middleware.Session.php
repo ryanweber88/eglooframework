@@ -42,6 +42,7 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 	}
 	
 	public function processRequest(\eGloo\System\Server\Action\HTTP\Request  &$request) { 
+		//var_export($request->COOKIE); exit;
 		// initialize storage, or retrieve cookies from request object
 		$this->store->init($request);
 		

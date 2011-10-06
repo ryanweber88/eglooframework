@@ -55,19 +55,12 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 		$requestInfoBean =  $request->context()->retrieve('requestInfoBean');
 		$requestValidator = $application->context()->retrieve('requestValidator');
 		
-		$application->context()->run(function(&$context, $key) use (&$response) { 			
-			$context
-				->bind($key, 'test')
-				->expire($key, 10);
-				
-		});
-		
-		return $response;
 		
 		if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 			eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 			exit;
 		}
+		
 		
 		// prepare requestInfoBean for egloo dispatch
 		// Validate this request and update the info bean accordingly
@@ -114,6 +107,8 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 			ob_start();
 			$requestProcessor->processRequest();
 			$response->content = ob_get_clean();
+			
+			$response->content = session_id();
 			
 		} else {
 			$errorRequestProcessor = \RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );

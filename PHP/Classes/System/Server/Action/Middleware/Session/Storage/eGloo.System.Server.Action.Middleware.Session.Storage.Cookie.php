@@ -25,8 +25,10 @@ class Cookie extends \photon\session\storage\Cookies {
 	}
 	
 	public function commit($response) { 
-		// TODO figure timeout - maybe not time based, but vigilantly monitiored
+		// TODO figure timeout - maybe not time based, but vigilantly monitored
         $timeout = time() + 365 * 24 * 3600;
+        $response->COOKIE->setCookie('scsiv', $this->iv, $timeout);
+        return ;
         
         if (0 === strlen($this->iv)) {
         	exit ('should never be here');
@@ -36,7 +38,7 @@ class Cookie extends \photon\session\storage\Cookies {
         
         // these shouldn't be called - we're not using session to actually store values
         foreach ($this->cache as $name => $val) {
-            //$val = Crypt::encrypt($val, Conf::f('secret_key'), $this->iv);
+            $val = Crypt::encrypt($val, Conf::f('secret_key'), $this->iv);
             
             $response->COOKIE->setCookie('scs-' . $name, $val, $timeout);
         }

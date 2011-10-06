@@ -26,7 +26,6 @@ class Cache extends \eGloo\Dialect\Object implements ListenerAggregate {
 	}
 	
 	public function valid(Event $event) { 
-		echo 'in valid';
 		// checks if cache is still valid; if not, unbind the value from attributes
 		// owner (a context object)
 		if ($this->expired()) { 
