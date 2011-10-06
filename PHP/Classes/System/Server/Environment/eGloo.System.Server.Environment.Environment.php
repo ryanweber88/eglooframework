@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\System\Server\Environment;
 
+use \eGloo\System\Server;
 /**
  * 
  * Represents the underlying environment which
@@ -9,8 +10,6 @@ namespace eGloo\System\Server\Environment;
  * @author Christian Calloway
  *
  */
-use eGloo\System\Server\Context;
-
 abstract class Environment extends \eGloo\Dialect\Object implements EnvironmentInterface {
 	
 	/**

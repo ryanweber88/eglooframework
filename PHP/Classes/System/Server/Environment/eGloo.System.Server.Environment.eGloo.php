@@ -1,4 +1,5 @@
 <?php
+namespace eGloo\System\Server\Environment;
 
 /**
  * 
@@ -6,7 +7,7 @@
  * @author Christian Calloway
  *
  */
-class Environment extends \eGloo\System\Server\Environment\Environment {
+class eGloo extends Environment {
 	
 	/**
 	 * (non-PHPdoc)

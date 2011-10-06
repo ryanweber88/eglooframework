@@ -25,6 +25,7 @@ class Callback extends Environment {
 		
 	}
 	
+	
 	/**
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Environment.Environment::load()
