@@ -136,8 +136,8 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		} else {
 			$this->setOutputHeaders();
 			
-			// why the fuck this works - noone knows?
-			echo 'd'.$output;
+
+			echo $output;
 		}
 
 		$this->postProcessing();

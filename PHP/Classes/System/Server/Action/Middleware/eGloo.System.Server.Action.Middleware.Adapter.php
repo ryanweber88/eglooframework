@@ -1,30 +1,27 @@
 <?php
 namespace eGloo\System\Server\Action\Middleware;
 
+use \eGloo\System\Server\Action\HTTP\Request;
+use \eGloo\System\Server\Action\HTTP\Response;
+
 /**
  * 
  * Responsible for adapting environment to egloo dispatch cycle; in-other-words,
  * the job of the adapter, is to ensure that underlying framework runs in a 
  * context that it is familiar with, and should have no concept outside of
  * that context
+ * The reason adapter exists, is so that it can be subclassed or swapped to
+ * fit to different underlying frameworks, or contexts
  * @author Christian Calloway
  *
  */
-use eGloo\System\Server\Action\HTTP\Response;
-
-class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface { 
+class Adapter extends Middleware { 
 
 	/**
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processRequest()
 	 */
-	public function processRequest(\eGloo\System\Server\Action\HTTP\Request   &$request) { 
-
-		// point superglobals (which do not exist in cli environment) to $requests
-		// interpretation of them
-		$GLOBALS['_GET']     = &$request->GET;
-		$GLOBALS['_POST']    = &$request->POST;
-		$GLOBALS['_REQUEST'] = &$request->GET;
+	public function processRequest(Request   &$request) { 
 								
 		// set defaults for requestClass and requestID should
 		// they not exist
@@ -40,14 +37,14 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 		
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
-		return new \eGloo\System\Server\Action\HTTP\Response();
+		return new Response();
 	}
 	
 	/**
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processResponse()
 	 */
-	public function &processResponse(\eGloo\System\Server\Action\HTTP\Request $request, \eGloo\System\Server\Action\HTTP\Response &$response) { 
+	public function &processResponse(Request $request, Response &$response) { 
 
 		// get reference to application instance
 		$application = &\eGloo\System\Server\Application::instance();
@@ -105,11 +102,9 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 			//echo var_export($requestProcessor, true);return;
 			
 			ob_start();
-			$requestProcessor->processRequest();
+			$requestProcessor->processRequest();			
 			$response->content = ob_get_clean();
-			
-			$response->content = session_id();
-			
+						
 		} else {
 			$errorRequestProcessor = \RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 			
@@ -120,6 +115,7 @@ class Adapter extends \eGloo\Dialect\Object implements MiddlewareInterface {
 				\eGlooLogger::writeLog( \eGlooLogger::DEBUG, 'INVALID request!', 'RequestValidation', 'Security' );
 			}
 		}
+		
 		
 		return $response;
 	}	

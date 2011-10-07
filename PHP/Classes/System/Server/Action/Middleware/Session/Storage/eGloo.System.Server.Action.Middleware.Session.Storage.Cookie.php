@@ -18,6 +18,9 @@ class Cookie extends \photon\session\storage\Cookies {
 
 		$this->cookie = &$request->COOKIE;
 		
+		// cookie sciv, a photon convention, does not exist, then use
+		// request uuid, which is gaurenteed* to be unique as the current
+		// session id
 		$this->iv = isset($this->cookie['scsiv']) 
 			? $this->cookie['scsiv']
 			: $request->uuid;
@@ -25,26 +28,34 @@ class Cookie extends \photon\session\storage\Cookies {
 	}
 	
 	public function commit($response) { 
-		// TODO figure timeout - maybe not time based, but vigilantly monitored
-        $timeout = time() + 365 * 24 * 3600;
-        $response->COOKIE->setCookie('scsiv', $this->iv, $timeout);
-        return ;
+
+	
+		// if session id has not yet been set, which actually should be impossible (if underlying framework has been evoked)
+		// then commit to response header
+        //if (!session_id()) { 
+        if (isset($this->cookie['scsiv'])) {
+        	//echo 'setting cookie<br/>';
+	        // setting cookie here will expire at browser close - its up to underlying
+	        // framework to determine cookie lifetime
+	        $response->COOKIE->setCookie('scsiv', $this->iv);
+	        	        
+        }
         
         if (0 === strlen($this->iv)) {
         	exit ('should never be here');
-            $this->iv = Crypt::getiv();
+            //$this->iv = Crypt::getiv();
             $response->COOKIE->setCookie('scsiv', $this->iv, $timeout);
         }
         
         // these shouldn't be called - we're not using session to actually store values
         foreach ($this->cache as $name => $val) {
-            $val = Crypt::encrypt($val, Conf::f('secret_key'), $this->iv);
-            
-            $response->COOKIE->setCookie('scs-' . $name, $val, $timeout);
+            //$val = Crypt::encrypt($val, Conf::f('secret_key'), $this->iv);
+            $response->COOKIE->setCookie('scs-' . $name, $val);
         }
         foreach ($this->deleted as $name => $val) {
             $response->COOKIE->delCookie('scs-' . $name);
         }
+        
         
         return $this->getNewKey(json_encode($response->headers));		
 	}

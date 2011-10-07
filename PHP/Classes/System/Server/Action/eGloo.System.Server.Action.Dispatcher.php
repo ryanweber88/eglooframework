@@ -25,13 +25,14 @@ class Dispatcher extends \photon\core\Dispatcher {
 	static public function dispatch($request) { 
 		
 		$response = null;
-		
-		
+				
 		// TODO set middleware components in configuration
 		// TODO make adapter middleware component REQUIRED
 		$middleware = [
-			new \eGloo\System\Server\Action\Middleware\Session(), 
-			new \eGloo\System\Server\Action\Middleware\Adapter()
+			new Middleware\Session(), 
+			new Middleware\Header(),
+			new Middleware\RequestParameters(),
+			new Middleware\Adapter()
 		];
 				
 		
@@ -49,7 +50,7 @@ class Dispatcher extends \photon\core\Dispatcher {
 				}				
 			}
 		}		
-						
+								
 
 		if ($response instanceof \eGloo\System\Server\Action\HTTP\Response) { 
 			return $response;
