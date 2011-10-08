@@ -25,13 +25,26 @@ class Dispatcher extends \photon\core\Dispatcher {
 	static public function dispatch($request) { 
 		
 		$response = null;
+		
+		if (empty($request->GET)) { 
+			\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+				'cannot resolve ' . $request->headers->PATH
+			);	
+
+			return new Response();
+		}
+		
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			"Dispatcher::dispatch request is {$request->GET['eg_requestClass']}.{$request->GET['eg_requestID']}"
+		);
 				
 		// TODO set middleware components in configuration
 		// TODO make adapter middleware component REQUIRED
+		// TODO middleware order shouldn't matter
 		$middleware = [
+			new Middleware\RequestParameters(),
 			new Middleware\Session(), 
 			new Middleware\Header(),
-			new Middleware\RequestParameters(),
 			new Middleware\Adapter()
 		];
 				

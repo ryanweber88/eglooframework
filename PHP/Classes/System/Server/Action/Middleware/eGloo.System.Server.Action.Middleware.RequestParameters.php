@@ -18,10 +18,10 @@ class RequestParameters extends Middleware {
 
 		// point superglobals (which do not exist in cli environment) to $request object's
 		// parsed (from mongrel) values
-		$GLOBALS['_GET']     = &$request->GET;
-		$GLOBALS['_POST']    = &$request->POST;
-		$GLOBALS['_REQUEST'] = &$request->GET;
-		$GLOBALS['_COOKIE']  = &$request->COOKIE; 
+		$GLOBALS['_GET']     = $request->GET;
+		$GLOBALS['_POST']    = $request->POST;
+		$GLOBALS['_REQUEST'] = $request->GET;
+		$GLOBALS['_COOKIE']  = $request->COOKIE; 
 	}
 	
 }

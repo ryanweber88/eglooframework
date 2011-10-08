@@ -482,7 +482,7 @@ class CookieHandler
             foreach ($ck['cookies'] as $name => $val) {
                 $ck['cookies'][$name] = \photon\crypto\Sign::dumps($val, $key);
             }
-            $headers .= '' . http_build_cookie($ck) . "\r\n";
+            $headers .= 'Set-Cookie:' . http_build_cookie($ck) . "\r\n";
         }
         
         //echo "$headers\n";

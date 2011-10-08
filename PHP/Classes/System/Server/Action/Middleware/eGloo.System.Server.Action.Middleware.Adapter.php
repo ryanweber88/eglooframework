@@ -22,7 +22,11 @@ class Adapter extends Middleware {
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processRequest()
 	 */
 	public function processRequest(Request   &$request) { 
-								
+
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			'Adapter::processRequest'
+		);
+				
 		// set defaults for requestClass and requestID should
 		// they not exist
 		if (empty($_REQUEST['eg_requestClass'])) { 
@@ -46,6 +50,10 @@ class Adapter extends Middleware {
 	 */
 	public function &processResponse(Request $request, Response &$response) { 
 
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			'Adapter::processResponse'
+		);
+		
 		// get reference to application instance
 		$application = &\eGloo\System\Server\Application::instance();
 				
@@ -104,6 +112,8 @@ class Adapter extends Middleware {
 			ob_start();
 			$requestProcessor->processRequest();			
 			$response->content = ob_get_clean();
+			
+			$_SESSION['testmyshit'] = 'fuckyourmom';
 						
 		} else {
 			$errorRequestProcessor = \RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
@@ -115,6 +125,8 @@ class Adapter extends Middleware {
 				\eGlooLogger::writeLog( \eGlooLogger::DEBUG, 'INVALID request!', 'RequestValidation', 'Security' );
 			}
 		}
+		
+		
 		
 		
 		return $response;

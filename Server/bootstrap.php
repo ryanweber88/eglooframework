@@ -141,6 +141,10 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 		static::contextApplication()->bind('logger.smarty.template', \Log::factory(
 			'file', '/home/petflowdeveloper/Develop/eglooframework/Compiled/SmartyStandAloneComplex/log/object', 'logger.smarty.template'
 		));		
+		
+		static::contextApplication()->bind('logger.test', \Log::factory(
+			'console', '', 'logger.test'
+		));			
 	}
 	
 	
