@@ -101,6 +101,22 @@ class Test {
 			);
 		}
 		
+		// do variable interpolation -----------------------------------------/
+		
+		
+		$content = preg_replace(
+			"/{$leftDelimiter}(\\$.+?){$rightDelimiter}/", 	
+			'{{ $1 }}',	
+			$content		
+		); 
+		
+				
+		// do conditionals ---------------------------------------------------/
+		
+		
+		
+		// do looping
+		
 		return $content;
 		
 	}
