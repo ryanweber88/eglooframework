@@ -9,7 +9,7 @@ namespace eGloo\Utilities\HPHP\Target;
  */
 abstract class HTTP extends \eGloo\Utilities\HPHP\Target { 
 	
-	use \eGloo\System\Server\Context\ContextTrait;
+	use \eGloo\System\Server\Context\ContextAccessTrait;
 	
 	const HOST = '127.0.0.1';
 	const CONTROLLER = 'index.php';
@@ -81,6 +81,9 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 		// sends data as multi-part/formdata, which is sig slower 
 		// than form urlenceded
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $this->buildPostQuery());
+		
+		//curl_setopt($this->curl, CURLOPT_POSTFIELDS, array(self::VARIABLE_PAYLOAD => $this->buildPostQuery()));
+		
 	}
 	
 	/**
@@ -90,6 +93,8 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 */
 	protected function call() { 
 		$content = curl_exec($this->curl);
+		
+		//return var_export(curl_getinfo($this->curl), true);
 		
 		// check if an error was generated on curl request
 		if (curl_errno($this->curl)) { 
@@ -118,9 +123,12 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 				);
 			}
 		}
+		
+		//var_export(json_encode($this->parameters)); exit;
 				
 		// encode parameters and set payload
-		return self::VARIABLE_PAYLOAD . '=' . json_encode($this->parameters);
+		//return json_encode($this->parameters());
+		return self::VARIABLE_PAYLOAD . '=' . urlencode(json_encode($this->parameters));
 	}
 	
 	

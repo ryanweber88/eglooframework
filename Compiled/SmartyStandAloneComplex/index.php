@@ -36,10 +36,12 @@ $smarty->merge_compiled_includes = true;
 // if successful, push rendered template to stdout
 if (isset($_POST[VARIABLE_PAYLOAD])) {
 	
-	// decode payload and assign to smarty
-	$parameters = json_decode($_POST[VARIABLE_PAYLOAD]);
-	$smarty->assign($parameters);
+	//echo $_POST[VARIABLE_PAYLOAD]; exit;
 	
+	// decode payload and assign to smarty
+	$parameters = json_decode($_POST[VARIABLE_PAYLOAD], true);
+	$smarty->assign($parameters);
+		
 	//$smarty->display('/usr/lib/egloo/applications/Skeleton.gloo/InterfaceBundles/Default/XHTML/ExternalMainPage/ExternalMainPageBaseForm.tpl');
 	$content = $smarty->fetch($parameters['path']);
 	

@@ -29,9 +29,14 @@
  */
 
 
-$requestInfoBean = $application->context()->retrieve('requestInfoBean');
+$requestInfoBean  = $application->context()->retrieve('requestInfoBean');
 $requestValidator = $application->context()->retrieve('requestValidator');
 
+//$requestInfoBean = RequestInfoBean::getInstance();
+
+// Get a request validator based on the current application and UI bundle
+//$requestValidator =
+	//RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
 
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
@@ -39,14 +44,24 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 }
 
 
+
 // Validate this request and update the info bean accordingly
-//$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+// TODO From a programmatic standpoint, it isn't clear that this method
+// changes requestInfoBean properties - and if it does, it shouldn't
+// return a method 
+// $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
+
+
+
+
 
 // TODO cache this based upon request passed, and if lambda return is boolean true, plus request
 // itself taken into account; caching at the moment to determine performance gain
 // TODO I hate having to pass the signature - I'd like to find a way to understand request context and
 // only pass lambda; right now this can't be done as request signature will obviously change
 // based upon request
+
+
 $isValidRequest = $application->context()->retrieve($requestInfoBean->signature(), function(&$context, $key) use ($requestValidator, &$requestInfoBean) { 	
 	//echo 'run/lambda';
 	
@@ -57,22 +72,25 @@ $isValidRequest = $application->context()->retrieve($requestInfoBean->signature(
 	// and and expire value in 60
 	$context
 		->bind($key, $isValidRequest)
-		->expire($key, 10);
+		->expire($key, 60);
 		
 });
 
 
+
+$GLOBALS['payload'] = true;
 if (!isset($GLOBALS['payload'])) {
 	$GLOBALS['payload'] = file_get_contents(
 		'/tmp/static'
 	);
 }
 
+echo "request = " . print_r($_REQUEST, true); return;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
-	//servecho var_export($requestProcessor, true);return;
+	//echo var_export($requestProcessor, true);return;
 	$requestProcessor->processRequest();
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );

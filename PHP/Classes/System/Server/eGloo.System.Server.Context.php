@@ -1,6 +1,9 @@
 <?php
 namespace eGloo\System\Server;
 
+use \Zend\EventManager\EventCollection;
+use \Zend\EventManager\EventManager;
+
 /**
  * 
  * Represents 'context' within stateful application : Request, Application, Server, Session etc;
@@ -12,7 +15,7 @@ namespace eGloo\System\Server;
  * @author Christian Calloway
  *
  */
-class Context extends \eGloo\Dialect\Object implements \SplSubject { 
+class Context extends \eGloo\Dialect\Object { 
 	
 	use \eGloo\Utilities\SubjectTrait;
 	
@@ -20,11 +23,14 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		// add reference to context's owner: application, request, session, etc
 		$this->owner = &$owner;
 		
-		// add change observer
-		$this->attach(new Context\Observer\Change(function(&$context) { 
-			
-			// TODO do something with $context->owner
-		}));
+		// add zf2 EventManager and attach listeners
+		$this->events = new EventManager();
+		
+		// manages context change events
+		$this->events->attachAggregate(new Context\Listener\Change());
+		
+		// manages context memory allocation
+		$this->events->attachAggregate(new Context\Listener\Limit());
 	}
 	
 	
@@ -36,10 +42,12 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 	 */
 	public function &expire($key, $expires) { 
 		if ($this->exists($key)) { 
-			$this->store[$key]->attach(new Context\Observer\AttributeCache(
+			
+			// attach cache listener to attribute
+			$this->store[$key]->events->attachAggregate(new Context\Listener\Attribute\Cache(
 				$expires
 			));
-		
+			
 			return $this;
 		}
 		
@@ -61,10 +69,10 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		
 		//return $this->retrieve($signature, $lambda);
 		// TODO this is oversimplified at the moment; needs cache support and
-		// check for boolean true
-		
+		// check for boolean true		
 		if (!$this->exists($signature) || $this->store[$signature] === false) {
-			if (!is_null($value = $lambda($this, $signature))) { 	
+			//echo "i\n";
+			if (!is_null($value = $lambda($this, $signature))) { 
 				$this->bind($signature, $value);
 			}
 			
@@ -116,7 +124,8 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		// to enforce the usage of 'exists' method and if retrieve is called, then
 		// a default closure must be provided
 		throw new \eGloo\Dialect\Exception(
-			"Attempted to access invalid storage key w/o providing default closure >> $key"
+			"Attempted to access invalid storage key w/o providing default closure >> $key\n" . 
+			"Please use Context::exists method to ensure value exists"
 		);
 	}
 	
@@ -134,6 +143,9 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 		if (!is_null($expires)) { 
 			$this->expire($key, $expires);	
 		}
+		
+		// trigger bind event
+		$this->events()->trigger(__FUNCTION__, $this, compact('key', 'value'));
 				
 		return $this;
 	}
@@ -153,6 +165,9 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 			);
 		}
 		
+		// trigger unbind event
+		$this->events()->trigger(__FUNCTION__, $this, compact('key'));
+		
 		return $this;
 	}
 	
@@ -163,10 +178,12 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 	public function exists($key) { 
 				
 		if (in_array($key, array_keys($this->store))) { 
-			// call notify on attributes observers, should they exist
-			$this->store[$key]->notify();
+			// call cache listener on attribute to see if
+			$this->store[$key]->events->trigger('valid', $this->store[$key], compact('key'));
 			
-			// determine if value @ $key index exists/isset
+			// determine if value @ $key index exists/isset - it will be
+			// invalidated by call above if attribute has cache listener
+			// and cache has expired
 			return isset($this->store[$key]);
 		}
 		
@@ -191,5 +208,6 @@ class Context extends \eGloo\Dialect\Object implements \SplSubject {
 	
 	
 	protected $owner;
-	protected $store = array();
+	protected $store  =  array();
+	protected $events;
 }

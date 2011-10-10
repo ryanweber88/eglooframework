@@ -24,12 +24,14 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		// bootstrap egloo environment
 		$application = &\eGloo\System\Server\Application::instance();
 		
+		// TODO change to full-fledged component architecture - remove bootstrapping
 		$application->bootstrap()
-			->bootstrap('egloo')
-			->bootstrap('pear')
-			->bootstrap('symphony');	
+			->bootstrap('egloo')       // egloo environment
+			->bootstrap('components'); // egloo related components
+			
+			//->bootstrap('pear')
+			//->bootstrap('symphony');	
 
-		//exit ('here');
 		// Get a unique id for the process
 		$this->phid = sprintf('%s-%s-%s', gethostname(), posix_getpid(), time());
 		$this->registerSignals(); // For SIGTERM handling

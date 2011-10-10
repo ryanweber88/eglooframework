@@ -52,4 +52,19 @@ class Bridge {
 
 	}
 	
+	/**
+	 * 
+	 * Transparently move request parameters to global specifiers
+	 * @param  object $request
+	 * @return void
+	 */
+	public static function parameters($request) { 
+		$method = $request->method;
+		$name   = "_$method";
+
+		// set method global to point to request method
+		$$name = &$request->method;
+		$_REQUEST = &$request->method;		
+	}
+	
 }

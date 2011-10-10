@@ -8,52 +8,79 @@ namespace eGloo\System\Server\Action;
  * @author petflowdeveloper
  *
  */
-use eGloo\System\Server\Action\Middleware\Session;
+use eGloo\System\Server\Action\HTTP\Response;
+
+use eGloo\System\Server\EventMachine\Connection\HTTP;
 
 class Dispatcher extends \photon\core\Dispatcher { 
+	
 	
 	/**
 	 * 
 	 * Dispatches request to appropriate eGloo handler 
-	 * @param HTTP\Request $request
+	 * @param  HTTP\Request $request
 	 * @return HTTP\Response $response
+	 * @throws \eGloo\Dialect\Exception 
 	 */
 	static public function dispatch($request) { 
-		// Check for the minimum PHP version to run the framework
 		
-		// falsify (motherfucker) request parameters for testing purposes
-		$_REQUEST['eg_requestClass'] = 'externalMainPage';
-		$_REQUEST['eg_requestID'] = 'extMainViewBase';
-		$_GET = &$_REQUEST;
+		$response = null;
 		
-		// instantiate response object to return to mongrel2
-		$response = new HTTP\Response();
-		//return $response;
+		if (empty($request->GET)) { 
+			\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+				'cannot resolve ' . $request->headers->PATH
+			);	
+
+			return new Response();
+		}
 		
-		//var_export($request); exit;
-		$application = &\eGloo\System\Server\Application::instance();
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			"Dispatcher::dispatch request is {$request->GET['eg_requestClass']}.{$request->GET['eg_requestID']}"
+		);
+				
+		// TODO set middleware components in configuration
+		// TODO make adapter middleware component REQUIRED
+		// TODO middleware order shouldn't matter
+		$middleware = [
+			new Middleware\RequestParameters(),
+			new Middleware\Session(), 
+			new Middleware\Header(),
+			new Middleware\Adapter()
+		];
+				
 		
-		// TODO remove this, as request shouldn't be part of application context
-		$application->context()->bind('request', $request);
+		// perform pre-processing on request
+		foreach ($middleware as $component) { 
+			
+			// if a response is returned, then run middleware post processing
+			// on response object
+			if (($response = $component->processRequest($request)) instanceof \eGloo\System\Server\Action\HTTP\Response) { 
+
+				// reverse array as middleware components should have purposeful
+				// ordering
+				foreach (array_reverse($middleware) as $component) { 
+					$response = &$component->processResponse($request, $response);
+				}				
+			}
+		}		
+								
+
+		if ($response instanceof \eGloo\System\Server\Action\HTTP\Response) { 
+			return $response;
+		}
+
+		// throw exception if response has not been returned from middleware components
+		// TODO is it the middlewares job to ensure a response is returned? Perhaps
+		// adapter should be put into its own class		
+		throw \eGloo\Dialect\Exception(
+			'FAILED to generate proper response'
+		);
+					
 		
-		// TODO determine another (more fluid) method to access session
-		//$session = new Middleware\Session(new Middleware\Session\Cookie());
-		//$session->init('key', $request);		
-		//$application->context()->bind(
-		//	'session', $session
-		//);		
-		
-		// capture output of proxied dispatch and
-		ob_start();
-		require '/var/www/client/dispatch.php';
-		$response->content = ob_get_clean(); // gzencode(ob_get_clean());
-		//$response->content = var_export($request, true);
-		
-		
-		// apply middleware to response - later
-		// TODO remove session from directly commiting to response
-		//$session->commit($response);
-		
-		return $response;
 	}
+	
+
+	
+
+	
 }

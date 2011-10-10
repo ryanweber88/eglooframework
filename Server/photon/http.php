@@ -222,7 +222,7 @@ class Request
         $this->sender = $this->mess->sender;
         $this->client = $this->mess->conn_id;
         $this->headers = $this->mess->headers;
-
+                
         if (isset($this->mess->headers->QUERY)) {
             \mb_parse_str($this->mess->headers->QUERY, $this->GET);
             $this->query = $this->mess->headers->QUERY;
@@ -243,6 +243,7 @@ class Request
         } else if ('JSON' === $this->mess->headers->METHOD) {
             $this->BODY = $this->mess->body;
         }
+        
         $this->COOKIE = CookieHandler::parse($this->mess->headers, 
                                              Conf::f('secret_key', ''));
     }
@@ -361,6 +362,7 @@ class Cookie implements \ArrayAccess
             $cookie['flags'] = $cookie['flags'] | HTTP_COOKIE_HTTPONLY;
         }
         $this->all[$name] = $cookie;
+        
 
         return true;
     }
@@ -480,8 +482,10 @@ class CookieHandler
             foreach ($ck['cookies'] as $name => $val) {
                 $ck['cookies'][$name] = \photon\crypto\Sign::dumps($val, $key);
             }
-            $headers .= 'Set-Cookie: ' . http_build_cookie($ck) . "\r\n";
+            $headers .= 'Set-Cookie:' . http_build_cookie($ck) . "\r\n";
         }
+        
+        //echo "$headers\n";
 
         return $headers;
     }
@@ -497,9 +501,15 @@ class CookieHandler
      */
     public static function parse_cookie($cookie, $key)
     {
-        //$c = \http_parse_cookie($cookie);
+    	try { 
+        	$c = \http_parse_cookie($cookie);
+    	}
+    	catch (\Exception $e) { 
+    		var_export($e); exit;
+    	}
+    	
         $cookies = array();
-        /*
+        
         foreach ($c->cookies as $name => $val) {
             try {
                 $cookies[$name] = \photon\crypto\Sign::loads($val, $key);
@@ -507,7 +517,7 @@ class CookieHandler
                 // We simply ignore bad cookies.
             }
         }
-		*/
+		
         return $cookies;
     }
 }

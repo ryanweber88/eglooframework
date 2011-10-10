@@ -10,7 +10,7 @@ namespace eGloo\System\Server;
  * @author petflowdeveloper
  *
  */
-class Application extends \eGloo\Dialect\Object implements Context\Contextable { 
+class Application extends \eGloo\Dialect\Object implements Context\ContextInterface { 
 	
 	use \eGloo\Utilities\SingletonTrait;
 	
@@ -47,6 +47,7 @@ class Application extends \eGloo\Dialect\Object implements Context\Contextable {
 		// TODO change to full DI framework, instead of half-assed approached right now
 		//$this->context()->bind('components', new Component\Container());
 	}
+	
 	
 	/**
 	 * 
