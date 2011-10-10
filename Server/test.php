@@ -7,6 +7,8 @@ class Test {
 	const EXTENSION = 'blitz';
 	const TEST_TPL = '/tmp/tpl1/sub1/tpl1.tpl';
 	
+	const EXPRESSION_IF = 'expression_if_';
+	
 	function __construct() { 
 
 		// build mock implementor instance
@@ -22,7 +24,6 @@ class Test {
 		
 		// instantiate blitz if extension is available
 		if ($this->isBlitzAvailable()) {
-			$this->blitz = new \Blitz;
 			$this->variables = [ ];
 		}
 		
@@ -33,8 +34,16 @@ class Test {
 	}
 	
 	public function fetch($path, $cacheId) { 
-		if ($this->isBlitzAvailable()) { 
-			$this->blitz->set($this->variables);			
+		if ($this->isBlitzAvailable()) {
+			// TODO create a blitz "component" and place into
+			// application context for every single template - 
+			// this way we'd never have to reload template again
+			$this->blitz = new \Blitz($this->translate(file_get_contents(
+				$path
+			)));
+						 
+			return $this->blitz->parse($this->variables);
+				
 		}
 		
 		else { 
@@ -81,7 +90,7 @@ class Test {
 		// TODO determine the wisdom of using eval statement here - 
 		// would be far easier for includes
 		preg_match_all(
-			"/{$leftDelimiter}include.+?file=('|\")(.+?)('|\").*?{$rightDelimiter}/", 	
+			"/{$leftDelimiter}include.+?file=('|\")(.+?)('|\").*?{$rightDelimiter}/i", 	
 			$content,	
 			$matches,	
 			PREG_SET_ORDER|PREG_OFFSET_CAPTURE
@@ -105,13 +114,52 @@ class Test {
 		
 		
 		$content = preg_replace(
-			"/{$leftDelimiter}(\\$.+?){$rightDelimiter}/", 	
+			"/{$leftDelimiter}(\\$.+?){$rightDelimiter}/i", 	
 			'{{ $1 }}',	
 			$content		
 		); 
 		
 				
 		// do conditionals ---------------------------------------------------/
+		
+		// match all if, elseif statements
+		preg_match_all(
+			"/{$leftDelimiter}(if|elseif)(.+?){$rightDelimiter}/i", 
+			$content, 
+			$matches,
+			PREG_SET_ORDER|PREG_OFFSET_CAPTURE
+		);
+		
+		for ($counter = count($matches); $counter >= 0; $counter--) {
+			$match = &$matches[$counter];	
+			
+			// since blitz cannot handle expressions, we come
+			// up with a unique indentifier for each expression and
+			// place into variables
+			$expressionIdentifier = self::EXPRESSION_IF . $counter;
+			
+			// first get expresion and save to variable stack
+			preg_match(
+				"/{$leftDelimiter}(if|elseif)(.+?){$rightDelimiter}/i", 
+				$match[0][0], 
+				$expressionMatch,
+				PREG_SET_ORDER|PREG_OFFSET_CAPTURE
+			);
+			
+			// get unique ident, which is last used index of stack
+			$id = $this->pushExpression($expressionMatch[2][0])
+			
+			$replace = preg_replace(
+				"/{$leftDelimiter}(if|elseif)(.+?){$rightDelimiter}/i",
+				"{{ $1 $expression_$id }}",
+				$match[0][0]
+			);
+			
+			
+			
+		}
+		
+		// replace all /else and /if
 		
 		
 		
@@ -121,6 +169,19 @@ class Test {
 		
 	}
 	
+	private function pushExpression($eval) { 
+		
+		// TODO evaluate expression - but how do you do that without using
+		// an eval; in most likelihood, the value is available in variables
+		// but where? There is also the possibility that value should a static
+		// method call.. then we're shits creek
+		
+		// evaluates expression and places boolean value
+		// into variable stack
+		$this->variables['expressions'][$index = count($this->variables['expressions'])] = $val;
+		
+		return $index;
+	}
 	
 	private function path($fileName) { 
 		// find the correct path to template
