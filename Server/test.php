@@ -1,14 +1,13 @@
 <?php
 //namespace eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine;
 
-use eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Blitz;
 class Test { 
 	
-	const EXTENSION = 'blitz';
-	const TEST_TPL = '/tmp/tpl1/sub1/tpl1.tpl';
-	
-	const EXPRESSION_IF = 'expression_if_';
-	
+	const EXTENSION        = 'blitz';
+	const TEST_TPL         = '/home/petflowdeveloper/www/tierzwei/Client.gloo/InterfaceBundles/Default/XHTML/Start/StartTest.tpl';
+	const NAME_EXPRESSIONS = 'expressions';
+	const NAME_BLOCKS      = 'blocks';
+		
 	function __construct() { 
 
 		// build mock implementor instance
@@ -16,20 +15,20 @@ class Test {
 		$this->implementor->right_delimiter = '<!--{';
 		$this->implementor->left_delimiter  = '}-->';
 		$this->implementor->template_dir = [
-			'/tmp/tpl1',
-			'/tmp/tpl2',
-			'/tmp/tpl3',
-			'/tmp/tpl1/sub1'
+			'/home/petflowdeveloper/www/tierzwei/Client.gloo/InterfaceBundles/Default/XHTML/',
+			'/home/petflowdeveloper/www/tierzwei/Client.gloo/InterfaceBundles/Default/XHTML/Start',
+			'/home/petflowdeveloper/www/tierzwei/Common/Templates/'
 		];
 		
 		// instantiate blitz if extension is available
 		if ($this->isBlitzAvailable()) {
 			$this->variables = [ ];
+			$this->variables[self::NAME_EXPRESSIONS] = [ ];
 		}
 		
 		// create mock template values
 		foreach([1, 2, 3, 4] as $value) { 
-			$this->assign("$variable$value", $value);
+			$this->assign("variable$value", $value);
 		}
 	}
 	
@@ -71,7 +70,7 @@ class Test {
 			self::TEST_TPL
 		));
 		
-		echo $buf;
+		//echo $buf;
 	}
 	
 	
@@ -119,7 +118,7 @@ class Test {
 			$content		
 		); 
 		
-				
+
 		// do conditionals ---------------------------------------------------/
 		
 		// match all if, elseif statements
@@ -130,46 +129,113 @@ class Test {
 			PREG_SET_ORDER|PREG_OFFSET_CAPTURE
 		);
 		
-		for ($counter = count($matches); $counter >= 0; $counter--) {
+		for ($counter = count($matches) - 1; $counter >= 0; $counter--) {
 			$match = &$matches[$counter];	
 			
 			// since blitz cannot handle expressions, we come
 			// up with a unique indentifier for each expression and
 			// place into variables
-			$expressionIdentifier = self::EXPRESSION_IF . $counter;
-			
+						
 			// first get expresion and save to variable stack
 			preg_match(
 				"/{$leftDelimiter}(if|elseif)(.+?){$rightDelimiter}/i", 
 				$match[0][0], 
 				$expressionMatch,
-				PREG_SET_ORDER|PREG_OFFSET_CAPTURE
+				PREG_OFFSET_CAPTURE
 			);
-			
+									
 			// get unique ident, which is last used index of stack
-			$id = $this->pushExpression($expressionMatch[2][0])
+			$id = $this->pushExpression($expressionMatch[2][0]);
 			
 			$replace = preg_replace(
 				"/{$leftDelimiter}(if|elseif)(.+?){$rightDelimiter}/i",
-				"{{ $1 $expression_$id }}",
+				"{{ $1 \$" . self::NAME_EXPRESSIONS . "[$id] }}",
 				$match[0][0]
+			);
+												
+			// now actually replace expression
+			$content = $this->splice(
+				$content, $match[0][1], strlen($match[0][0]), $replace
+			);
+								
+		}
+		
+		$content = preg_replace(
+			"/{$leftDelimiter}(\/if){$rightDelimiter}/i", '{{ end  }}', $content
+		);		
+		
+		// replace all /else and /if
+		$content = preg_replace(
+			"/{$leftDelimiter}(else){$rightDelimiter}/i", '{{ $2  }}', $content
+		);
+				
+		//return $content;
+		
+		
+		// do looping --------------------------------------------------------/
+		
+		preg_match_all(
+			"/{$leftDelimiter}foreach.+?{$rightDelimiter}/i", 
+			$content, 
+			$matches,
+			PREG_SET_ORDER|PREG_OFFSET_CAPTURE
+		);
+				
+		
+		// iterate through foreach matches
+		for ($counter = count($matches) - 1; $counter >= 0; $counter--) { 
+			
+			$match = &$matches[$counter];
+						
+			// match from, item - which are requred
+			$attributes = [
+				'from', 
+				'item',
+				'key' ,
+				'name' 
+			];
+			
+			$values = [ ];
+			
+			foreach ($attributes as $attribute) { 	
+					
+				// matches attribute values - there is no enforcement
+				// of required attributes (they are expected to be there)
+				if (preg_match ("/$attribute=(.+?)(\s|\})/i", $match, $attributeMatch)) { 
+					$values[$attribute] = $attributeMatch[1];
+				}
+			}
+			
+			// push block information
+			$id = $this->pushBlock($values, self::NAME_BLOCKS);
+
+			
+			// replace foreach statement with block
+			$this->splice(
+				$content, $match[0][1], strlen($match[0][0]), "{{ begin block_$id }}"
 			);
 			
 			
 			
 		}
 		
-		// replace all /else and /if
+		// replace {/foreach} with end blockName
+		preg_replace(
+			"/{$leftDelimiter}\/foreach{$rightDelimiter}/", '{{ end }}'
+		);
 		
-		
-		
-		// do looping
 		
 		return $content;
 		
 	}
 	
-	private function pushExpression($eval) { 
+	private function pushBlock($value, $namespace) { 
+		$this->variables[$namespace][$index = count($this->variables[$namespace])] = $value;
+		
+		return $index;
+	}
+	
+	private function pushExpression($expression) { 
 		
 		// TODO evaluate expression - but how do you do that without using
 		// an eval; in most likelihood, the value is available in variables
@@ -178,7 +244,7 @@ class Test {
 		
 		// evaluates expression and places boolean value
 		// into variable stack
-		$this->variables['expressions'][$index = count($this->variables['expressions'])] = $val;
+		$this->variables[self::NAME_EXPRESSIONS][$index = count($this->variables[self::NAME_EXPRESSIONS])] = $expression;
 		
 		return $index;
 	}
@@ -215,19 +281,20 @@ class Test {
 	}
 
 	final private function splice($input, $offset, $length=null, $splice='') {
-	  $input = (string)$input;
-	  $splice = (string)$splice;
-	  $count = strlen($input);
+		// TODO put here for convenience - will move into string "primitive" class
+		$input = (string)$input;
+		$splice = (string)$splice;
+		$count = strlen($input);
 	  
-	  // Offset handling (negative values measure from end of string)
-	  if ($offset<0) $offset = $count + $offset;
-	
-	  // Length handling (positive values measure from $offset; negative, from end of string; omitted = end of string)
-	  if (is_null($length)) $length = $count;
-	  elseif ($length < 0)  $length = $count-$offset+$length;
-	
-	  // Do the splice
-	  return substr($input, 0, $offset) . $splice . substr($input, $offset+$length);
+		  // Offset handling (negative values measure from end of string)
+		  if ($offset<0) $offset = $count + $offset;
+		
+		  // Length handling (positive values measure from $offset; negative, from end of string; omitted = end of string)
+		  if (is_null($length)) $length = $count;
+		  elseif ($length < 0)  $length = $count-$offset+$length;
+		
+		  // Do the splice
+		  return substr($input, 0, $offset) . $splice . substr($input, $offset+$length);
 	}	
 	
 	private        $implementor;
