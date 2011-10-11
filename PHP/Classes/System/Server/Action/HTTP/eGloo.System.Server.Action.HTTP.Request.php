@@ -1,6 +1,8 @@
 <?php 
 namespace eGloo\System\Server\Action\HTTP;
 
+use \eGloo\System\Server;
+
 /**
  * 
  * Represents an HTTP request as provided by Mongrel2; the guts of this class
@@ -9,7 +11,9 @@ namespace eGloo\System\Server\Action\HTTP;
  * @todo Separate from photon request and message
  *
  */
-class Request extends \photon\http\Request implements \eGloo\System\Server\Context\ContextInterface { 
+class Request extends \photon\http\Request implements Server\Context\ContextInterface { 
+	
+	use Server\Context\ContextTrait;
 	
 	const NAME_REQUEST_CLASS = 'eg_requestClass';
 	const NAME_REQUEST_ID    = 'eg_requestID';
@@ -21,29 +25,28 @@ class Request extends \photon\http\Request implements \eGloo\System\Server\Conte
 		//$this->headers['Accept-Encoding'] = 'gzip,deflate';
 
 		// instantiate context for request lifetime
-		$this->context = new \eGloo\System\Server\Context($this);
+		$this->initializeContext();
 		
 		
 		// add requestInfoBean to request context
+		// TODO check if this is used - if so, remove it - horrible
 		$requestInfoBean = &\eGloo\DataProcessing\Persistence\DataTransferObjects\Security\RequestInfoBean\Stateful::instance(
 			true
 		);
 		
 		$this->context->bind('requestInfoBean', $requestInfoBean);
+		
+		// TODO temporarily add request to application instance until something
+		// more elegant presents itself
+		$application = &Server\Application::instance();
+		$application->context()->bind('request', $this);
 	}
 	
 	
 	function __destruct() { 
 		// clean-up context store
 	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see eGloo\System\Server.Contextable::context()
-	 */
-	public function &context() {
-		return $this->context;
-	}
+
 	
 	/**
 	 * 
@@ -55,12 +58,14 @@ class Request extends \photon\http\Request implements \eGloo\System\Server\Conte
 		$notHtml = [
 			'xcss',
 			'xjavascript',
-			'xcss'
+			'xcss',
+			'file',
+			'image',
+			'media'
 		];
 		
 		return !in_array($this->GET[static::NAME_REQUEST_CLASS], $notHtml);
 	}
 	
-	protected $context;
 	
 }

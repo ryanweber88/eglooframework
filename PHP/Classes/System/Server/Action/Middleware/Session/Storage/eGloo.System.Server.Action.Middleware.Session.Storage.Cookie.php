@@ -28,14 +28,14 @@ class Cookie extends \photon\session\storage\Cookies {
 		
 		if (isset($this->cookie[self::NS_COOKIE])) { 
         	\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
-        		"Cookie::init cookie found in response:{$this->cookie[self::NS_COOKIE]}" . print_r($request->headers, true) 
+        		"Cookie::init cookie found in response:{$this->cookie[self::NS_COOKIE]}" //. print_r($request->headers, true) 
         	);	
 		}
 		
 		else { 
 			
         	\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
-        		"Cookie::init cookie not found " . print_r($request->headers, true) 
+        		"Cookie::init cookie not found " //. print_r($request->headers, true) 
         	);			
 		}
 		

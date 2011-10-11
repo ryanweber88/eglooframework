@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\System\Server\Context;
 
+use \eGloo\System\Server;
+
 /**
  * 
  * Provides interface by which all context-oriented objects
@@ -9,5 +11,11 @@ namespace eGloo\System\Server\Context;
  *
  */
 interface ContextInterface { 
+	
+	/**
+	 * 
+	 * Retrieve or set a context value
+	 */
+	public function &context(Server\Context $context = null);
 	
 }

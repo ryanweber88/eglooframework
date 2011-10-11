@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\System\Server;
 
+use \eGloo\System\Server;
+
 /**
  * 
  * Represents the application end or context of the Application Server (similar in model to application
@@ -13,6 +15,7 @@ namespace eGloo\System\Server;
 class Application extends \eGloo\Dialect\Object implements Context\ContextInterface { 
 	
 	use \eGloo\Utilities\SingletonTrait;
+	use Server\Context\ContextTrait;
 	
 	/**
 	 * 
@@ -41,7 +44,7 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 		$this->target($pathTarget);
 		
 		// set self as owner of context
-		$this->context(new Context($this));
+		$this->initializeContext();
 		
 		// bind components into context
 		// TODO change to full DI framework, instead of half-assed approached right now
@@ -101,12 +104,6 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 	 */
 	protected $target;
 	
-	/**
-	 * 
-	 * Represents an applications "context" or scope
-	 * @var Context
-	 */
-	protected $context;
-	
+
 	
 }

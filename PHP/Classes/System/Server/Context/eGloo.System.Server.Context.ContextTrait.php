@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\System\Server\Context;
 
+use \eGloo\System\Server;
+
 /**
  * Provides factory method to simplify access to different contexts;
  * Provides context characteristics to context-oriented objects
@@ -10,10 +12,10 @@ namespace eGloo\System\Server\Context;
 trait ContextTrait { 
 	
 	protected function initializeContext() { 
-		$this->context(new \eGloo\System\Server\Context($this));
+		$this->context(new Server\Context($this));
 	}
 	
-	public function &context(\eGloo\System\Server\Context $context = null) { 
+	public function &context(Server\Context $context = null) { 
 		if (is_null($context)) { 
 			return $this->context;		
 		}

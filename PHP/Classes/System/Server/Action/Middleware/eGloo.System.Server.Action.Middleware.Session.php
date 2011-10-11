@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\System\Server\Action\Middleware;
 
+use \eGloo\System\Server;
 use \eGloo\System\Server\Action\HTTP\Request;
 use \eGloo\System\Server\Action\HTTP\Response;
 
@@ -14,7 +15,9 @@ use \eGloo\System\Server\Action\HTTP\Response;
  * @author Christian Calloway
  *
  */
-class Session extends \photon\session\Session implements MiddlewareInterface, \eGloo\System\Server\Context\ContextInterface { 
+class Session extends \photon\session\Session implements MiddlewareInterface, Server\Context\ContextInterface { 
+	
+	use Server\Context\ContextTrait;
 	
 	/** used as namespace qualifier for session cookie */
 	const NS_COOKIE  = 'scsiv';
@@ -27,10 +30,8 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 		parent::__construct(is_null($store) ? 
 			new Session\Storage\Cookie() : $store
 		); 
-		
-		// attaches context awareness to session
-		//$this->initializeContext();
-		
+
+						
 		// add a session context observer - the point
 		// is to check if session is still viable - if it is not,
 		// then expire data from application context; this is done 
@@ -38,7 +39,12 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 		// only makes sense within session 
 		//$this->context()->attach($this);
 		
-	}	
+		// TODO application and sessin should not be coupled
+		// in this manner
+		$application = &Server\Application::instance();
+		$application->context()->bind('session', $this);
+	}
+	
 
 	
 	public function processRequest(Request  &$request) { 
@@ -51,7 +57,6 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 		// this will most likely be the request uuid, which is gaurenteed
 		// to be unique
 		session_id($this->store->iv);
-		
 		
 		//\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
 		
@@ -76,6 +81,25 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 				$GLOBALS['_SESSION'][$key] = $value; 
 			}
 		}
+		
+		// check if session has registered itself to application context - 
+		// if that is the case, then copy from 
+		// TODO copying parts of context between each other should be
+		// managed externally and moreso gracefully
+		$application = &Server\Application::instance();
+		
+		// if context currently exists in application scope, then attach reference
+		// of that context to session, otherwise create a new context in callback
+		$this->context($application->context()->retrieve(
+			$this->store->iv, function() { 
+				return new Server\Context\Session($this);
+			}
+		));
+			
+		
+		// TODO fire-event to determine if context is still valid?
+		// $this->context()->valid()
+		
 		
 	}
 	
@@ -104,9 +128,21 @@ class Session extends \photon\session\Session implements MiddlewareInterface, \e
 			// nature of 2+ application servers, means cookie data, as identified
 			// by session_id may be overwritten by an asynchronous request that
 			// is completed before primary request
-			//if ($request->isHTML()) { 
-				$this->store->commit($response);
-			//}
+			$this->store->commit($response);
+			
+			// checked if session context has been application bound - if it
+			// hasn't or if context has changed, then (re)bind to application
+			// context
+			$application = &Server\Application::instance();
+			
+			if ($this->context()->changed() || !$application->context()->exists($this->store->iv)) { 
+				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+					"BINDING NEW SESSION CONTEXT {$this->store->iv}"
+				);
+				$application->context()->bind(
+					$this->store->iv, $this->context()
+				);
+			}	
 		}
 		
 		

@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\System\Server\Context\Listener;
 
+use \eGloo\System\Server;
 use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
 use \Zend\EVentManager\EventCollection;
@@ -16,16 +17,20 @@ use \Zend\EVentManager\EventCollection;
 
 class Session extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
-	use \eGloo\Utilities\EventManager\HandlerAggregateTrait;
+	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
-	function __construct() { 
-		
+	function __construct(Server\Action\Middleware\Session $session) { 
+		$this->session = $session;
 	}
 	
     public function attach(EventCollection $events) {
-    	// TODO add session validation events
-    	
+    	$events->attach('valid', array($this, 'valid'));
     }
 	
+	public function valid(Event $event) { 
+		// TODO invalidate context if session has expired - should
+		// this be done in conjunction with time listener?
+	}    
 	
+	protected $session;
 }

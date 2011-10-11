@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\System\Server;
 
+use \eGloo\System\Server;
 use \Zend\EventManager\EventCollection;
 use \Zend\EventManager\EventManager;
 
@@ -19,20 +20,43 @@ class Context extends \eGloo\Dialect\Object {
 	
 	use \eGloo\Utilities\SubjectTrait;
 	
-	function __construct(&$owner) { 
+	/** @TODO implement storage interface */
+	function __construct(&$owner, Server\Context\Storage\StorageInterface $store = null) { 
 		// add reference to context's owner: application, request, session, etc
 		$this->owner = &$owner;
+		
+		// TODO add store initialization here
 		
 		// add zf2 EventManager and attach listeners
 		$this->events = new EventManager();
 		
 		// manages context change events
-		$this->events->attachAggregate(new Context\Listener\Change());
+		$this->events->attachAggregate(new Server\Context\Listener\Change());
 		
 		// manages context memory allocation
-		$this->events->attachAggregate(new Context\Listener\Limit());
+		$this->events->attachAggregate(new Server\Context\Listener\Limit());
 	}
 	
+	public function valid() { 
+		// pass
+	}
+	
+	/**
+	 * 
+	 * Deallocate current store property and reinitialize
+	 */
+	public function clear() {
+		unset($this->store);
+		$this->store = [ ];
+	}
+	
+	/**
+	 * 
+	 * Determines if context is empty
+	 */
+	public function isEmpty() { 
+		return count($this->store) === 0;
+	}
 	
 	/**
 	 * 
@@ -208,6 +232,7 @@ class Context extends \eGloo\Dialect\Object {
 	
 	
 	protected $owner;
-	protected $store  =  array();
+	protected $store   = array();
 	protected $events;
+	protected $changed = false;
 }

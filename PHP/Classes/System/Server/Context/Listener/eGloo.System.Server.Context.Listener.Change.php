@@ -22,6 +22,15 @@ class Change extends \eGloo\Dialect\Object implements ListenerAggregate {
 	
     public function attach(EventCollection $events) {
 	    // TODO attach change events
+	    $events->attach('bind'  , array($this, 'changed'));
+	    $events->attach('unbind', array($this, 'changed'));
     }
+    
+	public function changed(Event $event) { 
+		// TODO differentiate between change events
+		
+		// flag target (context) that change has occured 
+		$event->getTarget()->changed(true);
+	}      
 	
 }
