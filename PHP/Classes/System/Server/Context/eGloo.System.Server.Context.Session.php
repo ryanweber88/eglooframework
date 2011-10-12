@@ -20,7 +20,24 @@ class Session extends Server\Context {
 		
 		// attach time listener aggregate 
 		// TODO session expiry time should be configurable
-		$this->events->attachAggregate(new Server\Context\Listener\Time(25));			
+		$this->events->attachAggregate(new Server\Context\Listener\Time(10));
+
+	}
+	
+	public function &bind($key, $value, $expires = null) { 
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			"----SessionHandler::CALLING SESSIONCONTEXT::BIND with key $key---"
+		);			
+		
+		return parent::bind($key, $value);
+	}
+	
+	public function unbind($key) { 
+		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			"----SessionHandler::CALLING SESSIONCONTEXT::UNBIND with key $key---"
+		);	
+		
+		return parent::unbind($key);
 	}
 	
 	

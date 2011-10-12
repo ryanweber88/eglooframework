@@ -67,14 +67,14 @@ class Adapter extends Middleware {
 		}
 		
 		
+		
 		// prepare requestInfoBean for egloo dispatch
 		// Validate this request and update the info bean accordingly
 		// TODO From a programmatic standpoint, it isn't clear that this method
 		// changes requestInfoBean properties - and if it does, it shouldn't
 		// return a method 
 		$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
-				
-		
+						
 		// TODO cache this based upon request passed, and if lambda return is boolean true, plus request
 		// itself taken into account; caching at the moment to determine performance gain
 		// TODO I hate having to pass the signature - I'd like to find a way to understand request context and

@@ -16,20 +16,22 @@ class Time extends \eGloo\Dialect\Object implements ListenerAggregate {
 	
 	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
-    public function attach(EventCollection $events) {
-    	$events->attach('valid', array($this, 'valid'));
-    }
+
     	
 	function __construct($expires) {
 		// set absolute expires timestamp 
 		$this->expires = time()  + $expires;
 	}
-	
+
+    public function attach(EventCollection $events) {
+    	$events->attach('valid', array($this, 'valid'));
+    }
+    	
 	public function valid(Event $event) { 
 		// checks if cache is still valid; if not, unbind the value from attributes
 		// owner (a context object)
 		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
-			"CHECKING SESSION CONTEXT VALID"
+			"---Time::valid CHECKING SESSION CONTEXT VALID---"
 		);		
 		if ($this->expired()) { 
 			$event->getTarget()->clear();

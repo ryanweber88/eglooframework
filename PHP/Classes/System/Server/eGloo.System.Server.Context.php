@@ -38,7 +38,9 @@ class Context extends \eGloo\Dialect\Object {
 	}
 	
 	public function valid() { 
-		// pass
+		// TODO replace with magic call - fires trigger event
+		$this->events()->trigger('valid', $this, [ ]);
+		
 	}
 	
 	/**
@@ -200,8 +202,12 @@ class Context extends \eGloo\Dialect\Object {
 	 * Check if a value, idenified by key, exists within context
 	 */
 	public function exists($key) { 
+						
+		// check if context itself is still valid
+		$this->events->trigger('valid', $this, [ ]);
 				
 		if (in_array($key, array_keys($this->store))) { 
+			
 			// call cache listener on attribute to see if
 			$this->store[$key]->events->trigger('valid', $this->store[$key], compact('key'));
 			

@@ -58,6 +58,7 @@ class Request extends \photon\http\Request implements Server\Context\ContextInte
 		$notHtml = [
 			'xcss',
 			'xjavascript',
+			'xjs',
 			'xcss',
 			'file',
 			'image',

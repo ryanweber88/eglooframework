@@ -51,51 +51,68 @@ class Session extends \photon\session\Session implements MiddlewareInterface, Se
 		
 		//var_export($request->COOKIE); exit;
 		// initialize storage, or retrieve cookies from request object
-		$this->store->init($request);
-		
-		// set session id based upon what initialized value store;
-		// this will most likely be the request uuid, which is gaurenteed
-		// to be unique
-		session_id($this->store->iv);
-		
-		//\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
-		
-		// initialize session and feed values back into session global
-		// from this object, so that $_SESSION transparently contains
-		// values retrieved from request
-		$GLOBALS['_SESSION'] = [ ];
-		
-		//echo get_class($request->COOKIE); exit;
-		
-		// store should save to data, but unfortunately, saves to cookie hash, which suggest that
-		// storage must be cookie based - very bad design mf'er
-		$data = &$this->store->cookie;
-		
-		foreach ($data as $key => $value) {
-			if (strpos($key, self::NS_SESSION) !== false) {  
-				if (is_object($value)) { 
-					$value = 'object:' . get_class($value);
-				}		
-	
-				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log("Session::processRequest retrieving:$key is $value");
-				$GLOBALS['_SESSION'][$key] = $value; 
-			}
-		}
-		
-		// check if session has registered itself to application context - 
-		// if that is the case, then copy from 
-		// TODO copying parts of context between each other should be
-		// managed externally and moreso gracefully
-		$application = &Server\Application::instance();
-		
-		// if context currently exists in application scope, then attach reference
-		// of that context to session, otherwise create a new context in callback
-		$this->context($application->context()->retrieve(
-			$this->store->iv, function() { 
-				return new Server\Context\Session($this);
-			}
-		));
+		if ($request->isHTML()) { 
+			$this->store->init($request);
 			
+			// set session id based upon what initialized value store;
+			// this will most likely be the request uuid, which is gaurenteed
+			// to be unique
+			session_id($this->store->iv);
+			
+			//\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+			
+			// initialize session and feed values back into session global
+			// from this object, so that $_SESSION transparently contains
+			// values retrieved from request
+			$GLOBALS['_SESSION'] = [ ];
+			
+			//echo get_class($request->COOKIE); exit;
+			
+			// store should save to data, but unfortunately, saves to cookie hash, which suggest that
+			// storage must be cookie based - very bad design mf'er
+			$data = &$this->store->cookie;
+			
+			foreach ($data as $key => $value) {
+				if (strpos($key, self::NS_SESSION) !== false) {  
+					if (is_object($value)) { 
+						$value = 'object:' . get_class($value);
+					}		
+		
+					\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log("Session::processRequest retrieving:$key is $value");
+					$GLOBALS['_SESSION'][$key] = $value; 
+				}
+			}
+			
+			// check if session has registered itself to application context - 
+			// if that is the case, then copy from 
+			// TODO copying parts of context between each other should be
+			// managed externally and moreso gracefully
+			$application = &Server\Application::instance();
+			
+			// if context currently exists in application scope, then attach reference
+			// of that context to session, otherwise create a new context in callback
+			
+			if ($application->context()->exists($this->store->iv)) { 
+				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+					"-----Session::processRequest CONTEXT EXISTS--------" . get_class($application->context()->retrieve($this->store->iv))
+				);
+			}
+			
+			// retrieve session context, from either application's context or 
+			// instantiate new instance as set as current context
+			$sessionContext = $application->context()->retrieve($this->store->iv, function() { 
+				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+					"-----Session::processRequest NEW SESSION CONTEXT-------"
+				);	
+				
+				return new Server\Context\Session($this);
+			});
+			
+			// TODO changed should be explicitly set here - needs to placed transparenly
+			// during retrieval process
+			$sessionContext->changed(false);
+			$this->context($sessionContext);
+		}
 		
 		// TODO fire-event to determine if context is still valid?
 		// $this->context()->valid()
@@ -135,10 +152,26 @@ class Session extends \photon\session\Session implements MiddlewareInterface, Se
 			// context
 			$application = &Server\Application::instance();
 			
-			if ($this->context()->changed() || !$application->context()->exists($this->store->iv)) { 
+			/*
+			if ($this->context()->changed) { 
 				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
-					"BINDING NEW SESSION CONTEXT {$this->store->iv}"
+					"------Session::processResponse CONTEXT CHANGED---------"
+				);				
+			}
+			
+			if (!$application->context()->exists($this->store->iv)) {
+				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+					"------Session::processResponse CONTEXT DOESNT EXIST---------"
 				);
+			}
+			*/
+			
+			if ($this->context()->changed() || !$application->context()->exists($this->store->iv)) { 
+				
+				\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+					"------Session::processResponse BINDING NEW SESSION CONTEXT---------"
+				);
+				
 				$application->context()->bind(
 					$this->store->iv, $this->context()
 				);
