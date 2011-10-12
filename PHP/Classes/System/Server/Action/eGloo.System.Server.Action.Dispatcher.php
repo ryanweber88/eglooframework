@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\System\Server\Action;
 
+use \eGloo\System\Server;
+
 /**
  * 
  * Responsible for dispatch cycle - recieves mongrel2 request, routes to appropriate handler,
@@ -8,10 +10,6 @@ namespace eGloo\System\Server\Action;
  * @author petflowdeveloper
  *
  */
-use eGloo\System\Server\Action\HTTP\Response;
-
-use eGloo\System\Server\EventMachine\Connection\HTTP;
-
 class Dispatcher extends \photon\core\Dispatcher { 
 	
 	

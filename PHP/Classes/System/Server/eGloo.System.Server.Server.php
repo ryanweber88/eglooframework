@@ -145,12 +145,17 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 		}
 		unset($message); // Cleans the memory with the __destruct call.
 		
+		// unset class variables that fall outside of server (stateful-oriented) classes
+		$this->resetClassVariables();
+		
 		/*
 		Log::perf(array(
 			'photon.process_request', $uuid, Timer::stop('photon.process_request'), $stats['size']
 		));
 		*/
     }
+    
+
 	
 	/**
 	 * Clean-up configuration from persistent scope and discontinue polling
@@ -167,6 +172,32 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 			die(1);
 		}
 	}
+	
+	final private function resetClassVariables() {
+		// resets class variables, for all declared classes
+		// outside of stateful classes - eg, classes that fall
+		// in server namespace
+		
+		// TODO map declared classes and their static properties
+		// so that reflection (which is costly) does not have 
+		// to be used
+		foreach (get_declared_classes() as $name) { 
+			
+			// make sure classes are not stateful
+			if (strpos($name, "eGloo\System\Server") === false) { 
+				$reflection = new \ReflectionClass($name);
+				echo "class is $name\n"; 
+				
+				// access static properties and reset value
+				foreach($reflection->getStaticProperties() as $property)  {
+					echo $property; exit;
+				
+				}
+			}
+		}
+	}
+	
+	
 
 	
 }
