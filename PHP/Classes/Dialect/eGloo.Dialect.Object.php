@@ -74,6 +74,43 @@ abstract class Object {
 	
 	/**
 	 * 
+	 * Provides attr_reader quality to php objects - calls __call 
+	 * to cement retrieval. Like __call methods, this can be 
+	 * overriden with a method of the same name as property
+	 * @param  string $name
+	 * @throws \eGloo\Dialect\Exception
+	 * @return  mixed
+	 */
+	public function __get($name) {
+		try { 
+			return $this->$name();
+		}
+		catch (Exception $pass) { 
+			throw $pass;
+		}
+	}
+	
+	/**
+	 * 
+	 * Provides attr_writer quality to php objects - $obj->property = value
+	 * will actually call $obj->property($value); to implementors, it will
+	 * appears as if setting public properties
+	 * @param  string $name
+	 * @param  mixed  $value
+	 * @throws \eGloo\Dialect\Exception
+	 * @return void
+	 */
+	public function __set($name, $value) { 
+		try { 
+			$this->$name($value);
+		}
+		catch (Exception $pass) { 
+			throw $pass;
+		}
+	}
+	
+	/**
+	 * 
 	 * Taking a step away from the java world, and into ruby, (protected) properties 
 	 * will be accessed by dynamic method call "$object->propertyName($value = null)";
 	 * like Ruby, this functionality can be overriden by defining a like named method 
