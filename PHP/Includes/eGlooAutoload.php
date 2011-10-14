@@ -87,7 +87,7 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 
 // Load Pimple DIC
 // TODO place into configuration
-require_once 'PHP/Library/Pimple/Pimple.php';
+require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php';
 
 /**
  * Defines the class and interface autoload runtime handler.
