@@ -1,0 +1,1590 @@
+Sep 26 12:27:31 logger.smarty [info] OBJECT instance found >>>
+
+Array
+(
+    [path] => /usr/lib/egloo/applications/Client.gloo/InterfaceBundles/Default/XHTML/Start/StartTest.tpl
+    [cache_id] => 
+    [selected_nav] => start
+    [section] => start
+    [page] => start
+    [egCMSCurrentPage] => externalMainPage-extMainViewBase-ExternalMainPageBaseRequestProcessor-Default-externalMainPage-extMainViewBase
+    [categories] => Array
+        (
+            [0] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => 69
+                            [image] => dry_food
+                            [display] => Dry Food
+                        )
+
+                    [1] => Array
+                        (
+                            [id] => 71
+                            [image] => treats
+                            [display] => Treats
+                        )
+
+                    [2] => Array
+                        (
+                            [id] => 30483
+                            [image] => supplements
+                            [display] => Supplements
+                        )
+
+                    [3] => Array
+                        (
+                            [id] => 29384
+                            [image] => treatments
+                            [display] => Treatments
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [0] => Array
+                        (
+                            [id] => 9455
+                            [image] => canned_food
+                            [display] => Canned Food
+                        )
+
+                    [1] => Array
+                        (
+                            [id] => 1579
+                            [image] => litter
+                            [display] => Litter
+                        )
+
+                    [2] => Array
+                        (
+                            [id] => 7763
+                            [image] => pads
+                            [display] => Pads
+                        )
+
+                    [3] => Array
+                        (
+                            [id] => 29386
+                            [image] => accessories
+                            [display] => Accessories
+                        )
+
+                )
+
+        )
+
+    [pets] => Array
+        (
+            [0] => Array
+                (
+                    [id] => 3202
+                    [display] => Dog
+                    [type] => dog
+                    [ages] => Array
+                        (
+                            [Puppy] => 3217
+                            [Adult] => 3204
+                            [Senior] => 3229
+                        )
+
+                    [checked] => 
+                )
+
+            [1] => Array
+                (
+                    [id] => 3219
+                    [display] => Cat
+                    [type] => cat
+                    [ages] => Array
+                        (
+                            [Kitten] => 3217
+                            [Adult] => 3204
+                            [Senior] => 3229
+                        )
+
+                    [checked] => 
+                )
+
+        )
+
+    [featured_brands] => Array
+        (
+            [0] => PetflowBrand Object
+                (
+                    [productList:protected] => 
+                    [productCount:protected] => 
+                    [oldModel:protected] => 1
+                    [id:protected] => 12233
+                    [dataObject:protected] => stdClass Object
+                        (
+                            [nid] => 12233
+                            [vid] => 12840
+                            [type] => brand
+                            [language] => 
+                            [title] => Wellness
+                            [uid] => 1
+                            [status] => 1
+                            [created] => 1274890429
+                            [changed] => 1286464353
+                            [view_count] => 0
+                            [comment] => 0
+                            [promote] => 0
+                            [moderate] => 0
+                            [sticky] => 0
+                            [tnid] => 0
+                            [translate] => 0
+                            [slug] => brand/wellness
+                            [is_broken] => 
+                            [status_string] => Published
+                            [brand_link] => /explorer/brand/wellness
+                            [img_primary_id] => 12233-1_gif
+                            [img_thumb] => /images/default/brands/thumbnail/12233-1.gif
+                            [img_medium] => /images/default/brands/medium/12233-1.gif
+                            [img_original] => /images/default/brands/original/12233-1.gif
+                            [imgs_additional] => Array
+                                (
+                                    [12233-1_gif] => Array
+                                        (
+                                            [medium] => /images/default/brands/medium/12233-1.gif
+                                            [thumb] => /images/default/brands/thumbnail/12233-1.gif
+                                            [original] => /images/default/brands/original/12233-1.gif
+                                        )
+
+                                )
+
+                            [imgs_paths] => Array
+                                (
+                                    [12233-1_gif] => Array
+                                        (
+                                            [medium] => /images/default/brands/medium/12233-1.gif
+                                            [thumb] => /images/default/brands/thumbnail/12233-1.gif
+                                            [original] => /images/default/brands/original/12233-1.gif
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+            [1] => PetflowBrand Object
+                (
+                    [productList:protected] => 
+                    [productCount:protected] => 
+                    [oldModel:protected] => 1
+                    [id:protected] => 12207
+                    [dataObject:protected] => stdClass Object
+                        (
+                            [nid] => 12207
+                            [vid] => 12814
+                            [type] => brand
+                            [language] => 
+                            [title] => Taste Of The Wild
+                            [uid] => 1
+                            [status] => 1
+                            [created] => 1274890418
+                            [changed] => 1286464288
+                            [view_count] => 0
+                            [comment] => 0
+                            [promote] => 0
+                            [moderate] => 0
+                            [sticky] => 0
+                            [tnid] => 0
+                            [translate] => 0
+                            [slug] => brand/taste-wild
+                            [is_broken] => 
+                            [status_string] => Published
+                            [brand_link] => /explorer/brand/taste-wild
+                            [img_primary_id] => 
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12207.gif
+                            [img_medium] => /images/brands/medium/brand-12207.gif
+                            [img_original] => 
+                            [imgs_additional] => Array
+                                (
+                                )
+
+                            [imgs_paths] => Array
+                                (
+                                )
+
+                        )
+
+                )
+
+            [2] => PetflowBrand Object
+                (
+                    [productList:protected] => 
+                    [productCount:protected] => 
+                    [oldModel:protected] => 1
+                    [id:protected] => 3310
+                    [dataObject:protected] => stdClass Object
+                        (
+                            [nid] => 3310
+                            [vid] => 3311
+                            [type] => brand
+                            [language] => 
+                            [title] => Orijen
+                            [uid] => 1
+                            [status] => 1
+                            [created] => 1272647084
+                            [changed] => 1295030399
+                            [view_count] => 0
+                            [comment] => 0
+                            [promote] => 0
+                            [moderate] => 0
+                            [sticky] => 0
+                            [tnid] => 0
+                            [translate] => 0
+                            [slug] => brand/orijen
+                            [is_broken] => 
+                            [status_string] => Published
+                            [brand_link] => /explorer/brand/orijen
+                            [img_primary_id] => 
+                            [img_thumb] => /images/brands/thumb/brand-3310.gif
+                            [img_medium] => /images/brands/medium/brand-3310.gif
+                            [img_original] => 
+                            [imgs_additional] => Array
+                                (
+                                )
+
+                            [imgs_paths] => Array
+                                (
+                                )
+
+                        )
+
+                )
+
+            [3] => PetflowBrand Object
+                (
+                    [productList:protected] => 
+                    [productCount:protected] => 
+                    [oldModel:protected] => 1
+                    [id:protected] => 3256
+                    [dataObject:protected] => stdClass Object
+                        (
+                            [nid] => 3256
+                            [vid] => 3257
+                            [type] => brand
+                            [language] => 
+                            [title] => Blue Buffalo
+                            [uid] => 1
+                            [status] => 1
+                            [created] => 1272647077
+                            [changed] => 1286462936
+                            [view_count] => 0
+                            [comment] => 0
+                            [promote] => 0
+                            [moderate] => 0
+                            [sticky] => 0
+                            [tnid] => 0
+                            [translate] => 0
+                            [slug] => brand/blue-buffalo
+                            [is_broken] => 
+                            [status_string] => Published
+                            [brand_link] => /explorer/brand/blue-buffalo
+                            [img_primary_id] => 
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3256.gif
+                            [img_medium] => /images/brands/medium/brand-3256.gif
+                            [img_original] => 
+                            [imgs_additional] => Array
+                                (
+                                )
+
+                            [imgs_paths] => Array
+                                (
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [brands] => Array
+        (
+            [0] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => 9 Lives
+                            [nid] => 11481
+                            [slug] => brand/9-lives
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11481.gif
+                            [img_medium] => /images/brands/medium/brand-11481.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Acana
+                            [nid] => 29108
+                            [slug] => brand/acana
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-29108.jpg
+                            [img_medium] => /images/brands/medium/brand-29108.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Accessories
+                            [nid] => 29401
+                            [slug] => brand/accessories
+                            [img_thumb] => /images/brands/thumb/brand-29401.gif
+                            [img_medium] => /images/brands/medium/brand-29401.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Arm & Hammer
+                            [nid] => 3253
+                            [slug] => brand/arm-hammer
+                            [img_thumb] => /images/brands/thumb/brand-3253.gif
+                            [img_medium] => /images/brands/medium/brand-3253.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Artemis
+                            [nid] => 3262
+                            [slug] => brand/Artemis
+                            [img_thumb] => /images/default/brands/thumbnail/3262-2.jpg
+                            [img_medium] => /images/default/brands/medium/3262-2.jpg
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Avoderm
+                            [nid] => 22149
+                            [slug] => brand/avoderm
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-22149.gif
+                            [img_medium] => /images/brands/medium/brand-22149.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Beggin Strips
+                            [nid] => 3247
+                            [slug] => brand/beggin-strips
+                            [img_thumb] => /images/brands/thumb/brand-3247.gif
+                            [img_medium] => /images/brands/medium/brand-3247.gif
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Beneful
+                            [nid] => 11489
+                            [slug] => brand/beneful
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11489.gif
+                            [img_medium] => /images/brands/medium/brand-11489.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => BFF
+                            [nid] => 11493
+                            [slug] => brand/bff
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11493.gif
+                            [img_medium] => /images/brands/medium/brand-11493.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Bil Jac
+                            [nid] => 3255
+                            [slug] => brand/bil-jac
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3255.gif
+                            [img_medium] => /images/brands/medium/brand-3255.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Blue Buffalo
+                            [nid] => 3256
+                            [slug] => brand/blue-buffalo
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3256.gif
+                            [img_medium] => /images/brands/medium/brand-3256.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Bocces Bakery
+                            [nid] => 17881
+                            [slug] => brand/bocces-bakery
+                            [img_thumb] => /images/brands/thumb/brand-17881.gif
+                            [img_medium] => /images/brands/medium/brand-17881.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => By Nature
+                            [nid] => 3258
+                            [slug] => brand/nature
+                            [img_thumb] => /images/default/brands/thumbnail/3258-1.jpg
+                            [img_medium] => /images/default/brands/medium/3258-1.jpg
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Cadet
+                            [nid] => 29370
+                            [slug] => brand/cadet
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-29370.jpg
+                            [img_medium] => /images/brands/medium/brand-29370.gif
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => California Natural
+                            [nid] => 11538
+                            [slug] => brand/california-natural
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11538.gif
+                            [img_medium] => /images/brands/medium/brand-11538.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Canidae
+                            [nid] => 3260
+                            [slug] => brand/canidae
+                            [img_thumb] => /images/default/brands/thumbnail/3260-1.gif
+                            [img_medium] => /images/default/brands/medium/3260-1.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Canyon Creek Ranch 
+                            [nid] => 30331
+                            [slug] => brand/canyon-creek-ranch
+                            [img_thumb] => /images/default/brands/thumbnail/30331-1.png
+                            [img_medium] => /images/default/brands/medium/30331-1.png
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Castor And Pollux
+                            [nid] => 3333
+                            [slug] => brand/castor-pollux
+                            [img_thumb] => /images/default/brands/thumbnail/3333-1.png
+                            [img_medium] => /images/default/brands/medium/3333-1.png
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Cesar
+                            [nid] => 3249
+                            [slug] => brand/cesar
+                            [img_thumb] => /images/brands/thumb/brand-3249.png
+                            [img_medium] => /images/brands/medium/brand-3249.png
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Chef Michaels
+                            [nid] => 29959
+                            [slug] => brand/chef-michaels
+                            [img_thumb] => /images/default/brands/thumbnail/29959-1.jpg
+                            [img_medium] => /images/default/brands/medium/29959-1.jpg
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Chicken Soup
+                            [nid] => 11579
+                            [slug] => brand/chicken-soup
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11579.gif
+                            [img_medium] => /images/brands/medium/brand-11579.gif
+                        )
+
+                )
+
+            [3] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Dingo
+                            [nid] => 3269
+                            [slug] => brand/dingo
+                            [img_thumb] => /images/brands/thumb/brand-3269.gif
+                            [img_medium] => /images/brands/medium/brand-3269.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Dogswell
+                            [nid] => 3271
+                            [slug] => brand/dogswell
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3271.gif
+                            [img_medium] => /images/brands/medium/brand-3271.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Dr. Elsey
+                            [nid] => 3272
+                            [slug] => brand/dr-elsey
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3272.gif
+                            [img_medium] => /images/brands/medium/brand-3272.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Eagle Pack
+                            [nid] => 11626
+                            [slug] => brand/eagle-pack
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11626.gif
+                            [img_medium] => /images/brands/medium/brand-11626.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Earthborn Holistic
+                            [nid] => 11634
+                            [slug] => brand/earthborn-holistic
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11634.gif
+                            [img_medium] => /images/brands/medium/brand-11634.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Eukanuba
+                            [nid] => 3274
+                            [slug] => brand/eukanuba
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3274.gif
+                            [img_medium] => /images/brands/medium/brand-3274.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Evangers
+                            [nid] => 3275
+                            [slug] => brand/evangers
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3275.gif
+                            [img_medium] => /images/brands/medium/brand-3275.gif
+                        )
+
+                )
+
+            [4] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Ever Clean
+                            [nid] => 11689
+                            [slug] => brand/ever-clean
+                            [img_thumb] => /images/default/brands/thumbnail/11689-1.jpg
+                            [img_medium] => /images/default/brands/medium/11689-1.jpg
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => EVO
+                            [nid] => 11695
+                            [slug] => brand/evo
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11695.gif
+                            [img_medium] => /images/brands/medium/brand-11695.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Fancy Feast
+                            [nid] => 11719
+                            [slug] => brand/fancy-feast
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11719.gif
+                            [img_medium] => /images/brands/medium/brand-11719.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Felidae
+                            [nid] => 3259
+                            [slug] => brand/felidae
+                            [img_thumb] => /images/brands/thumb/brand-3259.gif
+                            [img_medium] => /images/brands/medium/brand-3259.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Feline Pine
+                            [nid] => 3303
+                            [slug] => brand/feline-pine
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3303.gif
+                            [img_medium] => /images/brands/medium/brand-3303.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Flea and Tick
+                            [nid] => 29390
+                            [slug] => brand/flea-and-tick
+                            [img_thumb] => /images/brands/thumb/brand-29390.gif
+                            [img_medium] => /images/brands/medium/brand-29390.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Fresh Step
+                            [nid] => 11746
+                            [slug] => brand/fresh-step
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11746.gif
+                            [img_medium] => /images/brands/medium/brand-11746.gif
+                        )
+
+                )
+
+            [5] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Friskies
+                            [nid] => 11754
+                            [slug] => brand/friskies
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11754.gif
+                            [img_medium] => /images/brands/medium/brand-11754.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Fromm
+                            [nid] => 3280
+                            [slug] => brand/fromm
+                            [img_thumb] => /images/brands/thumb/brand-3280.gif
+                            [img_medium] => /images/brands/medium/brand-3280.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Fruitables
+                            [nid] => 3281
+                            [slug] => brand/fruitables
+                            [img_thumb] => /images/default/brands/thumbnail/3281-1.jpg
+                            [img_medium] => /images/default/brands/medium/3281-1.jpg
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Furminator
+                            [nid] => 3282
+                            [slug] => brand/furminator
+                            [img_thumb] => /images/default/brands/thumbnail/3282-1.jpg
+                            [img_medium] => /images/default/brands/medium/3282-1.jpg
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Go!
+                            [nid] => 11774
+                            [slug] => brand/go
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11774.gif
+                            [img_medium] => /images/brands/medium/brand-11774.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Great Life
+                            [nid] => 30099
+                            [slug] => brand/great-life
+                            [img_thumb] => /images/default/brands/thumbnail/30099-1.jpg
+                            [img_medium] => /images/default/brands/medium/30099-1.jpg
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Greenies
+                            [nid] => 11787
+                            [slug] => brand/greenies
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11787.gif
+                            [img_medium] => /images/brands/medium/brand-11787.gif
+                        )
+
+                )
+
+            [6] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Halo
+                            [nid] => 12516
+                            [slug] => brand/halo
+                            [img_thumb] => /images/brands/thumb/brand-12516.gif
+                            [img_medium] => /images/brands/medium/brand-12516.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Healthwise
+                            [nid] => 20897
+                            [slug] => brand/healthwise
+                            [img_thumb] => /images/brands/thumb/brand-20897.gif
+                            [img_medium] => /images/brands/medium/brand-20897.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Hill's Prescription Diet
+                            [nid] => 3287
+                            [slug] => brand/hills-prescription-diet
+                            [img_thumb] => /images/brands/thumb/brand-3287.jpg
+                            [img_medium] => /images/brands/medium/brand-3287.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Holistic Select
+                            [nid] => 11800
+                            [slug] => brand/holistic-select
+                            [img_thumb] => /images/brands/thumb/brand-11800.gif
+                            [img_medium] => /images/brands/medium/brand-11800.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Horizon
+                            [nid] => 30428
+                            [slug] => brand/horizon
+                            [img_thumb] => /images/default/brands/thumbnail/30428-1.jpg
+                            [img_medium] => /images/default/brands/medium/30428-1.jpg
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Iams
+                            [nid] => 3288
+                            [slug] => brand/iams
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3288.gif
+                            [img_medium] => /images/brands/medium/brand-3288.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Innova
+                            [nid] => 11859
+                            [slug] => brand/innova
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11859.gif
+                            [img_medium] => /images/brands/medium/brand-11859.gif
+                        )
+
+                )
+
+            [7] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Jonny Cat
+                            [nid] => 3290
+                            [slug] => brand/jonny-cat
+                            [img_thumb] => /images/brands/thumb/brand-3290.jpg
+                            [img_medium] => /images/brands/thumb/default.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Karma Organic
+                            [nid] => 21014
+                            [slug] => brand/karma-organic
+                            [img_thumb] => /images/brands/thumb/brand-21014.gif
+                            [img_medium] => /images/brands/medium/brand-21014.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Lotus
+                            [nid] => 3252
+                            [slug] => brand/lotus
+                            [img_thumb] => /images/default/brands/thumbnail/3252-3.png
+                            [img_medium] => /images/default/brands/medium/3252-3.png
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Merrick
+                            [nid] => 3296
+                            [slug] => brand/merrick
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3296.gif
+                            [img_medium] => /images/brands/medium/brand-3296.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Milk-Bone
+                            [nid] => 3297
+                            [slug] => brand/milk-bone
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3297.jpg
+                            [img_medium] => /images/brands/medium/brand-3297.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Mother Nature
+                            [nid] => 11951
+                            [slug] => brand/mother-nature
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-11951.gif
+                            [img_medium] => /images/brands/medium/brand-11951.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Native
+                            [nid] => 3299
+                            [slug] => brand/native
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3299.gif
+                            [img_medium] => /images/brands/medium/brand-3299.gif
+                        )
+
+                )
+
+            [8] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Natural Balance
+                            [nid] => 3301
+                            [slug] => brand/natural-balance
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3301.gif
+                            [img_medium] => /images/brands/medium/brand-3301.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Nature's Logic
+                            [nid] => 3257
+                            [slug] => brand/Nature-Logic
+                            [img_thumb] => /images/default/brands/thumbnail/3257-1.jpg
+                            [img_medium] => /images/default/brands/medium/3257-1.jpg
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Nature's Variety
+                            [nid] => 3306
+                            [slug] => brand/natures-variety
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3306.gif
+                            [img_medium] => /images/brands/medium/brand-3306.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Newmans Own Organics
+                            [nid] => 3308
+                            [slug] => brand/newmans-own-organics
+                            [img_thumb] => /images/brands/thumb/brand-3308.gif
+                            [img_medium] => /images/brands/medium/brand-3308.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Now!
+                            [nid] => 12060
+                            [slug] => brand/now
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12060.gif
+                            [img_medium] => /images/brands/medium/brand-12060.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Nutro
+                            [nid] => 12678
+                            [slug] => brand/nutro-0
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12678.jpg
+                            [img_medium] => /images/brands/medium/brand-12678.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Old Mother Hubbard
+                            [nid] => 12075
+                            [slug] => brand/old-mother-hubbard
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12075.gif
+                            [img_medium] => /images/brands/medium/brand-12075.gif
+                        )
+
+                )
+
+            [9] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Orijen
+                            [nid] => 3310
+                            [slug] => brand/orijen
+                            [img_thumb] => /images/brands/thumb/brand-3310.gif
+                            [img_medium] => /images/brands/medium/brand-3310.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Pedigree
+                            [nid] => 12087
+                            [slug] => brand/pedigree
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12087.gif
+                            [img_medium] => /images/brands/medium/brand-12087.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Pet Time
+                            [nid] => 29371
+                            [slug] => brand/pet-time
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-29371.jpg
+                            [img_medium] => /images/brands/medium/brand-29371.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => PetGuard
+                            [nid] => 3314
+                            [slug] => brand/petguard
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3314.gif
+                            [img_medium] => /images/brands/medium/brand-3314.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Pill Pockets
+                            [nid] => 14283
+                            [slug] => brand/pill-pockets
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-14283.jpg
+                            [img_medium] => /images/brands/medium/brand-14283.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Pinnacle
+                            [nid] => 3315
+                            [slug] => brand/pinnacle
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3315.jpg
+                            [img_medium] => /images/brands/medium/brand-3315.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Plato Pet Treats
+                            [nid] => 30235
+                            [slug] => brand/plato-pet-treats
+                            [img_thumb] => /images/default/brands/thumbnail/30235-1.jpg
+                            [img_medium] => /images/default/brands/medium/30235-1.jpg
+                        )
+
+                )
+
+            [10] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Precise
+                            [nid] => 3316
+                            [slug] => brand/precise
+                            [img_thumb] => /images/default/brands/thumbnail/3316-1.jpg
+                            [img_medium] => /images/default/brands/medium/3316-1.jpg
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Premium Edge 
+                            [nid] => 30055
+                            [slug] => brand/premium-edge
+                            [img_thumb] => /images/default/brands/thumbnail/30055-1.jpg
+                            [img_medium] => /images/default/brands/medium/30055-1.jpg
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Pro Plan
+                            [nid] => 3317
+                            [slug] => brand/pro-plan
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3317.gif
+                            [img_medium] => /images/brands/medium/brand-3317.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Pure Vita
+                            [nid] => 30162
+                            [slug] => brand/pure-vita
+                            [img_thumb] => /images/default/brands/thumbnail/30162-1.jpg
+                            [img_medium] => /images/default/brands/medium/30162-1.jpg
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Purina ONE
+                            [nid] => 12070
+                            [slug] => brand/purina-one
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12070.gif
+                            [img_medium] => /images/brands/medium/brand-12070.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Redbarn
+                            [nid] => 3319
+                            [slug] => brand/redbarn
+                            [img_thumb] => /images/brands/thumb/brand-3319.gif
+                            [img_medium] => /images/brands/medium/brand-3319.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Royal Canin
+                            [nid] => 3469
+                            [slug] => brand/royal-canin
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3469.gif
+                            [img_medium] => /images/brands/medium/brand-3469.gif
+                        )
+
+                )
+
+            [11] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Royal Canin Veterinary Diet
+                            [nid] => 23616
+                            [slug] => brand/royal-canin-veterinary-diet
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-23616.jpg
+                            [img_medium] => /images/brands/medium/brand-23616.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Salmon Paws
+                            [nid] => 30585
+                            [slug] => brand/salmon-paws
+                            [img_thumb] => /images/default/brands/thumbnail/30585-1.png
+                            [img_medium] => /images/default/brands/medium/30585-1.png
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Science Diet
+                            [nid] => 12421
+                            [slug] => brand/science-diet
+                            [img_thumb] => /images/brands/thumb/brand-12421.gif
+                            [img_medium] => /images/brands/medium/brand-12421.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Scoop Away
+                            [nid] => 12184
+                            [slug] => brand/scoop-away
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12184.gif
+                            [img_medium] => /images/brands/medium/brand-12184.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Smart Pup
+                            [nid] => 30592
+                            [slug] => brand/smart-pup
+                            [img_thumb] => /images/default/brands/thumbnail/30592-1.jpg
+                            [img_medium] => /images/default/brands/medium/30592-1.jpg
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Sojos
+                            [nid] => 3321
+                            [slug] => brand/sojos
+                            [img_thumb] => /images/default/brands/thumbnail/3321-1.jpg
+                            [img_medium] => /images/default/brands/medium/3321-1.jpg
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Solid Gold
+                            [nid] => 3320
+                            [slug] => brand/solid-gold
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3320.gif
+                            [img_medium] => /images/brands/medium/brand-3320.gif
+                        )
+
+                )
+
+            [12] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Stella & Chewy
+                            [nid] => 3322
+                            [slug] => brand/stella-chewy
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3322.gif
+                            [img_medium] => /images/brands/medium/brand-3322.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Supplements
+                            [nid] => 30058
+                            [slug] => brand/supplements
+                            [img_thumb] => /images/default/brands/thumbnail/30058-4.jpg
+                            [img_medium] => /images/default/brands/medium/30058-4.jpg
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Swheat Scoop
+                            [nid] => 3663
+                            [slug] => brand/swheat-scoop
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3663.gif
+                            [img_medium] => /images/brands/medium/brand-3663.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Taste Of The Wild
+                            [nid] => 12207
+                            [slug] => brand/taste-wild
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12207.gif
+                            [img_medium] => /images/brands/medium/brand-12207.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Temptations
+                            [nid] => 30024
+                            [slug] => brand/temptations
+                            [img_thumb] => /images/default/brands/thumbnail/30024-1.jpg
+                            [img_medium] => /images/default/brands/medium/30024-1.jpg
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => the honest kitchen
+                            [nid] => 12638
+                            [slug] => brand/honest-kitchen
+                            [img_thumb] => /images/brands/thumb/brand-12638.gif
+                            [img_medium] => /images/brands/medium/brand-12638.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Three Dog Bakery
+                            [nid] => 29136
+                            [slug] => brand/three-dog-bakery
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-29136.jpg
+                            [img_medium] => /images/brands/medium/brand-29136.gif
+                        )
+
+                )
+
+            [13] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Tidy Cats
+                            [nid] => 3328
+                            [slug] => brand/tidy-cats
+                            [img_thumb] => /images/brands/thumb/brand-3328.jpg
+                            [img_medium] => /images/brands/medium/brand-3328.jpg
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Tiki Cat
+                            [nid] => 3324
+                            [slug] => brand/tiki-cat
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3324.gif
+                            [img_medium] => /images/brands/medium/brand-3324.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => Tiki Dog
+                            [nid] => 3325
+                            [slug] => brand/tiki-dog
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3325.jpg
+                            [img_medium] => /images/brands/medium/brand-3325.jpg
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Verus
+                            [nid] => 4354
+                            [slug] => brand/Verus
+                            [img_thumb] => /images/default/brands/thumbnail/4354-1.jpg
+                            [img_medium] => /images/default/brands/medium/4354-1.jpg
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => Wee Wee Pads
+                            [nid] => 12601
+                            [slug] => brand/wee-wee-pads
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-12601.jpg
+                            [img_medium] => /images/brands/medium/brand-12601.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Wellness
+                            [nid] => 12233
+                            [slug] => brand/wellness
+                            [img_thumb] => /images/default/brands/thumbnail/12233-1.gif
+                            [img_medium] => /images/default/brands/medium/12233-1.gif
+                        )
+
+                    [6] => Array
+                        (
+                            [title] => Weruva
+                            [nid] => 3330
+                            [slug] => brand/weruva
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3330.gif
+                            [img_medium] => /images/brands/medium/brand-3330.gif
+                        )
+
+                )
+
+            [14] => Array
+                (
+                    [0] => Array
+                        (
+                            [title] => Whiskas
+                            [nid] => 30332
+                            [slug] => brand/whiskas
+                            [img_thumb] => /images/default/brands/thumbnail/30332-1.gif
+                            [img_medium] => /images/default/brands/medium/30332-1.gif
+                        )
+
+                    [1] => Array
+                        (
+                            [title] => Whole Life 
+                            [nid] => 18287
+                            [slug] => brand/whole-life
+                            [img_thumb] => /images/brands/thumb/brand-18287.gif
+                            [img_medium] => /images/brands/medium/brand-18287.gif
+                        )
+
+                    [2] => Array
+                        (
+                            [title] => World's Best
+                            [nid] => 3332
+                            [slug] => brand/worlds-best
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3332.gif
+                            [img_medium] => /images/brands/medium/brand-3332.gif
+                        )
+
+                    [3] => Array
+                        (
+                            [title] => Wysong
+                            [nid] => 3329
+                            [slug] => brand/wysong
+                            [img_thumb] => /images/brands/thumb/brand-3329.gif
+                            [img_medium] => /images/brands/medium/brand-3329.gif
+                        )
+
+                    [4] => Array
+                        (
+                            [title] => ZiwiPeak
+                            [nid] => 3334
+                            [slug] => brand/ziwipeak
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3334.gif
+                            [img_medium] => /images/brands/medium/brand-3334.gif
+                        )
+
+                    [5] => Array
+                        (
+                            [title] => Zukes
+                            [nid] => 3335
+                            [slug] => brand/zukes
+                            [img_thumb] => http://d26u4ooqi73xwz.cloudfront.net/preset_1/brand-3335.gif
+                            [img_medium] => /images/brands/medium/brand-3335.gif
+                        )
+
+                )
+
+        )
+
+    [utm_medium] => 
+    [utm_source] => 
+    [_get] => Array
+        (
+        )
+
+    [attributes] => Array
+        (
+            [age] => Array
+                (
+                    [Young] => 3217
+                    [Adult] => 3204
+                    [Senior] => 3229
+                )
+
+            [category] => Array
+                (
+                    [Accessories] => 29386
+                    [Canned Food] => 9455
+                    [Dry Food] => 69
+                    [Litter] => 1579
+                    [Pads] => 7763
+                    [Pouches] => 1536
+                    [Rolls] => 1534
+                    [Supplements] => 30483
+                    [Treatments] => 29384
+                    [Treats] => 71
+                )
+
+            [lifestyle] => Array
+                (
+                    [Diet] => 3201
+                    [Grain-Free] => 30484
+                    [Light] => 12454
+                    [Normal] => 3207
+                    [Organic] => 3464
+                    [Performance] => 3236
+                    [Prescription] => 29145
+                )
+
+            [conditions] => Array
+                (
+                    [Allergy] => 74
+                    [Dental Care] => 75
+                    [Dental Health] => 11269
+                    [Diabetic] => 29313
+                    [Digestive] => 10821
+                    [Flea and Tick] => 29387
+                    [Growth] => 10844
+                    [Joint] => 29312
+                    [None] => 11480
+                    [Performance] => 12435
+                    [Regular Diet] => 78
+                    [Sensitive Stomach] => 77
+                    [Skin] => 10819
+                    [Urinary Tract] => 17021
+                    [Weight Management] => 76
+                )
+
+            [pet] => Array
+                (
+                    [Dog] => 3202
+                    [Cat] => 3219
+                )
+
+            [brands] => Array
+                (
+                    [9 Lives] => 11481
+                    [Acana] => 29108
+                    [Accessories] => 29401
+                    [Arm & Hammer] => 3253
+                    [Artemis] => 3262
+                    [Avoderm] => 22149
+                    [Beggin Strips] => 3247
+                    [Beneful] => 11489
+                    [BFF] => 11493
+                    [Bil Jac] => 3255
+                    [Blue Buffalo] => 3256
+                    [Bocces Bakery] => 17881
+                    [By Nature] => 3258
+                    [Cadet] => 29370
+                    [California Natural] => 11538
+                    [Canidae] => 3260
+                    [Canyon Creek Ranch ] => 30331
+                    [Castor And Pollux] => 3333
+                    [Cesar] => 3249
+                    [Chef Michaels] => 29959
+                    [Chicken Soup] => 11579
+                    [Dingo] => 3269
+                    [Dogswell] => 3271
+                    [Dr. Elsey] => 3272
+                    [Eagle Pack] => 11626
+                    [Earthborn Holistic] => 11634
+                    [Eukanuba] => 3274
+                    [Evangers] => 3275
+                    [Ever Clean] => 11689
+                    [EVO] => 11695
+                    [Fancy Feast] => 11719
+                    [Felidae] => 3259
+                    [Feline Pine] => 3303
+                    [Flea and Tick] => 29390
+                    [Fresh Step] => 11746
+                    [Friskies] => 11754
+                    [Fromm] => 3280
+                    [Fruitables] => 3281
+                    [Furminator] => 3282
+                    [Go!] => 11774
+                    [Great Life] => 30099
+                    [Greenies] => 11787
+                    [Halo] => 12516
+                    [Healthwise] => 20897
+                    [Hill's Prescription Diet] => 3287
+                    [Holistic Select] => 11800
+                    [Horizon] => 30428
+                    [Iams] => 3288
+                    [Innova] => 11859
+                    [Jonny Cat] => 3290
+                    [Karma Organic] => 21014
+                    [Lotus] => 3252
+                    [Merrick] => 3296
+                    [Milk-Bone] => 3297
+                    [Mother Nature] => 11951
+                    [Native] => 3299
+                    [Natural Balance] => 3301
+                    [Nature's Logic] => 3257
+                    [Nature's Variety] => 3306
+                    [Newmans Own Organics] => 3308
+                    [Now!] => 12060
+                    [Nutro] => 12678
+                    [Old Mother Hubbard] => 12075
+                    [Orijen] => 3310
+                    [Pedigree] => 12087
+                    [Pet Time] => 29371
+                    [PetGuard] => 3314
+                    [Pill Pockets] => 14283
+                    [Pinnacle] => 3315
+                    [Plato Pet Treats] => 30235
+                    [Precise] => 3316
+                    [Premium Edge ] => 30055
+                    [Pro Plan] => 3317
+                    [Pure Vita] => 30162
+                    [Purina ONE] => 12070
+                    [Redbarn] => 3319
+                    [Royal Canin] => 3469
+                    [Royal Canin Veterinary Diet] => 23616
+                    [Salmon Paws] => 30585
+                    [Science Diet] => 12421
+                    [Scoop Away] => 12184
+                    [Smart Pup] => 30592
+                    [Sojos] => 3321
+                    [Solid Gold] => 3320
+                    [Stella & Chewy] => 3322
+                    [Supplements] => 30058
+                    [Swheat Scoop] => 3663
+                    [Taste Of The Wild] => 12207
+                    [Temptations] => 30024
+                    [the honest kitchen] => 12638
+                    [Three Dog Bakery] => 29136
+                    [Tidy Cats] => 3328
+                    [Tiki Cat] => 3324
+                    [Tiki Dog] => 3325
+                    [Verus] => 4354
+                    [Wee Wee Pads] => 12601
+                    [Wellness] => 12233
+                    [Weruva] => 3330
+                    [Whiskas] => 30332
+                    [Whole Life ] => 18287
+                    [World's Best] => 3332
+                    [Wysong] => 3329
+                    [ZiwiPeak] => 3334
+                    [Zukes] => 3335
+                )
+
+        )
+
+    [drop_downs] => Array
+        (
+            [pet] => Pet
+            [age] => Age
+            [category] => Category
+            [lifestyle] => Lifestyle
+            [conditions] => Conditions
+        )
+
+    [sel_attrs] => Array
+        (
+            [pet] => All
+            [age] => All
+            [category] => All
+            [lifestyle] => All
+            [conditions] => All
+        )
+
+    [loggedin] => 
+    [user] => PetflowUser Object
+        (
+            [roles:protected] => Array
+                (
+                    [1] => anonymous user
+                )
+
+            [session:protected] => 
+            [isAnonymous:protected] => 1
+            [addressList:PetflowUser:private] => 
+            [paymentList:PetflowUser:private] => 
+            [oldModel:protected] => 1
+            [id:protected] => 0
+            [dataObject:protected] => stdClass Object
+                (
+                    [uid] => 0
+                    [session_id] => o5prdcglkfsj2e0t88opkmcse3
+                    [anonymous] => 1
+                    [name] => 
+                    [pass] => 
+                    [mail] => 
+                    [mail_archived] => 
+                    [deleted] => 0
+                    [sort] => 0
+                    [created] => 
+                    [access] => 
+                    [login] => 
+                    [status] => 1
+                    [data] => Array
+                        (
+                        )
+
+                    [first_name] => 
+                    [last_name] => 
+                    [is_broken] => 
+                )
+
+        )
+
+    [active_user] => PetflowUser Object
+        (
+            [roles:protected] => Array
+                (
+                    [1] => anonymous user
+                )
+
+            [session:protected] => 
+            [isAnonymous:protected] => 1
+            [addressList:PetflowUser:private] => 
+            [paymentList:PetflowUser:private] => 
+            [oldModel:protected] => 1
+            [id:protected] => 0
+            [dataObject:protected] => stdClass Object
+                (
+                    [uid] => 0
+                    [session_id] => o5prdcglkfsj2e0t88opkmcse3
+                    [anonymous] => 1
+                    [name] => 
+                    [pass] => 
+                    [mail] => 
+                    [mail_archived] => 
+                    [deleted] => 0
+                    [sort] => 0
+                    [created] => 
+                    [access] => 
+                    [login] => 
+                    [status] => 1
+                    [data] => Array
+                        (
+                        )
+
+                    [first_name] => 
+                    [last_name] => 
+                    [is_broken] => 
+                )
+
+        )
+
+    [menu] => 
+    [client_url] => 
+    [client_url_ssl] => 
+    [admin_url] => 
+    [title] => 
+    [rewriteBase] => /
+    [userAgentHash] => 21b111cbfe6e8fca2d181c43f53ad548b22e38aca955b9824706a504b0a07a2d
+    [eGlooCSS] => /css/21b111cbfe6e8fca2d181c43f53ad548b22e38aca955b9824706a504b0a07a2d/
+    [eGlooJS] => /js/21b111cbfe6e8fca2d181c43f53ad548b22e38aca955b9824706a504b0a07a2d/
+    [SCRIPT_NAME] => /index.php
+)
+

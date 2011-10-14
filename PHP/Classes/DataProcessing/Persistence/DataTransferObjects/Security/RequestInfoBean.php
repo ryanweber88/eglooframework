@@ -77,10 +77,12 @@ class RequestInfoBean {
 	private $interfaceBundle = null;
 
 	protected static $singleton;
+	protected static $signature;
 	
-	final private function __construct() {
+	//final private function __construct() {
+	function __construct() { 
 		if ( isset(self::$singleton) ) {
-		throw new Exception('Attempted __construct(): An instance of RequestInfoBean already exists');
+			throw new Exception('Attempted __construct(): An instance of RequestInfoBean already exists');
 		}
 
 		// $this injected; magic method invocation
@@ -90,7 +92,7 @@ class RequestInfoBean {
 	/**
 	 * getInstance()
 	 */
-	final public static function getInstance() {
+	final public static function &getInstance() {
 		if ( !isset(self::$singleton) ) {
 			self::$singleton = new RequestInfoBean();
 		}
@@ -518,6 +520,42 @@ class RequestInfoBean {
 
 	public function setInterfaceBundle( $interfaceBundle ) {
 		$this->interfaceBundle = $interfaceBundle;
+	}
+	
+	/**
+	 * 
+	 * Returns an instance 'signature' of requestInfoBean, based upon makeup of private properties;
+	 * this is in turn used to generate a key for caching instantiated classes based upon the
+	 * request info bean's current state
+	 */
+	public function signature() { 
+				
+		//if (!isset(static::$signature)) { 
+		$rclass = new \ReflectionClass($this);
+		$values = array();
+		
+		foreach($rclass->getProperties(\ReflectionProperty::IS_PRIVATE) as $property) { 
+			$value = $this->{$property->getName()};
+
+			if (is_array($value)) { 
+				$value = implode(":", $value);
+			}
+			
+			$values[] = $property->getName() . ':' . ((!is_object($value) && !is_array($value)) ? 
+				$value : 'NA'
+			);
+		}
+		
+		//var_export($values); exit;
+		
+		// how much overhead is associated with md5 value here?
+		// enough to worry about if signature is singleton?
+		//static::$signature = md5(implode(':', $values));
+
+		return md5(implode(':', $values));
+		//}
+		
+		//return static::$signature;
 	}
 
 	/**

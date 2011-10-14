@@ -1,5 +1,8 @@
 <?php
+<<<<<<< HEAD
 use eGloo\System\Server\EventMachine;
+=======
+>>>>>>> feature/Server
 namespace eGloo\System\Server;
 
 /**
@@ -19,13 +22,20 @@ namespace eGloo\System\Server;
  * @author Christian Calloway
  *
  */
+<<<<<<< HEAD
 class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Runnable { 
+=======
+class EventMachine extends \eGloo\Dialect\Object { 
+	
+	const LOCALHOST = '127.0.0.1';
+>>>>>>> feature/Server
 	
 	/**
 	 * 
 	 * Runs the EventMachine (ie an continuous loop) 
 	 * @param Closure $lambda
 	 */
+<<<<<<< HEAD
 	static public function run(Closure $lambda = null) { 
 		
 		$configuration = &\eGloo\System\Server\Configuration::instance();
@@ -50,6 +60,18 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 					}
 				}
 			}
+=======
+	static public function run(\Closure $lambda = null) { 
+		
+		// start continuous loop; loop can be controlled (exited) via run property within closure
+		// static::$run = true;
+		
+		while (static::$run) {
+			if (is_callable($lambda)) { 
+				$lambda();
+			}
+		}
+>>>>>>> feature/Server
 	}
 		
 	/**
@@ -68,6 +90,7 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 	 * @throws EventMachine\Exception
 	 * @return EventMachine\Server
 	 */
+<<<<<<< HEAD
 	static protected function startServer($host = self::LOCALHOST, $port, $handlerMixed, \Closure $handlerClosure = null) { 
 		// starts listening on specified port, throw exception if not available
 		// @todo check port availability
@@ -100,11 +123,32 @@ class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Run
 		}
 		
 		static::$connections[] = $connection;
+=======
+	static public function startServer(EventMachine\Connection $connection, \Closure $handlerConnection = null) { 
+		// starts listening on specified port, throw exception if not available
+		// @todo check port availability
+					
+		// instantiate connection 
+		$connection = new \eGloo\System\Server\EventMachine\Connection();
+		
+		if (!is_null($handlerConnection)) { 
+			$connection = $handlerConnection($connection);
+		}
+		
+		static::$connection = $connection;
+>>>>>>> feature/Server
 	}
 	
 	/** @var boolean */
 	private static $run = true;
 	
+<<<<<<< HEAD
 	/** @var EventMachine\Connection[] */
 	private static $connections = array();
+=======
+	/** @var EventMachine\Connection */
+	private static $connection;
+	
+
+>>>>>>> feature/Server
 }

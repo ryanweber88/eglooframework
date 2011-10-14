@@ -40,11 +40,13 @@ class eGlooResponse {
 
 	public static function getXHTML( $templateVariables = null, $dispatchClass = null, $dispatchID = null ) {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "eGlooResponse: Entered getXHTML()" );
+		$application = &\eGloo\System\Server\Application::instance();
 
 		$retVal = null;
 
 		$requestInfoBean = RequestInfoBean::getInstance();
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );
+
 
 		if ( !$dispatchClass ) {
 			$dispatchClass = $requestInfoBean->getRequestClass();

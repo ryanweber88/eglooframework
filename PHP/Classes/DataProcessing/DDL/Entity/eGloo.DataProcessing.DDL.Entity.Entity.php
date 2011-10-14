@@ -18,7 +18,10 @@ use Zend\Log\Logger;
 abstract class Entity extends \eGloo\Dialect\Object { 
 	
 	function __construct() { 
+		// call initialization method
 		$this->init();
+		
+		// 
 	}
 	
 	/**

@@ -74,6 +74,7 @@ abstract class Object {
 	
 	/**
 	 * 
+<<<<<<< HEAD
 	 * Provides attr_reader quality to php objects - calls __call 
 	 * to cement retrieval. Like __call methods, this can be 
 	 * overriden with a method of the same name as property
@@ -111,6 +112,8 @@ abstract class Object {
 	
 	/**
 	 * 
+=======
+>>>>>>> feature/Server
 	 * Taking a step away from the java world, and into ruby, (protected) properties 
 	 * will be accessed by dynamic method call "$object->propertyName($value = null)";
 	 * like Ruby, this functionality can be overriden by defining a like named method 

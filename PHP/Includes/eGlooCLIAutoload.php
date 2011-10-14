@@ -105,6 +105,7 @@ if ( Configuration::getUseDoctrine() ) {
 	spl_autoload_register(array('Doctrine', 'autoload'));
 }
 
+
 /**
  * Defines the class and interface autoload runtime handler.
  * 
@@ -198,7 +199,7 @@ function autoload($class_name) {
 	if ($sanityCheckClassLoading) {
 		$instances = array();
 	}
-
+	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();
