@@ -47,6 +47,7 @@ final class XML2ArrayDPDefinitionParser extends eGlooDPDefinitionParser {
 	public function getDPDynamicObjectDefinition( $object_id ) {
 		$retVal = null;
 
+		
 		if ( !isset( $this->_dataProcessingDynamicObjects ) ) {
 			// Grab the cache handler specifically for this cache region.  We do this so that when we write to the cache for DataProcessing
 			// we can also write some information to the caching system to better keep track of what is cached for the DataProcessing system
@@ -63,7 +64,7 @@ final class XML2ArrayDPDefinitionParser extends eGlooDPDefinitionParser {
 					'XML2ArrayDPDefinitionParserDynamicObjectNodes', 'DataProcessing', true );
 			}
 		}
-
+		
 		if ( isset( $this->_dataProcessingDynamicObjects['objects'][$object_id] ) ) {
 			$retVal = $this->_dataProcessingDynamicObjects['objects'][$object_id];
 		} else {

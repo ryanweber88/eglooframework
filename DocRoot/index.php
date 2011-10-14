@@ -1,5 +1,5 @@
 <?php
-/**
+/***
  * eGloo Framework Bootstrap File 
  *
  * This file contains the bootstrap for the eGloo framework
@@ -61,10 +61,10 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 }
 
 
+
+
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
-
-//var_export($requestInfoBean); exit;
 
 
 // If the request is valid, process it.  Otherwise, log it and die
