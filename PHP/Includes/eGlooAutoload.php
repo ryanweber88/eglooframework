@@ -85,6 +85,10 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 	spl_autoload_register(array('Doctrine', 'autoload'));
 }
 
+// Load Pimple DIC
+// TODO place into configuration
+require_once 'PHP/Library/Pimple/Pimple.php';
+
 /**
  * Defines the class and interface autoload runtime handler.
  * 
