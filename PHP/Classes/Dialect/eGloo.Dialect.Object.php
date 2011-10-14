@@ -39,12 +39,23 @@ abstract class Object {
 				static::$classes[get_class($this)] = new _Class($this);
 			}
 			
-			$this->_class = static::$classes[get_class($this)];
+			$this->_class = static::$_classes[get_class($this)];
 			
 			// this doesn't work polymorphically
 			//static::$_class = new _Class($this);
 		}
 		
+	}
+	
+	protected function defineMethod($name, $lambda) { 
+		if (is_callable($lambda)) {
+			static::$_methods[$name] = $lambda;
+		}
+		
+		throw new DDL\Exception\Exception(
+			'Illegal argument exception : parameter ' . 
+		    'must be of type lambda'
+		);
 	}
 	
 	/**
@@ -53,11 +64,27 @@ abstract class Object {
 	 * @param string $methodName
 	 */
 	public function respondsTo($methodName) { 
-		return method_exists($this, $methodName);
+		return ( 
+			method_exists($this, $methodName) || isset(static::$_methods[$methodName]) 
+		);
 	}
 	
-	public static function isInstanceOf($object) { 
-		return $object instanceof static;
+	/**
+	 * 
+	 * Determines if class is-a, extends-a or implements-a 
+	 * @param class $class
+	 */
+	public function isInstanceOf($class) { 
+		return $this instanceof $class;
+	}
+	
+	/**
+	 * 
+	 * Checks class trait history as well inheritance
+	 * @param mixed $mixed
+	 */
+	public function isKindOf($mixed) { 
+		// pass
 	}
 	
 	/**
@@ -160,6 +187,15 @@ abstract class Object {
 		
 		//echo "$name\n";
 		
+		// check defined methods - this takes precedence, so its
+		// up to the developer to ensure an avoidance of 
+		// collisions
+		if (isset(static::$_methods[$name])) {
+			return call_user_func_array(
+				static::$_methods[$name], $arguments
+			);
+		}
+		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
 		// value at the fist index
@@ -234,5 +270,6 @@ abstract class Object {
 	}
 	
 	protected $_class;
-	static protected $classes;
+	static protected $_classes;
+	static protected $_methods;
 }

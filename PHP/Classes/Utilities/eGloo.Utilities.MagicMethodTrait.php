@@ -9,13 +9,17 @@ trait MagicMethodTrait {
 	
 	protected function callMagicOn($name, $arguments, $container) {
 		
-		$functionContainer = &static::$magicMethodTraitFunctionContainer;
+		$functionContainer = 
+			is_object($container) && $container instanceof \eGloo\Dialect\Object
+			? static::$_methods
+			: static::$magicMethodTraitFunctionContainer
+			
 
 		// check if specific magic call has been previously called - in
 		// case, call 'compiled' version of function
 		if (isset($functionContainer[$name])) {
 			return $functionContainer[$name](
-				$this->magicMethodTraitGetValue($property, $container), $arguments[0], $arguments
+				$arguments[0], $arguments
 			);
 		}
 		
