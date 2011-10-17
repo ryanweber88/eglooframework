@@ -12,8 +12,12 @@ use \eGloo\DataProcessing\DDL;
 class Transaction extends \eGloo\Dialect\Object implements Transaction { 
 	
 	function __construct(DDL\Entity\Entity $entity, DDL\Statement\Statement $statement) { 
-		
+		$this->entity = $entity;
+		$this->statement = $statement;
 	}
 	
 	public function commit() { }
+	
+	protected $entity;
+	protected $statement;
 }

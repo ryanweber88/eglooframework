@@ -43,17 +43,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		// set state
 		$this->state = self::STATE_NEW
 		
-		// TODO if valid "entity" 
+		// TODO if valid "entity" (explicit from data processing/relationships)
+		// use definition package
 		
 		
 		// TODO read/determine entity relationships (explicit from xml)
+		// use definition package
 		
 		
 		// TODO read/determine interface (explicit from directory structure)
+		// use statement package
 		
 		
-		
-		// set stat 
+		// initialize stat trait
 		$this->initStatTrait();
 		
 		
@@ -244,5 +246,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	
 	/** Defines callable methods */
 	private static $interface = [ ];
+	
+	private static $definition;
 	 
 }
