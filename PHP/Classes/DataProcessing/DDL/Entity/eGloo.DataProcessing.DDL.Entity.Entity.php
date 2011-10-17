@@ -17,6 +17,8 @@ use Zend\EventManager\HandlerAggregate;
  */
 abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface { 
 	
+	// TRAITS -------------------------------------------------------------- //
+	
 	use \eGloo\Utilities\StatTrait;
 	
 	// CONST --------------------------------------------------------------- //
@@ -40,6 +42,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		
 		// set state
 		$this->state = self::STATE_NIL;
+		
+		// set stat 
+		$this->initStatTrait();
 	}
 	
 	/**
@@ -62,6 +67,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * @param mixed $key
 	 */
 	public static function find($key) { 
+		$manager = &DDL\Manager\ManagerFactory::factory();
+		$key = 
+		
 		// if key is array, then we are retrieving a queryset 
 		if (is_array($key)) { 
 			
@@ -69,12 +77,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		
 		// otherwise - retrieve singular data point
 		else { 
-			
+			$manager->retrieve($this);
 		}
 	}
 	
 	public function update() { }
 	public function delete() { }
+	public function save() { }
 	
 	// MAGIC --------------------------------------------------------------- //
 	// This sections primary concern is communicating with underlying
@@ -127,6 +136,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 			return $lambda($this);
 		}		
 	}
+	
+	// FINAL --------------------------------------------------------------- // 
+	
+
 	
 	// PROPERTIES ---------------------------------------------------------- // 
 	

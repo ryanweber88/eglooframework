@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\System\Server\Action\Middleware;
 
+use \eGloo\System\Server;
 use \eGloo\System\Server\Action\HTTP\Request;
 use \eGloo\System\Server\Action\HTTP\Response;
 
@@ -23,7 +24,7 @@ class Adapter extends Middleware {
 	 */
 	public function processRequest(Request   &$request) { 
 
-		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+		Server\Application::instance()->context()->retrieve('logger.test')->log(
 			'Adapter::processRequest'
 		);
 				
@@ -36,8 +37,10 @@ class Adapter extends Middleware {
 		if (empty($_REQUEST['eg_requestID'])) { 
 			$_GET['eg_requestID'] = 'index';
 		}
+
+		// TODO place bootstrap of egloo environment here?
 		
-	
+		
 		
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
@@ -50,7 +53,7 @@ class Adapter extends Middleware {
 	 */
 	public function &processResponse(Request $request, Response &$response) { 
 
-		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
+		Server\Application::instance()->context()->retrieve('logger.test')->log(
 			'Adapter::processResponse'
 		);
 		

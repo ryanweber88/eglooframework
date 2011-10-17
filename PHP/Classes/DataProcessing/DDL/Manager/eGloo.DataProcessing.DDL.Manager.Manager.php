@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Entity;
+namespace eGloo\DataProcessing\DDL\Manager;
 
 use \eGloo\DataProcessing\DDL;
 
@@ -12,5 +12,12 @@ use \eGloo\DataProcessing\DDL;
  */
 class Manager extends \eGloo\Dialect\Object implements ManagerInterface { 
 	
+	function __construct() { 
+
+		// initialize pool
+		$this->pool = new Pool();
+	}
 	
+	
+	protected $pool;
 }

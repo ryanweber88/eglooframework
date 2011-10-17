@@ -1,4 +1,6 @@
 <?php
+use \eGloo\System\Server;
+
 /**
  * Defines bootstrap and loads into application context
  */
@@ -106,13 +108,15 @@ class Bootstrap extends \eGloo\Utilities\Bootstrap\BootstrapAbstract {
 			exit;
 		}
 		
+		
 		// below is for testing purposes only; flag monrel in global scope to denote context 
 		// and place requestInfoBean into global context, as it doesn't need to be
 		// reinstantiated each time
-		$GLOBALS['mongrel'] = true;
-		$GLOBALS['payload'] = file_get_contents('/tmp/static');
+		//$GLOBALS['mongrel'] = true;
+		//$GLOBALS['payload'] = file_get_contents('/tmp/static');
 		
 		// change back to server directory
+		// TODO this is really messy
 		chdir(__DIR__);
 	}
 	

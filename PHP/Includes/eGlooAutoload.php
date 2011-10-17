@@ -108,8 +108,17 @@ require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimpl
  *
  * @param string $class_name class or interface to load
  */
+<<<<<<< HEAD
 function eglooAutoload($class_name) {
 	
+=======
+function eglooAutoload( $class_name ) {
+	/* Hack for https://bugs.php.net/bug.php?id=50731 */
+	if ( strpos($class_name, '\\') === 0 ) {
+		$class_name = substr( $class_name, 1 );
+	}
+
+>>>>>>> develop
 	$cacheGateway = CacheGateway::getCacheGateway();
 
 	if ( ( $autoload_hash = $cacheGateway->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {

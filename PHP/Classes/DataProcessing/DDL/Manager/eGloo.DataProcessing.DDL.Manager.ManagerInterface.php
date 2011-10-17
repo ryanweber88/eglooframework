@@ -1,7 +1,8 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Entity;
+namespace eGloo\DataProcessing\DDL\Manager;
 
 use eGloo\DataProcessing\DDL;
+use eGloo\DataProcessing\DDL\Entity\Entity;
 
 /**
  * 
@@ -42,8 +43,9 @@ interface ManagerInterface {
 	 * 
 	 * Retrieves entity from persistence context
 	 * @param DDL\Entity $entity
+	 * @param mixed      $key
 	 */
-	public function retrieve(Entity $entity);
+	public function retrieve(Entity $entity, $key);
 	
 	
 	/**

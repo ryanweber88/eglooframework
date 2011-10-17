@@ -10,5 +10,20 @@ use \eGloo\DataProcessing\DDL;
  *
  */
 interface EntityInterface { 
+
+	// CRUD METHODS 
+	
+	public static function create() { }
+	public static function find($id) { }
+	public function update() { }
+	public function delete() { }
+	public function save();
+	
+	// LIFECYCLE CALLBACK
+	
+	public function onPersist(\Closure $lambda = null);
+	public function onRemove(\Closure $lambda = null);
+	public function onRefresh(\Closure $lambda = null);
+		
 	
 }
