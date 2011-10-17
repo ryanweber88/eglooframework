@@ -15,9 +15,40 @@ class Manager extends \eGloo\Dialect\Object implements ManagerInterface {
 	function __construct() { 
 
 		// initialize pool
-		$this->pool = new Pool();
+		// TODO replace array declaration with pool instance
+		//$this->pool = new Pool();
+		//$this->pool = [ ];
+	}
+	
+	public function persist(Entity $entity) { 
+		// calls createx
+	}
+	
+	public function contains(Entity $entity) { 
+		
 	}
 	
 	
-	protected $pool;
+	public function retrieve(Entity $entity, $key) { 
+		// calls find.sql
+	}
+	
+	public function merge(Entity $entity)  { 
+		// calls update
+		
+		// check if entity is 
+		if ($this->contains($entity)) { 
+			// TODO 	
+		}
+		
+		// TODO throw exception if entity does not exist
+	}
+	
+	final private function key(Entity $entity, $key) { 
+		// creates a persistent key based upon entity and its unique indentifier
+		return get_class($entity) . ':' . $key;	
+	}
+	
+	
+	protected $pool = [ ];
 }

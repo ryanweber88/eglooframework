@@ -2,10 +2,10 @@
 namespace eGloo\DataProcessing\DDL\Entity;
 
 use eGloo\DataProcessing\DDL\Entity\EntityInterface\EntityInterface;
-
 use Zend\EventManager\Event;
 use Zend\EventManager\EventCollection;
 use Zend\EventManager\HandlerAggregate;    
+
 /**
  * 
  * Represents the structure of data and is responsible for:
@@ -41,10 +41,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		$this->data = new Data($this);
 		
 		// set state
-		$this->state = self::STATE_NIL;
+		$this->state = self::STATE_NEW
+		
+		// TODO if valid "entity" 
+		
+		
+		// TODO read/determine entity relationships (explicit from xml)
+		
+		
+		// TODO read/determine interface (explicit from directory structure)
+		
+		
 		
 		// set stat 
 		$this->initStatTrait();
+		
+		
 	}
 	
 	/**
@@ -53,37 +65,116 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * where-in construct should  
 	 * 
 	 */
-	public function init() { }
+	protected function init() { }
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
-	// Interfaces with Entity manager
+	// Provides standard crud methods - entity will onlyh 
 	
-	public static function create() { }
-	
+	public  function create() { 
+		$manager = &DDL\Manager\ManagerFactory::factory();
+		
+		// TODO check that entity already exists and throw exception
+		return $manager->persist($this);
+		
+	}
+		
 	/**
 	 * 
-	 * Provides retrieve by primary key functionality
+	 * Provides retrieve by primary key functionality within
+	 * manager context
 	 * @param mixed $key
 	 */
 	public static function find($key) { 
 		$manager = &DDL\Manager\ManagerFactory::factory();
-		$key = 
 		
 		// if key is array, then we are retrieving a queryset 
 		if (is_array($key)) { 
+			$entities = [ ];
 			
+			// don't worry, key is evaluated once, so loop 
+			// proceeds normally
+			foreach ($key as $key) { 
+				$entities[] = $manager->retrieve($this, $key);
+			}
+			
+			return $entities;
 		}
 		
-		// otherwise - retrieve singular data point
+		// otherwise - retrieve singular 
 		else { 
-			$manager->retrieve($this);
+			return $manager->retrieve($this, $key);
 		}
 	}
 	
-	public function update() { }
-	public function delete() { }
-	public function save() { }
+
+	
+	/**
+	 * 
+	 * Calls create or update, depending on entities current state
+	 */
+	public static function save() {
+		return ($this->state == self::STATE_NEW)  
+			? $this->create()
+			: $this->update(); 
+	}	
+	
+	/**
+	 * Updates entity within manager context, and flags underlying data layer update;
+	 * returns updated entity instance
+	 * 
+	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
+	 */
+	public function update() { 
+		$manager = &DDL\Manager\ManagerFactory::factory();
+		return $manager->merge($this);
+	}
+	
+	/**
+	 * Removes entity from manager context and flags underlying data layer delete
+	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::delete()
+	 */
+	public function delete() { 
+		$manager = &DDL\Manager\ManagerFactory::factory();
+		return $manager->remove($this);
+	}
+	
+	
+	
+	// REFLECT ------------------------------------------------------------- //
+	// This section is used to "reflect" upon current state of entity, and
+	// its available interface and structure
+	
+	/**
+	 * 
+	 * Used to determine structure of underlying data/table 
+	 */
+	public function members() { 
+		
+	}
+	
+	/**
+	 * 
+	 * Used to determine callable methods or interface provided
+	 * to this class
+	 */
+	public static function methods() {
+		
+	}
+	
+	/**
+	 * 
+	 * Used to determine relationships their associated types to
+	 * current data object
+	 */
+	public static function relationships() { 
+		// tracks xml definition of object to determine relationships
+	}
+	
+	
+	
+	
+	
 	
 	// MAGIC --------------------------------------------------------------- //
 	// This sections primary concern is communicating with underlying
@@ -93,6 +184,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	public function __set($name, $value) { }
 	
 	public function __call($name, $arguments) { 
+		// essentially servces at the gateway by which crud
+		// methods are called
 		
 		// call class object magic method
 		parent::__call($name, $arguments);
@@ -148,5 +241,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	
 	/** The persistence id */
 	protected $id;
+	
+	/** Defines callable methods */
+	private static $interface = [ ];
 	 
 }

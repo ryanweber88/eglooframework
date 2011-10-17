@@ -56,12 +56,22 @@ interface ManagerInterface {
 	 */
 	public function refresh(Entity $entity);
 	
+	/**
+	 * 
+	 * Merge context
+	 * @param  Entity $entity
+	 * @throws \eGloo\Dialect\Exception
+	 */
+	public function merge(Entity $entity);
+	
 	
 	/**
 	 * 
 	 * Synchronize the persistence context to the underlying database
 	 */
 	public function flush();
+	
+
 	
 	
 	/**

@@ -12,6 +12,7 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class Factory extends \eGloo\Dialect\Object { 
 	
+	// TODO key should be hex for faster lookup
 	const KEY = 'entity.manager';
 	
 	public static function &factory(\eGloo\System\Server\Context &$context = null) { 
