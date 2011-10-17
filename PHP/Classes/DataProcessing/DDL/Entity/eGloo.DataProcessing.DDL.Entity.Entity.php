@@ -1,27 +1,45 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
+use eGloo\DataProcessing\DDL\Entity\EntityInterface\EntityInterface;
+
 use Zend\EventManager\Event;
 use Zend\EventManager\EventCollection;
-use Zend\EventManager\HandlerAggregate;
-use Zend\Log\Logger;
-    
+use Zend\EventManager\HandlerAggregate;    
 /**
  * 
  * Represents the structure of data and is responsible for:
  *  - providing the base interface for all ddl objects
  *  - providing the structure of an entity (what it is composed of)
- *  - 
+ *  - communicates transparently with entity manager
  * @author Christian Calloway
  *
  */
-abstract class Entity extends \eGloo\Dialect\Object { 
+abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface { 
+	
+	use \eGloo\Utilities\StatTrait;
+	
+	// CONST --------------------------------------------------------------- //
+	
+	const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
+	const STATE_NEW      = 0x01;  // Entity is brand new, but not yet managed
+	const STATE_MANAGED  = 0x02;  // Entity is managed in persistence context
+	const STATE_REMOVED  = 0x03;  // Entity has been removed from database
+	const STATE_DETACHED = 0x04;  // Entity has been serialized to another tier
+	
+	
+	// INITIALIZTAION  ----------------------------------------------------- //
+	
 	
 	function __construct() { 
 		// call initialization method
 		$this->init();
 		
-		// 
+		// initialize data container
+		$this->data = new Data($this);
+		
+		// set state
+		$this->state = self::STATE_NIL;
 	}
 	
 	/**
@@ -32,11 +50,29 @@ abstract class Entity extends \eGloo\Dialect\Object {
 	 */
 	public function init() { }
 	
+	
 	// CRUD METHODS -------------------------------------------------------- //
-	// TODO determine if these should be class or instance variables
+	// Interfaces with Entity manager
 	
 	public static function create() { }
-	public static function find() { }
+	
+	/**
+	 * 
+	 * Provides retrieve by primary key functionality
+	 * @param mixed $key
+	 */
+	public static function find($key) { 
+		// if key is array, then we are retrieving a queryset 
+		if (is_array($key)) { 
+			
+		}
+		
+		// otherwise - retrieve singular data point
+		else { 
+			
+		}
+	}
+	
 	public function update() { }
 	public function delete() { }
 	
@@ -92,7 +128,12 @@ abstract class Entity extends \eGloo\Dialect\Object {
 		}		
 	}
 	
-
+	// PROPERTIES ---------------------------------------------------------- // 
 	
+	protected $data;
+	protected $state;
+	
+	/** The persistence id */
+	protected $id;
 	 
 }
