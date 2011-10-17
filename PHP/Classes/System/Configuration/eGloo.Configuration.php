@@ -1,8 +1,10 @@
 <?php
+namespace eGloo;
+
 /**
- * eGlooConfiguration Class File
+ * eGloo\Configuration Class File
  *
- * Contains the class definition for the eGlooConfiguration
+ * Contains the class definition for the eGloo\Configuration
  * 
  * Copyright 2011 eGloo LLC
  * 
@@ -27,7 +29,7 @@
  */
 
 /**
- * eGlooConfiguration
+ * eGloo\Configuration
  *
  * $short_description
  *
@@ -36,7 +38,7 @@
  * @category System
  * @package Configuration
  */
-final class eGlooConfiguration {
+final class Configuration {
 
 	/* Class Constants */
 
@@ -825,18 +827,18 @@ final class eGlooConfiguration {
 					// No errors
 					$retVal = true;
 				} else {
-					// We don't have eGlooLogger access at this point
-					// eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Cached options read from ' . $config_cache_path . ' were invalid.  Content: ' .
+					// We don't have Logger access at this point
+					// Logger::writeLog( Logger::EMERGENCY, 'Cached options read from ' . $config_cache_path . ' were invalid.  Content: ' .
 					// "\n\n" . $cached_options);
 				}
 			} else {
-				// We don't have eGlooLogger access at this point
-				// eGlooLogger::writeLog( eGlooLogger::WARN, 'Attempting to read ' . $config_cache_path . ' returned false');
+				// We don't have Logger access at this point
+				// Logger::writeLog( Logger::WARN, 'Attempting to read ' . $config_cache_path . ' returned false');
 			}
 		}
-		// We don't have eGlooLogger access at this point
+		// We don't have Logger access at this point
 		//	else {
-		//	eGlooLogger::writeLog( eGlooLogger::NOTICE, 'Could not read ' . $config_cache_path);
+		//	Logger::writeLog( Logger::NOTICE, 'Could not read ' . $config_cache_path);
 		// }
 
 		return $retVal;
@@ -2017,7 +2019,7 @@ final class eGlooConfiguration {
 
 	public static function getLogFormat( $update_cache_on_set = true ) {
 		if ( !isset(self::$configuration_options['egLogFormat']) ) {
-			self::$configuration_options['egLogFormat'] = eGlooLogger::LOG_LOG;
+			self::$configuration_options['egLogFormat'] = Logger::LOG_LOG;
 
 			if ( $update_cache_on_set ) {
 				// TODO see if we should move this into an "update cache" method
@@ -2031,16 +2033,16 @@ final class eGlooConfiguration {
 		} else if ( is_string(self::$configuration_options['egLogFormat']) ) {
 			switch( strtoupper(self::$configuration_options['egLogFormat']) ) {
 				case 'LOG' :
-					self::$configuration_options['egLogFormat'] = eGlooLogger::LOG_LOG;
+					self::$configuration_options['egLogFormat'] = Logger::LOG_LOG;
 					break;
 				case 'HTML' :
-					self::$configuration_options['egLogFormat'] = eGlooLogger::LOG_HTML;
+					self::$configuration_options['egLogFormat'] = Logger::LOG_HTML;
 					break;
 				case 'XML' :
-					self::$configuration_options['egLogFormat'] = eGlooLogger::LOG_XML;
+					self::$configuration_options['egLogFormat'] = Logger::LOG_XML;
 					break;
 				default:
-					self::$configuration_options['egLogFormat'] = eGlooLogger::LOG_LOG;
+					self::$configuration_options['egLogFormat'] = Logger::LOG_LOG;
 					break;
 			}
 
@@ -2064,7 +2066,7 @@ final class eGlooConfiguration {
 	
 	public static function getLoggingLevel( $update_cache_on_set = true ) {
 		if ( !isset(self::$configuration_options['egLogLevel']) ) {
-			self::$configuration_options['egLogLevel'] = eGlooLogger::DEVELOPMENT;
+			self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
 
 			if ( $update_cache_on_set ) {
 				// TODO see if we should move this into an "update cache" method
@@ -2078,19 +2080,19 @@ final class eGlooConfiguration {
 		} else if ( is_string(self::$configuration_options['egLogLevel']) ) {
 			switch( strtoupper(self::$configuration_options['egLogLevel']) ) {
 				case 'LOG_OFF' : 
-					self::$configuration_options['egLogLevel'] = eGlooLogger::LOG_OFF;
+					self::$configuration_options['egLogLevel'] = Logger::LOG_OFF;
 					break;
 				case 'PRODUCTION' : 
-					self::$configuration_options['egLogLevel'] = eGlooLogger::PRODUCTION;
+					self::$configuration_options['egLogLevel'] = Logger::PRODUCTION;
 					break;
 				case 'STAGING' : 
-					self::$configuration_options['egLogLevel'] = eGlooLogger::STAGING;
+					self::$configuration_options['egLogLevel'] = Logger::STAGING;
 					break;
 				case 'DEVELOPMENT' : 
-					self::$configuration_options['egLogLevel'] = eGlooLogger::DEVELOPMENT;
+					self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
 					break;
 				default : 
-					self::$configuration_options['egLogLevel'] = eGlooLogger::DEVELOPMENT;
+					self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
 					break;
 			}
 
