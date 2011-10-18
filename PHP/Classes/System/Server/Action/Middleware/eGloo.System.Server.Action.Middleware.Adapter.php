@@ -75,8 +75,8 @@ class Adapter extends Middleware {
 		// return a method 
 		$isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 		
-		$product = new \eGloo\DP\Product;
-		exit('test');
+		//$product = new \eGloo\DP\Product;
+		//exit('test');
 						
 		// TODO cache this based upon request passed, and if lambda return is boolean true, plus request
 		// itself taken into account; caching at the moment to determine performance gain

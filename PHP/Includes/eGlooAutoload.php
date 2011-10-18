@@ -253,15 +253,8 @@ function eglooAutoload( $class_name ) {
 					}
 				}
 
-<<<<<<< HEAD
 				include_once( $realPath );
-=======
 
-				try { 
-					include( $realPath );
-				}
-				catch(Exception $ignore) { }
->>>>>>> feature/ddo_decouplefromautoloader
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 				break;
