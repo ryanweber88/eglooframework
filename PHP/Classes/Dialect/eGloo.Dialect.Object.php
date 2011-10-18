@@ -12,7 +12,21 @@ namespace eGloo\Dialect;
  */
 abstract class Object { 
 	
-	function __construct() { }
+
+	function __construct() { 
+		
+		// TODO perform static initialization using reflection
+		// - the problem though is that reflection is overhead
+		// heavy
+		
+		// does not work - will stop once set
+		//if (is_null(static::$class)) { 
+		//	static::$class = new _Class($this);
+		//}
+		
+		$this->_class = new _Class($this);
+		
+	}
 	
 	/**
 	 * 
@@ -27,54 +41,19 @@ abstract class Object {
 		$className = get_called_class();
 		return new $className($arguments);
 	}
-	
+		
 	/**
 	 * 
 	 * Provides equality interface for classes implementing Object
 	 * @param unknown_type $object
 	 */
-	public function equals(\eGloo\Dialect\Object &$object) { }
-	
-	
-	/**
-	 * 
-	 * Copies 'attr_reader' ruby paradigm - allows for "public" access
-	 * to protected properties; will throw an exception if property
-	 * is not available
-	 * @param  string $name
-	 * @throws Exception
-	 * @return mixed
-	 */
-	public function __get($name) { 
-		try { 
-			return $this->$name();
-		}
-		catch (Exception $pass) {
-			throw $pass;
-		}		
+	public function equals(\eGloo\Dialect\Object &$object) { 
+		return true;
 	}
 	
-	/**
-	 * 
-	 * Copies 'attr_writer' ruby paradigm - allows for public mutation pf protected properties; 
-	 * will throw an exception if property is non existent
-	 * @param  String $name
-	 * @param  mixed  $value
-	 * @throws Exception
-	 * @return void
-	 */
-	public function __set($name, $value) { 
-		try { 
-			$this->$name($value);
-		}
-		catch (Exception $pass) {
-			throw $pass;
-		}	
-	}
 	
 	/**
 	 * 
-<<<<<<< HEAD
 	 * Provides attr_reader quality to php objects - calls __call 
 	 * to cement retrieval. Like __call methods, this can be 
 	 * overriden with a method of the same name as property
@@ -112,8 +91,6 @@ abstract class Object {
 	
 	/**
 	 * 
-=======
->>>>>>> feature/Server
 	 * Taking a step away from the java world, and into ruby, (protected) properties 
 	 * will be accessed by dynamic method call "$object->propertyName($value = null)";
 	 * like Ruby, this functionality can be overriden by defining a like named method 
@@ -163,4 +140,6 @@ abstract class Object {
 	protected function propertyExists($propertyName) { 
 		return property_exists($this, $propertyName);	
 	}
+	
+	protected $_class = null;
 }

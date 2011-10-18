@@ -9,6 +9,6 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * @author Christian Calloway
  *
  */
-class Product extends Entity\Entity {
-	
+class Product extends Entity {
+
 }

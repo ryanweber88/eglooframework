@@ -43,6 +43,7 @@ class Dispatcher extends \photon\core\Dispatcher {
 			new Middleware\RequestParameters(),
 			new Middleware\Session(), 
 			new Middleware\Header(),
+			new Middleware\Test(),
 			new Middleware\Adapter()
 		];
 				

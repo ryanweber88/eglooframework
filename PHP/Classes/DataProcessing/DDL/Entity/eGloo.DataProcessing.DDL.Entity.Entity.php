@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
-use eGloo\DataProcessing\DDL\Entity\EntityInterface\EntityInterface;
+use eGloo\DataProcessing\DDL;
 use Zend\EventManager\Event;
 use Zend\EventManager\EventCollection;
 use Zend\EventManager\HandlerAggregate;    
@@ -34,6 +34,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	
 	
 	function __construct() { 
+		parent::__construct();
+		
 		// call initialization method
 		$this->init();
 		
@@ -41,24 +43,34 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		$this->data = new Data($this);
 		
 		// set state
-		$this->state = self::STATE_NEW
+		$this->state = self::STATE_NEW;
 		
-		// TODO if valid "entity" (explicit from data processing/relationships)
-		// use definition package
+		// retrieve entity definition/caveats from entities
+		// descriptor file
+		try { 
+			$this->definition = Definition::factory($this);
+		}
+		catch (\eGloo\Dialect\Exception $pass) { 
+			throw $pass;
+		}
 		
+		var_export($this->definition); exit;
 		
-		// TODO read/determine entity relationships (explicit from xml)
-		// use definition package
 		
 		
 		// TODO read/determine interface (explicit from directory structure)
 		// use statement package
+		$this->interface = DDl\Statement\Group::interfaces($this);
 		
 		
 		// initialize stat trait
 		$this->initStatTrait();
 		
 		
+	}
+	
+	public function __toString() { 
+		return get_class($this);
 	}
 	
 	/**
@@ -68,6 +80,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * 
 	 */
 	protected function init() { }
+	
+	
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
@@ -185,7 +199,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	public function __get($name) { }
 	public function __set($name, $value) { }
 	
-	public function __call($name, $arguments) { 
+	public function &__call($name, $arguments) { 
 		// essentially servces at the gateway by which crud
 		// methods are called
 		
@@ -241,12 +255,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	protected $data;
 	protected $state;
 	
-	/** The persistence id */
+	
 	protected $id;
 	
-	/** Defines callable methods */
-	private static $interface = [ ];
+	/** The persistence id */
+	protected $pid;
 	
-	private static $definition;
+	/** Defines callable methods */
+	protected static $interface     = [ ];
+	
+	
+	protected static $relationships = [ ];
 	 
 }
