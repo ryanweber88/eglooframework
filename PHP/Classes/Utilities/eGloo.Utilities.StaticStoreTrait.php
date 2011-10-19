@@ -11,10 +11,10 @@ namespace eGloo\Utilities;
  */
 trait StaticStoreTrait { 
 	
-	protected function retrieve($key, \Closure $fallback = null) { 
+	protected static function &retrieve($key, \Closure $fallback = null) { 
 		
 		if (!isset(static::$store[$key])) { 
-			static::$store[$key] = $fallback($key, $this);
+			static::$store[$key] = $fallback($key);
 		} 
 		
 		return static::$store[$key];

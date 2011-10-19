@@ -48,19 +48,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		// retrieve entity definition/caveats from entities
 		// descriptor file
 		try { 
-			$this->definition = Definition::factory($this);
+			$definition = Definition::factory($this);
 		}
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
 		}
 		
-		var_export($this->definition); exit;
-		
-		
+		// set cardinality
+		$this->cardinality = $definition->relationships;
+				
 		
 		// TODO read/determine interface (explicit from directory structure)
 		// use statement package
-		$this->interface = DDl\Statement\Group::interfaces($this);
+		// all we need is the interface - not anything else in regards to
+		// statements, which should be handled by manager
+		
+		$this->methods = DDl\Statement\Group::methods($this);
 		
 		
 		// initialize stat trait
@@ -69,8 +72,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		
 	}
 	
+	/**
+	 * 
+	 * By default, will print entity information - should be overriden to
+	 * provide acceptable stdout values (eg. Product.name) 
+	 * @throws \eGloo\Dialect\Exception
+	 */
 	public function __toString() { 
-		return get_class($this);
+		
 	}
 	
 	/**
@@ -262,9 +271,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	protected $pid;
 	
 	/** Defines callable methods */
-	protected static $interface     = [ ];
+	protected static $methods;
 	
-	
-	protected static $relationships = [ ];
+	/** Defines relationships */
+	protected static $cardinality;
 	 
 }

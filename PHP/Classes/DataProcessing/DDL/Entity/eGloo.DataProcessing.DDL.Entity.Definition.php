@@ -11,7 +11,7 @@ use eGloo\DataProcessing\DDL;
  */
 class Definition extends \eGloo\Dialect\Object { 
 	
-	use \eGloo\Utilities\StaticStoreTrait
+	use \eGloo\Utilities\StaticStoreTrait;
 	
 	function __construct(Entity $entity) { 
 		$this->entity = &$entity;
@@ -19,7 +19,7 @@ class Definition extends \eGloo\Dialect\Object {
 	
 	static public function &factory(DDL\Entity\Entity $entity) { 
 				
-		return static::retrieve($entity->_class->name, function() { 
+		return static::retrieve($entity->_class->name, function() use ($entity) { 
 			$builder = new Definition\Builder();
 			$builder->entity = $entity;
 			

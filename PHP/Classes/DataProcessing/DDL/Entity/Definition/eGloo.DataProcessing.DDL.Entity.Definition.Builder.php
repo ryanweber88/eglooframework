@@ -12,13 +12,14 @@ use eGloo\DataProcessing\DDL;
  */
 class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderInterface { 
 	
-	const FILE = 'Entities.xml';
+	use \eGloo\Utilities\StaticStoreTrait;
 	
+	const FILE = 'Entities.xml';
 	
 	/**
 	 * 
 	 * Responsible for building entity object definition
-	 * 
+	 * @throws \eGloo\Dialect\Exception
 	 */
 	public function build() {
 		
@@ -35,43 +36,51 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 		$path = 
 			\eGlooConfiguration::getApplicationsPath() . '/' . 
 			\eGlooConfiguration::getApplicationPath()  . '/XML/' . self::FILE;
+			
+		$xml = &static::retrieve($path, function($key) {
+			return simplexml_load_file($key);
+		});	
 
-		if (!isset($xml[$path])) { 
-			$xml[$path] = simplexml_load_file(
-				\eGlooConfiguration::getApplicationsPath() . '/' . 
-				\eGlooConfiguration::getApplicationPath()  . '/XML/' . self::FILE
-			);
-		}
 		
 		$name  = $this->entity->_class->name;
 		$definition = new DDL\Entity\Definition($this->entity);
 		$relationships = [ ];
+		
+		// check that entity definition exists
+		if ($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship") { 
+			
+			// iterate through relationships
+			foreach($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship") as $node) { 
+				// TODO throw exception if required cardinality attributes 
+				// are not available
 				
-		// iterate through relationships
-		foreach($xml[$path]->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship") as $node) { 
-			// TODO throw exception if required cardinality attributes 
-			// are not available
-			
-			$relationship = new Relationship();
-			$relationship->to  = $node['to'];
-			
-			foreach(['has', 'belongs'] as $type) { 
-			
-				if (isset($node[$type])) { 
-					$relationship->$type = $node[$type] == 'many'
-						? Relationship::CARDINALITY_MANY 
-						: Relationship::CARDINALITY_ONE;
+				$relationship = new DDL\Entity\Relationship;
+				$relationship->to = $node['to'];
+				
+				foreach(['has', 'belongs'] as $type) { 
+				
+					if (isset($node[$type])) { 
+						$relationship->$type = $node[$type] == 'many'
+							? Relationship::CARDINALITY_MANY 
+							: Relationship::CARDINALITY_ONE;
+					}
 				}
-			}
-			
-			$relationships[] = $relationship;
 				
+				$relationships[] = $relationship;
+					
+			}
+		
+		
+		
+			// set relationships property and return definition
+			$definition->relationships = $relationships;
+			
+			return $definition;
 		}
 		
-		// set relationships property and return definition
-		$definition->relationships = $relationships;
-		
-		return $definition;
+		throw new \eGloo\Dialect\Exception(
+			'INVALID entity construction'
+		);
 		
 	}
 	
