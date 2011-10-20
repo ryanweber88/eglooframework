@@ -10,10 +10,10 @@ use \eGloo\Dialect\Object;
  * @author Christian Calloway
  *
  */
-interface StorageInterface {
+interface StorageInterface extends \Countable {
 	
 	public function attach(Object $object);
 	public function remove(Object $object);
+	public function retrieve(Object $object);
 	public function clear();
-	public function count();
 }
