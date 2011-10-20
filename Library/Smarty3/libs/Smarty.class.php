@@ -788,9 +788,10 @@ class Smarty extends Smarty_Internal_Data {
  */
 function smartyAutoload($class)
 {
+
     $_class = strtolower($class);
     if (substr($_class, 0, 16) === 'smarty_internal_' || $_class == 'smarty_security') {
-        include SMARTY_SYSPLUGINS_DIR . $_class . '.php';
+        @require_once SMARTY_SYSPLUGINS_DIR . $_class . '.php';
     } 
 } 
 

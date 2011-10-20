@@ -62,15 +62,18 @@ class eGlooInterfaceDirector extends TemplateDirector {
 	}
 
 	public function preProcessTemplate() {
+		
 		if ($this->useSmartCaching) {
 			if (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION) {
 				$requestClass = $this->requestInfoBean->getRequestClass();
 				$requestID = $this->requestInfoBean->getRequestID();
 				$cacheID = isset($this->cacheID) ? $this->cacheID : '';
 
+
 				$this->setHardCacheID($requestClass, $requestID, $cacheID);
 
 				if (!$this->isHardCached()) {
+					
 					$this->templateBuilder->setDispatchPath();
 					$this->templateBuilder->resolveTemplateRoot();
 
@@ -80,20 +83,32 @@ class eGlooInterfaceDirector extends TemplateDirector {
 				}
 			} else if (eGlooConfiguration::getDeployment() == eGlooConfiguration::STAGING) {
 			} else if (eGlooConfiguration::getDeployment() == eGlooConfiguration::DEVELOPMENT) {
+				
 				$this->templateBuilder->setDispatchPath();
 				$this->templateBuilder->resolveTemplateRoot();
+
+
 
 				if ( $this->cacheID !== null ) {
 					$this->templateBuilder->setCacheID( $this->cacheID, $this->ttl );
 				}
 			}
+
+		// expensive hit - 70 t/s
 		} else {
-			$this->templateBuilder->setDispatchPath();
+			
+			// begin refactored +30 t/s
+			$this->templateBuilder->setDispatchPath(); 
+			// end
+
+			// no/negligable hit
 			$this->templateBuilder->resolveTemplateRoot();
+
 
 			if ( $this->cacheID !== null ) {
 				$this->templateBuilder->setCacheID( $this->cacheID, $this->ttl );
 			}
+
 		}
 	}
 
@@ -132,6 +147,7 @@ class eGlooInterfaceDirector extends TemplateDirector {
 				}
 			}
 		}
+
 
 		$this->templateBuilder->setTemplateVariables( $tokenArray );
 	}
