@@ -2,9 +2,8 @@
 namespace eGloo\DataProcessing\DDL\Entity;
 
 use eGloo\DataProcessing\DDL;
-use Zend\EventManager\Event;
-use Zend\EventManager\EventCollection;
-use Zend\EventManager\HandlerAggregate;    
+use \Zend\EventManager\EventManager;
+   
 
 /**
  * 
@@ -15,19 +14,20 @@ use Zend\EventManager\HandlerAggregate;
  * @author Christian Calloway
  *
  */
-abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface { 
+abstract class Entity extends \eGloo\Dialect\Object implements 
+	Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
 	
 	// TRAITS -------------------------------------------------------------- //
 	
-	use \eGloo\Utilities\StatTrait;
+	use \eGloo\Utilities\StatTrait
 	
 	// CONST --------------------------------------------------------------- //
 	
-	const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
+	//const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
 	const STATE_NEW      = 0x01;  // Entity is brand new, but not yet managed
 	const STATE_MANAGED  = 0x02;  // Entity is managed in persistence context
-	const STATE_REMOVED  = 0x03;  // Entity has been removed from database
-	const STATE_DETACHED = 0x04;  // Entity has been serialized to another tier
+	const STATE_REMOVED  = 0x03;  // Entity has persistence context, but is marked for removal from db
+	const STATE_DETACHED = 0x04;  // Entity has been serialized to another tier, has not persistence context
 	
 	
 	// INITIALIZTAION  ----------------------------------------------------- //
@@ -63,8 +63,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		// all we need is the interface - not anything else in regards to
 		// statements, which should be handled by manager
 		
-		$this->methods = DDl\Statement\Group::methods($this);
+		$this->methods = $this->parseMethods(DDl\Statement\Group::files($this));
 		
+		// instantiate event manager and attach listeners
+		$this->events = new EventManager;
+		//$this->events->attachAggregate(new Listener\Logger);
+		$this->events->attachAggregate(new Listener\Called);
+		//$this->events->attachAggregate(new Listener\Stat);
 		
 		// initialize stat trait
 		$this->initStatTrait();
@@ -97,6 +102,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	// Provides standard crud methods - entity will onlyh 
 	
 	public  function create() { 
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		
 		// TODO check that entity already exists and throw exception
@@ -106,11 +112,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		
 	/**
 	 * 
-	 * Provides retrieve by primary key functionality within
-	 * manager context
-	 * @param mixed $key
+	 * Retrieves entity based on primary key
+	 * @param  mixed $key
+	 * @return Entity | Set 
 	 */
 	public static function find($key) { 
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		
 		// if key is array, then we are retrieving a queryset 
@@ -132,6 +139,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		}
 	}
 	
+	/**
+	 * 
+	 * Retrieves entity based on field|value pair
+	 * @param string         $field
+	 * @param string|integer $key
+	 * @return Entity | Set
+	 */
+	public static function find_by ($field, $value) { 
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		
+		
+	}
+	
 
 	
 	/**
@@ -139,6 +159,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * Calls create or update, depending on entities current state
 	 */
 	public static function save() {
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('update', $this);
+		
 		return ($this->state == self::STATE_NEW)  
 			? $this->create()
 			: $this->update(); 
@@ -151,6 +174,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
 	 */
 	public function update() { 
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('update', $this);
+		
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		return $manager->merge($this);
 	}
@@ -159,42 +185,45 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	 * Removes entity from manager context and flags underlying data layer delete
 	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::delete()
 	 */
-	public function delete() { 
+	public function delete() {
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('delete', $this); 
+		
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		return $manager->remove($this);
 	}
+	
+	// Retrieve Interfaces --------------------------------------------------- //
+	// Enforced by implementing the Retrieve interfaces, provides ability
+	// to chain on results - an explicit commit call must be made after
+	// specifying chain methods
+	
+	// TODO determine django-esque method to do lazy loading without
+	// commit call
+	
+	public function limit($amount) { 
+		
+	}
+	
+	public function offset($amount) { 
+		
+	}
+	
+	public function groupBy(array $fields) {
+		
+	}
+	
+	public function commit() { 
+		
+	}
+	
 	
 	
 	
 	// REFLECT ------------------------------------------------------------- //
 	// This section is used to "reflect" upon current state of entity, and
 	// its available interface and structure
-	
-	/**
-	 * 
-	 * Used to determine structure of underlying data/table 
-	 */
-	public function members() { 
-		
-	}
-	
-	/**
-	 * 
-	 * Used to determine callable methods or interface provided
-	 * to this class
-	 */
-	public static function methods() {
-		
-	}
-	
-	/**
-	 * 
-	 * Used to determine relationships their associated types to
-	 * current data object
-	 */
-	public static function relationships() { 
-		// tracks xml definition of object to determine relationships
-	}
+
 	
 	
 	
@@ -209,8 +238,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 	public function __set($name, $value) { }
 	
 	public function &__call($name, $arguments) { 
-		// essentially servces at the gateway by which crud
-		// methods are called
+		// check that unnamed method falls in the entities method signature
+		// pool, as defined by its statement group
+		if (($method = $this->methodSignature($name))) { 
+			
+			// trigger that the method has been requested
+			$this->events->trigger('called', $this, [ 'name' = > $name ]);	
+			
+			// map method signature to correct entity method call
+			// TODO are there any more use cases outside of find*
+		}
+		
+		
 		
 		// call class object magic method
 		parent::__call($name, $arguments);
@@ -255,20 +294,47 @@ abstract class Entity extends \eGloo\Dialect\Object implements EntityInterface {
 		}		
 	}
 	
-	// FINAL --------------------------------------------------------------- // 
+	// PRIVATE ------------------------------------------------------------- //
+	
 	
 
+	
+	final private function parseMethods(array $files = [ ]) { 
+		// parses statement files available to this entity
+		// TODO parse actual files, including comments, parameters, etc
+		$methods = [ ];
+		
+		foreach ($files as $file) { 
+			$method = new MethodSignature($this);
+			$method->name = \eGloo\IO\File::basename($file);
+			
+			$methods[] = $method;
+		}
+		
+		return $methods;
+	}
+	
+	final private function methodSignature($name) { 
+		// determines if name is part of available
+		// entity method signatures
+		foreach($this->methods as $signature) { 
+			if ($signature->name == strlower($name)) { 
+				return $signature;
+			}
+		}
+		
+		return false;
+	}
 	
 	// PROPERTIES ---------------------------------------------------------- // 
 	
 	protected $data;
 	protected $state;
+	protected $called = [ ];
+	protected $events;
 	
-	
+	/** The assumed primary key */
 	protected $id;
-	
-	/** The persistence id */
-	protected $pid;
 	
 	/** Defines callable methods */
 	protected static $methods;

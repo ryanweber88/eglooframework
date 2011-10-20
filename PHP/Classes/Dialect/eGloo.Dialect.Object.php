@@ -133,6 +133,24 @@ abstract class Object {
 		}
 	}
 	
+	protected function setOrGet($propertyName, $value = null, \Closure $lambda = null) { 
+		// convenience method when overriding property() methods, so that we don't
+		// have to check for whether a get or set has been request - in the case
+		// of set, a callback is supplied to set value
+		
+		// value is null, a 'get' has been requested
+		if (is_null($value)) { 
+			return $this->$propertyName;
+		}
+		
+		// call lambda and return reference to self
+		if (!is_null($value = $lambda($value))) {
+			$this->$propertyName = $value;
+		};
+				
+		return $this;
+	}
+	
 	protected function methodExists($methodName) { 
 		return method_exists($this, $methodName);
 	}

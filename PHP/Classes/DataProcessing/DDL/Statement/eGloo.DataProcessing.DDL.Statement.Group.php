@@ -12,11 +12,11 @@ class Group extends \eGloo\Dialect\Object {
 	// TODO temporary - find a more elegant solution to building entity interface
 	const BASE = '/home/petflowdeveloper/www/tierzwei/Common/Database/DPStatements/MySQLiOOP/';
 	
-	public function interfaces(Entity $entity) { 
+	public function files(Entity $entity) { 
 		
 		// TODO get class hierarchy as path
 		$hierarchy = [
-			explode('\\', get_class($entity))[0]
+			$entity->_class->name
 		];
 		
 		/*
@@ -29,7 +29,8 @@ class Group extends \eGloo\Dialect\Object {
 		*/
 		
 		// retrieve all sql files located in path
-		// TODO glob overhead
+		// TODO deterine glob overhead, maybe faster to do this
+		// with traditional approach
 		return glob(self::BASE . "/" . implode('/', $hierarchy) . '/*.sql');
 		
 	}

@@ -20,7 +20,7 @@ abstract class Listener extends \eGloo\Dialect\Object {
 				);
 				
 				$events->attach(
-					$method->getName(), array($this, $eventName)
+					$eventName, array($this, $method->getName())
 				);
 			}
 		}
