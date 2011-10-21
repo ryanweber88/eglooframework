@@ -38,9 +38,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// call initialization method
 		$this->init();
-		
-		// initialize data container
-		$this->data = new Data($this);
+
 		
 		// set state
 		$this->state = self::STATE_NEW;
@@ -54,7 +52,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
-		// set cardinality
+		// set cardinality,first as defined relationships within
+		// entity, and as empty arrays in data object
+		// TODO figure out relationship storage/initilization
+		// in data
 		$this->cardinality = $definition->relationships;
 				
 		
@@ -74,8 +75,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// initialize stat trait
 		$this->initStatTrait();
 		
+		// initialize data container
+		// TODO initialization of data container could be pushed till 
+		// data is actually needed - right now it is dependant upon
+		// above initialization which i don't like
+		$this->data = new Data($this);
+		
 		
 	}
+	
+	/**
+	 * 
+	 * Provides developer initialization for entity bean, 
+	 * where-in construct should  
+	 * 
+	 */
+	protected function init() { }	
 	
 	/**
 	 * 
@@ -87,13 +102,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 	}
 	
-	/**
-	 * 
-	 * Provides developer initialization for entity bean, 
-	 * where-in construct should  
-	 * 
-	 */
-	protected function init() { }
+
 	
 	
 	
@@ -240,7 +249,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	public function &__call($name, $arguments) { 
 		// check that unnamed method falls in the entities method signature
 		// pool, as defined by its statement group
-		if (($method = $this->methodSignature($name))) { 
+		if (!is_null(($method = $this->methods[$name]))) { 
 			
 			// trigger that the method has been requested
 			$this->events->trigger('called', $this, [ 'name' = > $name ]);	
@@ -305,26 +314,15 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$methods = [ ];
 		
 		foreach ($files as $file) { 
-			$method = new MethodSignature($this);
+			$method = new Method($this);
 			$method->name = \eGloo\IO\File::basename($file);
 			
-			$methods[] = $method;
+			$methods[$method->name] = $method;
 		}
 		
 		return $methods;
 	}
-	
-	final private function methodSignature($name) { 
-		// determines if name is part of available
-		// entity method signatures
-		foreach($this->methods as $signature) { 
-			if ($signature->name == strlower($name)) { 
-				return $signature;
-			}
-		}
-		
-		return false;
-	}
+
 	
 	// PROPERTIES ---------------------------------------------------------- // 
 	
@@ -335,6 +333,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	/** The assumed primary key */
 	protected $id;
+	
+	/** The persistent id */
+	protected $pid = 0;
 	
 	/** Defines callable methods */
 	protected static $methods;

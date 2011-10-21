@@ -16,7 +16,7 @@ abstract class CollectionLimit extends Listener {
 	
 	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
-	function __construct($count) { 
+	function __construct($limit) { 
 		// call parent constructor
 		parent::__construct();
 		
@@ -26,10 +26,26 @@ abstract class CollectionLimit extends Listener {
 	}
 	
     
-    abstract public function eventCheck(Event $event);
+    abstract public function eventCheckLimit(Event $event);
+    
+    public function eventIncrement(Event $event) { 
+    	$this->count += 1;
+    	
+    	// fire check limit event
+    	$this->eventCheckLimit($event);
+    }
+    
+    public function eventDecrement(Event $event) { 
+    	$this->count -= 1;
+    }
+    
+    final private function reachedLimit() { 
+    	return $this->count >= $this->limit;
+    }
     
     
 	
 	
+	protected $limit = 0;
 	protected $count = 0;
 }

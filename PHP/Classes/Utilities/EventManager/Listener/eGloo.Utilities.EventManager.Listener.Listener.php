@@ -15,7 +15,7 @@ abstract class Listener extends \eGloo\Dialect\Object {
 		
 		foreach ($reflection->getMethods as $method) { 
 			if (strpos($method->getName(), 'event')) { 
-				$eventName = lcfirst(str_replace(
+				$eventName = strlower(str_replace(
 					'event', null, $method->getName())
 				);
 				

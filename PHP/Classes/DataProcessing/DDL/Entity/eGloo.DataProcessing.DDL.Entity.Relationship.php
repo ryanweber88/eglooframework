@@ -18,8 +18,16 @@ class Relationship extends \eGloo\Dialect\Object {
 		return $this->has == self::CARDINALITY_MANY;
 	}
 	
+	public function hasOne() { 
+		return $this->has == self::CARDINALITY_ONE;
+	}
+	
 	public function belongsMany() { 
 		return $this->belongs == self::CARDINALITY_MANY;
+	}
+	
+	public function belongsOne() { 
+		return $this->belongs == self::CARDINALITY_ONE;
 	}
 	
 	protected $to;

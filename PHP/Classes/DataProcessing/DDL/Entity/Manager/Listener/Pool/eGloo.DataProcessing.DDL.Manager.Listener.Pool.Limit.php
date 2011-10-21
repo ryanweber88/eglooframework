@@ -8,18 +8,23 @@ use \Zend\EVentManager\EventCollection;
 
 class Limit extends \eGloo\Utilities\EventManager\CollectionLimit {
 	
-	// TODO count should be configurable
-	function __construct($count) {
-		
-	}
+	// TODO count passed to construct should be configurable
+
 	
 	/**
 	 * 
 	 * Checks current pool size and responds accordingly if exceeded
 	 * @param Event $event
 	 */
-	public function eventCheck(Event $event) { 
+	public function eventCheckLimit(Event $event) { 
 		
-	}	
+		// if we have reached the limit
+		if ($this->reachedLimit()) { 
+			// TODO what do we do once limit is reached - items must
+			// be detached from pool
+		}
+	}
+	
+
 	
 }

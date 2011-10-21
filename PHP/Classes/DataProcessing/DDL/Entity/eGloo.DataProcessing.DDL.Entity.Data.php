@@ -13,8 +13,19 @@ class Data extends \eGloo\Dialect\Object {
 
 	function __construct(Entity &$entity) { 
 		$this->entity = $entity;
+		
+		// construct holder relationships 
+		if (is_array($this->entity->relationships)) { 
+			foreach($this->entity->relationships as $relationship) { 
+				$this->relationships[$relationship->to] = ($relationship->hasMany())
+					? [ ] 
+					: new stdClass;
+			}
+		}
 	}
 
 	
 	protected $entity;
+	protected $relationships = [ ];
+	protected $properties;
 }

@@ -222,6 +222,17 @@ class Context extends \eGloo\Dialect\Object {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * Checks if context is availabe - when running framework outside
+	 * of nginx/mongrel instance, context should not available
+	 */
+	public function available() { 
+		// TODO some functionality that actually determines if available
+		// this should be statically set as well
+		return true;	
+	}
+	
 	
 	final private function hashLambda(\Closure &$lambda) { 
 		$reflection = new \ReflectionFunction($lambda);

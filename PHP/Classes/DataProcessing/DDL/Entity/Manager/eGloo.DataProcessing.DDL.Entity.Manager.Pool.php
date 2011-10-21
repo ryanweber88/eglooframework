@@ -4,6 +4,8 @@ namespace eGloo\DataProcessing\DDL\Manager;
 use \eGloo\Dialect\Object;
 use \eGloo\DataProcessing\DDL;
 use \eGloo\DataProcessing\DDL\Entity\Entity;
+use \Zend\EventManager\EventManager;
+
 
 /**
  * 
@@ -12,20 +14,25 @@ use \eGloo\DataProcessing\DDL\Entity\Entity;
  *
  */
 class Pool extends \eGloo\Dialect\Object implements 
-	\eGloo\Utilities\StorageInterface,  \Iterator, \ArrayAccess, \Countable { 
+	 \Iterator, \ArrayAccess, \Countable { 
 	
-	use \eGloo\Utilities\BridgeTrait;
+	// TODO limit should be configurable
+	const LIMIT = 10;
 	
-	function __construct() { 
+	function __construct(DDL\Entity\Manager $manager) { 
+		
+		// point pool to its associated manager
+		$this->manager = $manager;
 		
 		// stores entities in linked list, so as to allow for efficient unsetting
 		// of values 
 		$this->entities = new \SplDoublyLinkedList();
 		
-		// attempt to bridge entities
-		$this->bridge($this->entities);
-		
-		// TODO attach listeners to pool
+		// TODO pool limit should be configurable
+		$this->events = new EventMananger();
+		$this->events->attachAggregate(new Listener\Pool\Limit(
+			self::LIMIT
+		));
 	}
 	
 	// Concrete Interface -------------------------------------------------- //
@@ -44,45 +51,74 @@ class Pool extends \eGloo\Dialect\Object implements
 	}
 	
 	// Bridge Entities ----------------------------------------------------- //
-	
+	// Can't do this?
+		
 	protected function bridge() { }
 	
 		
 	// StorageInterface Interface ------------------------------------------ //
 	
-	public function attach(Object $object) { 
-			
-	}
-	
-	public function remove(Object $object) { }
-	public function retrieve(Object $object) { }
-	public function clear() { }
-	public function count() { }
+
 	
 	// ArrayAccess Interface ----------------------------------------------- //
 	// Unfortanetly, have to explicitely call every single method as opposed
 	// to conveniently bridging to underlying collection - but whatever
 	
 	public function offsetExists($offset) { 
-		
+		return $this->entities->offsetExists($offset);
 	}
 	
-	public function offsetGet($offset) { }
-	public function offsetSet($offset, $value) { }
-	public function offsetUnset($offset) { }	
+	public function offsetGet($offset) { 
+		return $this->entities->offsetGet($offset);
+	}
+	
+	public function offsetSet($offset, $value) { 
+		// if offset is not set, then a value has been added and we
+		// trigger an increment
+		if (!isset($this->entities[$offset])) { 
+			$this->events->trigger('increment', $this, null);
+		}
+				
+		return $this->entities->offsetSet($offset, $value);
+	}
+	
+	public function offsetUnset($offset) { 
+		$this->events->trigger('decrement', $this, null);
+		
+		return $this->entities->offsetUnset($offset);
+	}	
 	
 	// IteratorAccess Interface -------------------------------------------- //
 	
-	public function current() { }
-	public function key() { }
-	public function next() { }
-	public function rewind() { }
-	public function valid() { }
+	public function current() { 
+		return $this->entities->current();
+	}
+	
+	public function key() { 
+		return $this->entities->key();
+	}
+	public function next() { 
+		return $this->entities->next();
+	}
+	
+	public function rewind() { 
+		return $this->entities->rewind();
+	}
+	
+	public function valid() { 
+		return $this->entities->valid();
+	}
 	
 	// Countable Interface ------------------------------------------------- //
 	
-	public function count() { }
+	public function count() { 
+		return $this->entities->count();
+	}
+	
+	// Properties ---------------------------------------------------------- //
 	
 	protected $entities;
 	protected $map = [ ];
+	protected $events;
+	protected $manager;
 }

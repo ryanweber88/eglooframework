@@ -20,10 +20,12 @@ class Factory extends \eGloo\Dialect\Object {
 			$context = \eGloo\System\Server\Application::instance()->context();
 		}
 		
-		if (!$context->exists(self::KEY)) { 
-			$context->bind(
-				self::KEY, new Manager()
-			);
+		if ($context->available()) { 
+			if (!$context->exists(self::KEY)) { 
+				$context->bind(
+					self::KEY, new Manager()
+				);
+			}
 		}
 		
 		return $context->retrieve(self::KEY);
