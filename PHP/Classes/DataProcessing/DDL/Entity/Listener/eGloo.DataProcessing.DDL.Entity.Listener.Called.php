@@ -26,13 +26,7 @@ class Called extends \eGloo\Utilities\Listener\Listener
     	$name = strlower($events->getParams()['name']);
     	$event->getTarget()->called[] = $name;
     	
-    	// check if first method called, which would signify the
-    	// actual crud operation
-    	if (count($event->getTarget()->called) == 1) { 
-			$event->getTarget()->operation(
-				$event->getTarget()->called[0]
-			);
-    	}
+
     }
 	
 }

@@ -64,7 +64,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// all we need is the interface - not anything else in regards to
 		// statements, which should be handled by manager
 		
-		$this->definition->methods = $this->parseMethods(DDl\Statement\Group::statements($this));
+		$this->definition->methods = $this->parseMethods(DDl\Statement\Group::statements(
+			$this
+		));
 		
 		// instantiate event manager and attach listeners
 		$this->events = new EventManager;
@@ -127,26 +129,41 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return Entity | QuerySet 
 	 */
 	public static function find($key) { 
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		//$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$entity  = new static;
+		$entity->events->trigger('called', $entity, [ 'name' => ])
+		
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		
 		// if key is array, then we are retrieving a queryset 
-		if (is_array($key)) { 
-			$set = new QuerySet;
-			
-			// don't worry, key is evaluated once, so loop 
-			// proceeds normally
-			foreach ($key as $key) { 
-				$set[] = $manager->retrieve($this, $key);
+		if (isset($entity->methods[__FUNCTION__])) { 
+			if (is_array($key)) { 
+				$set  = new QuerySet;
+				$keys = $key;
+				
+				foreach ($keys as $key) { 
+					if (($entity = $manager->find($this, $key)) !== false) { 
+						$set[] = $entity;
+					}
+				}
+				
+				return $set;
 			}
 			
-			return $set;
+			// otherwise - retrieve singular 
+			else { 
+				// perform method call if entity is not found
+				$entity = $manager->find($entity, $key, function() { 
+					return DDL\Statement\Builder::build($entity, $entity->methods[__FUNCTION__]->call([
+						new DDL\Statement\Argument('key', $key) 
+					]));
+				});
+			}
 		}
 		
-		// otherwise - retrieve singular 
-		else { 
-			return $manager->retrieve($this, $key);
-		}
+		throw \eGloo\Dialect\Excetion(
+			__FUNCTION__ . ' statement is not defined'
+		);
 	}
 	
 	/**
@@ -157,17 +174,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return Entity | Set
 	 */
 	public static function findBy ($field, $value = null) { 
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);
+		//$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);
+		
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		
-
 		// if passed as key/value pair, then insert into pairs
 		// and treat as array
 		$pairs = (is_array($field)) 
 			? $field
 			: [ $field => $value ];
 			
-		return new QuerySet($manager->query($this, $pairs));
+		//creturn new QuerySet($manager->query($this, $pairs));
 		
 	}
 	

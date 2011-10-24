@@ -31,25 +31,33 @@ class Method extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
-	 * Responsible for executing "method" or statement; this can 
-	 * be done from an entity, when working outside of managerial
-	 * context, or most likely, from the manager
-	 * @return mixed[][];
+	 * Responsible for executing "method" or statement and
+	 * initializing data structure of entity if statement
+	 * returns data
+	 * @param  mixed $arguments
+	 * @return void
 	 */
-	public function call() {
+	public function call($arguments) {
 		
 		// get statement content
 		$content = DDL\Statement\Group::statement(
 			$this->entity, $this->name
 		);
 		
+		echo $content; exit;
+		
 		// build statement and pass to statement instance
-		$statement = new DDL\Statement\Statement(DDL\Statement\Builder::build(
-			$this->entity, $content
-		));
+		
+		$data = DDL\Statement\Statement::rnew()
+			->execute(DDL\Statement\Builder::build(
+				$this->entity, $content
+			));
 				
 		// execute statement and return contents to caller
-		return $statement->execute()
+		if (is_array($data)) { 
+			$this->entity->data = new Data($this->entity);
+			
+		}
 	}
 	
 	public function __toString() { 
@@ -60,6 +68,7 @@ class Method extends \eGloo\Dialect\Object {
 	protected $name;
 	protected $comments;
 	protected $parameters;
+	protected $arguments;
 	protected $return;
 	protected $entity;
 }

@@ -48,11 +48,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	public function offsetSet($offset, $value) { 
 		// if offset is not set, then a value has been added and we
 		// trigger an increment
-		if (!isset($this->entities[$offset])) { 
-			$this->events->trigger('increment', $this, null);
-		}
-				
-		return $this->entities->offsetSet($offset, $value);
+		$this->entities[$offset] = $value;
 	}
 	
 	public function offsetUnset($offset) { 

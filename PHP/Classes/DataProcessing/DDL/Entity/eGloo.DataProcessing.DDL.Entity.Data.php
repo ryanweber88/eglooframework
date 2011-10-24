@@ -19,7 +19,7 @@ class Data extends \eGloo\Dialect\Object {
 			
 			foreach($this->entity->definition->relationships as $relationship) { 
 				$this->relationships[$relationship->to] = ($relationship->hasMany())
-					? [ ] 
+					? new QuerySet() 
 					: new stdClass;
 			}
 		}
@@ -28,5 +28,5 @@ class Data extends \eGloo\Dialect\Object {
 	
 	protected $entity;
 	protected $relationships = [ ];
-	protected $properties;
+	protected $properties    = [ ];
 }

@@ -46,8 +46,13 @@ class Utility extends \eGloo\Dialect\Object {
 	 * @param Entity $entity
 	 */
 	static public function pathStatements(Entity $entity) { 
-		return 
-			\eGlooConfiguration::getApplicationsPath() . '/' .
-			\eGlooConfiguration::getApplicationPath()  . '/Statements/';		
+		// TODO this must be explanded upon to allow for loading
+		// statements at different contextual levels
+		// applicaiton, common, framework, etc
+		$path = "/home/petflowdeveloper/www/tierzwei/Common/Database/DPStatements/MySQLiOOP";
+		//\eGlooConfiguration::getApplicationsPath() . '/' .
+		//\eGlooConfiguration::getApplicationPath()  . '/Database/Statements/' . 
+		
+		return "$path/{$entity->_class->name}";		
 	}
 }

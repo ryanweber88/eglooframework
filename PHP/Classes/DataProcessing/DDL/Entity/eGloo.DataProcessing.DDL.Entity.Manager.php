@@ -96,19 +96,37 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * @param Entity $entity
 	 * @param integer[] | string[] $key
 	 */
-	public function retrieve(Entity $entity, $key) {
+	public function find(Entity $entity, $key, \Closure $lambda = null) {
 
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
-		// TODO method chaining here is ugly
-		if (isset($this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key])) {
+		// TODO method chaining here is really ugly
+		if ( isset($this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key])) {
 			return $this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key];
+		}
+		
+		if (!is_null($lambda)) { 
+			$entity = $lambda();
+			$this->perist($entity);
+			
+			return $entity;
 		}
 		
 		
 		return false;
 	}
+	
+	/**
+	 * 
+	 * Encompasses a retrieve and statement call, should the retrieve fail
+	 * @param Entity $entity
+	 * @param mixed  $key
+	 
+	public function find(Entity $entity, $key) { 
+		
+	}
+	*/
 	
 	/**
 	 * 
@@ -119,6 +137,8 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * @todo Should we be providing a query interface here - perhaps not the manager's job?
 	 */
 	public function query(Entity $entity, array $pairs, $operator = 'AND') { 
+		// PASS
+		
 		foreach ($pairs as $field => $value) { 
 			if (isset($this->pool->map[$entity->_class->name][$field])) { 
 				
@@ -130,7 +150,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	public function merge(Entity $entity)  { 
 		// calls update
 		
-		// check if entity is 
+		// check if entity is already a part of pool
 		if ($this->contains($entity)) { 
 			// TODO 	
 		}
