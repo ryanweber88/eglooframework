@@ -23,7 +23,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// CONST --------------------------------------------------------------- //
 	
-	//const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
+	const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
 	const STATE_NEW      = 0x01;  // Entity is brand new, but not yet managed
 	const STATE_MANAGED  = 0x02;  // Entity is managed in persistence context
 	const STATE_REMOVED  = 0x03;  // Entity has persistence context, but is marked for removal from db
@@ -46,7 +46,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// retrieve entity definition/caveats from entities
 		// descriptor file
 		try { 
-			$definition = Definition::factory($this);
+			$this->definition = Definition::factory($this);
 		}
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
@@ -56,7 +56,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// entity, and as empty arrays in data object
 		// TODO figure out relationship storage/initilization
 		// in data
-		$this->cardinality = $definition->relationships;
+		//$this->cardinality = $definition->relationships;
 				
 		
 		// TODO read/determine interface (explicit from directory structure)
@@ -64,13 +64,15 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// all we need is the interface - not anything else in regards to
 		// statements, which should be handled by manager
 		
-		$this->methods = $this->parseMethods(DDl\Statement\Group::files($this));
+		$this->definition->methods = $this->parseMethods(DDl\Statement\Group::statements($this));
 		
 		// instantiate event manager and attach listeners
 		$this->events = new EventManager;
+		
 		//$this->events->attachAggregate(new Listener\Logger);
 		$this->events->attachAggregate(new Listener\Called);
-		//$this->events->attachAggregate(new Listener\Stat);
+		$this->events->attachAggregate(new Listener\Evaluation);
+		$this->events->attachAggregate(new Listener\Stat);
 		
 		// initialize stat trait
 		$this->initStatTrait();
@@ -79,7 +81,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// TODO initialization of data container could be pushed till 
 		// data is actually needed - right now it is dependant upon
 		// above initialization which i don't like
-		$this->data = new Data($this);
+		// $this->data = new Data($this);
 		
 		
 	}
@@ -92,6 +94,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	protected function init() { }	
 	
+	
 	/**
 	 * 
 	 * By default, will print entity information - should be overriden to
@@ -101,8 +104,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	public function __toString() { 
 		
 	}
-	
-
 	
 	
 	
@@ -123,7 +124,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * 
 	 * Retrieves entity based on primary key
 	 * @param  mixed $key
-	 * @return Entity | Set 
+	 * @return Entity | QuerySet 
 	 */
 	public static function find($key) { 
 		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
@@ -131,15 +132,15 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// if key is array, then we are retrieving a queryset 
 		if (is_array($key)) { 
-			$entities = [ ];
+			$set = new QuerySet;
 			
 			// don't worry, key is evaluated once, so loop 
 			// proceeds normally
 			foreach ($key as $key) { 
-				$entities[] = $manager->retrieve($this, $key);
+				$set[] = $manager->retrieve($this, $key);
 			}
 			
-			return $entities;
+			return $set;
 		}
 		
 		// otherwise - retrieve singular 
@@ -151,13 +152,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	/**
 	 * 
 	 * Retrieves entity based on field|value pair
-	 * @param string         $field
-	 * @param string|integer $key
+	 * @param string | array  $field
+	 * @param string |integer $value
 	 * @return Entity | Set
 	 */
-	public static function find_by ($field, $value) { 
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+	public static function findBy ($field, $value = null) { 
+		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);
+		$manager = &DDL\Manager\ManagerFactory::factory();
 		
+
+		// if passed as key/value pair, then insert into pairs
+		// and treat as array
+		$pairs = (is_array($field)) 
+			? $field
+			: [ $field => $value ];
+			
+		return new QuerySet($manager->query($this, $pairs));
 		
 	}
 	
@@ -303,6 +313,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		}		
 	}
 	
+	// INTERFACES ---------------------------------------------------------- //
+	
+	
+	public function evaluated() { 
+		// used to determine if entity has been evaluated yet
+		return (is_null($this->data));	
+	}
+	
 	// PRIVATE ------------------------------------------------------------- //
 	
 	
@@ -330,17 +348,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	protected $state;
 	protected $called = [ ];
 	protected $events;
+	protected $evaluated = false;
 	
-	/** The assumed primary key */
-	protected $id;
+	
+	/** Represents the method/operation with which to build entity */
+	protected $operation;
 	
 	/** The persistent id */
-	protected $pid = 0;
+	protected $pid = -1;
 	
-	/** Defines callable methods */
-	protected static $methods;
-	
-	/** Defines relationships */
-	protected static $cardinality;
+	/** Abstraction of configurable definition */
+	protected $definition;
 	 
 }

@@ -24,16 +24,7 @@ class Called extends \eGloo\Utilities\Listener\Listener
     public function eventCalled(Event $event) { 
     	
     	$name = strlower($events->getParams()['name']);
-
-    	// set target's called property
-    	if ($name == 'commit') { 
-    		// reset chain
-    		$event->getTarget()->called = [ ];	
-    	}
-    	
-    	else { 	
-    		$event->getTarget()->called[] = $name;
-    	}
+    	$event->getTarget()->called[] = $name;
     	
     	// check if first method called, which would signify the
     	// actual crud operation

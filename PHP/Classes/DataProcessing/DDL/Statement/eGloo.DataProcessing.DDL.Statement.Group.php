@@ -21,7 +21,7 @@ class Group extends \eGloo\Dialect\Object {
 	 * @param  Entity $entity
 	 * @return string[]
 	 */
-	public static function files(Entity $entity) { 
+	public static function statements(Entity $entity) { 
 	
 		// retrieve all sql files located in path
 		// TODO deterine glob overhead, maybe faster to do this
@@ -34,9 +34,19 @@ class Group extends \eGloo\Dialect\Object {
 		
 	}
 	
+	/**
+	 * 
+	 * Retrieves content of statement file; entity acts as key to determine
+	 * where statement group lies
+	 * @param unknown_type $entity
+	 * @param unknown_type $name
+	 */
 	public static function statement(Entity $entity, $name) { 
-		return static::retrieve("$path/$name.", function() { 
-			return glob("$path/$name\.")[0];		
+		// TODO need specify between different statement types (not
+		// everything is going to be sql)
+		// TODO should we statically store file contents or jus the path
+		return static::retrieve("$path/$name", function() { 
+			return file_get_contents(glob("$path/$name\.")[0]);		
 		}	
 	}
 	

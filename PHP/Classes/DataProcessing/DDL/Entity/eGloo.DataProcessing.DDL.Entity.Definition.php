@@ -11,10 +11,10 @@ use eGloo\DataProcessing\DDL;
  */
 class Definition extends \eGloo\Dialect\Object { 
 	
-	use \eGloo\Utilities\StaticStoreTrait;
+	use \eGloo\Utilities\Collection\StaticStorageTrait;
 	
 	function __construct(Entity $entity) { 
-		$this->entity = &$entity;
+		$this->entity = $entity;
 	}	
 	
 	static public function &factory(DDL\Entity\Entity $entity) { 
@@ -30,4 +30,8 @@ class Definition extends \eGloo\Dialect\Object {
 	
 	protected $entity;	
 	protected $relationships = [ ];
+	protected $methods;
+	
+	// TODO this should be determined in entities definition
+	protected $primaryKey = 'id';
 }

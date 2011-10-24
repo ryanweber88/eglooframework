@@ -52,9 +52,7 @@ class Pool extends \eGloo\Dialect\Object implements
 	
 	// Bridge Entities ----------------------------------------------------- //
 	// Can't do this?
-		
-	protected function bridge() { }
-	
+			
 		
 	// StorageInterface Interface ------------------------------------------ //
 	

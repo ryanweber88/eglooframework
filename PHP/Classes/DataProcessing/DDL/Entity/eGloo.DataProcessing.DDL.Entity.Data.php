@@ -15,8 +15,9 @@ class Data extends \eGloo\Dialect\Object {
 		$this->entity = $entity;
 		
 		// construct holder relationships 
-		if (is_array($this->entity->relationships)) { 
-			foreach($this->entity->relationships as $relationship) { 
+		if (is_array($this->entity->definition->relationships)) { 
+			
+			foreach($this->entity->definition->relationships as $relationship) { 
 				$this->relationships[$relationship->to] = ($relationship->hasMany())
 					? [ ] 
 					: new stdClass;

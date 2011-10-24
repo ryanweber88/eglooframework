@@ -90,38 +90,41 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	
 	/**
 	 * 
-	 * Retrieves an entity from the persistence context - if none,
-	 * is available, then the entities associated find* method
-	 * will be called and the newly created entity will be placed
-	 * into the persistence context and returned; if $field is 
-	 * specified, then lookup will be based upon that field, default
-	 * will be primnary key
+	 * Retrieves an entity from the persistence context, using
+	 * primary key as search; return false if entity is not available
+	 * found in context
 	 * @param Entity $entity
 	 * @param integer[] | string[] $key
-	 * @param string $field
 	 */
-	public function retrieve(Entity $entity, $key, $field = null) { 
-		
-		// we are not assuming that entity is already managed
-		// because this method should not be called otherwise
+	public function retrieve(Entity $entity, $key) {
 
 		
-		// assume that field is primary key if null
-		// TODO primary key field name should be configurable
-		// probably based on configuration in Entities.xml
-		if (is_null($field)) { 
-			$field = 'id';
+		// we assume, that once an entity is retrieved via db operation
+		// that it will be mapped 
+		// TODO method chaining here is ugly
+		if (isset($this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key])) {
+			return $this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key];
 		}
 		
-		// first we lookup to see if a reference map has already
-		// been defined for quick lookup
-		// TODO avoid conflicts in the case of like-named
-		// entities
-		if (isset($this->pool->map[$entity->_class->name][$field])) {
-			return $this->pool->map[$entity->_class->name][$field];
-		}
 		
 		return false;
+	}
+	
+	/**
+	 * 
+	 * Uses map to look for already indexed entities
+	 * @param  Entity $entity
+	 * @param  array $pairs
+	 * @return Entity[]
+	 * @todo Should we be providing a query interface here - perhaps not the manager's job?
+	 */
+	public function query(Entity $entity, array $pairs, $operator = 'AND') { 
+		foreach ($pairs as $field => $value) { 
+			if (isset($this->pool->map[$entity->_class->name][$field])) { 
+				
+			}
+		}
+		
 	}
 	
 	public function merge(Entity $entity)  { 

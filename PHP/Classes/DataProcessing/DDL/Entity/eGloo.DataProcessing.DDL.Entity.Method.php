@@ -1,6 +1,10 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
+use \eGloo\DataProcessing\DDL;
+
+
+
 /**
  * 
  * Represents a callable method for an entity
@@ -32,8 +36,24 @@ class Method extends \eGloo\Dialect\Object {
 	 * context, or most likely, from the manager
 	 * @return mixed[][];
 	 */
-	public function call() { 
+	public function call() {
 		
+		// get statement content
+		$content = DDL\Statement\Group::statement(
+			$this->entity, $this->name
+		);
+		
+		// build statement and pass to statement instance
+		$statement = new DDL\Statement\Statement(DDL\Statement\Builder::build(
+			$this->entity, $content
+		));
+				
+		// execute statement and return contents to caller
+		return $statement->execute()
+	}
+	
+	public function __toString() { 
+		return $this->name;
 	}
 	
 	
