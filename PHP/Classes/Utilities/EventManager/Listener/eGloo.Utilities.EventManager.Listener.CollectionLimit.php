@@ -10,6 +10,7 @@ use \Zend\EVentManager\EventCollection;
  * Provides abstract functionality for monitoring limits of a 
  * collection
  * @author Christian Calloway
+ * @deprecated
  *
  */
 abstract class CollectionLimit extends Listener {

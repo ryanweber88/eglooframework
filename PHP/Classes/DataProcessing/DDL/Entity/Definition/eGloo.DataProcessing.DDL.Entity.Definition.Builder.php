@@ -47,7 +47,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 		$relationships = [ ];
 		
 		// check that entity definition exists
-		if ($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship") { 
+		if ($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship")) { 
 			
 			// iterate through relationships
 			foreach($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship") as $node) { 
@@ -60,9 +60,9 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 				foreach(['has', 'belongs'] as $type) { 
 				
 					if (isset($node[$type])) { 
-						$relationship->$type = $node[$type] == 'many'
-							? Relationship::CARDINALITY_MANY 
-							: Relationship::CARDINALITY_ONE;
+						$relationship->$type = $node[$type] == DDL\Entity\Relationship::STRING_MANY
+							? DDL\Entity\Relationship::CARDINALITY_MANY 
+							: DDL\Entity\Relationship::CARDINALITY_ONE;
 					}
 				}
 				

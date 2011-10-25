@@ -8,7 +8,7 @@ use eGloo\System\Server\Context\Listener\Time;
 
 trait StatTrait { 
 	
-	protected function initStatTrait() { 
+	protected function init() { 
 		$this->accessed = time();
 		$this->modified = time();
 	}

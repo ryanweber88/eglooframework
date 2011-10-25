@@ -15,11 +15,13 @@ use \Zend\EventManager\EventManager;
  *
  */
 abstract class Entity extends \eGloo\Dialect\Object implements 
-	Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
+	Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
 	
 	// TRAITS -------------------------------------------------------------- //
 	
-	use \eGloo\Utilities\StatTrait
+	//use \eGloo\Utilities\EventManager\StatTrait {
+		//StatTrait::init as initStatTrait;
+	//};
 	
 	// CONST --------------------------------------------------------------- //
 	
@@ -52,12 +54,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
-		// set cardinality,first as defined relationships within
-		// entity, and as empty arrays in data object
-		// TODO figure out relationship storage/initilization
-		// in data
-		//$this->cardinality = $definition->relationships;
-				
 		
 		// TODO read/determine interface (explicit from directory structure)
 		// use statement package
@@ -72,12 +68,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->events = new EventManager;
 		
 		//$this->events->attachAggregate(new Listener\Logger);
-		$this->events->attachAggregate(new Listener\Called);
+		$this->events->attachAggregate(new Listener\Call);
 		$this->events->attachAggregate(new Listener\Evaluation);
-		$this->events->attachAggregate(new Listener\Stat);
+		//$this->events->attachAggregate(new Listener\Stat);
 		
 		// initialize stat trait
-		$this->initStatTrait();
+		//$this->initStatTrait();
 		
 		// initialize data container
 		// TODO initialization of data container could be pushed till 
@@ -114,8 +110,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// Provides standard crud methods - entity will onlyh 
 	
 	public  function create() { 
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
 		$manager = &DDL\Manager\ManagerFactory::factory();
+		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		
 		// TODO check that entity already exists and throw exception
 		return $manager->persist($this);
@@ -129,11 +125,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return Entity | QuerySet 
 	 */
 	public static function find($key) { 
-		//$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
-		$entity  = new static;
-		$entity->events->trigger('called', $entity, [ 'name' => ])
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
+		$entity  = new static;
+		$entity->events->trigger('called', $entity, [ 'name' => __FUNCTION__ ]);
+		
 		
 		// if key is array, then we are retrieving a queryset 
 		if (isset($entity->methods[__FUNCTION__])) { 
@@ -174,7 +170,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return Entity | Set
 	 */
 	public static function findBy ($field, $value = null) { 
-		//$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);
+		//$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
 		
@@ -195,7 +191,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * Calls create or update, depending on entities current state
 	 */
 	public static function save() {
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		$this->events->trigger('update', $this);
 		
 		return ($this->state == self::STATE_NEW)  
@@ -210,7 +206,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
 	 */
 	public function update() { 
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		$this->events->trigger('update', $this);
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
@@ -222,7 +218,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::delete()
 	 */
 	public function delete() {
-		$this->events->trigger('called', $this, [ 'name' = > __FUNCTION__ ]);	
+		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		$this->events->trigger('delete', $this); 
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
@@ -237,21 +233,31 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// TODO determine django-esque method to do lazy loading without
 	// commit call
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::limit()
+	 */
 	public function limit($amount) { 
 		
 	}
 	
-	public function offset($amount) { 
+	/**
+	 * (non-PHPdoc)
+	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::offset()
+	 */
+	public function offset($start, $end = 0) { 
 		
 	}
 	
+	/**
+	 * (non-PHPdoc)
+	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.WindowingInterface::groupBy()
+	 */
 	public function groupBy(array $fields) {
 		
 	}
 	
-	public function commit() { 
-		
-	}
+
 	
 	
 	
@@ -279,7 +285,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		if (!is_null(($method = $this->methods[$name]))) { 
 			
 			// trigger that the method has been requested
-			$this->events->trigger('called', $this, [ 'name' = > $name ]);	
+			$this->events->trigger('called', $this, [ 'name' => $name ]);	
 			
 			// map method signature to correct entity method call
 			// TODO are there any more use cases outside of find*

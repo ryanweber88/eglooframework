@@ -12,7 +12,6 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class Utility extends \eGloo\Dialect\Object { 
 	
-	
 	/**
 	 * 
 	 * Determines entity path based upon inheritance chain
@@ -49,10 +48,9 @@ class Utility extends \eGloo\Dialect\Object {
 		// TODO this must be explanded upon to allow for loading
 		// statements at different contextual levels
 		// applicaiton, common, framework, etc
-		$path = "/home/petflowdeveloper/www/tierzwei/Common/Database/DPStatements/MySQLiOOP";
 		//\eGlooConfiguration::getApplicationsPath() . '/' .
 		//\eGlooConfiguration::getApplicationPath()  . '/Database/Statements/' . 
-		
+		$path = "/home/petflowdeveloper/www/tierzwei/Common/Database/DPStatements/MySQLiOOP";
 		return "$path/{$entity->_class->name}";		
 	}
 }

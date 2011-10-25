@@ -151,6 +151,10 @@ abstract class Object {
 		return $this;
 	}
 	
+	protected function sget($propertyName, $value = null, \Closure $lambda = null) { 
+		return $this->setOrGet($propertyName, $value, $lambda);
+	}
+	
 	protected function methodExists($methodName) { 
 		return method_exists($this, $methodName);
 	}

@@ -1,31 +1,26 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity\Listener;
 
-use \eGloo\DataProcessing\DDL;
 use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
 use \Zend\EVentManager\EventCollection;
 
 /**
  * 
- * Responsible for listening to entity stat events and updating
- * stat as appropriate
+ * Provides abstract functionality for monitoring 
  * @author Christian Calloway
  *
  */
-class Stat extends \eGloo\Utilities\Listener\Listener
+class Stat extends \eGloo\Utilities\EventManager\Listener\Listener {
 	
 	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
-	
-	
-    public function eventAccessed(Event $event) { 
 
-    	// set target's called property
-    	//$event->getTarget()->called = $event->getParams()['name'];
-    }
-    
-    
-	public function eventModified(Event $event) { 
-		
+	public function eventAccessed(Event $event) { 
+		$event->getTarget()->accessed = time();	
 	}
+	
+	public function eventModified(Event $event) { 
+		$event->getTarget()->modified = time();
+	}
+	
 }

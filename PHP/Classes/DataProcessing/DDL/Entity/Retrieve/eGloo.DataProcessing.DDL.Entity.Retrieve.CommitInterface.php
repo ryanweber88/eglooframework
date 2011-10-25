@@ -11,12 +11,6 @@ use eGloo\DataProcessing\DDL;
  */
 interface CommitInterface { 
 	
-	/**
-	 * 
-	 * Flags a group by for $fields on data set
-	 * @param array $fields
-	 */
-	public function groupBy(array $fields);
 	
 
 }

@@ -23,7 +23,7 @@ class Method extends \eGloo\Dialect\Object {
 	 * @param unknown_type $value
 	 */
 	public function name($value = null) { 
-		return $this->setOrGet(__FUNCTION__, $value, function() { 
+		return $this->setOrGet(__FUNCTION__, $value, function($value) { 
 			// ensures that method signature name is lower cased
 			$this->name = strtolower($value); 
 		});

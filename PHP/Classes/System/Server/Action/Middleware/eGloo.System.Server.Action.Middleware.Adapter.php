@@ -39,9 +39,9 @@ class Adapter extends Middleware {
 		}
 
 		// TODO place bootstrap of egloo environment here?
-		$product = new \eGloo\DataProcessing\DDL\Entity\Test\Product;
-		$product->find(1);
-		exit;
+		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(10);
+		exit('here');
+	
 		
 		
 		

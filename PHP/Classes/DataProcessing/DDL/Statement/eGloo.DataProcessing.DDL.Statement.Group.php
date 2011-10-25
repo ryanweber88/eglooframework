@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Entity\Statement;
+namespace eGloo\DataProcessing\DDL\Statement;
 
 use eGloo\DataProcessing\DDL;
 use eGloo\DataProcessing\DDL\Entity\Entity;
@@ -8,11 +8,11 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * 
  * Responsible for building determining entity interface
  * @author Christian Calloway
+ * @todo   Need limit architecture placed on static storage
  *
  */
 class Group extends \eGloo\Dialect\Object { 
 	
-	// TODO temporary - find a more elegant solution to building entity interface
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
 	
 	/**
@@ -26,9 +26,10 @@ class Group extends \eGloo\Dialect\Object {
 		// retrieve all sql files located in path
 		// TODO deterine glob overhead, maybe faster to do this
 		// with traditional approach
-		$path = DDL\Utlity\Utility::pathStatements($entity);
+
+		$path = \eGloo\DataProcessing\DDL\Utility\Utility::pathStatements($entity);
 		
-		return static::retrieve($path, function() { 
+		return static::retrieve($path, function() use ($path) { 
 			return glob("$path/*.sql");		
 		});
 		
@@ -44,10 +45,11 @@ class Group extends \eGloo\Dialect\Object {
 	public static function statement(Entity $entity, $name) { 
 		// TODO need specify between different statement types (not
 		// everything is going to be sql)
-		// TODO should we statically store file contents or jus the path
+		// TODO should we statically store file contents or just the path
+		
 		return static::retrieve("$path/$name", function() { 
 			return file_get_contents(glob("$path/$name\.")[0]);		
-		}	
+		});	
 	}
 	
 	

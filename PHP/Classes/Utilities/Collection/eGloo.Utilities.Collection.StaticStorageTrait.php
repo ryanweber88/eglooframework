@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\Utilities;
+namespace eGloo\Utilities\Collection;
 
 /**
  * 
@@ -7,6 +7,7 @@ namespace eGloo\Utilities;
  * class variable - this meant to be used only within
  * class context
  * @author Christian Calloway
+ * @todo   Add limiting\lru traits
  *
  */
 trait StaticStorageTrait { 
