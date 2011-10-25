@@ -3,41 +3,27 @@ namespace eGloo\DataProcessing\DDL\Entity;
 
 use \eGloo\DataProcessing\DDL;
 
-
-
 /**
  * 
- * Represents a callable method for an entity
+ * Represents a callable method for an entity - extends Callback
+ * functionality as method is simply a wrapper for deferred
+ * functionality with the addition of executing prepapred
+ * statements
  * @author Christian Calloway
  *
  */
-class Method extends \eGloo\Dialect\Object {
+class Method extends DDL\Utility\Callback {
 	
-	function __construct(Entity $entity) { 
-		$this->entity = $entity;
-	}
 	
 	/**
-	 * 
-	 * Overrides default setter/getter - strlower name on set
-	 * @param unknown_type $value
-	 */
-	public function name($value = null) { 
-		return $this->setOrGet(__FUNCTION__, $value, function($value) { 
-			// ensures that method signature name is lower cased
-			$this->name = strtolower($value); 
-		});
-	}
-	
-	/**
-	 * 
-	 * Responsible for executing "method" or statement and
+	 * Overrides parent method, because method is ultimately
+	 * responsible for executing "method" or statement and
 	 * initializing data structure of entity if statement
 	 * returns data
 	 * @param  mixed $arguments
 	 * @return void
 	 */
-	public function call($arguments) {
+	public function call() {
 		
 		// get statement content
 		$content = DDL\Statement\Group::statement(
@@ -60,15 +46,17 @@ class Method extends \eGloo\Dialect\Object {
 		}
 	}
 	
+	/**
+	 * 
+	 * String representation of method is returned as its name
+	 */
 	public function __toString() { 
 		return $this->name;
 	}
 	
 	
-	protected $name;
 	protected $comments;
 	protected $parameters;
-	protected $arguments;
 	protected $return;
 	protected $entity;
 }

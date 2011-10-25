@@ -93,17 +93,17 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * Retrieves an entity from the persistence context, using
 	 * primary key as search; return false if entity is not available
 	 * found in context
-	 * @param Entity $entity
+	 * @param \eGloo\Dialect\_Class $entity
 	 * @param integer[] | string[] $key
 	 */
-	public function find(Entity $entity, $key, \Closure $lambda = null) {
+	public function find(\eGloo\Dialect\_Class $class, $key, \Closure $lambda = null) {
 
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
 		// TODO method chaining here is really ugly
-		if ( isset($this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key])) {
-			return $this->pool->map[$entity->_class->name][$entity->definition->primaryKey][$key];
+		if ( isset($this->pool->map[$class->name]['_primary_key'][$key])) {
+			return $this->pool->map[$class->name]['_primary_key'][$key];
 		}
 		
 		if (!is_null($lambda)) { 

@@ -27,7 +27,7 @@ class Group extends \eGloo\Dialect\Object {
 		// TODO deterine glob overhead, maybe faster to do this
 		// with traditional approach
 
-		$path = \eGloo\DataProcessing\DDL\Utility\Utility::pathStatements($entity);
+		$path = DDL\Utility\Path::$statements($entity);
 		
 		return static::retrieve($path, function() use ($path) { 
 			return glob("$path/*.sql");		

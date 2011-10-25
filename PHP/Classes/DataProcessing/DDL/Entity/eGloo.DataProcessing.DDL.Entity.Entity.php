@@ -66,13 +66,40 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// instantiate event manager and attach listeners
 		$this->events = new EventManager;
+
 		
-		//$this->events->attachAggregate(new Listener\Logger);
-		//$this->events->attachAggregate(new Listener\Call);
-		
-		$this->events->attachAggregate(new Listener\Evaluation([
-			'evaluate' => function() { 
-				return $this->evaluate();
+		// attach a "callback" listener
+		$this->events->attachAggregate(new Listener\Generic([
+			// listens for evaluate trigger
+			'evaluate' => function(Event $event) { 
+				// evaluates entity for substance (is this
+				// a fake entity or what not eh)
+				$this->evaluate();
+				
+				// false return indicates that listener will only respond once
+				return false;
+			}, 
+			
+			// listens for call trigger
+			'call'     => function(Event $event) {
+				
+				// instantiate method, and provide callback details
+				$method = new Method(
+					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
+				);
+				
+				// set reference to this entity
+				$method->entity = $this;
+				
+				// add reference to callback stack
+				$this->callbacks->push($method);
+				
+				if ($event->getParams()['execute'] === true) { 
+					
+				}
+				
+				// short-circuit listens on this aggregate
+				return true;
 			}
 		]));
 		
@@ -98,7 +125,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	protected function init() { }	
 	
-	
+		
 	/**
 	 * 
 	 * By default, will print entity information - should be overriden to
@@ -108,66 +135,95 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	public function __toString() { 
 		
 	}
+		
+	protected function evaluate() { 
+		// evaluates entity if it has not yet been
+		// "touched" by underlying data layer
+		
+		// run callback batch
+		$this->callbacks->batch();
+	}
 	
+
 	
+	// ENTITY CONTROLLER --------------------------------------------------- //
+	// These methods act as a controller/router to entities crud methods - 
+	// this is required as lazy-loading approach uses callbacks aggressively
+	// which are triggered from events - returning data from an eventlistener
+	// is a bad approach from design perspective
+
+
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
-	// Provides standard crud methods - entity will onlyh 
+	// Provides standard crud methods - entity will only
+
+	/**
+	 * 
+	 * Place entity into persistence context 
+	 * @throws \eGloo\Dialect\Exception
+	 */
+	protected function create() { 
+		try { 
+			return DDL\Manager\ManagerFactory::factory()
+				->persist($this);
+		}
+		catch(\eGloo\Dialect\Exception $pass) { 
+			throw $pass;
+		}
+		
 	
-	public  function create() { 
-		$manager = &DDL\Manager\ManagerFactory::factory();
-		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
-		
-		// TODO check that entity already exists and throw exception
-		return $manager->persist($this);
-		
 	}
 		
 	/**
 	 * 
 	 * Retrieves entity based on primary key
 	 * @param  mixed $key
-	 * @return Entity | QuerySet 
+	 * @return Entity | QuerySet | boolean
 	 */
-	public static function find($key) { 
+	protected static function find($key) { 
 		
-		$manager = &DDL\Manager\ManagerFactory::factory();
-		$entity  = new static;
-		$entity->events->trigger('called', $entity, [ 'name' => __FUNCTION__ ]);
+		$entity = new static;
+	
 		
+		if (is_array($key)) { }
 		
-		// if key is array, then we are retrieving a queryset 
-		if (isset($entity->methods[__FUNCTION__])) { 
-			if (is_array($key)) { 
-				$set  = new QuerySet;
-				$keys = $key;
-				
-				foreach ($keys as $key) { 
-					if (($entity = $manager->find($this, $key)) !== false) { 
-						$set[] = $entity;
-					}
+			$entity->events->trigger('call', $this, [
+				'arguments'  => [ 'name' => __FUNCTION__, 'keys' => $key ],
+				'definition' => function($amount) { 
+					// TODO supply what this method actually does
 				}
-				
-				return $set;
+			]);		
+
+			$set  = new QuerySet;
+			$keys = $key;
+			
+			foreach ($keys as $key) { 
+				if (($entity = $manager->find($this, $key)) !== false) { 
+					$set[] = $entity;
+				}
 			}
 			
-			// otherwise - retrieve singular 
-			else { 
-				// perform method call if entity is not found
-				return $manager->find($entity, $key, function() use ($entity) { 
-					return DDL\Statement\Builder::build($entity, $entity->methods['find']([
-						new DDL\Statement\Argument('key', $key) 
-					]);
-				});
-				
-				
-			}
+			return $set;
 		}
 		
-		throw \eGloo\Dialect\Excetion(
-			__FUNCTION__ . ' statement is not defined'
-		);
+		// otherwise - retrieve singular 
+		else { 
+			// perform method call if entity is not found
+			// HOW DOES THIS WORK WITH CALLBACK FEATURES??!!
+			
+			// retrieve entity from manager, or use callback to
+			return $manager->find($entity, $key, function() use ($entity) { 
+			
+				return $entity->evaluate()
+					? $entity 
+					: false;
+			});
+			
+			return $entity;
+		}
+	
+
 	}
 	
 	/**
@@ -177,7 +233,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @param string |integer $value
 	 * @return Entity | Set
 	 */
-	public static function findBy ($field, $value = null) { 
+	protected static function findBy ($field, $value = null) { 
 		//$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
@@ -284,26 +340,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// This sections primary concern is communicating with underlying
 	// data class
 	
-	public function __get($name) { }
+	public function __get($name) { 
+		// make sure this entity is evaluated prior to retrieval
+		$this->events->trigger('evaluate');
+	}
+	
 	public function __set($name, $value) { }
 	
-	public function &__call($name, $arguments) { 
-		// check that unnamed method falls in the entities method signature
-		// pool, as defined by its statement group
-		if (!is_null(($method = $this->methods[$name]))) { 
-			
-			// trigger that the method has been requested
-			$this->events->trigger('called', $this, [ 'name' => $name ]);	
-			
-			// map method signature to correct entity method call
-			// TODO are there any more use cases outside of find*
-		}
-		
-		
-		
-		// call class object magic method
-		parent::__call($name, $arguments);
-	}
+
 	
 	// CALLBACK ------------------------------------------------------------ // 
 	// This section defines implicit callback handlers - they can be 
@@ -347,13 +391,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// INTERFACES ---------------------------------------------------------- //
 	
 	
-	public function evaluated() { 
-		// used to determine if entity has been evaluated yet
-		return (is_null($this->data));	
-	}
 	
 	// PRIVATE ------------------------------------------------------------- //
-	
 	
 
 	
@@ -379,13 +418,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	protected $data;
 	protected $state;
-	protected $called = [ ];
 	protected $events;
-	protected $evaluated = false;
+	protected $callbacks;	
 	
-	
-	/** Represents the method/operation with which to build entity */
-	protected $operation;
 	
 	/** The persistent id */
 	protected $pid = -1;

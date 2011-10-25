@@ -16,20 +16,6 @@ use \Zend\EVentManager\EventCollection;
  */
 class Limit extends \eGloo\Dialect\Object implements ListenerAggregate { 
 	
-	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
-	
-	function __construct() { 
-		// TODO determine limits - will these change in respect to
-		// different contexts
-	}
-	
-    public function attach(EventCollection $events) {
-    	// TODO add limit events
- 
-    }
-	
-	public function onLoad(\Closure $lambda = null) { }
-	public function onRemove(\Closure $lambda = null) { }
-	public function onUpdate(\Closure $lambda = null) { }
+
 	
 }

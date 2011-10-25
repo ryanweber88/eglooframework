@@ -34,19 +34,5 @@ class Statement extends \eGlooDPPrimitive {
 				->executeTransactionWithConnection($populatedStatement, $connection)
 				->getDataPackage();
 	}
-	
-	/**
-	 * 
-	 * Executes a batch statement
-	 */
-	public function executeBatch() { 
-		
-	}
-	
-	public function addBatch($string) { 
-		$this->batch[] = $string;
-	}
-
-	protected $batch = [ ];
 
 }

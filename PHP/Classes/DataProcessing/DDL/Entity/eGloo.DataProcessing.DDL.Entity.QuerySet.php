@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
-
+use \eGloo\DataProcessing\DDL;
   
 /**
  * 
@@ -17,14 +17,34 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		parent::__construct();
  		
  		// instantiate event manager and attach listeners
-		$this->events = new EventManager;
+		$this->events = new EventManager;		
+		$this->events->attachAggregate(new Listener\Generic([
+			// listens for evaluate trigger
+			'evaluate' => function(Event $event) { 
+				// evaluates entity for substance (is this
+				// a fake entity or what not eh)
+				$this->evaluate();
+				
+				// false return indicates that listener will only respond once
+				// or is removed after initial run
+				return false;
+			}, 
+			
+			// listens for call trigger
+			'call'     => function(Event $event) {
+				
+				$this->callbacks->push(new DDL\Utility\Callback(
+					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
+				));
+				
+				// short-circuit listens on this aggregate
+				return true;
+			}
+		]));
 		
-		//$this->events->attachAggregate(new Listener\Logger);
-		$this->events->attachAggregate(new Listener\Evaluation);
 		
-		if (!is_null($entities)) { 
-			// TODO 	
-		}
+		// instantiate callback stack
+		$this->callbacks = new DDL\Utility\CallbackStack;
  	}
  	
  	public function isEmpty() { 
@@ -33,25 +53,75 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		return $this->count() === 0;
  	}
  	
+ 	protected function evaluate() { 
+ 		// responsible for evaluating queryset 
+ 	}
+
+	// Retrieve Interfaces ------------------------------------------------- //
+	// Methods can be chained 
+ 
+	public function limit($amount) { 
+		$this->events->trigger('call', $this, [
+			'arguments'  => [ 'name' => __FUNCTION__, 'amount' => $amount ],
+			'definition' => function($amount) { 
+				// TODO supply what this method actually does
+			}
+		]);
+		
+	}
 	
+	public function offset($amount) { 
+		$this->events->trigger('call', $this, [
+			'arguments'  => [ 'name' => __FUNCTION__, 'amount' => $amount ],
+			'definition' => function($amount) { 
+				// TODO supply what this method actually does
+			}
+		]);
+	}
+	
+	public function orderBy(array $fields) { 
+		$this->events->trigger('call', $this, [
+			'arguments'  => [ 'name' => __FUNCTION__, 'fields' => $fields ],
+			'definition' => function($amount) { 
+				// TODO supply what this method actually does
+			}
+		]);	
+	}
+	
+	public function groupBy(array $fields) {
+		$this->events->trigger('call', $this, [
+			'arguments'  => [ 'name' => __FUNCTION__, 'fields' => $fields ],
+			'definition' => function($amount) { 
+				// TODO supply what this method actually does
+			}
+		]);
+	}
+		
  	// ArrayAccess Interface ----------------------------------------------- //
 
 	
 	public function offsetExists($offset) { 
+		$this->events->trigger('evaluate', $this, null);
+		
 		return $this->entities->offsetExists($offset);
 	}
 	
 	public function offsetGet($offset) { 
+		$this->events->trigger('evaluate', $this, null);
+				
 		return $this->entities->offsetGet($offset);
 	}
 	
 	public function offsetSet($offset, $value) { 
+		$this->events->trigger('evaluate', $this, null);
+				
 		// if offset is not set, then a value has been added and we
 		// trigger an increment
 		$this->entities[$offset] = $value;
 	}
 	
 	public function offsetUnset($offset) { 
+		$this->events->trigger('evaluate',  $this, null);		
 		$this->events->trigger('decrement', $this, null);
 		
 		return $this->entities->offsetUnset($offset);
@@ -81,27 +151,17 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Countable Interface ------------------------------------------------- //
 	
 	public function count() { 
+		$this->events->trigger('evaluate', $this, null);
+		
 		return $this->entities->count();
 	} 	
  	
- 	// Retrieve Interfaces ------------------------------------------------- //
-	
- 
-	public function limit($amount) { 
-		
-	}
-	
-	public function offset($amount) { 
-		
-	}
-	
-	public function groupBy(array $fields) {
-		
-	}
+
 	
 	// Properties ---------------------------------------------------------- //
 	
+	protected $callbacks;
 	protected $entities = [ ];
 	protected $events;
-	protected $evaluated = false;
+	
 }
