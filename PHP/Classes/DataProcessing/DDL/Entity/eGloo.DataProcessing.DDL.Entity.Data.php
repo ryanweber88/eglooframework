@@ -11,7 +11,10 @@ use \eGloo\DataProcessing\DDL;
  */
 class Data extends \eGloo\Dialect\Object {
 
-	function __construct(Entity &$entity) { 
+	function __construct(Entity $entity) {
+		parent::__construct();
+
+		// 
 		$this->entity = $entity;
 		
 		// construct holder relationships 
@@ -24,9 +27,34 @@ class Data extends \eGloo\Dialect\Object {
 			}
 		}
 	}
-
+	
+	/**
+	 * 
+	 * Enter description here ...
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function addProperty($name, $value) {
+		$this->properties[$name] = $value;
+		
+		return $this;
+	}
+	
+	/**
+	 * Accessor for properties
+	 * @see eGloo\Dialect.Object::__get()
+	 */
+	public function __get($name) { 
+		if (isset($this->properties[$name])) { 
+			return $this->properties[$name];
+		}
+		
+		throw new \eGloo\Dialect\Exception(
+			'Attempting to access invalid Entity/Data property'
+		);
+	}
+	
 	
 	protected $entity;
-	protected $relationships = [ ];
 	protected $properties    = [ ];
 }

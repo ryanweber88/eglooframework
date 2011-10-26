@@ -5,7 +5,8 @@ use eGloo\DataProcessing\DDL;
 
 /**
  * 
- * Represesents an entity definition
+ * Represesents an entity definition a defined
+ * within entities xml
  * @author Christian Calloway
  *
  */
@@ -20,18 +21,20 @@ class Definition extends \eGloo\Dialect\Object {
 	static public function &factory(DDL\Entity\Entity $entity) { 
 				
 		return static::retrieve($entity->_class->name, function() use ($entity) { 
-			$builder = new Definition\Builder();
-			$builder->entity = $entity;
-			
-			return $builder->build();
+			return Definition\Builder::create($entity);
 		});
 
 	}	
+	
+	public function addRelationship(Relationship $relationship) {
+		$this->relationships[] = $relationship;
+		
+		return $this;
+	}
 	
 	protected $entity;	
 	protected $relationships = [ ];
 	protected $methods;
 	
-	// TODO this should be determined in entities definition
-	protected $primaryKey = 'id';
+
 }

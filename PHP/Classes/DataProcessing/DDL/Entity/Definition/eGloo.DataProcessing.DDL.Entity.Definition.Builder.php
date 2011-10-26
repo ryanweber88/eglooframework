@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity\Definition;
 
-use eGloo\DataProcessing\DDL;
+use \eGloo\DataProcessing\DDL;
+use \eGloo\DataProcessing\DDL\Entity\Entity;
+
 
 /**
  * 
@@ -14,7 +16,13 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 	
 	use \eGloo\Utilities\StaticStoreTrait;
 	
-	const FILE = 'Entities.xml';
+	
+	public static function create(Entity $entity) { 
+		$builder = new Builder();
+		$builder->entity = $entity;
+		
+		return $builder->build();
+	}
 	
 	/**
 	 * 
@@ -32,19 +40,14 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 		
 		// use simplexml to load/parse entities file
 		// TODO abstract parsing mechanism, as we should be able
-		// to load entity information from any storage scheme
-		$path = 
-			\eGlooConfiguration::getApplicationsPath() . '/' . 
-			\eGlooConfiguration::getApplicationPath()  . '/XML/' . self::FILE;
-			
-		$xml = &static::retrieve($path, function($key) {
+		// to load entity information from any storage scheme			
+		$xml = &static::retrieve(DDL\Utility\Path::definition(), function($key) {
 			return simplexml_load_file($key);
 		});	
 
 		
 		$name  = $this->entity->_class->name;
 		$definition = new DDL\Entity\Definition($this->entity);
-		$relationships = [ ];
 		
 		// check that entity definition exists
 		if ($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship")) { 
@@ -66,14 +69,9 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 					}
 				}
 				
-				$relationships[] = $relationship;
-					
+				$definition->addRelationship($relationship);
 			}
 		
-		
-		
-			// set relationships property and return definition
-			$definition->relationships = $relationships;
 			
 			return $definition;
 		}

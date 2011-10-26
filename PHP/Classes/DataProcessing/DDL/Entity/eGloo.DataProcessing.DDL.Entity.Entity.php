@@ -60,7 +60,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// all we need is the interface - not anything else in regards to
 		// statements, which should be handled by manager
 		
-		$this->definition->methods = $this->parseMethods(DDl\Statement\Group::statements(
+		$this->definition->methods = $this->parseMethods(DDl\Statement\Bundle::files(
 			$this
 		));
 		
@@ -144,6 +144,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->callbacks->batch();
 	}
 	
+	/**
+	 * 
+	 * Only a setter is provided for data
+	 * @param Data $data
+	 */
+	public function data(Data $data) { 
+		$this->data = $data;
+	}
 
 	
 	// ENTITY CONTROLLER --------------------------------------------------- //
@@ -184,17 +192,15 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	protected static function find($key) { 
 		
 		$entity = new static;
-	
+		$entity->events->trigger('call', $entity, [
+			'arguments'  => [ 'name' => __FUNCTION__, 'key' => $key ],
+			'definition' => function($key) { 
+				// DO What?
+			}
+		]);	
 		
-		if (is_array($key)) { }
+		if (is_array($key)) { 
 		
-			$entity->events->trigger('call', $this, [
-				'arguments'  => [ 'name' => __FUNCTION__, 'keys' => $key ],
-				'definition' => function($amount) { 
-					// TODO supply what this method actually does
-				}
-			]);		
-
 			$set  = new QuerySet;
 			$keys = $key;
 			
@@ -210,7 +216,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// otherwise - retrieve singular 
 		else { 
 			// perform method call if entity is not found
-			// HOW DOES THIS WORK WITH CALLBACK FEATURES??!!
 			
 			// retrieve entity from manager, or use callback to
 			return $manager->find($entity, $key, function() use ($entity) { 

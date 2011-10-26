@@ -12,11 +12,12 @@ class _Class extends Object {
 	function __construct($mixed) { 
 		
 		$this->class = ($mixed instanceof Object) 
-			? get_class($object)
+			? get_class($mixed)
 			: $mixed;
 			
 		// get class name
 		if (class_exists($this->class)) { 
+			$parts = explode('\\', $this->class);
 			$this->name = $parts[count($parts)-1];
 		}
 	
