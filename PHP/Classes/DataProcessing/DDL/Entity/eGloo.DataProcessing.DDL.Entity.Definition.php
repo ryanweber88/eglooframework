@@ -8,6 +8,7 @@ use eGloo\DataProcessing\DDL;
  * Represesents an entity definition a defined
  * within entities xml
  * @author Christian Calloway
+ * @todo   limit_static
  *
  */
 class Definition extends \eGloo\Dialect\Object { 
@@ -32,9 +33,19 @@ class Definition extends \eGloo\Dialect\Object {
 		return $this;
 	}
 	
-	protected $entity;	
+	/**
+	 * 
+	 * Enter description here ...
+	 * @param unknown_type $interface
+	 * @todo determine if interface should be class
+	 */
+	public function addInterface($interface) { 
+		$this->interface[] = $interface;
+	}
+	
+	private   $entity;	
 	protected $relationships = [ ];
-	protected $methods;
+	protected $interface     = [ ];
 	
 
 }

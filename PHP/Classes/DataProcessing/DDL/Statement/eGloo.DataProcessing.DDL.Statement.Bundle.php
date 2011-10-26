@@ -10,6 +10,7 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * @author Christian Calloway
  * @todo   Need limit architecture placed on static storage
  * @todo   A bundle should really be an instance over anything else
+ * @tod    limit_static
  *
  */
 class Bundle extends \eGloo\Dialect\Object { 
@@ -22,67 +23,35 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		// use a static retrieve for files, as files are not likely to change
 		// TODO sniff statement type
-		$this->files = glob(
-			"$path/*"
-		);
+		$this->files = glob("$path/*");
+		
+		// retrieve bundle content
+		foreach ($this->files as $file) {
+			$this->content[\eGloo\IO\File::basename($file)] = file_get_contents(
+				$file
+			);
+		}
 	}
 	
+	/**
+	 * Retrieve a bundle instance based on
+	 * @todo limit_static 
+	 */
 	public static function factory(Entity $entity) { 
-		return new Bundle(DDL\Utility\Path::statements(
-			$entity
-		));
-	}
-	
-	//public function statement($name) { 
-		//return file_get_contents("{$this->path}/$name");
-	//}
-	
-	/**
-	 * 
-	 * Returns an array of statement files
-	 * @param  Entity $entity
-	 * @return string[]
-	 */
-	public static function statements(Entity $entity) { 
-	
-		// retrieve all sql files located in path
-		// TODO deterine glob overhead, maybe faster to do this
-		// with traditional approach
-		$path = DDL\Utility\Path::statements($entity);
-		
-		return static::retrieve(DDL\Utility\Path::statements($entity), function($path) { 
-			return glob("$path/*.sql");		
+		return static::retrieve($entity->_class->name, function() use ($entity) { 
+			return new Bundle(DDL\Utility\Path::statements(
+				$entity
+			));		
 		});
-		
 	}
 	
-	/**
-	 * 
-	 * Synonymous with statements
-	 * @param Entity $entity
-	 */
-	public static function files(Entity $entity) { 
-		return static::statements($entity);
+	public function statement($name) {
+		return $this->content[$name];
 	}
 	
-	/**
-	 * 
-	 * Retrieves content of statement file; entity acts as key to determine
-	 * where statement group lies
-	 * @param unknown_type $entity
-	 * @param unknown_type $name
-	 */
-	public static function statement(Entity $entity, $name) { 
-		// TODO need specify between different statement types (not
-		// everything is going to be sql)
-		// TODO should we statically store file contents or just the path
-		$path = DDL\Utility\Path::statements($entity);
-		
-		return static::retrieve("$path/$name", function() { 
-			return file_get_contents(glob("$path/$name\.")[0]);		
-		});	
-	}
 	
-	protected $path;
+	
+	private   $path;
 	protected $files;
+	private   $content = [ ];
 }

@@ -1,6 +1,10 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
+use eGloo\DataProcessing\DDL\Statement\Bundle;
+
+use eGloo\DataProcessing\DDL\Statement\Statement;
+
 use eGloo\DataProcessing\DDL;
 use \Zend\EventManager\EventManager;
    
@@ -38,15 +42,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	function __construct() { 
 		parent::__construct();
 		
-		// call initialization method
+		// CALL INITILIZATION METHOD
 		$this->init();
 
 		
-		// set state
+		// SET ENTITY STATE
 		$this->state = self::STATE_NEW;
 		
-		// retrieve entity definition/caveats from entities
-		// descriptor file
+		// BUILD ENTITY DEFINITION
 		try { 
 			$this->definition = Definition::factory($this);
 		}
@@ -54,21 +57,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
+		// ENTITY/STATEMENT INTERFACE
+		// TODO abstract adding of interfaces 
+		$statementBundle = DDL/Statement/Bundle::factory($this);
 		
-		// TODO read/determine interface (explicit from directory structure)
-		// use statement package
-		// all we need is the interface - not anything else in regards to
-		// statements, which should be handled by manager
-		
-		$this->definition->methods = $this->parseMethods(DDl\Statement\Bundle::files(
-			$this
-		));
-		
-		// instantiate event manager and attach listeners
-		$this->events = new EventManager;
+		foreach($statementBundle->files as $file) { 
+			$this->definition->addInterface(explode('.', \eGloo\IO\File::basename($file))[0]);
+		}
 
 		
-		// attach a "callback" listener
+		// ENTITY EVENT LISTENERS
+		$this->events = new EventManager;
 		$this->events->attachAggregate(new Listener\Generic([
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
@@ -103,16 +102,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			}
 		]));
 		
-		//$this->events->attachAggregate(new Listener\Stat);
-		
-		// initialize stat trait
-		//$this->initStatTrait();
-		
-		// initialize data container
-		// TODO initialization of data container could be pushed till 
-		// data is actually needed - right now it is dependant upon
-		// above initialization which i don't like
-		// $this->data = new Data($this);
+
 		
 		
 	}
