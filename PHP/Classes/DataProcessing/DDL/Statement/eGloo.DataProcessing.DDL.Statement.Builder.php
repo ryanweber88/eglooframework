@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Entity\Statement;
+namespace eGloo\DataProcessing\DDL\Statement;
 
 use \eGloo\DataProcessing\DDL;
 use \eGloo\DataProcessing\DDL\Entity\Entity;
@@ -11,15 +11,17 @@ use \eGloo\DataProcessing\DDL\Entity\Entity;
  * @author Christian Calloway
  *
  */
-class Builder extends \eGloo\Dialect\Object { 
+class Builder extends \eGloo\Dialect\Object {
 	
 	
 	public static function create(Entity $entity, $content, array $arguments = [ ]) {
-		$builder = new Builder();
-		$builder->entity = $entity;
-		$builder->content = $content;
+		$builder            = new Builder();
+		$builder->entity    = $entity;
+		$builder->content   = $content;
 		$builder->arguments = $arguments;
 		
+		var_export($builder->arguments); exit;
+				
 		return $builder->build();
 	}
 	
@@ -52,7 +54,7 @@ class Builder extends \eGloo\Dialect\Object {
 	private function removeMetaData($string) { 
 		// replace {{ name|type|[array] }} for {{ $name }}
 		return preg_replace (
-			'/\{\{.+?([a-zA-Z_].+?).+?\}\}/', '{{ $$0 }}', $string
+			'/\{\{.+?([a-zA-Z_]+).+?\}\}/', '{{ $$1 }}', $string
 		);
 	}
 	
@@ -65,5 +67,9 @@ class Builder extends \eGloo\Dialect\Object {
 		
 		return $assoc;
 	}
+	
+	protected $entity;
+	protected $content;
+	protected $arguments;
 	
 }

@@ -37,9 +37,9 @@ abstract class Object {
 	 * @param mixed $arguments
 	 * @return instanceofself
 	 */
-	public static function rnew($arguments) { 
+	public static function rnew(array $arguments = [ ]) { 
 		$className = get_called_class();
-		return new $className($arguments);
+		return new $className();
 	}
 		
 	/**

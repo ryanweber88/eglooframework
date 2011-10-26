@@ -11,24 +11,20 @@ namespace eGloo\DataProcessing\DDL\Utility;
  */
 class Callback extends \Zend\Stdlib\CallbackHandler { 
 	
-	function __construct($name, $callback, array $arguments = [ ]) { 
-		parent::__construct ($name, $callback, $arguments);
+	function __construct($name, $callback) { 
+		parent::__construct ($name, $callback, [ ]);
 		
-		$this->name      = $name;
-		$this->arguments = $arguments;
+		$this->name = $name;
 	}
 	
 	/**
 	 * 
 	 * Overrides parent call to allow for use of "deferred"
-	 * arguments
+	 * arguments - since callbacks are meant to exist in
+	 * stack, they also recieve the return of last pop
 	 */
 	public function call(array $arguments = [ ]) { 
-		if (!count($arguments)) { 
-			$arguments = $this->arguments;
-		}
-		
-		parent::call($this->arguments);
+		return parent::call($arguments);
 	}
 	
 	

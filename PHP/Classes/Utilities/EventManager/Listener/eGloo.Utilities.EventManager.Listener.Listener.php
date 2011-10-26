@@ -5,7 +5,7 @@ use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
 use \Zend\EVentManager\EventCollection;
 
-class Listener extends \eGloo\Dialect\Object {
+class Listener extends \eGloo\Dialect\Object implements ListenerAggregate {
 	
 	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
@@ -15,9 +15,9 @@ class Listener extends \eGloo\Dialect\Object {
 	
 	public function attach(EventCollection $events) { 
 		// use reflection to get all 'event' methods
-		$reflection = new ReflectionClass($this);
+		$reflection = new \ReflectionClass($this);
 		
-		foreach ($reflection->getMethods as $method) { 
+		foreach ($reflection->getMethods() as $method) { 
 			if (strpos($method->getName(), 'event')) { 
 				$eventName = strlower(str_replace(
 					'event', null, $method->getName())
@@ -32,7 +32,7 @@ class Listener extends \eGloo\Dialect\Object {
 		}	
 
 		// override event methods with callbacks, if provided
-		foreach($callbacks as $event => $callback) { 
+		foreach($this->callbacks as $event => $callback) { 
 			if ($callback instanceof \Closure) { 
 				
 				// detach previous event, should it exist

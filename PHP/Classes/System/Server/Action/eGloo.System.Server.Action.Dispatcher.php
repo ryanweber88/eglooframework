@@ -29,7 +29,7 @@ class Dispatcher extends \photon\core\Dispatcher {
 				'cannot resolve ' . $request->headers->PATH
 			);	
 
-			return new Response();
+			//return new Response();
 		}
 		
 		\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(

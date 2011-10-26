@@ -27,7 +27,7 @@ class Adapter extends Middleware {
 		Server\Application::instance()->context()->retrieve('logger.test')->log(
 			'Adapter::processRequest'
 		);
-				
+						
 		// set defaults for requestClass and requestID should
 		// they not exist
 		if (empty($_REQUEST['eg_requestClass'])) { 
@@ -39,8 +39,7 @@ class Adapter extends Middleware {
 		}
 
 		// TODO place bootstrap of egloo environment here?
-		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(10);
-		exit('here');
+
 	
 		
 		

@@ -1,13 +1,10 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
-use eGloo\DataProcessing\DDL\Statement\Bundle;
-
-use eGloo\DataProcessing\DDL\Statement\Statement;
-
-use eGloo\DataProcessing\DDL;
+use \eGloo\DataProcessing\DDL;
 use \Zend\EventManager\EventManager;
-   
+use \Zend\EventManager\Event;
+
 
 /**
  * 
@@ -19,7 +16,7 @@ use \Zend\EventManager\EventManager;
  *
  */
 abstract class Entity extends \eGloo\Dialect\Object implements 
-	Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
+	EvaluationInterface, Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
 	
 	// TRAITS -------------------------------------------------------------- //
 	
@@ -58,17 +55,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
+		
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 		
-		foreach(DDL\Statement\Bundle::create($this)->content as $name => statement) {	
-			$this->methods[$name] = new Method(
-				$this, $name
-			);
+		foreach(DDL\Statement\Bundle::create($this)->names as $name) {	
+			$this->methods[$name] = function($arguments) use ($name) {
+				$method = new Method($this, $name);
+				return $method->call($arguments);
+			};
 		}
 
 		
 		// ENTITY EVENT LISTENERS
-		$this->events = new EventManager;
+		$this->callbacks = new DDL\Utility\CallbackStack;
+		$this->events    = new EventManager;
+		
+		// TODO refactor
 		$this->events->attachAggregate(new Listener\Generic([
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
@@ -83,19 +85,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			// listens for call trigger
 			'call'     => function(Event $event) {
 			
-
-				$methodCallback = new DDL\Utility\MethodCallback(
-					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
-				);
+				// specifiy callback here?
+				$params = $event->getParams();
 				
-				$methodCallback->method = $this->methods[$event->getParams()['name']];
+				$this->callbacks->push(new DDL\Utility\Callback(
+					$params['name'], function($passThrough) use ($params) { 
+						return $this->methods[$params['name']]($params['arguments']); 
+					}
+				));
 				
-				// instantiate callback, and push onto stack
-				$this->callbacks->push($methodCallback);
+				// unless defer flag has been exp specified, trigger evaluation
+				// immediately
+				if (!isset($params['defer']) || $params['defer'] !== true) { 
+					$this->events->trigger('evaluate');
+				}
 				
 				
-				
-				// short-circuit listens on this aggregate
+				// true return will short-curcuit any subsequent calls
+			
 				return true;
 			}
 		]));
@@ -122,6 +129,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	public function __toString() { 
 		
+	}
+	
+	/**
+	 * 
+	 * 
+	 */
+	public function valid() { 
+		$this->events->trigger('evaluate');
+		
+		return $this->data instanceof Data;
 	}
 		
 	protected function evaluate() { 
@@ -159,7 +176,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * Place entity into persistence context 
 	 * @throws \eGloo\Dialect\Exception
 	 */
-	protected function create() { 
+	public function create() { 
 		try { 
 			return DDL\Manager\ManagerFactory::factory()
 				->persist($this);
@@ -177,55 +194,40 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @param  mixed $key
 	 * @return Entity | QuerySet | boolean
 	 */
-	protected static function find($key) { 
+	public static function find($key) { 
 		
 		$entity = new static;
 		$entity->events->trigger('call', $entity, [
-			// defines the calling method, and parameter values
-			'arguments'  => [ 'name' => __FUNCTION__, 'key' => $key ],
-			
-			// defines the action/definition of this method
-			'definition' => function($key) { 
-				if (is_array($key)) { 
-				
-					$set  = new QuerySet;
-					$keys = $key;
-					
-					foreach ($keys as $key) { 
-						if (($entity = $manager->find($this, $key)) !== false) { 
-							$set[] = $entity;
-						}
-					}
-					
-					return $set;
-				}
-				
-				// otherwise - retrieve singular 
-				else if (0) { 
-					// perform method call if entity is not found
-					
-					// retrieve entity from manager, or use callback to
-					return $manager->find($entity, $key, function() use ($entity) { 
-					
-						return $entity->evaluate()
-							? $entity 
-							: false;
-					});
-					
-					return $entity;
-				}
-				
-				return false;
-			},
-			
-			// singular find method will not defer execution
-			'execute' => true
-		]);	
+			'name'       => __FUNCTION__,
 		
+			// defines the calling method, and parameter values
+			'arguments'  => [ 'key' => $key ], 
+		
+			'definition' => null
+		]);
 
-	
+		if (is_array($key)) { 
+			// TODO figure out how queryset will be initialized
+			$set  = new QuerySet;
 
+			return $set;
+		}
+		
+		// otherwise - retrieve singular 
+		else {			
+			// retrieve entity from manager, or use callback to do explicit
+			// find, which is then persisted by manager and returned here
+			return $manager->find($entity, $key, function() use ($entity) { 
+				$entity->valid()
+					? $entity 
+					: false;
+			});
+			
+		}
+		
 	}
+			
+
 	
 	/**
 	 * 
@@ -234,7 +236,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @param string |integer $value
 	 * @return Entity | Set
 	 */
-	protected static function findBy ($field, $value = null) { 
+	public static function findBy ($field, $value = null) { 
 		//$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);
 		
 		$manager = &DDL\Manager\ManagerFactory::factory();

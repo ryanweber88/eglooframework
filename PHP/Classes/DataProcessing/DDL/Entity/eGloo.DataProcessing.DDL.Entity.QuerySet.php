@@ -11,7 +11,7 @@ use \eGloo\DataProcessing\DDL;
  *
  */
 class QuerySet extends \eGloo\Dialect\Object implements
-	Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
+	EvaluationInterface, Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
  	function __construct(array $entities = null) { 
  		parent::__construct();
@@ -47,6 +47,32 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		$this->callbacks = new DDL\Utility\CallbackStack;
  	}
  	
+ 	public function valid() { 
+ 		$this->events->trigger('evaluate');
+ 		
+ 		return ($this->count() > 0);
+ 	}
+ 	
+ 	/**
+ 	 * 
+ 	 * Provides a callback query interface for entities
+ 	 * already in 
+ 	 * @param  Closure  $lambda
+ 	 * @return QuerySet 
+ 	 */
+ 	public function query(\Closure $lambda) { 
+ 		
+ 		$set = new QuerySet;
+ 		
+ 		foreach ($this->entities as $entity) { 
+ 			if ($entity->valid() && $lambda($entity)) { 
+ 				$set[] = $entity;
+ 			}
+ 		}
+ 		
+ 		return $set;
+ 	}
+ 	
  	public function isEmpty() { 
  		$this->trigger('evaluate', $this, null);
  		
@@ -56,6 +82,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// responsible for evaluating queryset 
  	}
+ 	
+
 
 	// Retrieve Interfaces ------------------------------------------------- //
 	// Methods can be chained 

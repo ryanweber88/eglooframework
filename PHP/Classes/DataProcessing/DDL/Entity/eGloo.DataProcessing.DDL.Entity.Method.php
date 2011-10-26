@@ -18,6 +18,7 @@ class Method extends \eGloo\Dialect\Object {
 	function __construct(Entity $entity, $name) { 
 		$this->entity = $entity;
 		$this->name   = $name;
+		
 	}
 	
 	/**
@@ -29,20 +30,17 @@ class Method extends \eGloo\Dialect\Object {
 	 * @return void
 	 */
 	public function call(array $arguments = [ ]) {
-		
+				
 		// get statement content
 		$content = DDL\Statement\Bundle::create($this->entity)
-			->statement(
-				$this->entity, $this->name
-			);
+			->statementContent($this->name);
+							
 		
-				
 		// build statement and pass to statement instance
 		$data = DDL\Statement\Statement::rnew()
 			->execute(DDL\Statement\Builder::create(
 				$this->entity, $content, $arguments
 			));
-				
 		
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity

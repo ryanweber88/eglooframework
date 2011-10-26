@@ -46,6 +46,9 @@ class Bundle extends \eGloo\Dialect\Object {
 		});
 	}
 
+	public function statementContent($name) { 
+		return $this->content[$name];
+	}
 	
 	
 	

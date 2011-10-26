@@ -12,9 +12,28 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * @todo   Entirely SQL oriented; an adapter layer must be build in order to 
  *         to deal with disparate data sources
  */
-class Statement extends \eGlooDPPrimitive { 
+class Statement extends \eGloo\Dialect\Object { 
 	
+	public $_class;
+	public $_id;
+	public $_connection_name;
+	public $_engine_mode;
 	
+	public function __construct( $class = null, $id = null, $connection_name = 'egPrimary', $engine_mode = null ) {
+		
+		$this->_class = $class;
+		$this->_id = $id;
+
+		$this->_connection_name = $connection_name;
+
+		if ( $engine_mode !== null ) {
+			$this->_engine_mode = \eGlooConfiguration::getEngineModeFromString( $engine_mode );
+		} else {
+			$connection_info = \eGlooConfiguration::getDatabaseConnectionInfo( $connection_name );
+			$this->_engine_mode = $connection_info['engine'];
+		}
+	}
+		
 	/**
 	 * (non-PHPdoc)
 	 * @see eGlooDPPrimitive::execute()
@@ -22,11 +41,11 @@ class Statement extends \eGlooDPPrimitive {
 	 */	
 	public function execute($statement) { 
 
-		$preparedStatement = new QueryTransaction($statement);
+		$preparedStatement = new \QueryTransaction($statement);
 		$preparedStatement->setQueryDialect(DBConnectionManager::getConnection( $this->_connection_name )->getConnectionDialect());
 		
-		$connection = DBConnectionManager::getConnection($this->_connection_name, $this->_engine_mode);
-		$queryExecutionRoutine = QueryExecutionRoutineManager::getQueryExecutionRoutine($preparedStatement);
+		$connection = \DBConnectionManager::getConnection($this->_connection_name, $this->_engine_mode);
+		$queryExecutionRoutine = \QueryExecutionRoutineManager::getQueryExecutionRoutine($preparedStatement);
 
 		
 		return

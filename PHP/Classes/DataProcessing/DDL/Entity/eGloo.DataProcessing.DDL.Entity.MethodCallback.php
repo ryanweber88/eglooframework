@@ -11,13 +11,18 @@ use eGloo\DataProcessing\DDL;
  * @author Christian Calloway
  *
  */
-class MethodCallback extends \Zend\Stdlib\CallbackHandler { 
+class MethodCallback extends DDL\Utility\Callback { 
 	
-	public function call(array $arguments = [ ]) { 
-		if (parent::call($arguments) === false) { 
+	use \eGloo\Utilities\AttributeTrait;
+	
+	public function call(array $arguments = [ ]) {
+		
+		if (parent::call($arguments) === false) { 				
 			$this->method->call($arguments);
 		}
 	}
 	
-	protected $method;
+	
+	/** @todo change protected */
+	public $method;
 }
