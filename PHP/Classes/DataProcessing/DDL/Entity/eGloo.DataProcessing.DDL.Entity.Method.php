@@ -16,7 +16,8 @@ class Method extends \eGloo\Dialect\Object {
 	
 	
 	function __construct(Entity $entity, $name) { 
-		
+		$this->entity = $entity;
+		$this->name   = $name;
 	}
 	
 	/**

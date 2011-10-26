@@ -52,7 +52,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// BUILD ENTITY DEFINITION
 		// Defined in entities xml
 		try { 
-			$this->definition = Definition::factory($this);
+			$this->definition = Definition::create($this);
 		}
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
@@ -60,8 +60,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 		
-		foreach(DDL\Statement\Bundle::create($this)->content as $name => statement) {
-			$this->methods[] = 1;//new Method($this, $name);
+		foreach(DDL\Statement\Bundle::create($this)->content as $name => statement) {	
+			$this->methods[$name] = new Method(
+				$this, $name
+			);
 		}
 
 		
@@ -80,21 +82,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			
 			// listens for call trigger
 			'call'     => function(Event $event) {
-				
-				// instantiate method, and provide callback details
-				$method = new DDL\Utility\Callback(
+			
+
+				$methodCallback = new DDL\Utility\MethodCallback(
 					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
 				);
 				
-				// set reference to this entity
-				$method->entity = $this;
+				$methodCallback->method = $this->methods[$event->getParams()['name']];
 				
-				// add reference to callback stack
-				$this->callbacks->push($method);
+				// instantiate callback, and push onto stack
+				$this->callbacks->push($methodCallback);
 				
-				if ($event->getParams()['execute'] === true) { 
-					
-				}
+				
 				
 				// short-circuit listens on this aggregate
 				return true;
@@ -182,40 +181,48 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		$entity = new static;
 		$entity->events->trigger('call', $entity, [
+			// defines the calling method, and parameter values
 			'arguments'  => [ 'name' => __FUNCTION__, 'key' => $key ],
+			
+			// defines the action/definition of this method
 			'definition' => function($key) { 
-				// DO What?
-			}
+				if (is_array($key)) { 
+				
+					$set  = new QuerySet;
+					$keys = $key;
+					
+					foreach ($keys as $key) { 
+						if (($entity = $manager->find($this, $key)) !== false) { 
+							$set[] = $entity;
+						}
+					}
+					
+					return $set;
+				}
+				
+				// otherwise - retrieve singular 
+				else if (0) { 
+					// perform method call if entity is not found
+					
+					// retrieve entity from manager, or use callback to
+					return $manager->find($entity, $key, function() use ($entity) { 
+					
+						return $entity->evaluate()
+							? $entity 
+							: false;
+					});
+					
+					return $entity;
+				}
+				
+				return false;
+			},
+			
+			// singular find method will not defer execution
+			'execute' => true
 		]);	
 		
-		if (is_array($key)) { 
-		
-			$set  = new QuerySet;
-			$keys = $key;
-			
-			foreach ($keys as $key) { 
-				if (($entity = $manager->find($this, $key)) !== false) { 
-					$set[] = $entity;
-				}
-			}
-			
-			return $set;
-		}
-		
-		// otherwise - retrieve singular 
-		else { 
-			// perform method call if entity is not found
-			
-			// retrieve entity from manager, or use callback to
-			return $manager->find($entity, $key, function() use ($entity) { 
-			
-				return $entity->evaluate()
-					? $entity 
-					: false;
-			});
-			
-			return $entity;
-		}
+
 	
 
 	}
