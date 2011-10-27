@@ -34,32 +34,23 @@ class Method extends \eGloo\Dialect\Object {
 		// get statement content
 		$content = DDL\Statement\Bundle::create($this->entity)
 			->statementContent($this->name);
+			
 							
-		
-		echo DDL\Statement\Builder::create(
-				$this->entity, $content, $arguments
-		);
-			
-		exit;
-			
 		// build statement and pass to statement instance
 		$data = DDL\Statement\Statement::rnew()
 			->execute(DDL\Statement\Builder::create(
 				$this->entity, $content, $arguments
 			));
-		
+					
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity
 		// has requested evaluation.
 		// TODO how to do multiple data sets?? 
 		if ($data && is_array($data)) { 
-			
-			// 
-			$this->entity->data = Data/Builder::create(
-				$this->entity, $data
-			);
-			
+			return $data;
 		}
+		
+		return false;
 				
 	}
 	

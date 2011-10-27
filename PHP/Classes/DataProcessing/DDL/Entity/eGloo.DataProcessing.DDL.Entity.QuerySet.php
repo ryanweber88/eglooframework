@@ -13,8 +13,13 @@ use \eGloo\DataProcessing\DDL;
 class QuerySet extends \eGloo\Dialect\Object implements
 	EvaluationInterface, Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
- 	function __construct(DDL\Utility\CallbackStack $stack) { 
+ 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack) { 
  		parent::__construct();
+ 		
+ 		// set entity - each query set represents a collection of a singular
+ 		// type of entity, so entity represents the "type" of this queryset
+ 		$this->entity = $entity;
+ 		
  		
  		// instantiate event manager and attach listeners
 		$this->events = new EventManager;		
@@ -81,8 +86,32 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	
  	protected function evaluate() { 
  		
- 		// run batch on callback stack
- 		$this->callbacks->batch();
+
+ 		// check if callback data is valid - returned results will
+ 		// ALWAYS be 1+N records
+ 		if (($data = $this->callbacks->batch()) !== false) { 
+			$manager = &DDL\Manager\ManagerFactory::factory();
+ 			
+ 			// TODO write some measure of intelligence in the number
+ 			// of entities built on an evaluation
+ 			$this->entities = new \SplFixedArray(count($data));
+ 			
+ 			foreach ($data as $record) {
+ 				
+ 				// @todo how to determine what our primary key will be
+ 				return $manager->find(
+ 					$this->entity->_class, 
+ 					$record[$this->entity->definition->primaryKeyName], function() use ($record) { 
+ 						$entity = clone $this->entity;
+ 						$entity->data = Data\Builder::create(
+ 							$this->entity, $record
+ 						);
+ 						
+ 						return $entity;
+ 					}
+ 				}); 				
+ 			}
+		}
  	}
  	
 
@@ -220,7 +249,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Properties ---------------------------------------------------------- //
 	
 	protected $callbacks;
-	protected $entities = [ ];
+	protected $entities;
 	protected $events;
+	private   $entity;
 	
 }

@@ -9,18 +9,20 @@ use \eGloo\DataProcessing\DDL\Entity\Entity;
  * 
  * Responsible for building statement to be executed by Statement
  * @author Christian Calloway
+ * @todo   limit_static
  *
  */
 class Builder extends \eGloo\Dialect\Object {
+	
+	use \eGloo\Utilities\Collection\StaticStorageTrait;
+	
 	
 	public static function create(Entity $entity, $content, array $arguments = [ ]) {
 		$builder            = new Builder();
 		$builder->entity    = $entity;
 		$builder->content   = $content;
-		$builder->arguments = $arguments;d
-		
-		var_export($builder->arguments); exit;
-				
+		$builder->arguments = $arguments;
+						
 		return $builder->build();
 	}
 	
@@ -41,13 +43,25 @@ class Builder extends \eGloo\Dialect\Object {
 		// TODO cache parsed query based on key|value pairs
 		// passed in arguments
 		
+		
+		// add entity specific values to arguments
+		$this->arguments['type'] = strtolower(
+			$this->entity->_class->name
+		);
+		
 		// use blitz parser
 		$blitz = new \Blitz();
-		$blitz->load($content);
+		$blitz->load($this->content);
+		
+		// TODO arguments should be passed as object type, but
+		// associative array for now
+		return $blitz->parse($this->arguments);
+		
+		/*
 		$blitz->parse($this->keyValueArguments(
 			$this->arguments
 		));
-		
+		*/
 	}
 	
 	private function removeMetaData($string) { 

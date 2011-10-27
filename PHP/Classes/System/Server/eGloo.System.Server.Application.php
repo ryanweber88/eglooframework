@@ -12,10 +12,11 @@ use \eGloo\System\Server;
  * @author petflowdeveloper
  *
  */
-class Application  { 
+class Application extends \eGloo\Dialect\Object implements Context\ContextInterface { 
 	
 	use \eGloo\Utilities\SingletonTrait;
-	use Server\Context\ContextTrait;
+	use Server\Context\ContextTrait; 
+	
 	
 	/**
 	 * 

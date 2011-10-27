@@ -133,20 +133,21 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	/**
 	 * 
-	 * 
+	 * @return boolean
 	 */
 	public function valid() { 
 		$this->events->trigger('evaluate');
 		
-		return $this->data instanceof Data;
+		// Data shoud ALWAYS be either valid or false
+		return ($this->data !== false);
 	}
 		
 	protected function evaluate() { 
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
-		
-		// run callback batch
-		$this->callbacks->batch();
+		$this->data = (($data = $this->callbacks->batch()) !== false)
+			? Data\Builder::create($this, $data)
+			: false; 
 	}
 	
 	/**
@@ -184,6 +185,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return boolean
 	 */
 	public static function exists($key) { 
+		
+	}
+	
+	public function __clone() { 
+		// TODO copies will have to take circular ref 
+		// into account so as that data will not 
+		
+		// copy data, as we do not want to data values to 
+		// overwritten from entity to entity
+		$this->data = false;
 		
 	}
 	
@@ -228,7 +239,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 
 		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
-			return new QuerySet($entity->callbacks);
+			return new QuerySet($entity, $entity->callbacks);
 		}
 		
 		// otherwise - retrieve singular 
@@ -421,7 +432,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// PROPERTIES ---------------------------------------------------------- // 
 	
-	protected $data;
+	protected $data = false;
 	protected $state;
 	protected $events;
 	protected $callbacks;	

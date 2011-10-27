@@ -38,19 +38,22 @@ class Statement extends \eGloo\Dialect\Object {
 	 * (non-PHPdoc)
 	 * @see eGlooDPPrimitive::execute()
 	 * @return mixed[][]
+	 * @todo   refactor statement call-chain to replace any uneeded steps
 	 */	
 	public function execute($statement) { 
 
+		
 		$preparedStatement = new \QueryTransaction($statement);
-		$preparedStatement->setQueryDialect(DBConnectionManager::getConnection( $this->_connection_name )->getConnectionDialect());
+		$preparedStatement->setQueryDialect(\DBConnectionManager::getConnection( $this->_connection_name )->getConnectionDialect());
 		
 		$connection = \DBConnectionManager::getConnection($this->_connection_name, $this->_engine_mode);
 		$queryExecutionRoutine = \QueryExecutionRoutineManager::getQueryExecutionRoutine($preparedStatement);
-
 		
+		\QueryPopulationManager::populateQueryTransaction($preparedStatement, [ ]);
+				
 		return
 			$queryExecutionRoutine
-				->executeTransactionWithConnection($populatedStatement, $connection)
+				->executeTransactionWithConnection($preparedStatement, $connection)
 				->getDataPackage();
 	}
 

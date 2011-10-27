@@ -17,10 +17,8 @@ class Test extends Middleware {
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processRequest()
 	 */
-	public function processRequest(Request &$request) { 
-		
-		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(10);
-		echo $product; exit('here');
+	public function processRequest(Request &$request) { 		
+		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
 		
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
