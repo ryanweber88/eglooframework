@@ -55,7 +55,7 @@ class User {
 	/**
 	 * @var string security hash key 
 	 */
-	public $hash_key;
+	public $secure_key;
 	
 	/**
 	 * @var integer 1/0 for active user
@@ -67,7 +67,35 @@ class User {
 	 */
 	public $is_deleted = 0;
 	
+	/**
+	 * @var integer 1/0 for guest user
+	 */
+	public $is_guest = 0;
+	
+	/**
+	 * @var string created date
+	 */
+	public $created_date;
+	
+	/**
+	 * @var string deleted date
+	 */
+	public $deleted_date;
+	
+	/**
+	 * @var string updated date
+	 */
+	public $updated_date;
+	
+	/**
+	 *
+	 * @return type 
+	 */
+	public function getUserInfo(){
+		if (isset ($this->uid)){
+			
+		}
+		return $user;
+	}
 	
 }
-
-?>
