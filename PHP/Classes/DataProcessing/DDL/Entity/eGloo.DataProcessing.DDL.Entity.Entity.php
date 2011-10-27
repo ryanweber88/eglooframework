@@ -165,7 +165,27 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// which are triggered from events - returning data from an eventlistener
 	// is a bad approach from design perspective
 
+	// QUERY INTERFACE ----------------------------------------------------- //
 
+	/**
+	 * 
+	 * Specifies included relationships (default is all) for a specific query
+	 * @param Entities[] $entities
+	 */
+	public static function includes(array $entities) { 
+		
+	}
+	
+	/**
+	 * 
+	 * Acts as a wrapper to find - will attept to retrieve entity, which
+	 * if successful will throw into pool and return true, and if not, return false
+	 * @param Mixed[] | Mixed $key
+	 * @return boolean
+	 */
+	public static function exists($key) { 
+		
+	}
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
@@ -206,11 +226,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			'definition' => null
 		]);
 
+		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
-			// TODO figure out how queryset will be initialized
-			$set  = new QuerySet;
-
-			return $set;
+			return new QuerySet($entity->callbacks);
 		}
 		
 		// otherwise - retrieve singular 

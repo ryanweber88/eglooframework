@@ -36,6 +36,12 @@ class Method extends \eGloo\Dialect\Object {
 			->statementContent($this->name);
 							
 		
+		echo DDL\Statement\Builder::create(
+				$this->entity, $content, $arguments
+		);
+			
+		exit;
+			
 		// build statement and pass to statement instance
 		$data = DDL\Statement\Statement::rnew()
 			->execute(DDL\Statement\Builder::create(
@@ -47,9 +53,12 @@ class Method extends \eGloo\Dialect\Object {
 		// has requested evaluation.
 		// TODO how to do multiple data sets?? 
 		if ($data && is_array($data)) { 
-			$this->entity->data(Data/Builder::create(
+			
+			// 
+			$this->entity->data = Data/Builder::create(
 				$this->entity, $data
-			));
+			);
+			
 		}
 				
 	}

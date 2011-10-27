@@ -13,12 +13,11 @@ use \eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class Builder extends \eGloo\Dialect\Object {
 	
-	
 	public static function create(Entity $entity, $content, array $arguments = [ ]) {
 		$builder            = new Builder();
 		$builder->entity    = $entity;
 		$builder->content   = $content;
-		$builder->arguments = $arguments;
+		$builder->arguments = $arguments;d
 		
 		var_export($builder->arguments); exit;
 				

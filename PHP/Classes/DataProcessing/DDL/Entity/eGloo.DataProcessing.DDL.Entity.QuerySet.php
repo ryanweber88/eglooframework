@@ -13,7 +13,7 @@ use \eGloo\DataProcessing\DDL;
 class QuerySet extends \eGloo\Dialect\Object implements
 	EvaluationInterface, Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
- 	function __construct(array $entities = null) { 
+ 	function __construct(DDL\Utility\CallbackStack $stack) { 
  		parent::__construct();
  		
  		// instantiate event manager and attach listeners
@@ -44,7 +44,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 		
 		// instantiate callback stack
-		$this->callbacks = new DDL\Utility\CallbackStack;
+		$this->callbacks = $stack;
  	}
  	
  	public function valid() { 
@@ -80,7 +80,9 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
  	protected function evaluate() { 
- 		// responsible for evaluating queryset 
+ 		
+ 		// run batch on callback stack
+ 		$this->callbacks->batch();
  	}
  	
 
@@ -89,40 +91,69 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Methods can be chained 
  
 	public function limit($amount) { 
-		$this->events->trigger('call', $this, [
-			'arguments'  => [ 'name' => __FUNCTION__, 'amount' => $amount ],
-			'definition' => function($amount) { 
-				// TODO supply what this method actually does
+		$set = new QuerySet($this->callbacks);
+		$set->events->trigger('call', $entity, [
+			'name'       => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'  => [ 'amount' => $amount ], 
+		
+			'definition' => function($arguments) {
+		
+				return [ 'limit' => $arguments['amount'] ];
 			}
 		]);
 		
+		return $set;
 	}
 	
 	public function offset($amount) { 
-		$this->events->trigger('call', $this, [
-			'arguments'  => [ 'name' => __FUNCTION__, 'amount' => $amount ],
-			'definition' => function($amount) { 
-				// TODO supply what this method actually does
+		$set = new QuerySet($this->callbacks);
+		$set->events->trigger('call', $entity, [
+			'name'       => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'  => [ 'amount' => $amount ], 
+		
+			'definition' => function($arguments) {
+				return [ 'offset' => $arguments['amount'] ];
 			}
 		]);
+		
+		return $set;
 	}
 	
 	public function orderBy(array $fields) { 
-		$this->events->trigger('call', $this, [
-			'arguments'  => [ 'name' => __FUNCTION__, 'fields' => $fields ],
-			'definition' => function($amount) { 
-				// TODO supply what this method actually does
-			}
-		]);	
-	}
-	
-	public function groupBy(array $fields) {
-		$this->events->trigger('call', $this, [
-			'arguments'  => [ 'name' => __FUNCTION__, 'fields' => $fields ],
-			'definition' => function($amount) { 
-				// TODO supply what this method actually does
+		$set = new QuerySet($this->callbacks);
+		$set->events->trigger('call', $entity, [
+			'name'       => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'  => [ 'fields' => $fields ], 
+		
+			'definition' => function($arguments) {
+				return [ 'order_by' => $arguments['fields'] ];
 			}
 		]);
+		
+		return $set;	
+	}
+	
+	
+	public function groupBy(array $fields) {
+		$set = new QuerySet($this->callbacks);
+		$set->events->trigger('call', $entity, [
+			'name'       => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'  => [ 'fields' => $fields ], 
+		
+			'definition' => function($arguments) {	
+				return [ 'group_by' => $arguments['fields'] ];
+			}
+		]);
+		
+		return $set;
 	}
 		
  	// ArrayAccess Interface ----------------------------------------------- //
