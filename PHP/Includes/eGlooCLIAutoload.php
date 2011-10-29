@@ -1,7 +1,8 @@
 <?php
 namespace eGloo;
 
-use eGloo\Performance\Caching\Gateway as CacheGateway;
+use \eGloo\Performance\Caching\Gateway as CacheGateway;
+use \eGloo\Utility\Logger as Logger;
 
 use \RecursiveDirectoryIterator as RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator as RecursiveIteratorIterator;
@@ -40,9 +41,9 @@ if ( !class_exists( '\eGloo\Configuration', false ) ) {
 // Load the install configuration
 Configuration::loadCLIConfigurationOptions();
 
-// Bring up the eGloo\Logger
-if ( !class_exists( '\eGloo\Logger', false ) ) {
-	include( 'PHP/Classes/System/Utilities/eGloo.Logger.php' );
+// Bring up the eGloo\Utility\Logger
+if ( !class_exists( '\eGloo\Utility\Logger', false ) ) {
+	include( 'PHP/Classes/System/Utilities/eGloo.Utility.Logger.php' );
 }
 
 global $egloo_script_arguments;
@@ -405,6 +406,21 @@ function big( $mixed ) {
 	echo '<h1>';
 	print_r($mixed);
 	echo '</h1>';
+}
+
+/**
+ * Helpful alerts to note when deprecated functions are being used
+ */
+function deprecate( $deprecated, $replacement = null ) {
+	$class_name = '\\' . str_replace( '.', '\\', basename($deprecated, '.php') );
+
+	$alert_string = 'Warning: Class ' . $class_name . ' is deprecated.';
+
+	if ( $replacement !== null ) {
+		$alert_string .= '  Please use "' . $replacement . '" instead.';
+	}
+
+	Logger::writeLog( Logger::DEBUG, $alert_string, 'Deprecated' );
 }
 
 /**

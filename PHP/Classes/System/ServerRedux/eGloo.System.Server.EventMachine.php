@@ -1,4 +1,8 @@
 <?php
+<<<<<<< HEAD
+use eGloo\System\Server\EventMachine;
+=======
+>>>>>>> feature/Server
 namespace eGloo\System\Server;
 
 /**
@@ -18,15 +22,45 @@ namespace eGloo\System\Server;
  * @author Christian Calloway
  *
  */
+<<<<<<< HEAD
+class EventMachine extends \eGloo\Dialect\Object implements \eGloo\Utilities\Runnable { 
+=======
 class EventMachine extends \eGloo\Dialect\Object { 
 	
 	const LOCALHOST = '127.0.0.1';
+>>>>>>> feature/Server
 	
 	/**
 	 * 
 	 * Runs the EventMachine (ie an continuous loop) 
 	 * @param Closure $lambda
 	 */
+<<<<<<< HEAD
+	static public function run(Closure $lambda = null) { 
+		
+		$configuration = &\eGloo\System\Server\Configuration::instance();
+		
+		// fork 
+		for ($counter = 0; $counter < $configuration->children; $counter++) { 
+
+			// fork process and run children in the background  
+			$pid = pcntl_fork();
+		
+			// if parent, continue to next iteration
+			if ($pid) { 
+				
+			}
+			
+			// otherwise, as child, 
+			else { 
+				// start continuous loop; loop can be controlled (exited) via run property within closure
+				while (static::$run) {
+					if (is_callable($lambda)) { 
+						$lambda();
+					}
+				}
+			}
+=======
 	static public function run(\Closure $lambda = null) { 
 		
 		// start continuous loop; loop can be controlled (exited) via run property within closure
@@ -37,6 +71,7 @@ class EventMachine extends \eGloo\Dialect\Object {
 				$lambda();
 			}
 		}
+>>>>>>> feature/Server
 	}
 		
 	/**
@@ -55,6 +90,40 @@ class EventMachine extends \eGloo\Dialect\Object {
 	 * @throws EventMachine\Exception
 	 * @return EventMachine\Server
 	 */
+<<<<<<< HEAD
+	static protected function startServer($host = self::LOCALHOST, $port, $handlerMixed, \Closure $handlerClosure = null) { 
+		// starts listening on specified port, throw exception if not available
+		// @todo check port availability
+			
+		// check mixed, which can either be a closure (to which a connection
+		// object is passed) or a connection instance itself
+		$connection = null;
+		
+		// determine $handlerMixed type
+		if ($mixed instanceof EventMachine\HandlerInterface) { 
+			// $handlerMixed is handler interface, which literally means it implements methods
+			// to handle two-way connections
+			$connection = &$handlerMixed;
+			//$connection->port($port);
+		}
+		
+		else { 
+			// otherwise $mixed is lamda, pass an empty instance to lambda
+			$connection = new EventMachine\Connection.rnew()->port($port);
+			$lambda = &$handlerMixed;
+			
+			// call lambda with connection instance
+			$connection = $lambda($connection);
+		}
+		
+		// if $handlerClosure was provided, we pass connection to provide for
+		// binds to connection
+		if (!is_null($handlerClosure)) { 
+			$connection = $handlerClosure($connection);
+		}
+		
+		static::$connections[] = $connection;
+=======
 	static public function startServer(EventMachine\Connection $connection, \Closure $handlerConnection = null) { 
 		// starts listening on specified port, throw exception if not available
 		// @todo check port availability
@@ -67,13 +136,19 @@ class EventMachine extends \eGloo\Dialect\Object {
 		}
 		
 		static::$connection = $connection;
+>>>>>>> feature/Server
 	}
 	
 	/** @var boolean */
 	private static $run = true;
 	
+<<<<<<< HEAD
+	/** @var EventMachine\Connection[] */
+	private static $connections = array();
+=======
 	/** @var EventMachine\Connection */
 	private static $connection;
 	
 
+>>>>>>> feature/Server
 }

@@ -1,0 +1,6 @@
+
+#ifndef __GENERATED___bin_sys_scalar_integers_remap_hf0ce5ea5__
+#define __GENERATED___bin_sys_scalar_integers_remap_hf0ce5ea5__
+
+
+#endif // __GENERATED___bin_sys_scalar_integers_remap_hf0ce5ea5__

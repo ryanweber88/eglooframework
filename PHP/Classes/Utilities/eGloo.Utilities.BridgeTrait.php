@@ -5,7 +5,8 @@ namespace eGloo\Utilities;
  * Provides bridge-pattern by inspecting implementor interface methods
  * @author Christian Calloway
  */
-trait BridgeTrait { 	
+trait BridgeTrait {
+
 
 	public function &__call($name, $arguments) { 
 		// use reflection on implementors interfaces to
@@ -42,7 +43,7 @@ trait BridgeTrait {
 	}
 	
 	protected function bridge($implementor) { 
-		$this->implementor = $implementor;
+		$this->implementor = &$implementor;
 	}
 	
 

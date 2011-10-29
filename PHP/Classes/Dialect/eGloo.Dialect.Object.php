@@ -12,7 +12,28 @@ namespace eGloo\Dialect;
  */
 abstract class Object { 
 	
-	function __construct() { }
+
+	function __construct(array $dynamicParams = [ ]) { 
+		
+		// TODO perform static initialization using reflection
+		// - the problem though is that reflection is overhead
+		// heavy
+		
+		// does not work - will stop once set
+		//if (is_null(static::$class)) { 
+		//	static::$class = new _Class($this);
+		//}
+		
+		// @todo this needs to be deprecated as class should represent
+		// class, not an instance
+		//$this->_class = new _Class($this);
+		
+		// lets avoid infinite loops shall we
+		if (!($this instanceof _Class)) { 
+			static::$_class = new _Class($this);
+		}
+		
+	}
 	
 	/**
 	 * 
@@ -22,54 +43,65 @@ abstract class Object {
 	 * WARNING: This will only work in > 5.3
 	 * @param mixed $arguments
 	 * @return instanceofself
+	 * @deprecated This functionality has been moved to class
 	 */
-	public static function rnew($arguments) { 
+	public static function rnew(array $arguments = [ ]) { 
 		$className = get_called_class();
-		return new $className($arguments);
+		return new $className();
 	}
-	
+		
 	/**
 	 * 
 	 * Provides equality interface for classes implementing Object
 	 * @param unknown_type $object
 	 */
-	public function equals(\eGloo\Dialect\Object &$object) { }
+	public function equals(\eGloo\Dialect\Object &$object) { 
+		return true;
+	}
 	
 	
 	/**
 	 * 
-	 * Copies 'attr_reader' ruby paradigm - allows for "public" access
-	 * to protected properties; will throw an exception if property
-	 * is not available
+	 * Provides attr_reader quality to php objects - calls __call 
+	 * to cement retrieval. Like __call methods, this can be 
+	 * overriden with a method of the same name as property
 	 * @param  string $name
-	 * @throws Exception
-	 * @return mixed
+	 * @throws \eGloo\Dialect\Exception
+	 * @return  mixed
 	 */
-	public function __get($name) { 
+	public function __get($name) {
+		
+		// @todo replace after references to instance members have
+		// been replaced
+		if ($name == '_class') {
+			return static::$_class;	
+		}
+		
 		try { 
 			return $this->$name();
 		}
-		catch (Exception $pass) {
+		catch (Exception $pass) { 
 			throw $pass;
-		}		
+		}
 	}
 	
 	/**
 	 * 
-	 * Copies 'attr_writer' ruby paradigm - allows for public mutation pf protected properties; 
-	 * will throw an exception if property is non existent
-	 * @param  String $name
+	 * Provides attr_writer quality to php objects - $obj->property = value
+	 * will actually call $obj->property($value); to implementors, it will
+	 * appears as if setting public properties
+	 * @param  string $name
 	 * @param  mixed  $value
-	 * @throws Exception
+	 * @throws \eGloo\Dialect\Exception
 	 * @return void
 	 */
 	public function __set($name, $value) { 
 		try { 
 			$this->$name($value);
 		}
-		catch (Exception $pass) {
+		catch (Exception $pass) { 
 			throw $pass;
-		}	
+		}
 	}
 	
 	/**
@@ -116,6 +148,28 @@ abstract class Object {
 		}
 	}
 	
+	protected function setOrGet($propertyName, $value = null, \Closure $lambda = null) { 
+		// convenience method when overriding property() methods, so that we don't
+		// have to check for whether a get or set has been request - in the case
+		// of set, a callback is supplied to set value
+		
+		// value is null, a 'get' has been requested
+		if (is_null($value)) { 
+			return $this->$propertyName;
+		}
+		
+		// call lambda and return reference to self
+		if (!is_null($value = $lambda($value))) {
+			$this->$propertyName = $value;
+		};
+				
+		return $this;
+	}
+	
+	protected function sget($propertyName, $value = null, \Closure $lambda = null) { 
+		return $this->setOrGet($propertyName, $value, $lambda);
+	}
+	
 	protected function methodExists($methodName) { 
 		return method_exists($this, $methodName);
 	}
@@ -123,4 +177,6 @@ abstract class Object {
 	protected function propertyExists($propertyName) { 
 		return property_exists($this, $propertyName);	
 	}
+	
+	public static $_class;
 }
