@@ -13,7 +13,7 @@ namespace eGloo\Dialect;
 abstract class Object { 
 	
 
-	function __construct() { 
+	function __construct(array $dynamicParams = [ ]) { 
 		
 		// TODO perform static initialization using reflection
 		// - the problem though is that reflection is overhead
@@ -24,7 +24,14 @@ abstract class Object {
 		//	static::$class = new _Class($this);
 		//}
 		
-		$this->_class = new _Class($this);
+		// @todo this needs to be deprecated as class should represent
+		// class, not an instance
+		//$this->_class = new _Class($this);
+		
+		// lets avoid infinite loops shall we
+		if (!($this instanceof _Class)) { 
+			static::$_class = new _Class($this);
+		}
 		
 	}
 	
@@ -36,6 +43,7 @@ abstract class Object {
 	 * WARNING: This will only work in > 5.3
 	 * @param mixed $arguments
 	 * @return instanceofself
+	 * @deprecated This functionality has been moved to class
 	 */
 	public static function rnew(array $arguments = [ ]) { 
 		$className = get_called_class();
@@ -62,6 +70,13 @@ abstract class Object {
 	 * @return  mixed
 	 */
 	public function __get($name) {
+		
+		// @todo replace after references to instance members have
+		// been replaced
+		if ($name == '_class') {
+			return static::$_class;	
+		}
+		
 		try { 
 			return $this->$name();
 		}
@@ -163,5 +178,5 @@ abstract class Object {
 		return property_exists($this, $propertyName);	
 	}
 	
-	protected $_class = null;
+	public static $_class;
 }

@@ -10,7 +10,7 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * @author Christian Calloway
  * @todo   Need limit architecture placed on static storage
  * @todo   A bundle should really be an instance over anything else
- * @tod    limit_static
+ * @todo   limit_static
  *
  */
 class Bundle extends \eGloo\Dialect\Object { 

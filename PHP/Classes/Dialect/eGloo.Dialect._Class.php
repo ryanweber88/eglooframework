@@ -10,15 +10,30 @@ namespace eGloo\Dialect;
 class _Class extends Object { 
 	
 	function __construct($mixed) { 
+		parent::__construct();
 		
-		$this->class = ($mixed instanceof Object) 
-			? get_class($mixed)
-			: $mixed;
+		if (is_object($mixed)) {
+			$this->class    = get_class($mixed);
+			$this->instance = new WeakRef($mixed);
+		}
+		
+		else { 
+			$this->class = $mixed;
+		}
 			
-		// get class name
+		// get class name and namespace
 		if (class_exists($this->class)) { 
-			$parts = explode('\\', $this->class);
-			$this->name = $parts[count($parts)-1];
+			$parts           = explode('\\', $this->class);
+			$this->name      = $parts[count($parts)-1];
+			
+			// make sure we are namepace exists
+			if (count($parts) > 1) {  
+				$this->namespace = implode('\\', array_slice(
+					$parts, 0, count($parts)-2	
+				));
+			}
+			
+			
 		}
 	
 		else { 
@@ -31,12 +46,33 @@ class _Class extends Object {
 	/**
 	 * 
 	 * Attempts to create new instance of class
+	 * @todo need to map arguments or use call_user_function_array
 	 */
-	public function instantiate(array $arguments = [ ]) {
-		$class = $this->class(); 
-		return new $class();
+	protected function instantiate(array $arguments = [ ]) {
+		return call_user_func_array($function, $param_arr)
 	}
+	
+	/**
+	 * 
+	 * Only getter is provided for instance
+	 */
+	public function instance(array $arguments = [ ]) { 
+		if (is_null($this->instance)) { 
+			$this->instance = new WeakRef(array()
+			
+			);
+		}
+		
+		if ($this->instance->valid()) {
+			return $this->instance->get();
+		}
+		
+		return false;
+	}
+	
 	
 	protected $name;
 	protected $class;
+	protected $instance;
+	protected $namespace = false;
 }

@@ -11,33 +11,20 @@ use \eGloo\DataProcessing\DDL;
  */
 class Data extends \eGloo\Dialect\Object {
 
-	function __construct(Entity $entity) {
+	function __construct(Entity $entity, $data) {
 		parent::__construct();
-
-		// 
+		 
 		$this->entity = $entity;
 		
-		// construct holder relationships 
-		if (is_array($this->entity->definition->relationships)) { 
-			
-			foreach($this->entity->definition->relationships as $relationship) { 
-				$this->relationships[$relationship->to] = ($relationship->hasMany())
-					? new QuerySet() 
-					: new stdClass;
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * Enter description here ...
-	 * @param string $name
-	 * @param mixed $value
-	 */
-	public function addProperty($name, $value) {
-		$this->properties[$name] = $value;
 		
-		return $this;
+		// @todo this is ill thought-out
+		// construct holder relationships 
+		foreach($this->entity->definition()->relationships as $relationship) { 
+			$this->relationships[$relationship->to] = ($relationship->hasMany())
+				? new QuerySet() 
+				: new stdClass;
+		}
+	
 	}
 	
 	/**
@@ -54,7 +41,17 @@ class Data extends \eGloo\Dialect\Object {
 		);
 	}
 	
+	/**
+	 * Setter for properties
+	 */
+	public function __set($name, $value) {
+		$this->properties[$name] = $value;
+		
+		return $this;
+	}
+	
 	
 	protected $entity;
 	protected $properties    = [ ];
+	protected $relationships = [ ];
 }

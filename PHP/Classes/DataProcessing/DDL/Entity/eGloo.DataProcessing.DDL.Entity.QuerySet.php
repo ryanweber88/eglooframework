@@ -88,7 +88,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		
 
  		// check if callback data is valid - returned results will
- 		// ALWAYS be 1+N records
+ 		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($data = $this->callbacks->batch()) !== false) { 
 			$manager = &DDL\Manager\ManagerFactory::factory();
  			
@@ -98,18 +98,17 @@ class QuerySet extends \eGloo\Dialect\Object implements
  			
  			foreach ($data as $record) {
  				
- 				// @todo how to determine what our primary key will be
  				return $manager->find(
  					$this->entity->_class, 
  					$record[$this->entity->definition->primaryKeyName], function() use ($record) { 
  						$entity = clone $this->entity;
- 						$entity->data = Data\Builder::create(
+ 						$entity->data = new Data(
  							$this->entity, $record
  						);
  						
  						return $entity;
  					}
- 				}); 				
+ 				); 				
  			}
 		}
  	}
@@ -231,10 +230,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	public function rewind() { 
 		return $this->entities->rewind();
 	}
-	
-	public function valid() { 
-		return $this->entities->valid();
-	}
+
 	
 	// Countable Interface ------------------------------------------------- //
 	

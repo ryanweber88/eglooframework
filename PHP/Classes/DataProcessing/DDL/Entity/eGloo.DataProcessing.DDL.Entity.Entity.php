@@ -143,11 +143,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	}
 		
 	protected function evaluate() { 
+		
+		//echo $this->definition; exit;
+		
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
 		$this->data = (($data = $this->callbacks->batch()) !== false)
-			? Data\Builder::create($this, $data)
+			? new Data($this, $data)
 			: false; 
+			
+		var_export($this->data); exit;
 	}
 	
 	/**
@@ -159,14 +164,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->data = $data;
 	}
 
-	
-	// ENTITY CONTROLLER --------------------------------------------------- //
-	// These methods act as a controller/router to entities crud methods - 
-	// this is required as lazy-loading approach uses callbacks aggressively
-	// which are triggered from events - returning data from an eventlistener
-	// is a bad approach from design perspective
 
-	// QUERY INTERFACE ----------------------------------------------------- //
+	public function __clone() { 
+		// TODO copies will have to take circular ref 
+		// into account so as that data will not 
+		
+		// copy data, as we do not want to data values to 
+		// overwritten from entity to entity
+		$this->data = false;
+		
+	}
+
+	// EXPERIMENTAL INTERFACE ---------------------------------------------- //
 
 	/**
 	 * 
@@ -188,15 +197,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 	}
 	
-	public function __clone() { 
-		// TODO copies will have to take circular ref 
-		// into account so as that data will not 
+
+	
+	/**
+	 * 
+	 * The purpose of this method is to an idea of underlying 
+	 * data layer; will perform a find, persist if need be
+	 * and return available fields
+	 */
+	public static function introspect() { 
 		
-		// copy data, as we do not want to data values to 
-		// overwritten from entity to entity
-		$this->data = false;
-		
-	}
+	}	
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
@@ -246,7 +257,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		else {			
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity, $key, function() use ($entity) { 
+			return $manager->find($entity->class, $key, function() use ($entity) { 
 				$entity->valid()
 					? $entity 
 					: false;
@@ -372,12 +383,32 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// This sections primary concern is communicating with underlying
 	// data class
 	
+	/**
+	 * Proxies to Data instance
+	 */
 	public function __get($name) { 
+		
+		echo "calling get for $name\n";
+		
 		// make sure this entity is evaluated prior to retrieval
-		$this->events->trigger('evaluate');
+		if ($this->valid()) { 
+			return $this->data->$name;
+		}
+		
+		echo "calling parent get $name"; 
+		
+		// defer to class object processing
+		return parent::__get($name);
 	}
 	
-	public function __set($name, $value) { }
+	/**
+	 * @todo how do we control this - setting properties on a hallow
+	 * entity - you don't know the underlying data structure
+	 */
+	public function __set($name, $value) { 
+		
+		return parent::__set($name, $value);
+	}
 	
 
 	
