@@ -20,9 +20,15 @@ class Data extends \eGloo\Dialect\Object {
 		// @todo this is ill thought-out
 		// construct holder relationships 
 		foreach($this->entity->definition()->relationships as $relationship) { 
-			$this->relationships[$relationship->to] = ($relationship->hasMany())
-				? new QuerySet() 
-				: new stdClass;
+			// create entity representation of relationship
+			$entity = DDL\Entity\Factory::factory(
+				"{$entity->namespace}\\{$relationship->to}"
+			);
+			
+			// if a has-many relationship, then 
+			$this->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+				? new QuerySet($entity); 
+				: $entity;
 		}
 	
 	}
@@ -52,6 +58,6 @@ class Data extends \eGloo\Dialect\Object {
 	
 	
 	protected $entity;
-	protected $properties    = [ ];
-	protected $relationships = [ ];
+	protected $properties   = [ ];
+	protected $relationship = [ ];
 }

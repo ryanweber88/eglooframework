@@ -13,7 +13,7 @@ use \eGloo\DataProcessing\DDL;
 class QuerySet extends \eGloo\Dialect\Object implements
 	EvaluationInterface, Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
- 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack) { 
+ 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
  		parent::__construct();
  		
  		// set entity - each query set represents a collection of a singular
@@ -49,6 +49,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 		
 		// instantiate callback stack
+		if (is_null($stack)) { 
+			$stack = new DDL\Utility\CallbackStack;
+		}
+		
 		$this->callbacks = $stack;
  	}
  	
