@@ -13,7 +13,7 @@ namespace eGloo\Dialect;
 abstract class Object { 
 	
 
-	function __construct(array $dynamicParams = [ ]) { 
+	function __construct() { 
 		
 		// TODO perform static initialization using reflection
 		// - the problem though is that reflection is overhead

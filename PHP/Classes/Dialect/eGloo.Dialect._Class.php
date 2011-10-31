@@ -43,13 +43,17 @@ class _Class extends Object {
 		}
 	}
 	
-	/**
-	 * 
-	 * Attempts to create new instance of class
-	 * @todo need to map arguments or use call_user_function_array
-	 */
 	protected function instantiate(array $arguments = [ ]) {
-		return call_user_func_array($function, $param_arr)
+		// instantiates dynamic class with given arguments
+		
+		// use reflection to retrieve constructor and read parameter list
+		$reflection = new ReflectionClass(
+			$this->class
+		);
+		
+		return $reflection->newInstanceArgs($arguments);
+		
+		
 	}
 	
 	/**
@@ -58,9 +62,9 @@ class _Class extends Object {
 	 */
 	public function instance(array $arguments = [ ]) { 
 		if (is_null($this->instance)) { 
-			$this->instance = new WeakRef(array()
-			
-			);
+			$this->instance = new WeakRef($this->instantiate(
+				$arguments
+			));
 		}
 		
 		if ($this->instance->valid()) {
