@@ -1,4 +1,6 @@
 <?php
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * Class and Interface Autoloader
  *
@@ -27,7 +29,7 @@
 
 // Bring up the eGlooConfiguration: 12% Hit
 if ( !class_exists( 'eGlooConfiguration', false ) ) {
-	include( 'PHP/Classes/System/Configuration/eGlooConfiguration.php' );
+	include( 'PHP/Classes/System/Configuration/Deprecated/eGlooConfiguration.php' );
 }
 
 // Load the install configuration: 15% Hit
@@ -35,15 +37,23 @@ eGlooConfiguration::loadConfigurationOptions();
 
 // Bring up the eGlooLogger: 6% Hit
 if ( !class_exists( 'eGlooLogger', false ) ) {
-	include( 'PHP/Classes/System/Utilities/eGlooLogger.php' );
+	include( 'PHP/Classes/System/Utilities/Deprecated/eGlooLogger.php' );
 }
 
 // Initialize the eGlooLogger: 1% Hit
 eGlooLogger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfiguration::getLogFormat() );
 
+// // Bring up the eGloo\Utility\Logger
+// if ( !class_exists( '\eGloo\Utility\Logger', false ) ) {
+// 	include( 'PHP/Classes/System/Utilities/eGloo.Utility.Logger.php' );
+// }
+// 
+// // Initialize the eGlooLogger: 1% Hit
+// Logger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfiguration::getLogFormat() );
+
 // Bring up the caching system (needed for the autoloader): 2.5% Hit
 if ( !class_exists( 'CacheGateway', false ) ) {
-	include( 'PHP/Classes/Performance/Caching/CacheGateway.php' );
+	include( 'PHP/Classes/Performance/Caching/Deprecated/CacheGateway.php' );
 }
 
 // Register eGloo Autoloader: 0%
@@ -100,7 +110,12 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
  *
  * @param string $class_name class or interface to load
  */
-function eglooAutoload($class_name) {
+function eglooAutoload( $class_name ) {
+	/* Hack for https://bugs.php.net/bug.php?id=50731 */
+	if ( strpos($class_name, '\\') === 0 ) {
+		$class_name = substr( $class_name, 1 );
+	}
+
 	$cacheGateway = CacheGateway::getCacheGateway();
 
 	if ( ( $autoload_hash = $cacheGateway->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {
@@ -244,6 +259,67 @@ function eglooAutoload($class_name) {
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 				break;
+			}
+		}
+	}
+
+	// Path wasn't found, so let's try some fancy, fuzzy logic if we're doing namespaces
+	if ( $realPath === null && strpos($class_name, '\\') !== false ) {
+		$namespace = preg_replace( '~\\\([a-zA-Z0-9]+)$~', '', $class_name );
+		$namespace_regex = str_replace( '\\', '\\\\', $namespace );
+		$namespace_regex = '~\n\s*namespace\s+' . $namespace_regex . ';~';
+
+		$base_class = preg_replace( '~([a-zA-Z0-9]+\\\)~', '', $class_name );
+		$class_declaration_regex = '~\n\s*class\s+' . $base_class . '\s*([a-zA-Z0-9,]*\s*)*\s*{~';
+
+		// Go through each class path like normal
+		foreach ( $possible_path as $directory ) {
+			if ( file_exists( $directory ) && is_dir( $directory ) ) {
+				// Setup a test path and a marker for iterating
+				$next_step = preg_replace( '~^eGloo\\\~', '', $class_name, 1 );
+				$next_step = str_replace( '\\', '.', $next_step );
+				$next_step = preg_replace( '~\.~', '/', $next_step, 1 );
+
+				$fuzzied_path = '';
+
+				// Start comparing against possible fuzzy names/paths
+				while( $next_step !== $fuzzied_path ) {
+					$fuzzied_path = $next_step;
+
+					$file_paths = array();
+					$file_paths[] = $directory . '/' . $fuzzied_path  . '.php';
+					$file_paths[] = $directory . '/Classes/' . $fuzzied_path  . '.php';
+
+					// Let's check some paths
+					foreach( $file_paths as $file_path ) {
+						// See if this file exists
+						if ( file_exists( $file_path ) && is_file( $file_path ) && is_readable( $file_path ) ) {
+							// Found a file, let's inspect its contents to see if its what we want
+							$file_contents = file_get_contents( $file_path );
+
+							if ( preg_match( $namespace_regex, $file_contents ) !== 0 && preg_match( $class_declaration_regex, $file_contents ) !== 0 ) {
+								// Bingo, let's mark this and bail
+								$realPath = $file_path;
+								break;
+							}
+						}
+					}
+
+					if ( $realPath !== null ) {
+						break;
+					} else {
+						$next_step = preg_replace( '~\.~', '/', $fuzzied_path, 1 );
+					}
+				}
+
+				// Did we find something?
+				if ( $realPath !== null ) {
+					// We did.  Let's cache it and leave
+					include( $realPath );
+					$autoload_hash[$class_name] = realpath( $realPath );
+					$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+					break;
+				}
 			}
 		}
 	}
@@ -551,6 +627,25 @@ function big( $mixed ) {
 	echo '<h1>';
 	print_r($mixed);
 	echo '</h1>';
+}
+
+/**
+ * Helpful alerts to note when deprecated functions are being used
+ */
+function deprecate( $deprecated, $replacement = null ) {
+	$class_name = '\\' . str_replace( '.', '\\', basename($deprecated, '.php') );
+
+	$alert_string = 'Warning: Class ' . $class_name . ' is deprecated.';
+
+	if ( $replacement !== null ) {
+		$alert_string .= '  Please use "' . $replacement . '" instead.';
+	}
+
+	if ( class_exists('\eGloo\Utility\Logger', false) ) {
+		Logger::writeLog( Logger::DEBUG, $alert_string, 'Deprecated' );
+	} else {
+		eGlooLogger::writeLog( eGlooLogger::DEBUG, $alert_string, 'Deprecated' );
+	}
 }
 
 /**
