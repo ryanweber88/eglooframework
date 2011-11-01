@@ -50,6 +50,7 @@ class Pool extends \eGloo\Dialect\Object implements
 		$this->entities = new \SplDoublyLinkedList();
 	}
 	
+	
 	// Bridge Entities ----------------------------------------------------- //
 	// Can't do this?
 			

@@ -152,7 +152,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			? new Data($this, $data)
 			: false; 
 			
-		var_export($this->data); exit;
 	}
 	
 	/**

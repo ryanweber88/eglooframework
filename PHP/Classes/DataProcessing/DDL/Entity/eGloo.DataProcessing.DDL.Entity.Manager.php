@@ -107,8 +107,20 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		}
 		
 		if (!is_null($lambda)) { 
+			// create entity and persist
 			$entity = $lambda();
-			$this->perist($entity);
+			
+			// if entity is not false value, it is assumed to
+			// be valid (this is the responsibility of the lambda
+			// function) 
+			if ($entity) {
+				// persist the entity value
+				$entity = $this->persist($entity);
+				
+				// map/reference to primary key location
+				$this->map[$class->name]['_primary_key'][$key] = &$this->pool[$entity->pid];
+			}
+			
 			
 			return $entity;
 		}
@@ -196,6 +208,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	
 	/** Data structure containing pool of entityies */
 	protected $pool;
+	protected $map = [ ];
 	
 	/** An entity transaction */
 	protected $transaction;

@@ -25,9 +25,9 @@ class Data extends \eGloo\Dialect\Object {
 				"{$entity->namespace}\\{$relationship->to}"
 			);
 			
-			// if a has-many relationship, then 
+			// if a has-many relationship, then collection is represented as  
 			$this->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-				? new QuerySet($entity); 
+				? new QuerySet($entity)
 				: $entity;
 		}
 	
