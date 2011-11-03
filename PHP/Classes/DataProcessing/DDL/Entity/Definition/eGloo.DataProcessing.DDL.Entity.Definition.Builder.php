@@ -48,7 +48,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 		
 		$name  = $this->entity->_class->name;
 		$definition = new DDL\Entity\Definition($this->entity);
-		
+				
 		// check that entity definition exists
 		if ($xml->xpath("/DataProcessing/Entities/Entity[@name='$name']/Relationship")) { 
 			

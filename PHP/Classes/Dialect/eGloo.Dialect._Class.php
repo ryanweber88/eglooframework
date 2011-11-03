@@ -14,7 +14,7 @@ class _Class extends Object {
 		
 		if (is_object($mixed)) {
 			$this->class    = get_class($mixed);
-			$this->instance = new WeakRef($mixed);
+			$this->instance = new \WeakRef($mixed);
 		}
 		
 		else { 
@@ -29,7 +29,7 @@ class _Class extends Object {
 			// make sure we are namepace exists
 			if (count($parts) > 1) {  
 				$this->namespace = implode('\\', array_slice(
-					$parts, 0, count($parts)-2	
+					$parts, 0, count($parts)-1	
 				));
 			}
 			
@@ -47,7 +47,7 @@ class _Class extends Object {
 		// instantiates dynamic class with given arguments
 		
 		// use reflection to retrieve constructor and read parameter list
-		$reflection = new ReflectionClass(
+		$reflection = new \ReflectionClass(
 			$this->class
 		);
 		
@@ -62,7 +62,7 @@ class _Class extends Object {
 	 */
 	public function instance(array $arguments = [ ]) { 
 		if (is_null($this->instance)) { 
-			$this->instance = new WeakRef($this->instantiate(
+			$this->instance = new \WeakRef($this->instantiate(
 				$arguments
 			));
 		}

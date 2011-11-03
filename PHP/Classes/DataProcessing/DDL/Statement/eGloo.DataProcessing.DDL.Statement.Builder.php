@@ -35,6 +35,10 @@ class Builder extends \eGloo\Dialect\Object {
 	 */
 	public function build() { 
 		
+		// parse "statement" statements
+		$this->content = $this->insertIncludes($this->entity, $this->content);
+	
+		
 		// type and array will be removed for variable interpolation
 		// the information is there for future cases in which
 		// work is needed based upon that data
@@ -42,12 +46,18 @@ class Builder extends \eGloo\Dialect\Object {
 		
 		// TODO cache parsed query based on key|value pairs
 		// passed in arguments
+		//echo $content; exit;
 		
 		
 		// add entity specific values to arguments
+		$this->arguments = $this->processArguments(
+			$this->arguments
+		);
+		
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
 		);
+		
 		
 		// use blitz parser
 		$blitz = new \Blitz();
@@ -64,10 +74,42 @@ class Builder extends \eGloo\Dialect\Object {
 		*/
 	}
 	
-	private function removeMetaData($string) { 
+	
+	private function insertIncludes(Entity $entity, $content) { 
+		// parses statement content for list of includes, which
+		// follows pattern 	
+		$bundle = Bundle::create ($entity, $content);
+		
+		// match all {{ |statement }} patterns and replace
+		// with bundle content - using eval modifier here just
+		// for sanity reasons, as well as n-step
+		return preg_replace (
+			'/\{\{\s+?\$(.+?)\|statement\s+?}\}/e', '', $content
+		);
+				
+		
+	}
+	
+	private function processArguments(array $arguments = [ ]) { 
+		// processes arguments to be used in query: for example,
+		// turns string[] to comma delimited
+		// @todo this will have to be far more intelligent,
+		// as a 1 size fits all approach will not work
+		
+		foreach ($arguments as $key => $argument) { 
+			if (is_array($argument)) { 
+				$arguments[$key] = $argument;
+			}
+		}
+		
+		return $arguments;
+		
+	}
+	
+	private function removeMetaData($content) { 
 		// replace {{ name|type|[array] }} for {{ $name }}
 		return preg_replace (
-			'/\{\{.+?([a-zA-Z_]+).+?\}\}/', '{{ $$1 }}', $string
+			'/\{\{\s+?\$([a-zA-Z_]+).+?\}\}/', '{{ $$1 }}', $content
 		);
 	}
 	

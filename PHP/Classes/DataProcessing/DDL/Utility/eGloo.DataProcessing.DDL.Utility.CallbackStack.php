@@ -17,6 +17,8 @@ class CallbackStack extends \SplStack {
 			// TODO results push through is not working
 			$results = $this->pop()->call($results); // = function($results) { method->call($arguments, $results) }
 		}
+		
+		return $results;
 	}
 	
 	public function offsetGet($name) { 

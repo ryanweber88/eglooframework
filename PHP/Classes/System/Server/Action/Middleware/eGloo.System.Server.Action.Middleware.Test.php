@@ -19,7 +19,10 @@ class Test extends Middleware {
 	 */
 	public function processRequest(Request &$request) { 		
 		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
+		var_export($product);
 		
+		
+		exit ('Middleware\\Test::processRequest');
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
 		return new Response();

@@ -24,6 +24,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		//StatTrait::init as initStatTrait;
 	//};
 	
+	use \eGloo\Utilities\Collection\StaticStorageTrait;
+	
 	// CONST --------------------------------------------------------------- //
 	
 	const STATE_NIL      = 0x00;  // Entity does not, or no longer exists
@@ -57,13 +59,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		
 		// ENTITY/STATEMENT INTERFACE
-		// TODO abstract adding of interfaces 		
+		// TODO abstract adding of interfaces 
+				
 		foreach(DDL\Statement\Bundle::create($this)->names as $name) {	
 			$this->methods[$name] = function($arguments) use ($name) {
 				$method = new Method($this, $name);
 				return $method->call($arguments);
 			};
 		}
+		
+						
+		
 
 		
 		// ENTITY EVENT LISTENERS
@@ -84,7 +90,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			
 			// listens for call trigger
 			'call'     => function(Event $event) {
-			
+						
 				// specifiy callback here?
 				$params = $event->getParams();
 				
@@ -108,7 +114,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		]));
 		
 
-		
+		// initialize attributes and relationships
+
 		
 	}
 	
@@ -132,37 +139,44 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	}
 	
 	/**
-	 * 
+	 * Invokes evaluate method
 	 * @return boolean
 	 */
 	public function valid() { 
 		$this->events->trigger('evaluate');
 		
 		// Data shoud ALWAYS be either valid or false
-		return ($this->data !== false);
+		return ($this->attributes !== false);
 	}
 		
 	protected function evaluate() { 
-		
-		//echo $this->definition; exit;
-		
+				
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
-		$this->data = (($data = $this->callbacks->batch()) !== false)
-			? new Data($this, $data)
+		// callbacks->batch must always return mutlidim
+		// array for singular entity evaluation
+		$this->attributes = (($data = $this->callbacks->batch()) !== false)
+			? $data[0]
 			: false; 
+			
+
+		// evaluate entity relationships
+		foreach($this->definition()->relationships as $relationship) { 
+						
+			// create entity representation of relationship
+			$entity = DDL\Entity\Factory::factory(
+				"{$this->_class->namespace}\\{$relationship->to}"
+			);
+			
+			// if a has-many relationship, then collection is represented as  
+			$this->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+				? new QuerySet($entity)
+				: $entity;
+		}
+	
 			
 	}
 	
-	/**
-	 * 
-	 * Only a setter is provided for data
-	 * @param Data $data
-	 */
-	public function data(Data $data) { 
-		$this->data = $data;
-	}
-
 
 	public function __clone() { 
 		// TODO copies will have to take circular ref 
@@ -170,7 +184,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// copy data, as we do not want to data values to 
 		// overwritten from entity to entity
-		$this->data = false;
+		$this->attributes    = false;
+		$this->relationships = false;
 		
 	}
 
@@ -204,8 +219,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * data layer; will perform a find, persist if need be
 	 * and return available fields
 	 */
-	public static function introspect() { 
-		
+	public static function inspect() { 
+		// parses fields available
+		return static::retrieve(function() { 
+			// pass
+		});
 	}	
 	
 	
@@ -237,7 +255,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	public static function find($key) { 
 		
-		$entity = new static;
+		$manager = Manager\Factory::factory(); 
+		$entity  = new static;
 		$entity->events->trigger('call', $entity, [
 			'name'       => __FUNCTION__,
 		
@@ -246,17 +265,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 			'definition' => null
 		]);
-
+		
 		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
 			return new QuerySet($entity, $entity->callbacks);
 		}
 		
 		// otherwise - retrieve singular 
-		else {			
+		else {		
+			
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity->class, $key, function() use ($entity) { 
+			return $manager->find($entity, $key, function() use ($entity) { 
 				$entity->valid()
 					? $entity 
 					: false;
@@ -383,29 +403,74 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	// data class
 	
 	/**
-	 * Proxies to Data instance
+	 * Proxies to attributes, relationships, and then parent object - beware,
+	 * that if any attribute or relation name exists, it will take prescedence
+	 * over class protecteds
 	 */
 	public function __get($name) { 
 		
-		echo "calling get for $name\n";
+		// use reflection and static storage to retrieve list of entity properties
+		$properties = static::retrieve('properties', function() { 
+			$reflection = new \ReflectionClass($this);
+			$properties = [ ];
+			
+			foreach($reflection->getProperties(\ReflectionProperty::IS_PROTECTED) as $property) { 
+				$properties[] = $property->getName();	
+			}
+			
+			return $properties;
+		});		
 		
-		// make sure this entity is evaluated prior to retrieval
-		if ($this->valid()) { 
-			return $this->data->$name;
+		// if $name is part of entity properties, then entity property
+		// will take prescedence
+		if (in_array($name, $properties)) { 
+			return parent::__get($name);
 		}
 		
-		echo "calling parent get $name"; 
+		// otherwise first check entity attributes
+		if ($this->attributes && isset($this->attributes[$name])) { 
+			return $this->attributes[$name];
+		}
 		
-		// defer to class object processing
-		return parent::__get($name);
+		// and then relationshipos
+		if ($this->relationships && isset($this->relationships[$name])) { 
+			return $this->relationships[$name];
+		}
+		
+		
+		// otherwise throw big fat exception
+		throw new DDL\Exception\Exception(
+			'INVALID get for entity property : ' . $name
+		);
 	}
 	
 	/**
-	 * @todo how do we control this - setting properties on a hallow
-	 * entity - you don't know the underlying data structure
+	 * Sets attribute value, or entity property; in this case,
+	 * entity property take prescedence over attribute value
+	 * @todo limit_static
 	 */
 	public function __set($name, $value) { 
+		// use reflection and static storage to retrieve list of entity properties
+		$properties = static::retrieve('properties', function() { 
+			$reflection = new \ReflectionClass($this);
+			$properties = [ ];
+			
+			foreach($reflection->getProperties(\ReflectionProperty::IS_PROTECTED) as $property) { 
+				$properties[] = $property->getName();	
+			}
+			
+			return $properties;
+		});
 		
+		// if $name is not a part of entity properties, then we are setting 
+		// an attribute value
+		if (!in_array($name, $properties)) { 
+			$this->attributes[$name] = $value;
+			return $this;
+		}
+		
+		// otherwise class object implementation will handle
+		// set
 		return parent::__set($name, $value);
 	}
 	
@@ -462,10 +527,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// PROPERTIES ---------------------------------------------------------- // 
 	
-	protected $data = false;
 	protected $state;
 	protected $events;
 	protected $callbacks;	
+	
+	protected $attributes    = [ ];
+	protected $relationships = [ ];
 	
 	
 	/** The persistent id */

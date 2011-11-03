@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Manager;
+namespace eGloo\DataProcessing\DDL\Entity\Manager;
 
 use eGloo\DataProcessing\DDL;
 use eGloo\DataProcessing\DDL\Entity\Entity;
@@ -45,7 +45,7 @@ interface ManagerInterface {
 	 * @param DDL\Entity $entity
 	 * @param mixed      $key
 	 */
-	public function retrieve(Entity $entity, $key);
+	public function find(\eGloo\Dialect\Object $mixed, $key, \Closure $lambda = null) ;
 	
 	
 	/**

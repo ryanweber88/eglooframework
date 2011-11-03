@@ -30,9 +30,16 @@ abstract class Object {
 		
 		// lets avoid infinite loops shall we
 		if (!($this instanceof _Class)) { 
-			static::$_class = new _Class($this);
+			$this->_class = new _Class($this);
+			
+			// this doesn't work polymorphically
+			//static::$_class = new _Class($this);
 		}
 		
+	}
+	
+	public static function isInstanceOf($object) { 
+		return $object instanceof static;
 	}
 	
 	/**
@@ -73,11 +80,18 @@ abstract class Object {
 		
 		// @todo replace after references to instance members have
 		// been replaced
-		if ($name == '_class') {
-			return static::$_class;	
-		}
+		//if ($name == '_class') {
+			//return static::$_class;	
+		//}
 		
 		try { 
+			$tryMethod = "get" . ucfirst($name);
+			
+			if (method_exists($this, $tryMethod)) { 
+				return $this->$tryMethod();	
+			}
+			
+			// @ deprecated
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -97,6 +111,13 @@ abstract class Object {
 	 */
 	public function __set($name, $value) { 
 		try { 
+			$tryMethod = "set" . ucfirst($name);
+			
+			if (method_exists($this, $tryMethod)) { 
+				$this->$tryMethod($value);
+				return $this;	
+			}			
+			
 			$this->$name($value);
 		}
 		catch (Exception $pass) { 
@@ -146,8 +167,11 @@ abstract class Object {
 		else { 
 			return $this->$name;
 		}
+		
+		
 	}
 	
+	/** @deprecated */
 	protected function setOrGet($propertyName, $value = null, \Closure $lambda = null) { 
 		// convenience method when overriding property() methods, so that we don't
 		// have to check for whether a get or set has been request - in the case
@@ -178,5 +202,5 @@ abstract class Object {
 		return property_exists($this, $propertyName);	
 	}
 	
-	public static $_class;
+	protected $_class;
 }

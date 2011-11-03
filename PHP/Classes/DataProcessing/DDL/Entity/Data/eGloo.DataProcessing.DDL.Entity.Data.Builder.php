@@ -28,6 +28,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 
 		$data = new DDL\Entity\Data;
 		
+		
 		foreach($data as $key => $value) { 
 			
 		}

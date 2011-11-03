@@ -50,13 +50,11 @@ class Statement extends \eGloo\Dialect\Object {
 		$queryExecutionRoutine = \QueryExecutionRoutineManager::getQueryExecutionRoutine($preparedStatement);
 		
 		\QueryPopulationManager::populateQueryTransaction($preparedStatement, [ ]);
-				
+						
 		return
 			$queryExecutionRoutine
 				->executeTransactionWithConnection($preparedStatement, $connection)
 				->getDataPackage();
 	}
 
-	protected $name;
-	protected $content;
 }

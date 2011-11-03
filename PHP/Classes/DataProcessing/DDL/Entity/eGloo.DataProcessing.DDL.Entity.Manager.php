@@ -17,7 +17,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	function __construct() { 
 
 		// initialize pool
-		$this->pool = new Manager\Pool;
+		$this->pool = new Manager\Pool($this);
 		
 		
 		// use default transaction - entitymanager will have one to one 
@@ -96,14 +96,31 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * @param \eGloo\Dialect\_Class $entity
 	 * @param integer[] | string[] $key
 	 */
-	public function find(\eGloo\Dialect\_Class $class, $key, \Closure $lambda = null) {
+	public function find(\eGloo\Dialect\Object $mixed, $key, \Closure $lambda = null) {
+	
 
+		// determine mixed type, which can be either an entity 
+		// or class
+		if ($mixed instanceof Entity) {
+			$class = $mixed->_class;
+		}
+		
+		else if ($mixed instanceof \eGloo\Dialect\_Class) {
+			$class = $mixed;
+		}
+		
+		// if some other object has been passed, then throw exception
+		else { 
+			throw new DDL\Exception\Exception(
+				'Illegal Argument Exception: mixed must be instance of entity or class'
+			);
+		}
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
 		// TODO method chaining here is really ugly
-		if ( isset($this->pool->map[$class->name]['_primary_key'][$key])) {
-			return $this->pool->map[$class->name]['_primary_key'][$key];
+		if ( isset($this->map[$class->name]['_primary_key'][$key])) {
+			return $this->map[$class->name]['_primary_key'][$key];
 		}
 		
 		if (!is_null($lambda)) { 
@@ -175,7 +192,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * Detaches entity from persistence context
 	 * @param Entity $entity
 	 */
-	public function detach(Entity $entity) { 
+	public function remove(Entity $entity) { 
 		// set state to detached
 		$entity->STATE = Entity::STATE_DETACHED;
 		
@@ -185,6 +202,12 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		// 
 		return $entity;
 	}
+	
+	public function refresh(Entity $entity) { }
+	
+	public function flush() { }
+	
+	public function clear() { }
 	
 	/**
 	 * 
