@@ -25,6 +25,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	//};
 	
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
+	use \eGloo\Utilities\Ruby\InstantArgumentTrait;
 	
 	// CONST --------------------------------------------------------------- //
 	
@@ -51,7 +52,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// BUILD ENTITY DEFINITION
 		// Defined in entities xml
 		try { 
-			$this->definition = Definition::create($this);
+			// definitions are mapped to static storage, since an entities
+			// definition will not likely change from request to request,
+			// but will need to be limited in stateful environment
+			// @todo limit_static
+			// @todo limit_cache
+			$this->definition = static::retrieve((string)$this->_class, function() { 
+				return Definition::create($this);	
+			});
 		}
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
@@ -68,9 +76,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			};
 		}
 		
-						
-		
-
 		
 		// ENTITY EVENT LISTENERS
 		$this->callbacks = new DDL\Utility\CallbackStack;
@@ -86,18 +91,28 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				
 				// false return indicates that listener will only respond once
 				// and be unbound
-				return false;
+				// return false;
 			}, 
 			
 			// listens for call trigger
 			'call'     => function(Event $event) {
-						
-				// specifiy callback here?
-				$params = $event->getParams();
+				
+				// just shortcutting to params and results handler
+				$params  = $event->getParams();
+				$handler = $params['results_handler'];
 				
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$params['name'], function(array $passThrough = [ ]) use ($params) { 
-						return $this->methods[$params['name']]($params['arguments']); 
+					$params['name'], function(array $passThrough = [ ]) use ($params, $handler) {
+						// invoke entity method and retrieve results	
+						$results = $this->methods[$params['name']]($params['arguments']); 
+						
+						// if passed handler is callable, then pass results to handler
+						// and set results as the return of our dynamic handler
+						if (is_callable($handler)) { 
+							$results = $handler($results);
+						}
+						
+						return $results;
 					}
 				));
 				
@@ -150,11 +165,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	public function valid() { 
 		$this->events->trigger('evaluate');
 		
-		// Data shoud ALWAYS be either valid or false
+		// Data shoud ALWAYS be either valid or absolute false
 		return ($this->attributes !== false);
 	}
 		
 	protected function evaluate() { 
+		// @todo is this method needed anymore?
+		
 		// evaluate is responsible for running callback stack
 		// and acting upon resulting data
 				
@@ -166,26 +183,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// array for singular entity evaluation
 		
 		// inspect data to determine evaluation performed
-		$result = $this->callbacks->batch();
+		return $this->callbacks->batch();
 		
-		$this->attributes = (($data = $this->callbacks->batch()) !== false)
-			? $data[0]
-			: false; 
-			
 
-		// evaluate entity relationships
-		foreach($this->definition()->relationships as $relationship) { 
-						
-			// create entity representation of relationship
-			$entity = DDL\Entity\Factory::factory(
-				"{$this->_class->namespace}\\{$relationship->to}"
-			);
-			
-			// if a has-many relationship, then collection is represented as  
-			$this->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-				? new QuerySet($entity)
-				: $entity;
-		}
 	
 			
 	}
@@ -270,23 +270,87 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static;
-		$entity->events->trigger('call', $entity, [
-			'name'       => __FUNCTION__,
+
+		// this will allow users to pass keys as 1,2,3
+		if (count(func_get_args()) > 1) {
+			$key = func_get_args();	
+		}
 		
-			// defines the calling method, and parameter values
-			'arguments'  => [ 'key' => $key ], 
-		
-			'definition' => null
-		]);
+	
 		
 		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
+			
+			// trigger call to add the call "action" (find) to callback stack
+			// and specify results_handler to handle 
+			$entity->events->trigger('call', $entity, [
+				'name'            => __FUNCTION__,
+			
+				// defines the calling method, and parameter values
+				'arguments'       => [ 'key' => $key ], 
+			
+				// callback handler for results for a singular entity
+				'results_handler' => null,
+				
+				// we defer an evaluation of entity (running callback stack
+				// batch) to determine first, if the entity exists in the 
+				// manager, and if it 
+				'defer'           => true
+			]);				
+			
 			return new QuerySet($entity, $entity->callbacks);
 		}
 		
-		// otherwise - retrieve singular 
+		// otherwise - retrieve singular/entity
 		else {		
+				
+			// trigger call to add the call "action" (find) to callback stack
+			// and specify results_handler to handle - it does not matter
+			// if finding a singular entity or returning a queryset, the
+			// find action will be deferred until evaluation request is made
+			$entity->events->trigger('call', $entity, [
+				'name'            => __FUNCTION__,
 			
+				// defines the calling method, and parameter values
+				'arguments'       => [ 'key' => $key ], 
+			
+				// callback handler for results for a singular entity
+				'results_handler' => function($results) use ($entity) { 
+					echo "calling results handler\n";
+					
+					if ($results !== false) { 
+						
+						// set attribute values 
+						$entity->attributes = $results[0];
+							
+				
+						// evaluate entity relationships
+						// @todo this should only be done once, and at that, statically
+						foreach($entity->definition->relationships as $relationship) { 
+										
+							// create entity representation of relationship
+							$entityRelation = DDL\Entity\Factory::factory(
+								"{$entity->_class->namespace}\\{$relationship->to}"
+							);
+							
+							// if a has-many relationship, then collection is represented as  
+							$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+								? new QuerySet($entityRelation)
+								: $entityRelation;
+						}
+						
+						return true;
+					}
+					
+					return false;
+				},
+				
+				// we defer an evaluation of entity (running callback stack
+				// batch) to determine first, if the entity exists in the 
+				// manager, and if it 
+				'defer'           => true
+			]);	
+					
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
 			return $manager->find($entity, $key, function() use ($entity) {				
@@ -324,10 +388,31 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	}
 	
 	/**
-     * 
+     * Deletes entities from store and triggers deletion from database 
+     * @param mixed | mixed[] $key
+     * @return boolean
 	 */
-	public static function delete($key) { 
+	public static function delete($key) {
 		
+		$keyName = is_array($key) ? 'keys' : 'key';
+
+		// trigger call action, w/o deferal, which should
+		// perform action immediately
+		$entity->events->trigger('call', $entity, [
+			'name'            => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'       => [  $keyName => $key ], 
+		
+			// we do not need a handler for results for deletion
+			'results_handler' => null,
+		
+		]);
+		
+		// signal manager to remove entity from persistence 
+		// context
+		$manager = &DDL\Manager\Manager\Factory::factory();
+		return $manager->remove($this);		
 	}
 	
 	/**
@@ -366,17 +451,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		return $manager->merge($this);
 	}
 	
-	/**
-	 * Removes entity from manager context and flags underlying data layer delete
-	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::delete()
-	 */
-	public function delete() {
-		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
-		$this->events->trigger('delete', $this); 
-		
-		$manager = &DDL\Manager\ManagerFactory::factory();
-		return $manager->remove($this);
-	}
+
 	
 	// Retrieve Interfaces --------------------------------------------------- //
 	// Enforced by implementing the Retrieve interfaces, provides ability
@@ -548,8 +623,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// PRIVATE ------------------------------------------------------------- //
 	
-
-
 
 	
 	// PROPERTIES ---------------------------------------------------------- // 

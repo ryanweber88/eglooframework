@@ -26,7 +26,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		
  		// instantiate event manager and attach listeners
 		$this->events = new EventManager;		
-		$this->events->attachAggregate(new Listener\Generic([
+		$this->events->attachAggregate(new Listener\Callback([
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
@@ -41,8 +41,25 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// listens for call trigger
 			'call'     => function(Event $event) {
 				
+				// just shortcutting to params and results handler
+				$params  = $event->getParams();
+				$handler = $params['results_handler'];
+							
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
+					$event->getParams()['name'], function(array $passThrough = [ ]) use ($params, $handler) {
+						// invoke entity method and retrieve results	
+						// this idea doesn't exist here, there are no methods, only methods that
+						// belong to entities
+						//$results = $this->methods[$params['name']]($params['arguments']); 
+						
+						// if passed handler is callable, then pass results to handler
+						// and set results as the return of our dynamic handler
+						if (is_callable($handler)) { 
+							$results = $handler($results);
+						}
+						
+						return $results;
+					}
 				));
 				
 				// short-circuit listens on this aggregate
@@ -57,6 +74,24 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		}
 		
 		$this->callbacks = $stack;
+ 	}
+ 	
+ 	/**
+ 	 * Provides bulk update for delete on querysets
+ 	 * @return boolean
+ 	 */
+ 	public function delete() { 
+ 		
+ 	}
+ 	
+ 	/**
+ 	 * 
+ 	 * Provides bulk updates for querysets
+ 	 * @param  string[] $fields
+ 	 * @return boolean
+ 	 */
+ 	public function update(array $fields = [ ]) { 
+ 		
  	}
  	
 
@@ -94,6 +129,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	
  	protected function evaluate() { 
  		
+ 		return $this->callbacks->batch();
 
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
@@ -109,12 +145,14 @@ class QuerySet extends \eGloo\Dialect\Object implements
  				$this->entities[] = $manager->find(
  					$this->entity->_class, 
  					$record[$this->entity->definition->primaryKeyName], function() use ($record) { 
- 						$entity = clone $this->entity;
+ 						
+ 						$entity       = clone $this->entity;
  						$entity->data = new Data(
  							$this->entity, $record
  						);
  						
  						return $entity;
+ 						
  					}
  				); 				
  			}

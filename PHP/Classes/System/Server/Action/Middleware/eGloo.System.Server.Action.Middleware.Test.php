@@ -21,9 +21,12 @@ class Test extends Middleware {
 
 		$start = time();
 		$counter = 0;
-		while ($counter++ < 2) { 
-			$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
-		}
+		//while ($counter++ < 200) { 
+		
+		$set = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
+		echo $set[0]->title;
+			
+		//}
 		
 		echo time() - $start;
 		

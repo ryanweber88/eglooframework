@@ -100,7 +100,8 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 */
 	public function find(\eGloo\Dialect\Object $mixed, $key, \Closure $lambda = null) {
 	
-
+		echo "calling find\n";
+		
 		// determine mixed type, which can be either an entity 
 		// or class
 		if ($mixed instanceof Entity) {
@@ -122,6 +123,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		// that it will be mapped 
 		// TODO method chaining here is really ugly
 		if ( isset($this->map[$class->name]['_primary_key'][$key])) {
+			echo "entity found\n";
 			return $this->map[$class->name]['_primary_key'][$key];
 		}
 		

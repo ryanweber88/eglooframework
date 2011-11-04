@@ -43,17 +43,16 @@ class _Class extends Object {
 		}
 	}
 	
-	protected function instantiate(array $arguments = [ ]) {
-		// instantiates dynamic class with given arguments
-		
-		// use reflection to retrieve constructor and read parameter list
-		$reflection = new \ReflectionClass(
-			$this->class
-		);
-		
-		return $reflection->newInstanceArgs($arguments);
-		
-		
+	
+	
+
+	
+	/**
+	 * 
+	 * Returns fully qualified class name as string
+	 */
+	public function __toString() {
+		return $this->class;
 	}
 	
 	/**
@@ -73,6 +72,19 @@ class _Class extends Object {
 		
 		return false;
 	}
+	
+	protected function instantiate(array $arguments = [ ]) {
+		// instantiates dynamic class with given arguments
+		
+		// use reflection to retrieve constructor and read parameter list
+		$reflection = new \ReflectionClass(
+			$this->class
+		);
+		
+		return $reflection->newInstanceArgs($arguments);
+		
+		
+	}	
 	
 	
 	protected $name;

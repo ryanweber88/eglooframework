@@ -11,7 +11,7 @@ use \Zend\EVentManager\EventCollection;
  * @author Christian Calloway
  *
  */
-class Collection extends \eGloo\Utilities\EventManager\Listener\Limit {
+abstract class Collection extends \eGloo\Utilities\EventManager\Listener\Limit {
 		
 	
     /**
