@@ -1,4 +1,5 @@
 <?php
+namespace eGloo\DataProcessing\Connection;
 /**
  * DBConnection Class File
  *
@@ -36,7 +37,7 @@
  * @package $package
  * @subpackage $subpackage
  */
-class DBConnection extends eGlooConnection {
+class DBConnection extends \eGlooConnection {
 
 	protected $_connectionDialect = null;
 	protected $_rawConnectionResource = null;
@@ -58,4 +59,3 @@ class DBConnection extends eGlooConnection {
 	}
 
 }
-

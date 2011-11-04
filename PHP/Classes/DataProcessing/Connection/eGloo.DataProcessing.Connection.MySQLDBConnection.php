@@ -1,4 +1,5 @@
 <?php
+namespace eGloo\DataProcessing\Connection;
 /**
  * MySQLDBConnection Class File
  *

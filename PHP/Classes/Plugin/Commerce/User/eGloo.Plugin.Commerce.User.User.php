@@ -1,5 +1,5 @@
 <?php
-namespace Commerce;
+namespace eGloo\Plugin\Commerce\User;
 
 /**
  * User Class File

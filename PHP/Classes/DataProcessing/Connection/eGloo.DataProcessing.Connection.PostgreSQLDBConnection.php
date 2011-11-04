@@ -1,4 +1,5 @@
 <?php
+namespace eGloo\DataProcessing\Connection;
 /**
  * PostgreSQLDBConnection Class File
  *
@@ -39,7 +40,7 @@
 class PostgreSQLDBConnection extends DBConnection {
 
 	public function __construct( $rawConnectionResource ) {
-		$this->setConnectionDialect( DialectLibrary::POSTGRESQL );
+		$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
 		$this->setRawConnectionResource( $rawConnectionResource );
 	}
 
