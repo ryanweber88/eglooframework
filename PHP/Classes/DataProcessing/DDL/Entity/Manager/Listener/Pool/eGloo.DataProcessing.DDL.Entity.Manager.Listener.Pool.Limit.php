@@ -13,11 +13,17 @@ use \Zend\EVentManager\EventCollection;
  *
  */
 class Limit extends \eGloo\Utilities\EventManager\Listener\Limit\Collection {
-// pass
+	
+	function __construct($limit) { 
+		parent::__construct($limit);
+
+	}
+	
+	protected function reachedLimit(Event $event) {
+		// determine how to dump from pool intelligently
+		// pass
+	}
 
 	
-
-	
-
-	
+	protected $pool;
 }

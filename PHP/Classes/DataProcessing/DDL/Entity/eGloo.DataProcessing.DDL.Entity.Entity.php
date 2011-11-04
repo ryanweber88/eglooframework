@@ -85,6 +85,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				$this->evaluate();
 				
 				// false return indicates that listener will only respond once
+				// and be unbound
 				return false;
 			}, 
 			
@@ -95,7 +96,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				$params = $event->getParams();
 				
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$params['name'], function($passThrough) use ($params) { 
+					$params['name'], function(array $passThrough = [ ]) use ($params) { 
 						return $this->methods[$params['name']]($params['arguments']); 
 					}
 				));
@@ -115,8 +116,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 
 		// initialize attributes and relationships
-
+		//echo $this->state; exit;
 		
+	}
+	
+	function __destruct() { 
+		// provides destruction operations for entity instance	
 	}
 	
 	/**
@@ -150,11 +155,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	}
 		
 	protected function evaluate() { 
+		// evaluate is responsible for running callback stack
+		// and acting upon resulting data
+				
+		echo "calling eval\n";
 				
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
 		// callbacks->batch must always return mutlidim
 		// array for singular entity evaluation
+		
+		// inspect data to determine evaluation performed
+		$result = $this->callbacks->batch();
+		
 		$this->attributes = (($data = $this->callbacks->batch()) !== false)
 			? $data[0]
 			: false; 
@@ -276,8 +289,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity, $key, function() use ($entity) { 
-				$entity->valid()
+			return $manager->find($entity, $key, function() use ($entity) {				
+				return $entity->valid()
 					? $entity 
 					: false;
 			});
@@ -310,13 +323,27 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 	}
 	
+	/**
+     * 
+	 */
+	public static function delete($key) { 
+		
+	}
+	
+	/**
+     * Destroys entity and deletes associations as specified in relationships
+	 */
+	public function destroy() { 
+		
+	}
+	
 
 	
 	/**
 	 * 
 	 * Calls create or update, depending on entities current state
 	 */
-	public static function save() {
+	public function save() {
 		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		$this->events->trigger('update', $this);
 		

@@ -17,9 +17,15 @@ class Test extends Middleware {
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processRequest()
 	 */
-	public function processRequest(Request &$request) { 		
-		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
-		var_export($product);
+	public function processRequest(Request &$request) { 
+
+		$start = time();
+		$counter = 0;
+		while ($counter++ < 2) { 
+			$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
+		}
+		
+		echo time() - $start;
 		
 		
 		exit ('Middleware\\Test::processRequest');

@@ -9,10 +9,11 @@ class CallbackStack extends \SplStack {
 	 */
 	public function batch() { 
 
-		$results = [ 'suck' => 'it' ];
+		$results = ($this->isEmpty()) 
+			? false 
+			: [  ];
 		
 		while (!$this->isEmpty()) {
-			
 			// call, retrieve results to pass to the next callback
 			// TODO results push through is not working
 			$results = $this->pop()->call($results); // = function($results) { method->call($arguments, $results) }

@@ -25,7 +25,7 @@ class Listener extends \eGloo\Dialect\Object implements ListenerAggregate {
 				
 				$this->handlers[$eventName] = $events->attach(
 					$eventName, function(Event $event) use ($method) { 
-						return $this->eventController($event, function(Event $event) { $this->{$method->getName()}($event); });
+						return $this->{$method->getName()}($event); 
 					}
 				);
 			}
@@ -42,7 +42,7 @@ class Listener extends \eGloo\Dialect\Object implements ListenerAggregate {
 				}
 								
 				// attach override event
-				$this->handlers[$event] = $events->attach($event, function(Event $event) use ($callback, $events) { 
+				$this->handlers[$event] = $events->attach($event, function(Event $event) use ($callback, &$events) { 
 					// if callback returns absolute false, then detach particular event from
 					// collection
 					if ($callback($event) === false) { 
@@ -54,19 +54,6 @@ class Listener extends \eGloo\Dialect\Object implements ListenerAggregate {
 		}
 	}
 	
-	protected function eventController($event, \Closure $lambda) { 
-		// used to route events to appropriate handlers/actions
-		if (($value = $lambda($event)) === false) { 	
-			// a boolean false return will detach event listener method 
-			// from events 
-			//$this->detach($this->handlers[$event->getName()]);
-			
-			// @todo need a moreso elegant method to detach event
-			
-		}
-		
-		return $value;
-	}
 	
 	protected $callbacks;
 }

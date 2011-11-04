@@ -35,20 +35,22 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		
 		// check that entity is new, or removed, then push back to manage
 		if ($entity->state == Entity::STATE_NEW || $entity->state == Entity::STATE_REMOVED) {
-					
-			// set entity state to managed
-			$entity->state = Entity::STATE_MANAGED;
-						
+			
 			// push entity into pool and retrieve persistent id - 
 			// only if it is new, remember that a removed context
 			// is already a part of the pool and is waiting for
 			// the end of transaction to be determined whether it should
 			// be removed or not
 			// TODO is persistent id based on index enough?
+			
 			if ($entity->state == Entity::STATE_NEW) { 
 				$entity->pid  = $this->pool->count();
 				$this->pool[] = $entity;
 			}
+						
+			// set entity state to managed
+			$entity->state = Entity::STATE_MANAGED;
+			
 
 			// return
 			return $entity;
@@ -122,6 +124,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		if ( isset($this->map[$class->name]['_primary_key'][$key])) {
 			return $this->map[$class->name]['_primary_key'][$key];
 		}
+		
 		
 		if (!is_null($lambda)) { 
 			// create entity and persist

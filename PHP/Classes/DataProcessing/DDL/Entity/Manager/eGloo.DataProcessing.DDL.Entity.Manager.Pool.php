@@ -30,9 +30,12 @@ class Pool extends \eGloo\Dialect\Object implements
 		
 		// TODO pool limit should be configurable
 		$this->events = new EventManager;
-		//$this->events->attachAggregate(new Listener\Pool\Limit(
-		//	self::LIMIT
-		//));
+		new \eGloo\DataProcessing\DDL\Entity\Manager\Listener\Pool\Limit(1);
+		$this->events->attachAggregate(new Listener\Pool\Limit(
+			self::LIMIT
+		));
+		//$this->events->attachAggregate()
+		
 	}
 	
 	// Concrete Interface -------------------------------------------------- //
@@ -75,7 +78,7 @@ class Pool extends \eGloo\Dialect\Object implements
 		// if offset is not set, then a value has been added and we
 		// trigger an increment
 		if (!isset($this->entities[$offset])) { 
-			$this->events->trigger('increment', $this, null);
+			$this->events->trigger('increment', $this, [ ]);
 		}
 				
 		return $this->entities->offsetSet($offset, $value);

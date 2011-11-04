@@ -12,17 +12,15 @@ use \Zend\EVentManager\EventCollection;
  * @author Christian Calloway
  *
  */
-class Limit extends Listener {
+abstract class Limit extends Listener {
 	
-	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
 	
-	function __construct($limit, &$pool) { 
+	function __construct($limit) { 
 		// call parent constructor
 		parent::__construct();
 		
 		// Sets limit to some theoretical max
 		$this->limit = $limit;
-		$this->pool  = &$pool;
 	}
 	
     /**
@@ -55,10 +53,9 @@ class Limit extends Listener {
 	 * Determines if our limit has been reached
 	 * @return boolean
 	 */
-	abstract public function reachedLimit();    
+	abstract protected function reachedLimit(Event $event);    
     
 	
 	protected $limit   = 0;
 	protected $current = 0; 
-	protected $pool;
 }
