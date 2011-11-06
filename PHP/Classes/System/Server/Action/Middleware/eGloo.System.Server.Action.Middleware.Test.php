@@ -21,18 +21,22 @@ class Test extends Middleware {
 
 		$start = time();
 		$counter = 0;
+		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
+		
 		//while ($counter++ < 200) { 
 		
+		ob_start();
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
 		echo $set[0]->title;
 		$anotherSet = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
 		echo $anotherSet[1]->title;	
 		//}
 		
-		echo "time elapsed : " . (time() - $start) . "\n";
+		echo "\ntime elapsed : " . (time() - $start) . "\n";
 		
+		$logger->log(ob_get_clean());
 		
-		exit ('Middleware\\Test::processRequest');
+		//exit ('Middleware\\Test::processRequest');
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
 		return new Response();

@@ -150,6 +150,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  						$entity              = clone $this->entity;
  						$entity->attributes  = $record;
  						
+ 						// 
  						return $entity;
  						
  					}

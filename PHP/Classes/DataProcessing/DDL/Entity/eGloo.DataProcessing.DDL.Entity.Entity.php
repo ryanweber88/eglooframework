@@ -67,24 +67,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
-					
-		// evaluate entity relationships
-		// @todo should this be left here, or deferred to evaluation stage
-				
-		foreach($this->definition->relationships as $relationship) { 
-						
-			// create entity representation of relationship
-			$entityRelation = DDL\Entity\Factory::factory(
-				"{$this->_class->namespace}\\{$relationship->to}"
-			);
-			
-			// if a has-many relationship, then collection is represented as  
-			$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-				? new QuerySet($entityRelation)
-				: $entityRelation;
-		}		
-		
-		
+							
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 
 		//$this->entityInterface();
@@ -207,9 +190,31 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// array for singular entity evaluation
 		
 		// inspect data to determine evaluation performed
-		return $this->callbacks->batch();
 		
-
+		$results =  $this->callbacks->batch();
+		
+		// @todo should evaluation stand for "evaluating uncalled methods" or
+		// evaluating object existence - these need to be seperated somehow
+		if (!$this->evaluated) { 
+			// evaluate entity relationships
+			// @todo should this be left here, or deferred to evaluation stage				
+			foreach($this->definition->relationships as $relationship) { 
+							
+				// create entity representation of relationship
+				$entityRelation = DDL\Entity\Factory::factory(
+					"{$this->_class->namespace}\\{$relationship->to}"
+				);
+				
+				// if a has-many relationship, then collection is represented as  
+				$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+					? new QuerySet($entityRelation)
+					: $entityRelation;
+			}
+			
+			$this->evaluated = true;
+		}
+		
+		return $results;
 	
 			
 	}
@@ -315,6 +320,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				'arguments'       => [ 'fields' => [ 
 					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
 				]], 
+				
+				// scrub arguments and determine if any data can be retrieve from
+				// persistence context
+				'arguments_handler'    => function($arguments) { 
+					// pass - don't know how this will work yet
+				}
 			
 				// callback handling will be defined/managed by queryset
 				// instance
@@ -380,21 +391,45 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	/**
 	 * 
-	 * Retrieves entity based on field|value pair
-	 * @param string | array  $field
-	 * @param string |integer $value
-	 * @return Entity | Set
+	 * Retrieves entity based on array of field|value pair - this
+	 * is not meant to be explicitly called, but rather, to be 
+	 * invoked from __call method
+	 * @param array $pairs
+	 * @return Entity
 	 */
-	public static function findBy ($field, $value = null) { 
-		//$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);
-		
+	protected static function _findBy (array $pairs = [ ]) { 		
 		$manager = &DDL\Manager\ManagerFactory::factory();
+		$entity->find_by_name_christ
 		
 		// if passed as key/value pair, then insert into pairs
 		// and treat as array
 		$pairs = (is_array($field)) 
 			? $field
 			: [ $field => $value ];
+			
+					$entity->events->trigger('call', $entity, [
+				'name'            => __FUNCTION__,
+			
+				// defines the calling method, and parameter values
+				'arguments'       => [ 'fields' => [ 
+					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+				]], 
+				
+				// scrub arguments and determine if any data can be retrieve from
+				// persistence context
+				'arguments_handler'    => function($arguments) { 
+					// pass - don't know how this will work yet
+				}
+			
+				// callback handling will be defined/managed by queryset
+				// instance
+				'results_handler' => null,
+				
+				// we defer an evaluation of entity (running callback stack
+				// batch) to determine first, if the entity exists in the 
+				// manager, and if it 
+				'defer'           => true
+			]);		
 			
 		//creturn new QuerySet($manager->query($this, $pairs));
 		
@@ -415,8 +450,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			'name'            => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
-			'arguments'       => [  $keyName => $key ], 
-		
+			'arguments'       => [ 'fields' => [ 
+				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+			]], 		
+			
 			// we do not need a handler for results for deletion
 			'results_handler' => null,
 		
@@ -653,7 +690,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	protected $state;
 	protected $events;
-	protected $callbacks;	
+	protected $callbacks;
+	protected $evaluated = false;	
 	
 	protected $attributes    = [ ];
 	protected $relationships = [ ];
@@ -665,6 +703,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	/** Abstraction of configurable definition */
 	protected $definition;
 	
-	
+	/** Represents callable interface */
 	private $methods = [ ]; 
 }

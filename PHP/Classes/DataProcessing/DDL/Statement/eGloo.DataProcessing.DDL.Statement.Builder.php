@@ -40,9 +40,6 @@ class Builder extends \eGloo\Dialect\Object {
 			$this->entity->_class->name
 		);		
 		
-		var_export($this->splatArray(
-			$this->arguments
-		)); 
 		
 		// splat array ends/leaves 
 		extract($this->splatArray(
