@@ -186,14 +186,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						// if has-many relationship, then a queryset is instantiated with a single 
 						// callback on stack (a call to find_xxx statement)
 						if ($relationship->hasMany()) { 
-							$entity->relationships[ucfirst($relationship->to)] = new QuerySet(
+							$this->relationships[ucfirst($relationship->to)] = new QuerySet(
 								$entityRelation, new DDL\Utility\CallbackStack([ new DDL\Utility\Callback('init', function() use ($relationship) {
 									
 									$pk = $this->definition->primary_key;
 									 
 									// @todo name conventions will be have to be centralized (find_) around configurable, or 
 									// at least managed from some outside perspective - find_ could change at anytime. 
-									$results = $entity->methods['find_' . strlower($relationship->to)](['fields' => [ 
+									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
 										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
 									]]);
 									 															
@@ -202,10 +202,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						}
 						
 						else {
-							$entity->relationships[ucfirst($relationship->to)] = $entityRelation;
+							$this->relationships[ucfirst($relationship->to)] = $entityRelation;
 						}
 						
 					}
+					
 			}) ], 
 			
 			// callbacks recieved up-the inheritance chain
@@ -638,22 +639,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	public function __get($name) { 
 		
 		// use reflection and static storage to retrieve list of entity properties
-		$properties = static::retrieve('properties', function() { 
-			$reflection = new \ReflectionClass($this);
-			$properties = [ ];
-			
-			foreach($reflection->getProperties(\ReflectionProperty::IS_PROTECTED) as $property) { 
-				$properties[] = $property->getName();	
-			}
-			
-			return $properties;
-		});		
-		
-		// if $name is part of entity properties, then entity property
-		// will take prescedence
-		if (in_array($name, $properties)) { 
+		try {
 			return parent::__get($name);
-		}
+		} catch(\Exception $ignore) { }
 		
 		// otherwise first check entity attributes
 		if ($this->attributes && isset($this->attributes[$name])) { 
