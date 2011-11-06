@@ -51,6 +51,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// BUILD ENTITY DEFINITION
 		// Defined in entities xml
+		//$this->entityDefinition();
+		
 		try { 
 			// definitions are mapped to static storage, since an entities
 			// definition will not likely change from request to request,
@@ -65,9 +67,27 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			throw $pass;
 		}
 		
+					
+		// evaluate entity relationships
+		// @todo should this be left here, or deferred to evaluation stage
+				
+		foreach($this->definition->relationships as $relationship) { 
+						
+			// create entity representation of relationship
+			$entityRelation = DDL\Entity\Factory::factory(
+				"{$this->_class->namespace}\\{$relationship->to}"
+			);
+			
+			// if a has-many relationship, then collection is represented as  
+			$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+				? new QuerySet($entityRelation)
+				: $entityRelation;
+		}		
+		
 		
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 
+		//$this->entityInterface();
 				
 		foreach(DDL\Statement\Bundle::create($this)->names as $name) {	
 			$this->methods[$name] = function($arguments) use ($name) {
@@ -78,6 +98,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		
 		// ENTITY EVENT LISTENERS
+		//$this->entityEventListeners();
+		
 		$this->callbacks = new DDL\Utility\CallbackStack;
 		$this->events    = new EventManager;
 		
@@ -101,8 +123,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				$params  = $event->getParams();
 				$handler = $params['results_handler'];
 				
+				
 				$this->callbacks->push(new DDL\Utility\Callback(
 					$params['name'], function(array $passThrough = [ ]) use ($params, $handler) {
+												
 						// invoke entity method and retrieve results	
 						$results = $this->methods[$params['name']]($params['arguments']); 
 						
@@ -270,6 +294,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static;
+		$pk      = $entity->definition->primary_key;
 
 		// this will allow users to pass keys as 1,2,3
 		if (count(func_get_args()) > 1) {
@@ -287,16 +312,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				'name'            => __FUNCTION__,
 			
 				// defines the calling method, and parameter values
-				'arguments'       => [ 'key' => $key ], 
+				'arguments'       => [ 'fields' => [ 
+					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+				]], 
 			
-				// callback handler for results for a singular entity
+				// callback handling will be defined/managed by queryset
+				// instance
 				'results_handler' => null,
 				
 				// we defer an evaluation of entity (running callback stack
 				// batch) to determine first, if the entity exists in the 
 				// manager, and if it 
 				'defer'           => true
-			]);				
+			]);	
 			
 			return new QuerySet($entity, $entity->callbacks);
 		}
@@ -312,33 +340,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				'name'            => __FUNCTION__,
 			
 				// defines the calling method, and parameter values
-				'arguments'       => [ 'key' => $key ], 
-			
+				'arguments'       => [ 'fields' => [ 
+					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+				]], 
+				
 				// callback handler for results for a singular entity
 				'results_handler' => function($results) use ($entity) { 
 					echo "calling results handler\n";
 					
 					if ($results !== false) { 
-						
 						// set attribute values 
 						$entity->attributes = $results[0];
-							
-				
-						// evaluate entity relationships
-						// @todo this should only be done once, and at that, statically
-						foreach($entity->definition->relationships as $relationship) { 
-										
-							// create entity representation of relationship
-							$entityRelation = DDL\Entity\Factory::factory(
-								"{$entity->_class->namespace}\\{$relationship->to}"
-							);
-							
-							// if a has-many relationship, then collection is represented as  
-							$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-								? new QuerySet($entityRelation)
-								: $entityRelation;
-						}
-						
+	
 						return true;
 					}
 					
@@ -623,6 +636,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// PRIVATE ------------------------------------------------------------- //
 	
+	final private function entityDefintion() { 
+		
+	}
+	
+	final private function entityInterface() {
+		
+	}
+	
+	final private function entityEventListener() { 
+		
+	}
 
 	
 	// PROPERTIES ---------------------------------------------------------- // 

@@ -17,10 +17,10 @@ class Builder extends \eGloo\Dialect\Object {
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
 	
 	
-	public static function create(Entity $entity, $content, array $arguments = [ ]) {
+	public static function create(Entity $entity, $path, array $arguments = [ ]) {
 		$builder            = new Builder();
 		$builder->entity    = $entity;
-		$builder->content   = $content;
+		$builder->path      = $path;
 		$builder->arguments = $arguments;
 						
 		return $builder->build();
@@ -35,96 +35,53 @@ class Builder extends \eGloo\Dialect\Object {
 	 */
 	public function build() { 
 		
-		// parse "statement" statements
-		$this->content = $this->insertIncludes($this->entity, $this->content);
-	
-		
-		// type and array will be removed for variable interpolation
-		// the information is there for future cases in which
-		// work is needed based upon that data
-		$content = $this->removeMetaData($this->content);
-		
-		// TODO cache parsed query based on key|value pairs
-		// passed in arguments
-		//echo $content; exit;
-		
-		
-		// add entity specific values to arguments
-		$this->arguments = $this->processArguments(
-			$this->arguments
-		);
-		
+		// add entity type (class name) to arguments
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
-		);
+		);		
 		
+		var_export($this->splatArray(
+			$this->arguments
+		)); 
 		
-		// use blitz parser
-		$blitz = new \Blitz();
-		$blitz->load($this->content);
-		
-		// TODO arguments should be passed as object type, but
-		// associative array for now
-		return $blitz->parse($this->arguments);
-		
-		/*
-		$blitz->parse($this->keyValueArguments(
+		// splat array ends/leaves 
+		extract($this->splatArray(
 			$this->arguments
 		));
-		*/
-	}
-	
-	
-	private function insertIncludes(Entity $entity, $content) { 
-		// parses statement content for list of includes, which
-		// follows pattern 	
-		$bundle = Bundle::create ($entity, $content);
-		
-		// match all {{ |statement }} patterns and replace
-		// with bundle content - using eval modifier here just
-		// for sanity reasons, as well as n-step
-		return preg_replace (
-			'/\{\{\s+?\$(.+?)\|statement\s+?}\}/e', '', $content
-		);
 				
 		
+		// "parse" required content and place into buffer
+		ob_start();
+		require $this->path;
+		return  ob_get_clean();
+		
 	}
 	
-	private function processArguments(array $arguments = [ ]) { 
-		// processes arguments to be used in query: for example,
-		// turns string[] to comma delimited
-		// @todo this will have to be far more intelligent,
-		// as a 1 size fits all approach will not work
-		
-		foreach ($arguments as $key => $argument) { 
-			if (is_array($argument)) { 
-				$arguments[$key] = $argument;
-			}
+
+	
+	private function splatArray($array) { 
+		// a bit of misnormer - recursively splats the end points of array
+		foreach($array as $key => $value) {
+			
+			// look for leaf condition - current element is array, but child
+			// element is not
+			if (is_array($value)) { 
+				if (!is_array($value[array_keys($value)[0]])) { 
+					$array[$key] = implode (',', $value);
+				}
+				
+				else { 
+					$array[$key] = $this->splatArray($value);
+				}
+			}		
 		}
-		
-		return $arguments;
-		
+
+		return $array;
 	}
 	
-	private function removeMetaData($content) { 
-		// replace {{ name|type|[array] }} for {{ $name }}
-		return preg_replace (
-			'/\{\{\s+?\$([a-zA-Z_]+).+?\}\}/', '{{ $$1 }}', $content
-		);
-	}
-	
-	private function keyValueArguments($arguments) { 
-		$assoc = [ ];
-		
-		foreach ($arguments as $argument) { 
-			$assoc[$argument->name] = $argument->value; 
-		}
-		
-		return $assoc;
-	}
 	
 	protected $entity;
-	protected $content;
+	protected $path;
 	protected $arguments;
 	
 }

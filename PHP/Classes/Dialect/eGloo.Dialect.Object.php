@@ -38,6 +38,15 @@ abstract class Object {
 		
 	}
 	
+	/**
+	 * 
+	 * Determines if methodName is callable on object
+	 * @param string $methodName
+	 */
+	public function respondsTo($methodName) { 
+		
+	}
+	
 	public static function isInstanceOf($object) { 
 		return $object instanceof static;
 	}

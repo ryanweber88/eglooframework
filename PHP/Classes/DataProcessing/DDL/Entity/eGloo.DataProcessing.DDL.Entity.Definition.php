@@ -19,24 +19,47 @@ class Definition extends \eGloo\Dialect\Object {
 		$this->entity = $entity;
 	}	
 	
-	static public function create(DDL\Entity\Entity $entity) { 
-				
+	/**
+	 * 
+	 * Abstracts builder class - responsible for creating entity definition
+	 * @param Entity $entity
+	 * @todo limit_static;
+	 * @return Definition
+	 */
+	static public function create(DDL\Entity\Entity $entity) { 	
 		return static::retrieve($entity->_class->name, function() use ($entity) { 
 			return Definition\Builder::create($entity);
 		});
 
 	}	
 	
+	/**
+	 * 
+	 * Stack a relationship
+	 * @param Relationship $relationship
+	 */
 	public function addRelationship(Relationship $relationship) {
 		$this->relationships[] = $relationship;
 		
 		return $this;
 	}
 	
+	/**
+	 * Overrides parent to return from attribute set, should
+	 * it exist
+	 */
+	public function __get($name) { 
+		return isset($this->attributes[$name])
+			? $this->attributes[$name]
+			: parent::__get($name);
+	}
+		
+	
+	
 
 	
 	private   $entity;	
-	protected $relationships = [ ];
-	protected $primaryKey    = 'id';	
+	protected $attributes     = [ ];
+	protected $relationships  = [ ];
 
 }

@@ -41,17 +41,23 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		// retrieve bundle content
 		foreach ($this->files as $file) {
+			$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0];
+			/*
 			$this->content[$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0]] = file_get_contents(
 				$file
 			);
+			*/
 		}
+		
+
 				
 		
 		// check that required files in bundle are available - proceed up hierarchy chain
 		// if not available in current directory
 		// @todo determine moreso elegant mechanism for determining stop point
 		// in hierarchy - right now just looking at directory name vs engine mode
-		foreach(static::$REQUIRED as $required) {
+		
+		/*foreach(static::$REQUIRED as $required) {
 			 			
 			if (!in_array($required, $this->names)) { 
 				$found = false;
@@ -85,10 +91,27 @@ class Bundle extends \eGloo\Dialect\Object {
 
 	
 		}
+		*/
 		
 		
 
 	}
+
+	/**
+	 * 
+	 * Returns path to statement as identified by name - statement/file type
+	 * will be determine by patter $name.+ 
+	 * @param string $name
+	 */
+	public function path($name) {
+		if (count($matches = preg_grep('/' . preg_quote($name) . '+/i', $this->files))) {
+			// just going to return whatever the first element is - for some stupid reason
+			// preg_grep does not return matches sequentially
+			return current($matches);
+		}
+		
+		return false;
+	}	
 	
 	/**
 	 * Retrieve a bundle instance based on

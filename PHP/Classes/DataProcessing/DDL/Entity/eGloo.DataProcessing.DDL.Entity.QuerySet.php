@@ -31,6 +31,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
 				// a fake entity or what not eh)
+				//echo "calling evaluate\n";		
+		
 				$this->evaluate();
 				
 				// false return indicates that listener will only respond once
@@ -43,22 +45,17 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				
 				// just shortcutting to params and results handler
 				$params  = $event->getParams();
-				$handler = $params['results_handler'];
 							
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], function(array $passThrough = [ ]) use ($params, $handler) {
+					$event->getParams()['name'], function(array $passThrough = [ ]) use ($params) {
+						
+						//var_export($params['arguments']); exit;
+						
 						// invoke entity method and retrieve results	
 						// this idea doesn't exist here, there are no methods, only methods that
 						// belong to entities
-						//$results = $this->methods[$params['name']]($params['arguments']); 
-						
-						// if passed handler is callable, then pass results to handler
-						// and set results as the return of our dynamic handler
-						if (is_callable($handler)) { 
-							$results = $handler($results);
-						}
-						
-						return $results;
+						return $this->methods[$params['name']]($params['arguments']); 
+		
 					}
 				));
 				
@@ -128,28 +125,30 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
  	protected function evaluate() { 
+ 		// @todo we need to scrub ids from query if some are not needed
+ 		// since they already exist in persistence context
  		
- 		return $this->callbacks->batch();
-
+		echo "evaluating queryset\n";
+		
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
- 		if (($data = $this->callbacks->batch()) !== false) { 
-			$manager = &DDL\Manager\ManagerFactory::factory();
+ 		if (($results = $this->callbacks->batch()) !== false) { 
+			$manager = DDL\Entity\Manager\Factory::factory();
  			
  			// TODO write some measure of intelligence in the number
  			// of entities built on an evaluation
- 			$this->entities = new \SplFixedArray(count($data));
+ 			$this->entities = new \SplFixedArray(count($results));
+ 			$counter = 0;
  			
- 			foreach ($data as $record) {
- 				
- 				$this->entities[] = $manager->find(
+ 			foreach ($results as $record) {
+ 				 				 				
+ 				$this->entities[$counter++] = $manager->find(
  					$this->entity->_class, 
- 					$record[$this->entity->definition->primaryKeyName], function() use ($record) { 
+ 					$record[$this->entity->definition->primary_key], function() use ($record) { 
  						
- 						$entity       = clone $this->entity;
- 						$entity->data = new Data(
- 							$this->entity, $record
- 						);
+ 						// instantiate entity
+ 						$entity              = clone $this->entity;
+ 						$entity->attributes  = $record;
  						
  						return $entity;
  						
@@ -250,7 +249,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	}
 	
 	public function offsetGet($offset) { 
-		$this->events->trigger('evaluate', $this, null);
+		$this->events->trigger('evaluate', $this);
 				
 		return $this->entities->offsetGet($offset);
 	}
@@ -307,6 +306,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	protected $callbacks;
 	protected $entities;
 	protected $events;
+	protected $evaluated = false;
 	private   $entity;
 	
 }

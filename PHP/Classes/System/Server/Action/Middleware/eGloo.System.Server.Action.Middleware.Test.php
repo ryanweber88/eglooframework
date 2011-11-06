@@ -25,10 +25,11 @@ class Test extends Middleware {
 		
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
 		echo $set[0]->title;
-			
+		$anotherSet = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
+		echo $anotherSet[1]->title;	
 		//}
 		
-		echo time() - $start;
+		echo "time elapsed : " . (time() - $start) . "\n";
 		
 		
 		exit ('Middleware\\Test::processRequest');
