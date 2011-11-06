@@ -12,6 +12,8 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
 class Product extends Entity {
 
 	public function __toString() { 
-		return $this->title;
+		if ($this->valid()) { 
+			return $this->title;
+		}
 	}
 }

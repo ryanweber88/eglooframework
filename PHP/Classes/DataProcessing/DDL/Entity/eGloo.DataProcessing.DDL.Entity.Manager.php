@@ -43,7 +43,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	public function persist(Entity $entity) { 
 		
 		// check that entity is new, or removed, then push back to manage
-		if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ]) {
+		if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ])) {
 			
 			// push entity into pool and retrieve persistent id - 
 			// only if it is new, remember that a removed context

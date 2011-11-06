@@ -11,4 +11,9 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class User extends Entity {
 
+	public function __toString() {
+		if ($this->valid()) {
+			return $this->name;
+		}
+	}
 }

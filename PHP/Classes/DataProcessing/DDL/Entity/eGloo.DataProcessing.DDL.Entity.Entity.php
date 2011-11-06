@@ -17,13 +17,15 @@ use \Zend\EventManager\Event;
  * @author Christian Calloway
  *
  */
-abstract class Entity extends \eGloo\Dialect\Object implements 
-	EvaluationInterface, Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, Retrieve\CommitInterface { 
+abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterface { 
 	
 	// TRAITS -------------------------------------------------------------- //
 	
 	
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
+	use \eGloo\Utilities\StatTrait { 
+		init as initStatTrait;
+	}
 	
 	// CONST --------------------------------------------------------------- //
 	
@@ -42,6 +44,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		// CALL INITILIZATION METHOD
 		$this->init();
+		$this->initStatTrait();
 
 		
 		// SET ENTITY STATE
@@ -91,7 +94,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->events = new EventManager;
 		
 		// Stat listener is responsible for tracking accessed/modified data
-		$this->events->attachAggregate(new Listener/Stat);
+		$this->events->attachAggregate(new Listener\Stat);
 		
 		// TODO refactor into separate listener class
 		$this->events->attachAggregate(new Listener\Generic([
@@ -170,6 +173,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			// defines relationship initialization  
 			[ new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
+								
 					// evaluating object existence - these need to be seperated somehow
 					// evaluate entity relationships
 					foreach($this->definition->relationships as $relationship) { 
@@ -183,16 +187,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 						// callback on stack (a call to find_xxx statement)
 						if ($relationship->hasMany()) { 
 							$entity->relationships[ucfirst($relationship->to)] = new QuerySet(
-								$entityRelation, new DDL\Utility\CallbackStack([ new Callback('init', function() use ($entity, $relationship) {
-									$pk = $entity->definition->primary_key;
+								$entityRelation, new DDL\Utility\CallbackStack([ new DDL\Utility\Callback('init', function() use ($relationship) {
+									
+									$pk = $this->definition->primary_key;
 									 
 									// @todo name conventions will be have to be centralized (find_) around configurable, or 
 									// at least managed from some outside perspective - find_ could change at anytime. 
 									$results = $entity->methods['find_' . strlower($relationship->to)](['fields' => [ 
-										$pk => [ 'values' => $entity->id, 'type' => $entity->definition->primary_key ]
-									]]); 															
-								}]));
-							)
+										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
+									]]);
+									 															
+								})])
+							);
 						}
 						
 						else {
@@ -245,6 +251,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		// inspect data to determine evaluation performed
 		
 		$results =  $this->callbacks->batch();
+		
+		//var_export($results);
 		
 
 		
@@ -406,7 +414,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				// persistence context
 				'arguments_handler'    => function($arguments) { 
 					// pass - don't know how this will work yet
-				}
+				},
 			
 				// callback handling will be defined/managed by queryset
 				// instance
@@ -438,7 +446,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 				
 				// callback handler for results for a singular entity
 				'results_handler' => function($results) use ($entity) { 
-					echo "calling results handler\n";
+					// echo "calling results handler\n";
 					
 					if ($results !== false) { 
 						// set attribute values 
@@ -480,8 +488,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	protected static function _findBy (array $pairs = [ ]) { 		
 		$manager = Manager\Factory::factory();
-		$entity->find_by_name_christ
-		
+		/*
 		// if passed as key/value pair, then insert into pairs
 		// and treat as array
 		$pairs = (is_array($field)) 
@@ -513,6 +520,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			]);		
 			
 		//creturn new QuerySet($manager->query($this, $pairs));
+		 * 
+		 */
 		
 	}
 	

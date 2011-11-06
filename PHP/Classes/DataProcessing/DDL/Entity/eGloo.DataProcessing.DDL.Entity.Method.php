@@ -39,7 +39,7 @@ class Method extends \eGloo\Dialect\Object {
 		$data = $statement->execute(DDL\Statement\Builder::create(
 			$this->entity, $bundle->path($this->name), $arguments
 		));
-					
+							
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity
 		// has requested evaluation.
@@ -47,7 +47,7 @@ class Method extends \eGloo\Dialect\Object {
 		if ($data && is_array($data)) { 
 			return $data;
 		}
-		
+				
 		return false;
 				
 	}

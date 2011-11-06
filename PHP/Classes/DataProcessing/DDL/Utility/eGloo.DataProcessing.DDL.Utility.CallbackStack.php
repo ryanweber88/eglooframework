@@ -4,7 +4,6 @@ namespace eGloo\DataProcessing\DDL\Utility;
 class CallbackStack extends \SplStack { 
 	
 	function __construct(array $callbacks = [ ]) { 
-		parent::__construct();
 		
 		// push callbacks onto stack
 		foreach($callbacks as $callback) {
@@ -22,9 +21,14 @@ class CallbackStack extends \SplStack {
 			: [  ];
 		
 		while (!$this->isEmpty()) {
+			
+			$results = [ ];
+			
 			// call, retrieve results to pass to the next callback
 			// TODO results push through is not working
-			$results = $this->pop()->call($results); // = function($results) { method->call($arguments, $results) }
+			if (!is_array(($results = $this->pop()->call($results)))) { // = function($results) { method->call($arguments, $results) }
+				$results = [ 'previous' => $results ];				
+			}
 		}
 		
 		return $results;

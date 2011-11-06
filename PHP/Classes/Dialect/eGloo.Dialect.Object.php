@@ -145,7 +145,7 @@ abstract class Object {
 	 * @param string $name
 	 * @param mixed* $arguments
 	 */
-	public function &__call($name, $arguments) { 
+	public function __call($name, $arguments) { 
 		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
