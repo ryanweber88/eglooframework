@@ -44,7 +44,7 @@ abstract class Object {
 	 * @param string $methodName
 	 */
 	public function respondsTo($methodName) { 
-		
+		return method_exists($this, $methodName);
 	}
 	
 	public static function isInstanceOf($object) { 
@@ -158,6 +158,15 @@ abstract class Object {
 			// an attempt to access a property that does not exist is made
 			if ($this->propertyExists($name)) {
 				$this->$name = $arguments[0];
+			}
+			
+			// magic call to determine if property is "in" passed array argument
+			else if (is_array($arguments[0]) && preg_match('/(.+?)_in/', $name, $match)) {
+				$name = $match[1];
+				
+				if ($this->propertyExists($match[1])) { 
+					return in_array($this->$name, $arguments[0]);	
+				}
 			}
 			
 			else { 

@@ -69,19 +69,21 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 						// TODO throw exception if required cardinality attributes 
 						// are not available
 						
-						$relationship = new DDL\Entity\Relationship;
-						$relationship->to = $node['to'];
-											
-						foreach(['has', 'belongs'] as $type) { 
-						
-							if (isset($node[$type])) { 
-								$relationship->$type = $node[$type] == DDL\Entity\Relationship::STRING_MANY
-									? DDL\Entity\Relationship::CARDINALITY_MANY 
-									: DDL\Entity\Relationship::CARDINALITY_ONE;
+						if (!isset($node['ignore'])) { 
+							$relationship = new DDL\Entity\Relationship;
+							$relationship->to = $node['to'];
+												
+							foreach(['has', 'belongs'] as $type) { 
+							
+								if (isset($node[$type])) { 
+									$relationship->$type = $node[$type] == DDL\Entity\Relationship::STRING_MANY
+										? DDL\Entity\Relationship::CARDINALITY_MANY 
+										: DDL\Entity\Relationship::CARDINALITY_ONE;
+								}
 							}
+							
+							$definition->addRelationship($relationship);
 						}
-						
-						$definition->addRelationship($relationship);
 					}
 			
 				

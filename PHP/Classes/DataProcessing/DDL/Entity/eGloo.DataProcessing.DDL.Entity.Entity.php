@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
+use eGloo\DataProcessing\DDL\Utility\CallbackStack;
+
 use \eGloo\DataProcessing\DDL;
 use \Zend\EventManager\EventManager;
 use \Zend\EventManager\Event;
@@ -47,7 +49,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 
 		
 		// SET ENTITY STATE
-		$this->state = self::STATE_NEW;
+		$this->state = MANAGER::ENTITY_STATE_NEW;
 		
 		// BUILD ENTITY DEFINITION
 		// Defined in entities xml
@@ -79,12 +81,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			};
 		}
 		
+		// ENTITY CALLBACKS INITIALIZATION
+		// $this->entityCallbackStack();
+		$this->callbacks = new DDL\Utility\CallbackStack;
+		
+		foreach($this->initCallbacks() as $callback) { 
+			$this->callbacks->push($callback);
+		}
+		
 		
 		// ENTITY EVENT LISTENERS
 		//$this->entityEventListeners();
-		
-		$this->callbacks = new DDL\Utility\CallbackStack;
-		$this->events    = new EventManager;
+		$this->events = new EventManager;
 		
 		// TODO refactor
 		$this->events->attachAggregate(new Listener\Generic([
@@ -134,7 +142,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 			
 				return true;
 			}
-		]));
+		]));		
 		
 
 		// initialize attributes and relationships
@@ -153,6 +161,36 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * 
 	 */
 	protected function init() { }	
+	
+	
+	protected function initCallbacks(array $callbacks = [ ]) {
+		// Defines "initializing" callbacks - these will be run once
+		// but are vital to entity evaluation
+		return array_merge(
+			
+			// defines relationship initialization  
+			[new DDL\Utility\Callback(
+				'relationships', function(array $pass = [ ]) { 
+					// evaluating object existence - these need to be seperated somehow
+					// evaluate entity relationships
+					foreach($this->definition->relationships as $relationship) { 
+									
+						// create entity representation of relationship
+						$entityRelation = DDL\Entity\Factory::factory(
+							"{$this->_class->namespace}\\{$relationship->to}"
+						);
+						
+						// if a has-many relationship, then collection is represented as  
+						$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
+							? new QuerySet($entityRelation)
+							: $entityRelation;
+					}
+			})], 
+			
+			// callbacks recieved up-the inheritance chain
+			$callbacks
+		);
+	}
 	
 		
 	/**
@@ -193,26 +231,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		$results =  $this->callbacks->batch();
 		
-		// @todo should evaluation stand for "evaluating uncalled methods" or
-		// evaluating object existence - these need to be seperated somehow
-		if (!$this->evaluated) { 
-			// evaluate entity relationships
-			// @todo should this be left here, or deferred to evaluation stage				
-			foreach($this->definition->relationships as $relationship) { 
-							
-				// create entity representation of relationship
-				$entityRelation = DDL\Entity\Factory::factory(
-					"{$this->_class->namespace}\\{$relationship->to}"
-				);
-				
-				// if a has-many relationship, then collection is represented as  
-				$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-					? new QuerySet($entityRelation)
-					: $entityRelation;
-			}
-			
-			$this->evaluated = true;
-		}
+
 		
 		return $results;
 	
@@ -482,7 +501,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
 		$this->events->trigger('update', $this);
 		
-		return ($this->state == self::STATE_NEW)  
+		return ($this->state == MANAGER::ENTITY_STATE_MANAGED)  
 			? $this->create()
 			: $this->update(); 
 	}	
@@ -681,6 +700,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 	}
 	
+	final private function entityCallbackStack() { 
+
+	}
+	
 	final private function entityEventListener() { 
 		
 	}
@@ -698,7 +721,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	
 	/** The persistent id */
-	protected $pid = -1;
+	protected $pid = null;
 	
 	/** Abstraction of configurable definition */
 	protected $definition;

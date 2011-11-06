@@ -14,6 +14,15 @@ use \eGloo\DataProcessing\DDL;
  */
 class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface { 
 	
+	
+	// CONSTANTS ----------------------------------------------------------- //
+
+	const ENTITY_STATE_NIL      = 0x00;  // Entity does not, or no longer exists
+	const ENTITY_STATE_NEW      = 0x01;  // Entity is brand new, but not yet managed
+	const ENTITY_STATE_MANAGED  = 0x02;  // Entity is managed in persistence context
+	const ENTITY_STATE_REMOVED  = 0x03;  // Entity has persistence context, but is marked for removal from db
+	const ENTITY_STATE_DETACHED = 0x04;  // Entity has been serialized to another tier, has not persistence context
+		
 	function __construct() { 
 
 		// initialize pool
@@ -34,7 +43,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	public function persist(Entity $entity) { 
 		
 		// check that entity is new, or removed, then push back to manage
-		if ($entity->state == Entity::STATE_NEW || $entity->state == Entity::STATE_REMOVED) {
+		if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ]) {
 			
 			// push entity into pool and retrieve persistent id - 
 			// only if it is new, remember that a removed context
@@ -43,13 +52,13 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 			// be removed or not
 			// TODO is persistent id based on index enough?
 			
-			if ($entity->state == Entity::STATE_NEW) { 
+			if ($entity->state === self::ENTITY_STATE_NEW) { 
 				$entity->pid  = $this->pool->count();
 				$this->pool[] = $entity;
 			}
 						
 			// set entity state to managed
-			$entity->state = Entity::STATE_MANAGED;
+			$entity->state = self::ENTITY_STATE_MANAGED;
 			
 
 			// return
@@ -57,7 +66,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		}
 		
 		// if state is already managed, return entity from pool
-		else if ($entity->state == Entity::STATE_MANAGED) { 
+		else if ($entity->state === self::ENTITY_STATE_MANAGED) { 
 			return $this->pool[$entity->pid];
 		}
 		
@@ -198,14 +207,20 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * @param Entity $entity
 	 */
 	public function remove(Entity $entity) { 
-		// set state to detached
-		$entity->STATE = Entity::STATE_DETACHED;
 		
-		// remove persistence key
-		$entity->pid = null;
+		if ($entity->state_in ([ self::ENTITY_STATE_DETACHED, self::ENTITY_STATE_NEW ])) { 
+			// set state to detached
+			$entity->STATE = Entity::STATE_REMOVED;
+			
+			// unset from persistence pool, if it exists
+			unset($this->pool[$entity->pid]);
+			
+			$entity->pid = null;
+		}
 		
-		// 
-		return $entity;
+		throw new DDL\Exception\Exception(
+			'Illegal Argument Exception : entity must already be in a managed state'
+		);
 	}
 	
 	public function refresh(Entity $entity) { }
