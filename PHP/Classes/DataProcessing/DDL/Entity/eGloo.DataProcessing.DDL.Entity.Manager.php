@@ -208,7 +208,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 */
 	public function remove(Entity $entity) { 
 		
-		if ($entity->state_in ([ self::ENTITY_STATE_DETACHED, self::ENTITY_STATE_NEW ])) { 
+		if ($entity->state == self::ENTITY_STATE_MANAGED) { 
 			// set state to detached
 			$entity->STATE = Entity::STATE_REMOVED;
 			

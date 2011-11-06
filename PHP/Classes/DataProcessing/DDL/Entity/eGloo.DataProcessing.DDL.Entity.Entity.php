@@ -22,12 +22,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// TRAITS -------------------------------------------------------------- //
 	
-	//use \eGloo\Utilities\EventManager\StatTrait {
-		//StatTrait::init as initStatTrait;
-	//};
 	
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
-	use \eGloo\Utilities\Ruby\InstantArgumentTrait;
 	
 	// CONST --------------------------------------------------------------- //
 	
@@ -94,7 +90,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		//$this->entityEventListeners();
 		$this->events = new EventManager;
 		
-		// TODO refactor
+		// Stat listener is responsible for tracking accessed/modified data
+		$this->events->attachAggregate(new Listener/Stat);
+		
+		// TODO refactor into separate listener class
 		$this->events->attachAggregate(new Listener\Generic([
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
@@ -279,11 +278,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * The purpose of this method is to an idea of underlying 
 	 * data layer; will perform a find, persist if need be
 	 * and return available fields
+	 * @todo limit_static
 	 */
 	public static function inspect() { 
 		// parses fields available
-		return static::retrieve(function() { 
+		$entity = new static;
+		
+		return static::retrieve($entity->_class->class, function() use ($entity) { 
 			// pass
+			return DDL\Statement\Bundle::create($entity)->fields(
+				'find'
+			);
 		});
 	}	
 	
@@ -293,20 +298,61 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 
 	/**
 	 * 
-	 * Place entity into persistence context 
-	 * @throws \eGloo\Dialect\Exception
+	 * Place entity into persistence context and flags record insertion
+	 * on underlying data layer
 	 */
-	public function create() { 
-		try { 
-			return DDL\Manager\ManagerFactory::factory()
-				->persist($this);
-		}
-		catch(\eGloo\Dialect\Exception $pass) { 
-			throw $pass;
-		}
+	protected function _create() { 
+		$manager = Manager\Factory::factory();
+		$this->events->trigger('call', $this, [
+			'name'                 => 'create',
 		
+			// defines the calling method, and parameter values
+			'arguments'            => [ 'fields' => [ 
+				$pk => [ 'values' => $key, 'type' => $this->definition->primary_key ]
+			]], 
+			
+			// scrub arguments and determine if any data can be retrieve from
+			// persistence context
+			'arguments_handler'    => null,
+		
+			// callback handling will be defined/managed by queryset
+			// instance
+			'results_handler'      => null
+		]);	
+		
+		// persist entity
+		return $manager->persist($this);
 	
 	}
+	
+	/**
+	 * Updates entity within manager context, and flags underlying data layer update;
+	 * returns updated entity instance
+	 * 
+	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
+	 */
+	protected function _update() { 
+		$manager = Manager\Factory::factory();
+		$entity->events->trigger('call', $this, [
+			'name'              => 'update',
+		
+			// defines the calling method, and parameter values
+			'arguments'         => [ 'fields' => [ 
+				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+			]], 		
+			
+			// 
+			'arguments_handler' => null, 
+			
+			// we do not need a handler for results for deletion
+			'results_handler'   => null,
+		
+		]);
+		
+		// merges entity into persistence context; please be
+		// aware that it must already be managed
+		return $manager->merge($this);
+	}	
 		
 	/**
 	 * 
@@ -417,7 +463,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * @return Entity
 	 */
 	protected static function _findBy (array $pairs = [ ]) { 		
-		$manager = &DDL\Manager\ManagerFactory::factory();
+		$manager = Manager\Factory::factory();
 		$entity->find_by_name_christ
 		
 		// if passed as key/value pair, then insert into pairs
@@ -461,34 +507,61 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 */
 	public static function delete($key) {
 		
-		$keyName = is_array($key) ? 'keys' : 'key';
+		$entity  = new static;
+		$manager = Manager\Factory::factory();
+		
+		// this will allow users to pass keys as 1,2,3
+		if (count(func_get_args()) > 1) {
+			$key = func_get_args();	
+		}		
 
 		// trigger call action, w/o deferal, which should
 		// perform action immediately
 		$entity->events->trigger('call', $entity, [
-			'name'            => __FUNCTION__,
+			'name'              => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
-			'arguments'       => [ 'fields' => [ 
+			'arguments'         => [ 'fields' => [ 
 				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
 			]], 		
 			
+			// 
+			'arguments_handler' => null, 
+			
 			// we do not need a handler for results for deletion
-			'results_handler' => null,
+			'results_handler'   => null,
 		
 		]);
 		
 		// signal manager to remove entity from persistence 
 		// context
-		$manager = &DDL\Manager\Manager\Factory::factory();
-		return $manager->remove($this);		
+		// @todo need implement transactional layer
+		//$manager->transaction(function($manager) use ($key) { 
+		if (!is_array($key)) { 
+			$key = [ $key ];	
+		}
+		
+		foreach ($key as $key) { 
+			if (($entityFound = $manager->find($entity, $key)) !== false) { 
+				$manager->remove($entityFound);	
+			}
+		};
+		
 	}
 	
 	/**
      * Destroys entity and deletes associations as specified in relationships
 	 */
 	public function destroy() { 
+		$manager = Manager\Factory::factory();
 		
+		if ($this->state_in ([ Manager::ENTITY_STATE_MANAGED, Manager::ENTITY_STATE_DETACHED ])) {
+			return $manager->remove($this);
+		}
+		
+		throw new DDL\Exception\Exception(
+			'Attempting to destroy non-managed entity'
+		);
 	}
 	
 
@@ -498,63 +571,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	 * Calls create or update, depending on entities current state
 	 */
 	public function save() {
-		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
-		$this->events->trigger('update', $this);
-		
 		return ($this->state == MANAGER::ENTITY_STATE_MANAGED)  
 			? $this->create()
 			: $this->update(); 
 	}	
 	
-	/**
-	 * Updates entity within manager context, and flags underlying data layer update;
-	 * returns updated entity instance
-	 * 
-	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
-	 */
-	public function update() { 
-		$this->events->trigger('called', $this, [ 'name' => __FUNCTION__ ]);	
-		$this->events->trigger('update', $this);
-		
-		$manager = &DDL\Manager\ManagerFactory::factory();
-		return $manager->merge($this);
-	}
-	
 
 	
-	// Retrieve Interfaces --------------------------------------------------- //
-	// Enforced by implementing the Retrieve interfaces, provides ability
-	// to chain on results - an explicit commit call must be made after
-	// specifying chain methods
-	
-	// TODO determine django-esque method to do lazy loading without
-	// commit call
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::limit()
-	 */
-	public function limit($amount) { 
-		
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::offset()
-	 */
-	public function offset($start, $end = 0) { 
-		
-	}
-	
-	/**
-	 * (non-PHPdoc)
-	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.WindowingInterface::groupBy()
-	 */
-	public function groupBy(array $fields) {
-		
-	}
-	
-
 	
 	
 	

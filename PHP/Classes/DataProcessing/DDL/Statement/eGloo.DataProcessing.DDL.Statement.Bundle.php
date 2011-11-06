@@ -42,11 +42,10 @@ class Bundle extends \eGloo\Dialect\Object {
 		// retrieve bundle content
 		foreach ($this->files as $file) {
 			$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0];
-			/*
 			$this->content[$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0]] = file_get_contents(
 				$file
 			);
-			*/
+			
 		}
 		
 
@@ -112,6 +111,10 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		return false;
 	}	
+	
+	public function fields($name) {
+		
+	}
 	
 	/**
 	 * Retrieve a bundle instance based on
