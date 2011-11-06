@@ -168,7 +168,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		return array_merge(
 			
 			// defines relationship initialization  
-			[new DDL\Utility\Callback(
+			[ new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
 					// evaluating object existence - these need to be seperated somehow
 					// evaluate entity relationships
@@ -179,12 +179,28 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 							"{$this->_class->namespace}\\{$relationship->to}"
 						);
 						
-						// if a has-many relationship, then collection is represented as  
-						$entity->relationships[ucfirst($relationship->to)] = ($relationship->hasMany())
-							? new QuerySet($entityRelation)
-							: $entityRelation;
+						// if has-many relationship, then a queryset is instantiated with a single 
+						// callback on stack (a call to find_xxx statement)
+						if ($relationship->hasMany()) { 
+							$entity->relationships[ucfirst($relationship->to)] = new QuerySet(
+								$entityRelation, new DDL\Utility\CallbackStack([ new Callback('init', function() use ($entity, $relationship) {
+									$pk = $entity->definition->primary_key;
+									 
+									// @todo name conventions will be have to be centralized (find_) around configurable, or 
+									// at least managed from some outside perspective - find_ could change at anytime. 
+									$results = $entity->methods['find_' . strlower($relationship->to)](['fields' => [ 
+										$pk => [ 'values' => $entity->id, 'type' => $entity->definition->primary_key ]
+									]]); 															
+								}]));
+							)
+						}
+						
+						else {
+							$entity->relationships[ucfirst($relationship->to)] = $entityRelation;
+						}
+						
 					}
-			})], 
+			}) ], 
 			
 			// callbacks recieved up-the inheritance chain
 			$callbacks
@@ -286,9 +302,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 		
 		return static::retrieve($entity->_class->class, function() use ($entity) { 
 			// pass
-			return DDL\Statement\Bundle::create($entity)->fields(
+			return DDL\Statement\Parser::fields(DDL\Statement\Bundle::create($entity)->statement(
 				'find'
-			);
+			));
 		});
 	}	
 	
@@ -594,7 +610,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements
 	
 	// MAGIC --------------------------------------------------------------- //
 	// This sections primary concern is communicating with underlying
-	// data class
+	// data layer
+	
+	/**
+	 * A "magic" getter/setter - used retrieve primary_key value, but always
+	 * under the pseudoname id
+	 */
+	public function getId() { 
+		$pk = $this->definition->primary_key;
+		return $this->$pk;
+	}
 	
 	/**
 	 * Proxies to attributes, relationships, and then parent object - beware,

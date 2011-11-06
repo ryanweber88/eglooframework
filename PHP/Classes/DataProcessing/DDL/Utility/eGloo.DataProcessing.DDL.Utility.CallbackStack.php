@@ -3,6 +3,14 @@ namespace eGloo\DataProcessing\DDL\Utility;
 
 class CallbackStack extends \SplStack { 
 	
+	function __construct(array $callbacks = [ ]) { 
+		parent::__construct();
+		
+		// push callbacks onto stack
+		foreach($callbacks as $callback) {
+			$this->push($callback);
+		}
+	}
 	/**
 	 * 
 	 * Executes all callbacks currently sitting on stack

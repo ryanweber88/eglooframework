@@ -56,7 +56,7 @@ class Bundle extends \eGloo\Dialect\Object {
 		// @todo determine moreso elegant mechanism for determining stop point
 		// in hierarchy - right now just looking at directory name vs engine mode
 		
-		/*foreach(static::$REQUIRED as $required) {
+		foreach(static::$REQUIRED as $required) {
 			 			
 			if (!in_array($required, $this->names)) { 
 				$found = false;
@@ -87,10 +87,8 @@ class Bundle extends \eGloo\Dialect\Object {
 				}				
 			}
 
-
-	
 		}
-		*/
+		
 		
 		
 
@@ -111,10 +109,7 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		return false;
 	}	
-	
-	public function fields($name) {
-		
-	}
+
 	
 	/**
 	 * Retrieve a bundle instance based on

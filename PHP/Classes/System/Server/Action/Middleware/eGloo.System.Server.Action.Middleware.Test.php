@@ -23,14 +23,9 @@ class Test extends Middleware {
 		$counter = 0;
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
-		//while ($counter++ < 200) { 
-		
-		ob_start();
-		$set = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
-		echo $set[0]->title;
-		$anotherSet = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479, 11482, 11483);
-		echo $anotherSet[1]->title;	
-		//}
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(12427);
+		echo $user->name . "\n";
+		//echo $user->Products[0]->title;
 		
 		echo "\ntime elapsed : " . (time() - $start) . "\n";
 		

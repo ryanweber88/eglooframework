@@ -70,7 +70,8 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 						// are not available
 						
 						if (!isset($node['ignore'])) { 
-							$relationship = new DDL\Entity\Relationship;
+							
+							$relationship     = new DDL\Entity\Relationship;
 							$relationship->to = $node['to'];
 												
 							foreach(['has', 'belongs'] as $type) { 
@@ -80,6 +81,13 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 										? DDL\Entity\Relationship::CARDINALITY_MANY 
 										: DDL\Entity\Relationship::CARDINALITY_ONE;
 								}
+							}
+							
+							// determine if through exists, which will be the case in many-many
+							// relationships, where a junction is required - through indicated
+							// the foreign key to use
+							if (isset($node['through'])) {
+								$relationship->through = $node['through'];
 							}
 							
 							$definition->addRelationship($relationship);

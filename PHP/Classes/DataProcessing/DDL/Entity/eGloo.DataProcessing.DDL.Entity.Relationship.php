@@ -36,4 +36,5 @@ class Relationship extends \eGloo\Dialect\Object {
 	protected $to;
 	protected $has;
 	protected $belongs;
+	protected $through;
 }
