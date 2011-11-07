@@ -133,13 +133,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
-			$manager = DDL\Entity\Manager\Factory::factory();
+			$manager = Manager\Factory::factory();
  			
  			// TODO write some measure of intelligence in the number
  			// of entities built on an evaluation
  			$this->entities = new \SplFixedArray(count($results));
  			$counter = 0;
- 			
+ 			 			 			
  			foreach ($results as $record) {
  				 				 				
  				$this->entities[$counter++] = $manager->find(
@@ -150,7 +150,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  						$entity              = clone $this->entity;
  						$entity->attributes  = $record;
  						
- 						// 
+ 						// returning entity to manager to handle persistence
  						return $entity;
  						
  					}

@@ -21,14 +21,15 @@ class CallbackStack extends \SplStack {
 			: [  ];
 		
 		while (!$this->isEmpty()) {
-			
-			$results = [ ];
-			
+						
 			// call, retrieve results to pass to the next callback
 			// TODO results push through is not working
-			if (!is_array(($results = $this->pop()->call($results)))) { // = function($results) { method->call($arguments, $results) }
-				$results = [ 'previous' => $results ];				
-			}
+			//if (!is_array(($results = $this->pop()->call($results)))) { // = function($results) { method->call($arguments, $results) }
+			//	$results = [ 'previous' => $results ];				
+			//}
+			
+			// @todo chain passthrough data
+			$results = $this->pop()->call([]);			
 		}
 		
 		return $results;

@@ -73,6 +73,11 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 							
 							$relationship     = new DDL\Entity\Relationship;
 							$relationship->to = $node['to'];
+							
+							// determine optional attributes
+							foreach(['through', 'as'] as $key) { 
+								$relationship->$key = $node[$key];
+							}
 												
 							foreach(['has', 'belongs'] as $type) { 
 							
@@ -83,12 +88,9 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 								}
 							}
 							
-							// determine if through exists, which will be the case in many-many
-							// relationships, where a junction is required - through indicated
-							// the foreign key to use
-							if (isset($node['through'])) {
-								$relationship->through = $node['through'];
-							}
+	
+							
+						
 							
 							$definition->addRelationship($relationship);
 						}

@@ -24,8 +24,8 @@ class Test extends Middleware {
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
 		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(12427);
-		echo $user->name . "\n";
-		echo $user->Product[0]->title . "\n";
+		//echo $user->name . "\n"; exit;
+		echo $user->Products[0]->title . "\n";
 		
 		echo "\ntime elapsed : " . (time() - $start) . "\n";
 		

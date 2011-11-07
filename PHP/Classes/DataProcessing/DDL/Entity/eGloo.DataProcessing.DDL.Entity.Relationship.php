@@ -33,8 +33,19 @@ class Relationship extends \eGloo\Dialect\Object {
 		return $this->belongs == self::CARDINALITY_ONE;
 	}
 	
+	public function __toString() {
+		return $this->format();
+	}
+	
+	protected function format() { 
+		return ($this->as !== false)
+			? $this->as
+			: ucfirst(\eGloo\Utilities\Inflections::pluralize($this->to));
+	}
+	
 	protected $to;
 	protected $has;
 	protected $belongs;
 	protected $through;
+	protected $as = false;
 }

@@ -45,7 +45,7 @@ class Builder extends \eGloo\Dialect\Object {
 		extract($this->splatArray(
 			$this->arguments
 		));
-				
+						
 		
 		// "parse" required content and place into buffer
 		ob_start();
@@ -67,13 +67,18 @@ class Builder extends \eGloo\Dialect\Object {
 					$array[$key] = implode (',', $value);
 				}
 				
-				else { 
+				else if (!$this->isAssoc($value)) { 
 					$array[$key] = $this->splatArray($value);
 				}
 			}		
 		}
 
 		return $array;
+	}
+	
+	private function isAssoc($arr) {
+		// guesses if array is associative or not
+	    return array_keys($arr) !== range(0, count($arr) - 1);
 	}
 	
 	

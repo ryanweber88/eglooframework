@@ -183,10 +183,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 							"{$this->_class->namespace}\\{$relationship->to}"
 						);
 						
+						echo "$relationship\n";
+						//echo $this->uid; exit;
+						
 						// if has-many relationship, then a queryset is instantiated with a single 
 						// callback on stack (a call to find_xxx statement)
 						if ($relationship->hasMany()) { 
-							$this->relationships[ucfirst($relationship->to)] = new QuerySet(
+							$this->relationships[(string)$relationship] = new QuerySet(
 								$entityRelation, new DDL\Utility\CallbackStack([ new DDL\Utility\Callback('init', function() use ($relationship) {
 									
 									$pk = $this->definition->primary_key;
@@ -196,13 +199,14 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
 										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
 									]]);
-									 															
+									
+									return $results;									 															
 								})])
 							);
 						}
 						
 						else {
-							$this->relationships[ucfirst($relationship->to)] = $entityRelation;
+							$this->relationships[(string)$relationships] = $entityRelation;
 						}
 						
 					}
