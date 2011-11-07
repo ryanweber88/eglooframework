@@ -14,7 +14,7 @@ class CallbackStack extends \SplStack {
 	 * 
 	 * Executes all callbacks currently sitting on stack
 	 */
-	public function batch() { 
+	public function batch(array $middleware = [ ]) { 
 
 		$results = ($this->isEmpty()) 
 			? false 

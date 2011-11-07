@@ -49,9 +49,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				$params  = $event->getParams();
 							
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], function(array $passThrough = [ ]) use ($params) {
+					$event->getParams()['name'], function(array $middleware = [ ]) use ($params) {
 						
 						$arguments = $params['arguments'];
+
 						
 						//var_export($params['arguments']); exit;
 						if (is_callable($params['arguments_handler'])) {
@@ -134,7 +135,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
- 				
+
+ 		$middleware =[
+ 			new Middleware\EntityManager($this->entity)
+ 		];
+ 		
+ 		while 
+ 		
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
