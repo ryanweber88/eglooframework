@@ -25,7 +25,7 @@ class Test extends Middleware {
 		
 		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(12427);
 		//echo $user->name . "\n"; exit;
-		echo $user->Products[0]->title . "\n";
+		echo $user->Products->count() . "\n";
 		
 		echo "\ntime elapsed : " . (time() - $start) . "\n";
 		

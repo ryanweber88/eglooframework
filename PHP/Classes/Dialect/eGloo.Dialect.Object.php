@@ -160,6 +160,8 @@ abstract class Object {
 				$this->$name = $arguments[0];
 			}
 			
+			// @todo refactor dynamic methods, since continual preg processing
+			// will add overhead
 			// magic call to determine if property is "in" passed array argument
 			else if (is_array($arguments[0]) && preg_match('/(.+?)_in/', $name, $match)) {
 				$name = $match[1];
@@ -167,6 +169,13 @@ abstract class Object {
 				if ($this->propertyExists($match[1])) { 
 					return in_array($this->$name, $arguments[0]);	
 				}
+			}
+			
+			// magic call to use run regexp against value
+			else if (is_string($arguments[0]) && preg_match('/(.+?)_like/', $name, $match)) {
+				$name = $match[1];
+				
+				return preg_match($arguments[0], $this->$name);
 			}
 			
 			else { 

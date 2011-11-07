@@ -183,7 +183,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 							"{$this->_class->namespace}\\{$relationship->to}"
 						);
 						
-						echo "$relationship\n";
+						//echo "$relationship\n";
 						//echo $this->uid; exit;
 						
 						// if has-many relationship, then a queryset is instantiated with a single 
@@ -407,7 +407,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			// trigger call to add the call "action" (find) to callback stack
 			// and specify results_handler to handle 
-			$entity->events->trigger('call', $entity, [
+			// @todo alot of this work should fall on queryset side, but moreso convenient to
+			// do here
+			$set = new QuerySet($entity);
+			$set->events->trigger('call', $entity, [
 				'name'            => __FUNCTION__,
 			
 				// defines the calling method, and parameter values
@@ -415,63 +418,55 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
 				]], 
 				
-				// scrub arguments and determine if any data can be retrieve from
-				// persistence context
-				'arguments_handler'    => function($arguments) { 
-					// pass - don't know how this will work yet
-				},
-			
-				// callback handling will be defined/managed by queryset
-				// instance
-				'results_handler' => null,
 				
 				// we defer an evaluation of entity (running callback stack
 				// batch) to determine first, if the entity exists in the 
 				// manager, and if it 
 				'defer'           => true
 			]);	
-			
-			return new QuerySet($entity, $entity->callbacks);
+	
+			return $set;
 		}
 		
 		// otherwise - retrieve singular/entity
 		else {		
 				
-			// trigger call to add the call "action" (find) to callback stack
-			// and specify results_handler to handle - it does not matter
-			// if finding a singular entity or returning a queryset, the
-			// find action will be deferred until evaluation request is made
-			$entity->events->trigger('call', $entity, [
-				'name'            => __FUNCTION__,
-			
-				// defines the calling method, and parameter values
-				'arguments'       => [ 'fields' => [ 
-					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
-				]], 
-				
-				// callback handler for results for a singular entity
-				'results_handler' => function($results) use ($entity) { 
-					// echo "calling results handler\n";
-					
-					if ($results !== false) { 
-						// set attribute values 
-						$entity->attributes = $results[0];
-	
-						return true;
-					}
-					
-					return false;
-				},
-				
-				// we defer an evaluation of entity (running callback stack
-				// batch) to determine first, if the entity exists in the 
-				// manager, and if it 
-				'defer'           => true
-			]);	
-					
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity, $key, function() use ($entity) {				
+			return $manager->find($entity, $key, function() use ($entity) {	
+
+				// trigger call to add the call "action" (find) to callback stack
+				// and specify results_handler to handle - it does not matter
+				// if finding a singular entity or returning a queryset, the
+				// find action will be deferred until evaluation request is made
+				$entity->events->trigger('call', $entity, [
+					'name'            => __FUNCTION__,
+				
+					// defines the calling method, and parameter values
+					'arguments'       => [ 'fields' => [ 
+						$pk => [ 'values' => [ $key ], 'type' => $entity->definition->primary_key ]
+					]], 
+					
+					// callback handler for results for a singular entity
+					'results_handler' => function($results) use ($entity) { 
+						// echo "calling results handler\n";
+						
+						if ($results !== false) { 
+							// set attribute values 
+							$entity->attributes = $results[0];
+		
+							return true;
+						}
+						
+						return false;
+					},
+					
+					// we defer an evaluation of entity (running callback stack
+					// batch) to determine first, if the entity exists in the 
+					// manager, and if it 
+					'defer'           => true
+				]);			
+						
 				return $entity->valid()
 					? $entity 
 					: false;

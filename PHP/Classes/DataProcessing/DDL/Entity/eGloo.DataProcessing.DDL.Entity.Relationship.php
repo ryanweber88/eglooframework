@@ -38,9 +38,21 @@ class Relationship extends \eGloo\Dialect\Object {
 	}
 	
 	protected function format() { 
-		return ($this->as !== false)
-			? $this->as
-			: ucfirst(\eGloo\Utilities\Inflections::pluralize($this->to));
+		// as value will always be valid unless
+		// absolute false
+		if ($this->as !== false) {
+			return $this->as;
+		}
+		
+		// otherwise, determine plurality from
+		// relationship type
+		else {
+			return ucfirst($this->hasMany() 
+				? \eGloo\Utilities\Inflections::pluralize($this->to)
+				: \eGloo\Utilities\Inflections::singularize($this->to)
+			);
+		}
+			
 	}
 	
 	protected $to;

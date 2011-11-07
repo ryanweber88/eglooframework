@@ -25,6 +25,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	
  		
  		// instantiate event manager and attach listeners
+ 		// $this->querySetEvents();
+ 		
 		$this->events = new EventManager;		
 		$this->events->attachAggregate(new Listener\Callback([
 			// listens for evaluate trigger
@@ -49,7 +51,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				$this->callbacks->push(new DDL\Utility\Callback(
 					$event->getParams()['name'], function(array $passThrough = [ ]) use ($params) {
 						
+						$arguments = $params['arguments'];
+						
 						//var_export($params['arguments']); exit;
+						if (is_callable($params['arguments_handler'])) {
+							$arguments = $params['arguments_hanlder']($arguments);
+						}
 						
 						// invoke entity method and retrieve results	
 						// this idea doesn't exist here, there are no methods, only methods that
@@ -101,13 +108,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	 * @return QuerySet 
  	 */
  	public function query(\Closure $lambda) { 
- 		$this->events->trigger('evaluate', $this, null);
+ 		$this->events->trigger('evaluate', $this);
  		
  		if (!$this->isEmpty()) { 
 	 		$set = new QuerySet;
 	 		
 	 		foreach ($this->entities as $entity) { 
-	 			if ($entity->valid() && $lambda($entity)) { 
+	 			if ($lambda($entity)) { 
 	 				$set[] = $entity;
 	 			}
 	 		}
@@ -127,9 +134,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
- 		
-		echo "evaluating queryset\n";
-		
+ 				
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
@@ -295,7 +300,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Countable Interface ------------------------------------------------- //
 	
 	public function count() { 
-		$this->events->trigger('evaluate', $this, null);
+		$this->events->trigger('evaluate', $this);
 		
 		return $this->entities->count();
 	} 	
