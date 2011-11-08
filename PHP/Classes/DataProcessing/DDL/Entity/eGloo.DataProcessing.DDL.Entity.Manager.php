@@ -46,41 +46,70 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 */
 	public function persist(Entity $entity) { 
 		
-		// check that entity is new, or removed, then push back to manage
-		if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ])) {
-			
-			// push entity into pool and retrieve persistent id - 
-			// only if it is new, remember that a removed context
-			// is already a part of the pool and is waiting for
-			// the end of transaction to be determined whether it should
-			// be removed or not
-			// TODO is persistent id based on index enough?
-			
-			if ($entity->state === self::ENTITY_STATE_NEW) { 
-				$entity->pid  = $this->pool->count();
-				$this->pool[] = $entity;
-			}
-						
-			// set entity state to managed
-			$entity->state = self::ENTITY_STATE_MANAGED;
-			
-			// map entity for convenient lookups in the future
-			$this->map->profile($entity);
-			
+		// entity must be valid in order to be persisted 
+		//if ($entity->valid()) { 
+		// @todo replace with valid check, which is currently failing as it calls
+		// evaluate more than once
+		// @todo a little messy in terms of pointers (or expected behavior)
+		// but all holders should pointing to the same object
+		if ($entity->attributes !== false) {
+				
+			// check that entity is new, or removed, then push back to manage		
+			if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ])) {
+				
+				// check to see if entity has already been added to persistence
+				// which could be the case if entity was found/evaluated
+				// using field other than primary - since we now have the primary
+				// key (entity is evaluated), we can check explicitly by pk 
+				$entityPersistent = $this->map
+					->with($entity->definition->primary_key)
+					->with($entity->id)
+					->retrieves($entity);
 
-			// return
-			return $entity;
+				// if unable to find entity via pk map, then entity has not yet
+				// been added to pool
+				if ($entityPersistent === false) { 
+					// push entity into pool and retrieve persistent id - 
+					// only if it is new, remember that a removed context
+					// is already a part of the pool and is waiting for
+					// the end of transaction to be determined whether it should
+					// be removed or not
+					// TODO is persistent id based on index enough?
+					
+					if ($entity->state === self::ENTITY_STATE_NEW) { 
+						$entity->pid  = $this->pool->count();
+						$this->pool[] = $entity;
+					}
+								
+					// set entity state to managed
+					$entity->state = self::ENTITY_STATE_MANAGED;
+					
+					// finally add pk map to entity
+					$entityPersistent = $this->map
+						->with($entity->definition->primary_key)
+						->with($entity->id)	
+						->refers($entity);					
+				}
+
+				
+				
+				return $entityPersistent;
+			}
+			
+			// if state is already managed, return entity from pool
+			else if ($entity->state === self::ENTITY_STATE_MANAGED) { 
+				return $this->pool[$entity->pid];
+			}
+			
+			// we assume state is detached, to which 
+			throw new DDL\Exception\Exception (
+				'Cannot PERSIT a detached entity - only MERGE is available'
+			);	
 		}
-		
-		// if state is already managed, return entity from pool
-		else if ($entity->state === self::ENTITY_STATE_MANAGED) { 
-			return $this->pool[$entity->pid];
-		}
-		
-		// we assume state is detached, to which 
-		throw new DDL\Exception\Exception (
-			'Cannot PERSIT a detached entity - only MERGE is available'
-		);		
+
+		throw new DDL\Exception\Exception(
+			'Cannot PERSIST an un-evaluated entity'
+		);
 
 	}
 	
@@ -122,14 +151,9 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
 		if (($entity = $this->map-with($pk)->with($key)->retrieves($entity)) !== false) { 
-		//if ( isset($this->map[$entity->_class->name]['_primary_key'][$key])) {
-			//echo "entity found\n";
-			//return $this->map[$entity->_class_name]['_primary_key'][$key];
 			return $entity;
 		}
-		
-		$this->map->profile($entity)
-		
+				
 		
 		if (!is_null($lambda)) { 
 			// create entity and persist

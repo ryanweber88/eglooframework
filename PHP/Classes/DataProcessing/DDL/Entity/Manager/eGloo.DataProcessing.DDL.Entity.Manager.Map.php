@@ -25,7 +25,7 @@ class Map extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
-	 * Enter description here ...
+	 * Determines if valid entity is pointed to by domain.
 	 * @param  Entity $entity
 	 * @return Entity
 	 */
@@ -85,6 +85,9 @@ class Map extends \eGloo\Dialect\Object {
 
 		// reset chain
 		$this->chain = [ ];
+		
+		// return entity
+		return $entity;
 	}
 	
 	

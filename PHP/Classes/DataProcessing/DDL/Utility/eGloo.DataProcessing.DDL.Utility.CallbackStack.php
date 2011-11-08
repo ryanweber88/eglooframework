@@ -28,6 +28,9 @@ class CallbackStack extends \SplStack {
 			//	$results = [ 'previous' => $results ];				
 			//}
 			
+			//$callback = $this->pop();
+			//$
+			
 			// @todo chain passthrough data
 			$results = $this->pop()->call([]);			
 		}

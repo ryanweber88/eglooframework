@@ -114,19 +114,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				
 				// just shortcutting to params and results handler
 				$params  = $event->getParams();
-				$handler = $params['results_handler'];
 				
 				
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$params['name'], function(array $passThrough = [ ]) use ($params, $handler) {
+					$params['name'], function(array $passThrough = [ ]) use ($params) {
 												
-						// invoke entity method and retrieve results	
+						$arguments = $params['arguments'];
+						
+						// invoke entity method and retrieve results
+						if (is_callable($handler = $params['handler_arguments'])) { 	
+							$arguments = $handler($arguments);
+						}
+						
 						$results = $this->methods[$params['name']]($params['arguments']); 
 						
 						// if passed handler is callable, then pass results to handler
 						// and set results as the return of our dynamic handler
-						if (is_callable($handler)) { 
-							$results = $handler($results);
+						if (is_callable($params['results_handler'])) { 
+							$results = $params['results_handler']($results);
 						}
 						
 						return $results;
@@ -196,6 +201,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									 
 									// @todo name conventions will be have to be centralized (find_) around configurable, or 
 									// at least managed from some outside perspective - find_ could change at anytime. 
+									
 									// we know that a method call on an entity is using a foreign key
 									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
 										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
@@ -421,7 +427,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				
 				// here we define middleware, which acts layer between arguments to
 				// db calls
-				'middleware'      => [ new Middleware\EntityManager($entity) ]
+				'middleware'      => [ 
+					new Middleware\QuerySetManager($entity) 
+				]
 				
 				// we defer an evaluation of entity (running callback stack
 				// batch) to determine first, if the entity exists in the 
@@ -444,26 +452,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				// if finding a singular entity or returning a queryset, the
 				// find action will be deferred until evaluation request is made
 				$entity->events->trigger('call', $entity, [
-					'name'            => __FUNCTION__,
+					'name'              => __FUNCTION__,
 				
 					// defines the calling method, and parameter values
-					'arguments'       => [ 'fields' => [ 
+					'arguments'         => [ 'fields' => [ 
 						$pk => [ 'values' => [ $key ], 'type' => $entity->definition->primary_key ]
 					]], 
 					
-					// callback handler for results for a singular entity
-					'results_handler' => function($results) use ($entity) { 
-						// echo "calling results handler\n";
-						
-						if ($results !== false) { 
-							// set attribute values 
-							$entity->attributes = $results[0];
-		
-							return true;
-						}
-						
-						return false;
-					},
+					'middleware'        => [
+						new Middleware\EntityManager($entity)
+					],
 					
 					// we defer an evaluation of entity (running callback stack
 					// batch) to determine first, if the entity exists in the 
