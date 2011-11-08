@@ -196,6 +196,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									 
 									// @todo name conventions will be have to be centralized (find_) around configurable, or 
 									// at least managed from some outside perspective - find_ could change at anytime. 
+									// we know that a method call on an entity is using a foreign key
 									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
 										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
 									]]);
@@ -418,6 +419,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
 				]], 
 				
+				// here we define middleware, which acts layer between arguments to
+				// db calls
+				'middleware'      => [ new Middleware\EntityManager($entity) ]
 				
 				// we defer an evaluation of entity (running callback stack
 				// batch) to determine first, if the entity exists in the 

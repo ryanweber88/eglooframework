@@ -28,10 +28,14 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		// initialize pool
 		$this->pool = new Manager\Pool($this);
 		
-		
+		// initialize map - a quick lookup tool for entities
+		$this->map  = new Manager\Map($this);
+				
 		// use default transaction - entitymanager will have one to one 
 		// relationship with transaction instance
 		$this->transaction = new Transaction;
+		
+
 	}
 	
 	/**
@@ -59,6 +63,9 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 						
 			// set entity state to managed
 			$entity->state = self::ENTITY_STATE_MANAGED;
+			
+			// map entity for convenient lookups in the future
+			$this->map->profile($entity);
 			
 
 			// return
@@ -107,34 +114,21 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 * @param \eGloo\Dialect\_Class $entity
 	 * @param integer[] | string[] $key
 	 */
-	public function find(\eGloo\Dialect\Object $mixed, $key, \Closure $lambda = null) {
+	public function find(Entity $entity, $key, \Closure $lambda = null) {
 	
 		echo "calling find\n";
-		
-		// determine mixed type, which can be either an entity 
-		// or class
-		if ($mixed instanceof Entity) {
-			$class = $mixed->_class;
-		}
-		
-		else if ($mixed instanceof \eGloo\Dialect\_Class) {
-			$class = $mixed;
-		}
-		
-		// if some other object has been passed, then throw exception
-		else { 
-			throw new DDL\Exception\Exception(
-				'Illegal Argument Exception: mixed must be instance of entity or class'
-			);
-		}
+		$pk = $entity->definition->primary_key;
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
-		// TODO method chaining here is really ugly
-		if ( isset($this->map[$class->name]['_primary_key'][$key])) {
-			echo "entity found\n";
-			return $this->map[$class->name]['_primary_key'][$key];
+		if (($entity = $this->map-with($pk)->with($key)->retrieves($entity)) !== false) { 
+		//if ( isset($this->map[$entity->_class->name]['_primary_key'][$key])) {
+			//echo "entity found\n";
+			//return $this->map[$entity->_class_name]['_primary_key'][$key];
+			return $entity;
 		}
+		
+		$this->map->profile($entity)
 		
 		
 		if (!is_null($lambda)) { 
@@ -149,7 +143,12 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 				$entity = $this->persist($entity);
 				
 				// map/reference to primary key location
-				$this->map[$class->name]['_primary_key'][$key] = &$this->pool[$entity->pid];
+				//$this->map[$class->name]['_primary_key'][$key] = &$this->pool[$entity->pid];
+				
+				$this->map
+					->with($pk)
+					->with($entity->id)					
+					->refers($this->pool[$entity->pid]);
 			}
 			
 			
@@ -243,6 +242,10 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		});
 	}
 	
+	public function map() {
+		return $this->map;
+	}
+	
 	final private function key(Entity $entity, $key) { 
 		// creates a persistent key based upon entity and its unique indentifier
 		return $entity->_class->name . ':' . $key;	
@@ -251,7 +254,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	
 	/** Data structure containing pool of entityies */
 	protected $pool;
-	protected $map = [ ];
+	protected $map;
 	
 	/** An entity transaction */
 	protected $transaction;

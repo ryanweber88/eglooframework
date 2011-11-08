@@ -34,7 +34,7 @@ class EntityManager extends \eGloo\Dialect\Object implements MiddlewareInterface
 			
 			foreach($composite['values'] as $key) {
 				// if entity is found then  
-				if (($entity = $manager->find($this->entity, $key) !== false)) {
+				if (($entity = $manager->map->find($this->entity)->with($name)->with($key)) !== false) {
 					$arguments['fields'][$name]['found'][] = [
 						'index' => $counter++ , 'value' => $key, 'entity' => $entity
 					];
