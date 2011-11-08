@@ -1,4 +1,5 @@
 <?php
+namespace eGloo\DataProcessing\DBConnectionManagement;
 use eGloo\DataProcessing\Connection;
 /**
  * DBConnectionManager Class File

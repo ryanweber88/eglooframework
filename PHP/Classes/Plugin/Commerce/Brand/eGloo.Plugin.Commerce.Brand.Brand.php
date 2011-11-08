@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\Brand;
-
+use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnect;
 /**
  * Brand Class File
  * 
@@ -36,52 +36,78 @@ namespace eGloo\Plugin\Commerce\Brand;
  * @subpackage Commerce
  */
 class Brand {
-	/** @var integer Brand ID */
-	public		$id_brand;
+
+	/** @var integer brand id */
+	/* public          $brand_id; */
 
 	/** @var string Name */
-	public 		$name;
+	/* public          $name;*/
 
-	/** @var string description */
-	public 		$description;
+	/** @var array/Mix properties of Brands */
+	protected		$properties;
 
-	/** @var string creation date */
-	public 		$date_added;
-
-	/** @var string last modification date */
-	public 		$date_updated;
-
-	/** @var boolean active */
-	public		$active;
-	
-	/** @var array list of products under brand */
-	protected	$brand_products = array();
-	
-	/** @var array list of brand images */
-	protected	$brand_iamges = array();
-	
-	public function __construct ( $args ) {
-		
+	/**
+	 * Create a new Brand object
+	 * 
+	 * @param array $args optional
+	 */
+	public function __construct ( array $args = null ) {
+		$this->properties = $args;
 	}
 	
+	public function getBrandProducts( ){
+		//return 'Yeay!';
+		if ($key = $this->__get('brand_id' )){
+			echo $key;
+		} else {
+			return false;
+		}
+		//return $this->brand_products = function ( $result ) use ( $this->brand_id ) {};
+	}
+	
+	public function getBrandImages() {
+		
+	}
+
 	/**
 	 * Extract brand property out for clean UI display
 	 * 
 	 * @return array of brand property 
 	 */
-	public function getBrandArray(){
-		$result = array();
-		if (isset ($this->id_brand)){
-			$result['id_brand']			= $this->id_brand;
-			$result['brand_name']		= $this->name;
-			$result['description']		= $this->description;
-			$result['date_added']		= $this->date_added;
-			$result['date_updated']		= $this->date_updated;
-			$result['active']			= $this->active;
-			$result['brand_products']	= $this->brand_products;
-			$result['brand_images']		= $this->brand_images;
-		} 
-		return $result;
+	public function getPropertiesArray(){
+		return (array)  $this->properties;
+	}
+	
+	/**
+	 * Populate data int the brand object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the brand Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from brand
+	 */
+	public function __get( $key ) {
+		if ( isset($this->properties[$key] )) {
+			return $this->properties[$key];
+		}
+		return false;
+	}
+	
+	/**
+	 *
+	 * @return Brand 
+	 */
+	public function toString(){
+		return serialize($this->properties);
 	}
 }
 
