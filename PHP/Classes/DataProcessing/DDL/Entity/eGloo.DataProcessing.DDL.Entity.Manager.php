@@ -84,7 +84,9 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 					// set entity state to managed
 					$entity->state = self::ENTITY_STATE_MANAGED;
 					
-					// finally add pk map to entity
+					// finally add pk map to entity, which will return
+					// reference to persistent entity (their actually
+					// all the same)
 					$entityPersistent = $this->map
 						->with($entity->definition->primary_key)
 						->with($entity->id)	

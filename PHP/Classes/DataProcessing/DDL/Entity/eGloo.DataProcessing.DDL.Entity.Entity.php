@@ -490,6 +490,33 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	protected static function _findBy (array $pairs = [ ]) { 		
 		$manager = Manager\Factory::factory();
+		$entity  = new static;
+		$set     = new QuerySet($entity);
+		
+		$set->events->trigger('call', $entity, [
+			'name'            => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			'arguments'       => [ 'fields' => [ 
+				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+			]], 
+			
+			// scrub arguments and determine if any data can be retrieve from
+			// persistence context
+			'arguments_handler'    => function($arguments) { 
+				// pass - don't know how this will work yet
+			}
+		
+			// callback handling will be defined/managed by queryset
+			// instance
+			'results_handler' => null,
+			
+			// we defer an evaluation of entity (running callback stack
+			// batch) to determine first, if the entity exists in the 
+			// manager, and if it 
+			'defer'           => true
+		]);	
+		
 		/*
 		// if passed as key/value pair, then insert into pairs
 		// and treat as array
@@ -689,6 +716,48 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// otherwise class object implementation will handle
 		// set
 		return parent::__set($name, $value);
+	}
+	
+	/**
+	 * Serves as an interface to find_by_xxx methods
+	 */
+	public function __call($name, $args) {
+		
+		if (isset($this->methods[$name])) { 
+			
+			$name = strtolower($name);
+			
+			// @todo this should be simpler if/when following convention 
+			if (strpos('find', $name) !== false && strpos('by', $name) !== false) {
+				
+				// parse field name by stripping known entities
+				$whatsLeft = $name;
+				$delimiter = '/';
+				$arguments = [ ];
+				
+				foreach(['find','by','and','or', '_', 'like'] as $lookFor) { 
+					$whatsLeft = str_ireplace($lookFor, $delimiter, $whatsLeft);
+				}
+				
+				// explode what remains, not counting empty
+				$fields = preg_split("/\$delimiter/", $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
+			
+				foreach ($fields as $name) {
+					$arguments[$name] = [
+						'values' => array_shift($args), 'type' => $name
+					];
+				}
+				
+				$reflection = new ReflectionMethod($this, '_findBy');
+				$reflection->setAccessible(true);
+				return $reflection->invokeArgs($this, $arguments);
+				
+			}
+			
+		}
+		
+		// if not a part of my methods/interface, pass to parent call
+		return parent::__call($name, $args);
 	}
 	
 
