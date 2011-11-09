@@ -1,5 +1,5 @@
 <?php
-namespace \eGloo\DataProcessing\DDL\Entity\Middleware;
+namespace eGloo\DataProcessing\DDL\Entity\Middleware;
 
 /**
  * 
@@ -15,7 +15,7 @@ interface MiddlewareInterface {
 	 * @param  mixed[] $arguments
 	 * @return boolean 
 	 */
-	public function processArguments(array &$arguments);
+	public function processArguments(array $arguments);
 	
 	/**
 	 * 
@@ -23,5 +23,5 @@ interface MiddlewareInterface {
 	 * @param array $arguments
 	 * @param unknown_type $results
 	 */
-	public function processResults(array $arguments, &$results);
+	public function processResults(array $arguments, $results);
 }

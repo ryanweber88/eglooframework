@@ -45,7 +45,7 @@ interface ManagerInterface {
 	 * @param DDL\Entity $entity
 	 * @param mixed      $key
 	 */
-	public function find(\eGloo\Dialect\Object $mixed, $key, \Closure $lambda = null) ;
+	public function find(Entity $entity, $key, \Closure $lambda = null) ;
 	
 	
 	/**

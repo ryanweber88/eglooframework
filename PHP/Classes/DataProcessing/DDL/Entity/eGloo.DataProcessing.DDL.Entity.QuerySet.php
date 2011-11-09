@@ -136,12 +136,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
 
- 		$middleware =[
- 			new Middleware\EntityManager($this->entity)
- 		];
- 		
- 		while 
- 		
+
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 

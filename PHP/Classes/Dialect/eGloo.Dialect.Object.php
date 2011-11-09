@@ -96,11 +96,12 @@ abstract class Object {
 		try { 
 			$tryMethod = "get" . ucfirst($name);
 			
+
+			
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
 			}
 			
-			// @ deprecated
 			return $this->$name();
 		}
 		catch (Exception $pass) { 

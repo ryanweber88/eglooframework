@@ -48,7 +48,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 
 		
 		// SET ENTITY STATE
-		$this->state = MANAGER::ENTITY_STATE_NEW;
+		$this->state = Manager::ENTITY_STATE_NEW;
 		
 		// BUILD ENTITY DEFINITION
 		// Defined in entities xml
@@ -118,21 +118,32 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				
 				$this->callbacks->push(new DDL\Utility\Callback(
 					$params['name'], function(array $passThrough = [ ]) use ($params) {
-												
+
 						$arguments = $params['arguments'];
-						
-						// invoke entity method and retrieve results
-						if (is_callable($handler = $params['handler_arguments'])) { 	
-							$arguments = $handler($arguments);
+						$runMethod = true;
+												
+						if (isset($params['middleware']) && is_array($params['middleware'])) {
+							foreach($params['middleware'] as $middleware) {
+								// a false return will indicate that method does not need to be
+								// called
+								if (($arguments = $middleware->processArguments($arguments)) === false) {
+									$runMethod = false;
+									break ;
+								}
+							}
+							
+							if ($runMethod) {
+
+								$results = $this->methods[$params['name']]($arguments); 
+								
+								foreach(array_reverse($params['middleware']) as $middleware) {
+									if (($results = $middleware->processResults($arguments, $results)) === false) {
+										break ;
+									}
+								}
+							}
 						}
-						
-						$results = $this->methods[$params['name']]($params['arguments']); 
-						
-						// if passed handler is callable, then pass results to handler
-						// and set results as the return of our dynamic handler
-						if (is_callable($params['results_handler'])) { 
-							$results = $params['results_handler']($results);
-						}
+		
 						
 						return $results;
 					}
@@ -429,7 +440,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				// db calls
 				'middleware'      => [ 
 					new Middleware\QuerySetManager($entity) 
-				]
+				],
 				
 				// we defer an evaluation of entity (running callback stack
 				// batch) to determine first, if the entity exists in the 
@@ -442,21 +453,26 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// otherwise - retrieve singular/entity
 		else {		
-				
+
+
+			
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity, $key, function() use ($entity) {	
+			return $manager->find($entity, $key, function($entity, $key)  {	
+				
+				$pk = $entity->definition->primary_key;
+				
 
 				// trigger call to add the call "action" (find) to callback stack
 				// and specify results_handler to handle - it does not matter
 				// if finding a singular entity or returning a queryset, the
 				// find action will be deferred until evaluation request is made
 				$entity->events->trigger('call', $entity, [
-					'name'              => __FUNCTION__,
+					'name'              => 'find',
 				
 					// defines the calling method, and parameter values
 					'arguments'         => [ 'fields' => [ 
-						$pk => [ 'values' => [ $key ], 'type' => $entity->definition->primary_key ]
+						$pk => [ 'values' => [ $key ], 'type' => $pk ]
 					]], 
 					
 					'middleware'        => [
@@ -483,15 +499,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	/**
 	 * 
 	 * Retrieves entity based on array of field|value pair - this
-	 * is not meant to be explicitly called, but rather, to be 
+	 * is not meant to be explicitly called (which is impossible outside
+	 * of scope), but rather, to be 
 	 * invoked from __call method
 	 * @param array $pairs
 	 * @return Entity
 	 */
-	protected static function _findBy (array $pairs = [ ]) { 		
+	protected static function _findBy (array $arguments) { 
 		$manager = Manager\Factory::factory();
 		$entity  = new static;
 		$set     = new QuerySet($entity);
+		
+		var_export($arguments); exit;
 		
 		$set->events->trigger('call', $entity, [
 			'name'            => __FUNCTION__,
@@ -503,13 +522,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			// scrub arguments and determine if any data can be retrieve from
 			// persistence context
-			'arguments_handler'    => function($arguments) { 
-				// pass - don't know how this will work yet
-			}
-		
-			// callback handling will be defined/managed by queryset
-			// instance
-			'results_handler' => null,
+			// here we define middleware, which acts layer between arguments to
+			// db calls
+			'middleware'      => [ 
+				new Middleware\QuerySetManager($entity) 
+			],
 			
 			// we defer an evaluation of entity (running callback stack
 			// batch) to determine first, if the entity exists in the 
@@ -517,40 +534,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			'defer'           => true
 		]);	
 		
-		/*
-		// if passed as key/value pair, then insert into pairs
-		// and treat as array
-		$pairs = (is_array($field)) 
-			? $field
-			: [ $field => $value ];
-			
-					$entity->events->trigger('call', $entity, [
-				'name'            => __FUNCTION__,
-			
-				// defines the calling method, and parameter values
-				'arguments'       => [ 'fields' => [ 
-					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
-				]], 
-				
-				// scrub arguments and determine if any data can be retrieve from
-				// persistence context
-				'arguments_handler'    => function($arguments) { 
-					// pass - don't know how this will work yet
-				}
-			
-				// callback handling will be defined/managed by queryset
-				// instance
-				'results_handler' => null,
-				
-				// we defer an evaluation of entity (running callback stack
-				// batch) to determine first, if the entity exists in the 
-				// manager, and if it 
-				'defer'           => true
-			]);		
-			
-		//creturn new QuerySet($manager->query($this, $pairs));
-		 * 
-		 */
+		return $set;
 		
 	}
 	
@@ -758,6 +742,53 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// if not a part of my methods/interface, pass to parent call
 		return parent::__call($name, $args);
+	}
+	
+	/**
+	 * Serves as an interface to find_by_xxx methods
+	 */
+	public static function __callStatic($name, $args) {
+
+		$entity = new static;
+		
+		if (isset($entity->methods[$name])) { 
+			
+			$name = strtolower($name);
+			
+			// @todo this should be simpler if/when following convention 
+			if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
+				
+				// parse field name by stripping known entities
+				$whatsLeft = $name;
+				$delimiter = '.';
+				$arguments = [ ];
+				
+				foreach(['find','by','and','or', '_', 'like'] as $lookFor) { 
+					$whatsLeft = str_ireplace($lookFor, $delimiter, $whatsLeft);
+				}
+				
+				
+				// explode what remains, not counting empty
+				$fields = preg_split('/\./', $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
+							
+				foreach ($fields as $name) {
+					$arguments[$name] = [
+						'values' => array_shift($args), 'type' => $name
+					];
+				}
+				
+				$reflection = new \ReflectionMethod($entity, '_findBy');
+				$reflection->setAccessible(true);
+
+				return $reflection->invokeArgs($entity, $arguments);
+				
+			}
+			
+		}
+		
+		throw new DDL\Exception\Exception(
+			'Illegal Method Call : cannot find ' . $name
+		);
 	}
 	
 

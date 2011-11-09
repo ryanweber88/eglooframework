@@ -1,5 +1,5 @@
 <?php
-namespace \eGloo\DataProcessing\DDL\Entity\Middleware;
+namespace eGloo\DataProcessing\DDL\Entity\Middleware;
 
 /**
  * Provides stub methods for classes implementing middleware interface 

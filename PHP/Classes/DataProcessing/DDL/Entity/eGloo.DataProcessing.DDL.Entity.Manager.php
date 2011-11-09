@@ -152,14 +152,14 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
-		if (($entity = $this->map-with($pk)->with($key)->retrieves($entity)) !== false) { 
-			return $entity;
+		if (($persistentEntity = $this->map->with($pk)->with($key)->retrieves($entity)) !== false) { 
+			return $persistentEntity;
 		}
 				
 		
 		if (!is_null($lambda)) { 
 			// create entity and persist
-			$entity = $lambda();
+			$entity = $lambda($entity, $key);
 			
 			// if entity is not false value, it is assumed to
 			// be valid (this is the responsibility of the lambda

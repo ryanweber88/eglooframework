@@ -17,16 +17,12 @@ class EntityManager extends Middleware {
 	 * @see MiddlewareInterface::processResults()
 	 */
 	public function processResults(array $arguments, $results) { 
-		$manager = Manager\Factory::factory();
 		
-		foreach($arguments['fields'] as $name => $composite) {
-				
-			foreach ($composite['values'] as $key) { 
-				
-			}
+		if ($results !== false) {
+			$this->entity->attributes = $results[0];
 		}
 		
-		return $results;
+		return true;
 	}
 	
 }

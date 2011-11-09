@@ -38,15 +38,13 @@ class Builder extends \eGloo\Dialect\Object {
 		// add entity type (class name) to arguments
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
-		);		
-		
-		
+		);	
+
 		// splat array ends/leaves 
 		extract($this->splatArray(
 			$this->arguments
 		));
 						
-		
 		// "parse" required content and place into buffer
 		ob_start();
 		require $this->path;
@@ -60,6 +58,7 @@ class Builder extends \eGloo\Dialect\Object {
 		// a bit of misnormer - recursively splats the end points of array
 		foreach($array as $key => $value) {
 			
+			
 			// look for leaf condition - current element is array, but child
 			// element is not
 			if (is_array($value)) { 
@@ -67,7 +66,8 @@ class Builder extends \eGloo\Dialect\Object {
 					$array[$key] = implode (',', $value);
 				}
 				
-				else if (!$this->isAssoc($value)) { 
+				//else if (!$this->isAssoc($value)) { 
+				else {
 					$array[$key] = $this->splatArray($value);
 				}
 			}		
