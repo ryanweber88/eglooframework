@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\Product;
-use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnect;
+use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 
 /**
  * Product Class File
@@ -134,6 +134,8 @@ class Product {
 
 	/** @var array list user objects */
 	public static $config = array();
+	
+	protected	  $properties;
 
 	/**
 	 * Create a new Product object
@@ -141,48 +143,17 @@ class Product {
 	 * @param array $args optional
 	 */
 	public function __construct ( array $args = null ) {
-		if (isset ( $args )){
-			$this->configurate( $args );
-		}
-		return $this;
+		$this->properties = $args;
 	}
 	
-	/**
-	 * Allow to instantiate a Product object without the constainst of the constructor
-	 * 
-	 * @param array $args used to configurate the Product object
-	 * 
-	 * @return void
-	 */
-	protected function configurate ( array $args ) {
-		foreach ( $args as $key => $value ){
-			if (property_exists( $this, $key)) {
-				$this->key	= $value;
-			} else {
-				self::$config['USER_DEFINED.' .$key] = $value;
-			}
-		}
-		return $this;
-	}
 
 	/**
 	 * Extract Product property out for clean UI display
 	 * 
 	 * @return array of Product property 
 	 */
-	public function getBrandArray(){
-		$result = array();
-		if (isset ($this->id_brand)){
-			$result['product_id']			= $this->product_id;
-			$result['brand_name']		= $this->name;
-			$result['description']		= $this->description;
-			$result['date_added']		= $this->date_added;
-			$result['date_updated']		= $this->date_updated;
-			$result['active']			= $this->active;
-			$result['brand_products']	= $this->brand_products;
-			$result['brand_images']		= $this->brand_images;
-		} 
-		return $result;
+	public function getProductArray(){
+		return (array) $this->properties;
 	}
 	
 	/**
@@ -190,23 +161,22 @@ class Product {
 	 * 
 	 * @param type $key
 	 * @param type $value 
-	 */
+	 */	
 	public function __set($key, $value) {
-		self::$config[$key] = $value;
+		$this->properties[$key] = $value;
 		return $this;
 	}
-	
 	/**
 	 * Getter for the Product Object
 	 * @param type $key
 	 * 
 	 * @return mix type object retrieved from Product
 	 */
-	public function __get($key) {
-		if (is_callable($this->config[$key])){
-			return $this->config[$key];
+	public function __get( $key ) {
+		if ( isset($this->properties[$key] )) {
+			return $this->properties[$key];
 		}
-		return array_key_exists($key, self::$config) ? self::$config[$key] : null;
+		return false;
 	}
 	
 	/**
@@ -214,7 +184,7 @@ class Product {
 	 * @return Product 
 	 */
 	public function toString(){
-		return $this;
+		return serialize($this->properties);
 	}
 
 }

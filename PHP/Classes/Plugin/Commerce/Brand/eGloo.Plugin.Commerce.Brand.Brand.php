@@ -56,9 +56,10 @@ class Brand {
 	}
 	
 	public function getBrandProducts( ){
-		//return 'Yeay!';
 		if ($key = $this->__get('brand_id' )){
-			echo $key;
+			if ( false  === ($this->__get('brand_products' ))) {
+		
+			}
 		} else {
 			return false;
 		}
