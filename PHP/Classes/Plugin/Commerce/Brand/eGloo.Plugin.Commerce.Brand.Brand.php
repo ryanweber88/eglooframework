@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\Brand;
-use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnect;
+use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 /**
  * Brand Class File
  * 
