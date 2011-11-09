@@ -215,7 +215,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									
 									// we know that a method call on an entity is using a foreign key
 									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
-										$pk => [ 'values' => $this->id, 'type' => $this->definition->primary_key ]
+										$pk => [ 'values' => [ $this->id ], 'type' => $this->definition->primary_key ]
 									]]);
 									
 									return $results;									 															
@@ -505,27 +505,22 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @param array $pairs
 	 * @return Entity
 	 */
-	protected static function _findBy (array $arguments) { 
+	protected function _findBy ($methodName, array $arguments) { 
 		$manager = Manager\Factory::factory();
-		$entity  = new static;
-		$set     = new QuerySet($entity);
+		$set     = new QuerySet($this);	
 		
-		var_export($arguments); exit;
-		
-		$set->events->trigger('call', $entity, [
-			'name'            => __FUNCTION__,
+		$set->events->trigger('call', $this, [
+			'name'            => $methodName,
 		
 			// defines the calling method, and parameter values
-			'arguments'       => [ 'fields' => [ 
-				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
-			]], 
+			'arguments'       => [ 'fields' => $arguments ], 
 			
 			// scrub arguments and determine if any data can be retrieve from
 			// persistence context
 			// here we define middleware, which acts layer between arguments to
 			// db calls
 			'middleware'      => [ 
-				new Middleware\QuerySetManager($entity) 
+				new Middleware\QuerySetManager($this) 
 			],
 			
 			// we defer an evaluation of entity (running callback stack
@@ -707,49 +702,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public function __call($name, $args) {
 		
-		if (isset($this->methods[$name])) { 
-			
-			$name = strtolower($name);
-			
-			// @todo this should be simpler if/when following convention 
-			if (strpos('find', $name) !== false && strpos('by', $name) !== false) {
-				
-				// parse field name by stripping known entities
-				$whatsLeft = $name;
-				$delimiter = '/';
-				$arguments = [ ];
-				
-				foreach(['find','by','and','or', '_', 'like'] as $lookFor) { 
-					$whatsLeft = str_ireplace($lookFor, $delimiter, $whatsLeft);
-				}
-				
-				// explode what remains, not counting empty
-				$fields = preg_split("/\$delimiter/", $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
-			
-				foreach ($fields as $name) {
-					$arguments[$name] = [
-						'values' => array_shift($args), 'type' => $name
-					];
-				}
-				
-				$reflection = new ReflectionMethod($this, '_findBy');
-				$reflection->setAccessible(true);
-				return $reflection->invokeArgs($this, $arguments);
-				
-			}
-			
-		}
 		
-		// if not a part of my methods/interface, pass to parent call
-		return parent::__call($name, $args);
 	}
 	
 	/**
 	 * Serves as an interface to find_by_xxx methods
 	 */
-	public static function __callStatic($name, $args) {
+	public static function __callStatic($name, $dynamicArguments) {
 
-		$entity = new static;
+		$entity     = new static;
+		$methodName = $name;
 		
 		if (isset($entity->methods[$name])) { 
 			
@@ -757,8 +719,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			// @todo this should be simpler if/when following convention 
 			if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
-				
+								
 				// parse field name by stripping known entities
+				
 				$whatsLeft = $name;
 				$delimiter = '.';
 				$arguments = [ ];
@@ -770,17 +733,62 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				
 				// explode what remains, not counting empty
 				$fields = preg_split('/\./', $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
-							
-				foreach ($fields as $name) {
-					$arguments[$name] = [
-						'values' => array_shift($args), 'type' => $name
-					];
+				
+				// massage arguments into array, if passed as series of scalars
+				if (!is_array(current($dynamicArguments))) {
+					// if asking find_by_name_and_title (name, title) where name
+					// title and passed via scalar
+					if (count($fields) > 1) {
+						$counter = 0;
+						
+						foreach($fields as $ignore) {
+							$dynamicArguments[$counter++] = [ $dynamicArguments ];	
+						}
+					}
+					
+					else {
+						$dynamicArguments = [ $dynamicArguments ];
+					}
 				}
 				
-				$reflection = new \ReflectionMethod($entity, '_findBy');
-				$reflection->setAccessible(true);
+				// check that argument count is correct
+				if (count($fields) === 1 && !is_array(current($dynamicArguments))) {
+					$dynamicArguments = [ $dynamicArguments ];
+				}
+				
+				if (count($dynamicArguments) == count($fields)) {
+					
+					foreach ($fields as $name) {
+						$arguments[$name] = [
+							'values' =>  array_shift($dynamicArguments) , 'type' => $name
+						];
+					}
+									
+					$reflection = new \ReflectionMethod($entity, '_findBy');
+					$reflection->setAccessible(true);
+					
+					
+									
+					return $reflection->invokeArgs(
+						$entity, [$methodName, $arguments]
+					);
+				}
+				
+				// make sure arguments are congruent with number of fields specified
+				// in the case of more than one field, either an equal number of arguments
+				// which may be of type array or scalar must be passed
+								
+				else {
+					throw new DDL\Exception\Exception(
+						"Illegal Argument Exception : passed illegal argument collection\n". vvar_export(
+							$dynamicArguments, true
+						)
+					);
+				}
+							
 
-				return $reflection->invokeArgs($entity, $arguments);
+								
+
 				
 			}
 			
@@ -873,5 +881,5 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	protected $definition;
 	
 	/** Represents callable interface */
-	private $methods = [ ]; 
+	protected $methods = [ ]; 
 }

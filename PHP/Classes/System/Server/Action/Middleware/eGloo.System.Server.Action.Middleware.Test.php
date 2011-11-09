@@ -23,8 +23,9 @@ class Test extends Middleware {
 		$counter = 0;
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
-		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1');
-		echo get_class($set); exit;
+		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
+		echo $set->count();
+		exit;
 		
 		//echo $user->name . "\n"; exit;
 		echo $user->Products->count() . "\n";

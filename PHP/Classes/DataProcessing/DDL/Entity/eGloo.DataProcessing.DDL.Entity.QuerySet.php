@@ -49,20 +49,42 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				$params  = $event->getParams();
 							
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], function(array $middleware = [ ]) use ($params) {
+					$event->getParams()['name'], function(array $ignore = [ ]) use ($params) {
 						
 						$arguments = $params['arguments'];
+						$runMethod = true;
+												
+						if (isset($params['middleware']) && is_array($params['middleware'])) {
+							foreach($params['middleware'] as $middleware) {
+								// a false return will indicate that method does not need to be
+								// called
+								if (($arguments = $middleware->processArguments($arguments)) === false) {
+									$runMethod = false;
+									break ;
+								}
+							}
+							
+							if ($runMethod) {
 
-						
-						//var_export($params['arguments']); exit;
-						if (is_callable($params['arguments_handler'])) {
-							$arguments = $params['arguments_hanlder']($arguments);
+								// @todo figure out container for methods  
+								//$method  = new Method($this->entity, $params['name']);
+								$results = (new Method($this->entity, $params['name']))->call($arguments);  
+								
+								var_export($results); exit('suckit');
+								
+								foreach(array_reverse($params['middleware']) as $middleware) {
+									if (($results = $middleware->processResults($arguments, $results)) === false) {
+										break ;
+									}
+								}
+							}
 						}
+		
 						
-						// invoke entity method and retrieve results	
-						// this idea doesn't exist here, there are no methods, only methods that
-						// belong to entities
-						return $this->methods[$params['name']]($params['arguments']); 
+						
+						return $results;
+						
+						
 		
 					}
 				));

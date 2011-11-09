@@ -18,7 +18,7 @@ class QuerySetManager extends Middleware {
 	 * @see MiddlewareInterface::processArguments()
 	 */
 	public function processArguments(array $arguments) { 
-		$manager = Manager\Factory::factory();
+		$manager = DDL\Entity\Manager\Factory::factory();
 		$allIn   = true;
 		
 		// check fields for entities that already exist in database - 
@@ -26,12 +26,12 @@ class QuerySetManager extends Middleware {
 		foreach ($arguments['fields'] as $name => $composite) {
 			$arguments['fields'][$name]['found'] = [ ];
 			$counter = 0;
-			
+						
 			foreach($composite['values'] as $key) {
 				// if entity is found then  
-				if (($entity = $manager->map->with($name)->with($key)->retrieves) !== false) {
+				if (($entity = $manager->map->with($name)->with($key)->retrieves($this->entity)) !== false) {
 					$arguments['fields'][$name]['found'][] = [
-						'index' => $counter++ , 'value' => $key, 'entity' => $entity
+						'index' => $counter++ , 'value' => $key, 'entity' => $this->entity
 					];
 				}
 
@@ -75,5 +75,4 @@ class QuerySetManager extends Middleware {
 		return $results;
 	}
 	
-	protected $entity;
 }

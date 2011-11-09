@@ -22,7 +22,7 @@ class Builder extends \eGloo\Dialect\Object {
 		$builder->entity    = $entity;
 		$builder->path      = $path;
 		$builder->arguments = $arguments;
-						
+								
 		return $builder->build();
 	}
 	
@@ -55,14 +55,14 @@ class Builder extends \eGloo\Dialect\Object {
 
 	
 	private function splatArray($array) { 
+		
 		// a bit of misnormer - recursively splats the end points of array
 		foreach($array as $key => $value) {
-			
-			
+									
 			// look for leaf condition - current element is array, but child
 			// element is not
 			if (is_array($value)) { 
-				if (!is_array($value[array_keys($value)[0]])) { 
+				if (count($keys = array_keys($value)) && !is_array($value[$keys[0]])) { 
 					$array[$key] = implode (',', $value);
 				}
 				

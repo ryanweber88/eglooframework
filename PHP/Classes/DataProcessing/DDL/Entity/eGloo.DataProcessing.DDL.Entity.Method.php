@@ -15,10 +15,21 @@ use \eGloo\DataProcessing\DDL;
 class Method extends \eGloo\Dialect\Object {
 	
 	
+	/**
+	 * 
+	 * @param  Entity $entity
+	 * @param  string $name
+	 */
 	function __construct(Entity $entity, $name) { 
 		$this->entity = $entity;
 		$this->name   = $name;
 		
+		// throw exception if invalid		
+		if (!DDL\Statement\Bundle::create($entity)->valid($name)) { 
+			throw new DDL\Exception\Exception (
+				'Invalid Entity Method Invocation : ' . $entity->_class->class
+			);	
+		}
 	}
 	
 	/**
@@ -28,6 +39,7 @@ class Method extends \eGloo\Dialect\Object {
 	 * returns data
 	 * @param  mixed $arguments
 	 * @return void
+	 * @throws DDL\Exception\Exception
 	 */
 	public function call(array $arguments = [ ]) {
 				

@@ -42,6 +42,7 @@ class Bundle extends \eGloo\Dialect\Object {
 		// retrieve bundle content
 		foreach ($this->files as $file) {
 			$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0];
+			$this->paths[] = $file;
 			$this->content[$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0]] = file_get_contents(
 				$file
 			);
@@ -69,7 +70,7 @@ class Bundle extends \eGloo\Dialect\Object {
 					if (count($matches = preg_grep("/$required/i", glob("$path/*")))) { 
 						$found = true;
 						
-						$this->content[$this->names[] = $required] = file_get_contents(array_pop(
+						$this->content[$this->names[] = $required] = file_get_contents($this->paths[$required] = array_pop(
 							$matches
 						));	
 					}
@@ -101,14 +102,23 @@ class Bundle extends \eGloo\Dialect\Object {
 	 * @param string $name
 	 */
 	public function path($name) {
-		if (count($matches = preg_grep('/' . preg_quote($name) . '+/i', $this->files))) {
-			// just going to return whatever the first element is - for some stupid reason
-			// preg_grep does not return matches sequentially
-			return current($matches);
+		if (isset($this->paths[$name])) {
+			return $this->paths[$name];
 		}
 		
 		return false;
 	}	
+	
+	/**
+	 * 
+	 * Determines if statement, identified by name,
+	 * is a valid construct
+	 * @param  string $name
+	 * @throws DDL\Exception\Exception
+	 */
+	public function valid($name) {
+		return $this->path($name) !== false;
+	}
 
 	
 	/**
@@ -150,4 +160,5 @@ class Bundle extends \eGloo\Dialect\Object {
 	protected $files;
 	protected $names   = [ ];
 	protected $content = [ ];
+	protected $paths   = [ ];
 }
