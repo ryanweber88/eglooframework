@@ -63,6 +63,8 @@ class PostgreSQLDBConnection extends DBConnection {
 		} else {
 			$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
 			$this->setRawConnectionResource( $rawConnectionResource );
+			$this->link = $rawConnectionResource;
+			$this->is_connected = isset ($this->link) ? true : false;
 		}
 	}
 	

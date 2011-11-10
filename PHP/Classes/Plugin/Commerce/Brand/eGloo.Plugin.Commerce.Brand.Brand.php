@@ -38,13 +38,29 @@ use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 class Brand {
 
 	/** @var integer brand id */
-	/* public          $brand_id; */
+	public      $brand_id;
 
 	/** @var string Name */
-	/* public          $name;*/
+	public      $name;
+	
+	/** @var string description */
+	public 		$description;
+
+	/** @var string Object creation date */
+	public 		$date_added;
+
+	/** @var string Object last modification date */
+	public 		$date_updated;
+
+	/** @var boolean active */
+	public		$active;
+	
+	protected	$published_brands;
+	
+	protected	$brand_product;
 
 	/** @var array/Mix properties of Brands */
-	protected		$properties;
+	protected	$properties;
 
 	/**
 	 * Create a new Brand object
@@ -52,7 +68,10 @@ class Brand {
 	 * @param array $args optional
 	 */
 	public function __construct ( array $args = null ) {
-		$this->properties = $args;
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
+		//$this->properties = $args;
 	}
 	
 	public function getBrandProducts( ){
@@ -107,8 +126,8 @@ class Brand {
 	 *
 	 * @return Brand 
 	 */
-	public function toString(){
-		return serialize($this->properties);
+	public function __toString(){
+		return serialize($this);
 	}
 }
 

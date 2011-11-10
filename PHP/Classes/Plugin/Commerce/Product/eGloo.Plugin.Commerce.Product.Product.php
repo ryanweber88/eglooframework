@@ -43,7 +43,7 @@ class Product {
 	public		$product_id;
 
 	/** @var string Name */
-	public 		$name;
+	public 		$title;
 
 	/** @var string A description */
 	public 		$description;
@@ -52,7 +52,10 @@ class Product {
 	public 		$short_description;
 
 	/** @var string Product Brand */
-	public		$brand;
+	public		$brand_title;
+	
+	/** @var string Product Brand ID */
+	public		$brand_id;
 
 	/** @var string Product UPC(12) or EAN(13) barcode */
 	public		$product_upc;
@@ -72,6 +75,9 @@ class Product {
 	/** @var string Manufacturer Price */
 	public		$manufacturer_price;
 	
+	/** @var string Competitor Price */
+	public		$competitor_markup;
+	
 	/** @var string Wholesale Price */
 	public		$wholesale_price;
 
@@ -79,7 +85,7 @@ class Product {
 	public		$images = array();
 
 	/** @var array of variant sizes */
-	public		$sizes = array();
+	public		$size;
 
 	/** @var boolean on_sale */
 	public 		$on_sale = false;
@@ -98,6 +104,9 @@ class Product {
 
 	/** @var string Weight */
 	public 		$weight = 0;
+	
+	/** @var string Weight */
+	public 		$weight_lbs = 0;
 
 	/** @var string Weight Unit (measure LB/LT/OZ/MM/CM/CL/FT/IN/QT/GL) */
 	public 		$measure_unit;
@@ -109,7 +118,7 @@ class Product {
 	public		$weight_description;
 
 	/** @var string Container (Case/Bag/Box/Pallet/Bale/Roll/EACH) */
-	public		$product_container;
+	public		$package;
 
 	/** @var string Unit for number of items */
 	public 		$units = 1;
@@ -131,6 +140,9 @@ class Product {
 
 	/** @var Cache Object */
 	protected	$cache;
+	
+	/** @var is recuring product */
+	protected $recurring_ok;
 
 	/** @var array list user objects */
 	public static $config = array();
@@ -143,7 +155,11 @@ class Product {
 	 * @param array $args optional
 	 */
 	public function __construct ( array $args = null ) {
-		$this->properties = $args;
+		
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
+		//$this->properties = $args;
 	}
 	
 
@@ -183,8 +199,8 @@ class Product {
 	 *
 	 * @return Product 
 	 */
-	public function toString(){
-		return serialize($this->properties);
+	public function __toString(){
+		return serialize($this);
 	}
 
 }
