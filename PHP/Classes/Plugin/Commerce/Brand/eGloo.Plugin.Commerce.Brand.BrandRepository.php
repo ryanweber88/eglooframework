@@ -17,8 +17,8 @@ class BrandRepository extends PostgreSQLDBConnection {
 	private $brands;
 
 
-	public function __construct( array $args = null ) {
-		$this->brands = parent::__construct( $args );	
+	public function __construct( array $db_resource = null ) {
+		parent::__construct( $db_resource );	
 	}
 	
 	public function find( $id ){
@@ -27,5 +27,4 @@ class BrandRepository extends PostgreSQLDBConnection {
 					return new Brand($row);
 				});
 	}
-	
 }

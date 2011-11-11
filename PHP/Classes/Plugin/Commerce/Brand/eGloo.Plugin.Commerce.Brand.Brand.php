@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Plugin\Commerce\Brand;
-use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
+use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PostgreSQLDBConnection;
+
 /**
  * Brand Class File
  * 
@@ -53,11 +54,9 @@ class Brand {
 	public 		$date_updated;
 
 	/** @var boolean active */
-	public		$active;
+	public		$status;
 	
-	protected	$published_brands;
-	
-	protected	$brand_product;
+	protected	$brand_products;
 
 	/** @var array/Mix properties of Brands */
 	protected	$properties;
@@ -71,10 +70,11 @@ class Brand {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
+		$this->getProducts();
 		//$this->properties = $args;
 	}
 	
-	public function getBrandProducts( ){
+	/*public function getBrandProducts( ){
 		if ($key = $this->__get('brand_id' )){
 			if ( false  === ($this->__get('brand_products' ))) {
 		
@@ -83,8 +83,18 @@ class Brand {
 			return false;
 		}
 		//return $this->brand_products = function ( $result ) use ( $this->brand_id ) {};
-	}
+	}*/
 	
+	public function getProducts(){
+		return $this->brand_products;
+	}
+
+	public function setBrandProduct( array $products ){
+		$this->brand_products = $products;
+		return $this;
+	}
+
+
 	public function getBrandImages() {
 		
 	}
@@ -130,4 +140,3 @@ class Brand {
 		return serialize($this);
 	}
 }
-

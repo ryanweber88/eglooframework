@@ -91,7 +91,7 @@ class PostgreSQLDBConnection extends DBConnection {
 			if ( $callback !== null ) {
 				$result = $callback( $pg_result, $this->link );
 			} else {
-				return $result = pg_fetch_array( $pg_result );
+				return $result = pg_fetch_all( $pg_result );
 			}
 		}
 		if ( !$pg_result ) {

@@ -16,11 +16,10 @@ use \eGloo\Plugin\Commerce\Brand\Brand as Brand,
  */
 class ProductRepository extends PostgresDBConnection {
 	
-	private $products;
+	protected $products;
 	
-	public function __construct( array $products = null ) {
-		parent::__construct( $products );
-		$this->products = $products;
+	public function __construct( $db_resource = null ) {
+		parent::__construct( $db_resource );
 	}
 	
 	public function getProduct($id) {
@@ -36,6 +35,7 @@ class ProductRepository extends PostgresDBConnection {
 		});
 	}
 	
+
 	protected function getSavedProducts(){
 		return $this->products;
 	}
@@ -57,6 +57,5 @@ class ProductRepository extends PostgresDBConnection {
 		if (!empty ($this->products )){
 			return $this->products;
 		}
-		//$this->getProducts();
 	}
 }

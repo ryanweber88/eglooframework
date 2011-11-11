@@ -40,114 +40,114 @@ use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 class Product {
 
 	/** @var integer Product ID */
-	public		$product_id;
+	public			$product_line_id;
 
 	/** @var string Name */
-	public 		$title;
+	public			$title;
 
 	/** @var string A description */
-	public 		$description;
+	public			$description;
 
 	/** @var string A short description */
-	public 		$short_description;
+	public			$short_description;
 
 	/** @var string Product Brand */
-	public		$brand_title;
+	public			$brand_title;
 	
 	/** @var string Product Brand ID */
-	public		$brand_id;
+	public			$brand_id;
 
 	/** @var string Product UPC(12) or EAN(13) barcode */
-	public		$product_upc;
+	public			$product_upc;
 
 	/** @var string Manufacturer name */
-	public		$manufacturer_name;
+	public			$manufacturer_name;
 
 	/** @var string Supplier Name */
-	public		$supplier_name;
+	public			$supplier_name;
 
 	/** @var string Retail price */
-	public		$retail_price;
+	public			$retail_price;
 	
 	/** @var string Unit price */
-	public		$unit_price;
+	public			$unit_price;
 
 	/** @var string Manufacturer Price */
-	public		$manufacturer_price;
+	public			$manufacturer_price;
 	
 	/** @var string Competitor Price */
-	public		$competitor_markup;
+	public			$competitor_markup;
 	
 	/** @var string Wholesale Price */
-	public		$wholesale_price;
+	public			$wholesale_price;
 
 	/** @var array of Images */
-	public		$images = array();
+	public			$images = array();
 
 	/** @var array of variant sizes */
-	public		$size;
+	public			$sizes = array();
 
 	/** @var boolean on_sale */
-	public 		$on_sale = false;
+	public			$on_sale = false;
 
 	/** @var string Width */
-	public 		$width = 0;
+	public			$width = 0;
 	
 	/** @var string Width */
-	public 		$length = 0;
+	public			$length = 0;
 
 	/** @var string Height */
-	public 		$height = 0;
+	public			$height = 0;
 
 	/** @var string Depth */
-	public 		$depth = 0;
+	public			$depth = 0;
 
 	/** @var string Weight */
-	public 		$weight = 0;
+	public			$weight = 0;
 	
 	/** @var string Weight */
-	public 		$weight_lbs = 0;
+	public			$weight_lbs = 0;
 
 	/** @var string Weight Unit (measure LB/LT/OZ/MM/CM/CL/FT/IN/QT/GL) */
-	public 		$measure_unit;
+	public			$measure_unit;
 	
 	/** @var string Weight Unit (measure LB/LT/OZ/MM/CM/CL/FT/IN/QT/GL) */
-	public 		$weight_unit;
+	public			$weight_unit;
 
 	/** @var string Weight Description */
-	public		$weight_description;
+	public			$weight_description;
 
 	/** @var string Container (Case/Bag/Box/Pallet/Bale/Roll/EACH) */
-	public		$package;
+	public			$package;
 
 	/** @var string Unit for number of items */
-	public 		$units = 1;
+	public			$units = 1;
 
 	/** @var string Ingredients */
-	public 		$ingredients;
+	public			$ingredients;
 
 	/** @var string Friendly URL */
-	public 		$link_rewrite;
+	public			$link_rewrite;
 
 	/** @var string creation date */
-	public 		$date_added;
+	public			$date_added;
 
 	/** @var string last modification date */
-	public 		$date_updated;
+	public			$date_updated;
 
 	/** @var boolean Active */
-	public		$status = 1;
+	public			$status = 1;
 
 	/** @var Cache Object */
-	protected	$cache;
+	protected		$cache;
 	
 	/** @var is recuring product */
-	protected $recurring_ok;
+	protected		$recurring_ok;
 
 	/** @var array list user objects */
-	public static $config = array();
+	public static	$config = array();
 	
-	protected	  $properties;
+	protected		$properties;
 
 	/**
 	 * Create a new Product object
@@ -159,9 +159,25 @@ class Product {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
+		//$this->loadImages();
 		//$this->properties = $args;
 	}
 	
+	public function loadImages( $id = null ) {
+		if (isset ($this->product_line_id )) {
+			$this->images = array();
+		}
+		return false;
+	}
+	
+	public function getSizes() {
+		return $this->__get('sizes');
+	}
+
+
+	/*protected function getBrandImages = function ( $this->brand_id ) {
+		
+	}*/ 
 
 	/**
 	 * Extract Product property out for clean UI display
