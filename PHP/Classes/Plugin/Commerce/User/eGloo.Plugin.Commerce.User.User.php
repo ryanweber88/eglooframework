@@ -3,21 +3,21 @@ namespace eGloo\Plugin\Commerce\User;
 
 /**
  * User Class File
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author Gilbert Sewovoe-Ekoue
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -28,7 +28,7 @@ namespace eGloo\Plugin\Commerce\User;
 
 /**
  * Description of User
- * 
+ *
  * Representation of User Entity
  * Hold CRUD functionalities and user related method
  *
@@ -36,66 +36,82 @@ namespace eGloo\Plugin\Commerce\User;
  * @subpackage Commerce
  */
 class User {
-	
-	/**
-	 * @var integer user id
-	 */
+
+	/** @var integer user id */
 	public $uid;
-	
-	/**
-	 * @var string user email address
-	 */
+
+	/** @var string user email address */
 	public $email;
-	
-	/**
-	 * @var string password
-	 */
+
+	/** @var string password */
 	public $password;
-	
-	/**
-	 * @var string security hash key 
-	 */
+
+	/** @var string security hash key */
 	public $secure_key;
-	
-	/**
-	 * @var integer 1/0 for active user
-	 */
+
+	/** @var integer 1/0 for active user */
 	public $is_active = 1;
-	
-	/**
-	 * @var integer 1/0 for deleted user
-	 */
+
+	/** @var integer 1/0 for deleted user */
 	public $is_deleted = 0;
-	
-	/**
-	 * @var integer 1/0 for guest user
-	 */
+
+	/** @var integer 1/0 for guest user */
 	public $is_guest = 0;
-	
-	/**
-	 * @var string created date
-	 */
+
+	/** @var string created date */
 	public $created_date;
-	
-	/**
-	 * @var string deleted date
-	 */
+
+	/** @var string deleted date */
 	public $deleted_date;
-	
-	/**
-	 * @var string updated date
-	 */
+
+	/** @var string updated date */
 	public $updated_date;
-	
+
+	/** @var string last logged in date */
+	public $last_logged_date;
+
+	/** @var string is user logged in */
+	public $logged_in				= false;
+
+	const PRIVILEGES_REGULAR_USER	= 0;
+	const PRIVILEGES_ADMIN_USER		= 1;
+	const PRIVILEGES_SUPER_USER		= 2;
 	/**
 	 *
-	 * @return type 
+	 * @return type
 	 */
 	public function getUserInfo(){
 		if (isset ($this->uid)){
-			
+
 		}
 		return $user;
 	}
-	
+
+	public function __contruct ($uname, $pwd, User::PRIVILEGES_REGULAR_USER) {
+		$this->username		= $uname;
+		$this->password = $password;
+		if ($uname == '' || $password == '') {
+			throw new \Exception("Invalid User Data Exception: Username or Password is invalid");
+		}
+	}
+
+	public function checkPassword ($password) {
+		return MD5($password) == $this->password ? true : false;
+	}
+
+
+	public function logout () {
+		$this->logged_in = false;
+	}
+
+	public function __toString () {
+		$user_data = '';
+		foreach ($this as $field => $value) {
+			if ($field == 'password') {
+				continue;
+			}
+			$user_data .= "$field: $value\n";
+		}
+		return $user_data;
+	}
 }
