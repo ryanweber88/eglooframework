@@ -305,6 +305,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			foreach( $requestClass->xpath( 'child::Request' ) as $request ) {
 				// Grab the ID for this particular Request
 				$requestID = isset($request['id']) ? (string) $request['id'] : null;
+				$requestType = isset($request['type']) ? (string) $request['type'] : null;
 
 				// Grab the name of the RequestProcessor specified to handle this particular Request
 				// Example:
@@ -332,7 +333,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 				// Request Properties
 				$requestClasses[$requestClassID]['requests'][$requestID] =
-					array('requestClass' => $requestClassID, 'requestID' => $requestID, 'processorID' => $processorID, 'errorProcessorID' => $errorProcessorID );
+					array('requestClass' => $requestClassID, 'requestID' => $requestID, 'requestType' => $requestType,
+					'processorID' => $processorID, 'errorProcessorID' => $errorProcessorID );
 
 				$eglooXMLObj = new eGlooXML( $request );
 
@@ -735,6 +737,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		$requestNode = $requestProcessingCacheRegionHandler->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'XML2ArrayRequestDefinitionParserNodes::' .
 			$requestLookup, 'RequestValidation', true );
 
+		$requestType = isset($requestNode['requestType']) ? $requestNode['requestType'] : null;
+
 		if ( !$requestNode && $allNodesCached ) {
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in cache, checking wildcards: ' . $requestLookup, 'Security' );
 			$useRequestIDDefaultHandler = eGlooConfiguration::getUseDefaultRequestIDHandler();
@@ -841,7 +845,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		$retVal = true;
 
 		// Validate Environment
-		if( !$this->validateEnvironment( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateEnvironment( $requestNode, $requestInfoBean, $requestType ) ) {
 			// Should this instruct to build an ErrorRequestProcessor on failure?  Not sure...
 			if ($errorProcessorID) {
 				$retVal = false;
@@ -851,7 +855,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Execute InitRoutines
-		if ( !$this->executeInitRoutines( $requestNode, $requestInfoBean ) ) {
+		if ( !$this->executeInitRoutines( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -860,7 +864,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process BooleanArguments
-		if( !$this->validateBooleanArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateBooleanArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -869,7 +873,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process VariableArguments
-		if( !$this->validateVariableArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateVariableArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -878,7 +882,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process FormArguments
-		if( !$this->validateFormArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateFormArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -887,7 +891,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process ComplexArguments
-		if( !$this->validateComplexArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateComplexArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -896,7 +900,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process SelectArguments
-		if( !$this->validateSelectArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateSelectArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -905,7 +909,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process FileArguments
-		if( !$this->validateFileArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateFileArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -914,7 +918,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Process Depends
-		if( !$this->validateDependArguments( $requestNode, $requestInfoBean ) ) {
+		if( !$this->validateDependArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
 			} else {
@@ -923,7 +927,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		}
 
 		// Build decorator array and set it in the requestInfoBean
-		$this->buildDecoratorArray( $requestNode, $requestInfoBean);
+		$this->buildDecoratorArray( $requestNode, $requestInfoBean );
 
 		/**
 		 * If have gotten here with out returning... we're golden.
@@ -940,7 +944,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	}
 
 
-	private function executeInitRoutines( $requestNode, $requestInfoBean ) {
+	private function executeInitRoutines( $requestNode, $requestInfoBean, $requestType = null ) {
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -962,7 +966,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if environment passes the test, false otherwise
 	 */
-	private function validateEnvironment( $requestNode, $requestInfoBean ) {
+	private function validateEnvironment( $requestNode, $requestInfoBean, $requestType = null ) {
 		$retVal = true;
 
 		return $retVal;
@@ -973,7 +977,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all file arguments pass the test, false otherwise
 	 */
-	private function validateFileArguments( $requestNode, $requestInfoBean ) {
+	private function validateFileArguments( $requestNode, $requestInfoBean, $requestType = null ) {
 		$retVal = true;
 
 		return $retVal;
@@ -984,7 +988,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all boolean arguments pass the test, false otherwise
 	 */
-	private function validateBooleanArguments( &$requestNode, $requestInfoBean ){
+	private function validateBooleanArguments( &$requestNode, $requestInfoBean, $requestType = null ){
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -1023,7 +1027,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" is not in correct 'true' or 'false' format in GET request with id: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1072,7 +1076,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" is not in correct 'true' or 'false' format in post request with id: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1099,7 +1103,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all variable arguments pass the test, false otherwise
 	 */
-	private function validateVariableArguments( $requestNode, $requestInfoBean ){
+	private function validateVariableArguments( $requestNode, $requestInfoBean, $requestType = null ) {
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -1151,7 +1155,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in GET request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1279,7 +1283,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in post request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1371,7 +1375,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all FormArguments pass the test, false otherwise
 	 */
-	private function validateFormArguments( $requestNode, $requestInfoBean ) {
+	private function validateFormArguments( $requestNode, $requestInfoBean, $requestType = null ) {
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -1473,7 +1477,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in post request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1511,7 +1515,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all complex arguments pass the test, false otherwise
 	 */
-	private function validateComplexArguments( $requestNode, $requestInfoBean ) {
+	private function validateComplexArguments( $requestNode, $requestInfoBean, $requestType = null ) {
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -1577,7 +1581,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in GET request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1646,7 +1650,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in GET request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1718,7 +1722,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in post request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1786,7 +1790,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							" in post request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1811,7 +1815,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all select arguments pass the test, false otherwise
 	 */
-	private function validateSelectArguments( $requestNode, $requestInfoBean ){
+	private function validateSelectArguments( $requestNode, $requestInfoBean, $requestType = null ){
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -1866,7 +1870,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							"GET request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1941,7 +1945,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 							"POST request with request ID: " . $requestID;
 						eGlooLogger::writeLog( eGlooLogger::DEBUG, $errorMessage, 'Security' );
 
-						if ( !isset($requestNode['errorProcessorID']) ) {
+						if ( !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 							if (eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 								throw new ErrorException($errorMessage);
 							}
@@ -1973,7 +1977,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	 * 
 	 * @return true if all depend arguments pass the test, false otherwise
 	 */
-	private function validateDependArguments( $requestNode, $requestInfoBean ){
+	private function validateDependArguments( $requestNode, $requestInfoBean, $requestType = null ) {
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
@@ -2083,7 +2087,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 	/**
 	 * build the decorator array
 	 */
-	private function buildDecoratorArray( $requestNode, $requestInfoBean ){
+	private function buildDecoratorArray( $requestNode, $requestInfoBean ) {
 		
 		$decoratorArray = array();
 		$requestNode['decorators'];
