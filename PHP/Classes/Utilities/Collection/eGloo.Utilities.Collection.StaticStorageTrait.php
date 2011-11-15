@@ -12,11 +12,35 @@ namespace eGloo\Utilities\Collection;
  */
 trait StaticStorageTrait { 
 	
-	protected static function &retrieve($key, \Closure $fallback = null) { 
+	protected static function &retrieve($key, $fallback = null) { 
 		
+		// if passing multiple keys, these will be representative
+		// of dimension in array
+		$node = &static::$store;
+		
+		// if key is passed as array of multiple keys,
+		// pop the last element as key and build multi-
+		// dimension path to array
+		if (is_array($key)) { 	
+			
+			$tmp = array_pop($key);
+			
+			foreach($key as $value) {
+				if (!isset($node[$value])) {
+					$node[$value] = [ ];
+				}
+				
+				$node = &$node[$value];
+			}
+			
+			$key = $tmp;
+		}
+		
+		
+				
 		// if key is our closure, then we generate key from
 		// lambda signature
-		if ($key instanceof \Closure) { 
+		else if (is_callable($key)) { 
 			// assign key to fallback
 			$fallback = $key;
 			
@@ -25,12 +49,12 @@ trait StaticStorageTrait {
 			// to extend reflectionfunction to provide quicker
 			// lookup
 			$reflection = new ReflectionFunction($key);
-			$key = md5((string)$reflection);
+			$key = base64_encode((string)$reflection);
 			
 		}
 		
 		if (!isset(static::$store[$key])) { 
-			static::$store[$key] = $fallback($key);
+			$node = $fallback($key);
 		} 
 		
 		return static::$store[$key];

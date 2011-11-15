@@ -68,7 +68,9 @@ class QuerySet extends \eGloo\Dialect\Object implements
 
 								// @todo figure out container for methods  
 								//$method  = new Method($this->entity, $params['name']);
-								$results = (new Method($this->entity, $params['name']))->call($arguments);  
+								$results = MethodGateway::method($this->entity, $params['name'])->call(
+									$arguments
+								);  
 								
 								var_export($results); exit('suckit');
 								

@@ -163,24 +163,64 @@ abstract class Object {
 			
 			// @todo refactor dynamic methods, since continual preg processing
 			// will add overhead
-			// magic call to determine if property is "in" passed array argument
-			else if (is_array($arguments[0]) && preg_match('/(.+?)_in/', $name, $match)) {
-				$name = $match[1];
+			// handle generic array functionality
+			else if (is_array($arguments[0])) {
 				
-				if ($this->propertyExists($match[1])) { 
-					return in_array($this->$name, $arguments[0]);	
+				if (preg_match('/(.+?)_in/', $name, $match)) { 
+					$name = $match[1];
+					
+					if ($this->propertyExists($match[1])) { 
+						return in_array($this->$name, $arguments[0]);	
+					}
 				}
 			}
 			
-			// magic call to use run regexp against value
-			else if (is_string($arguments[0]) && preg_match('/(.+?)_like/', $name, $match)) {
-				$name = $match[1];
-				
-				return preg_match($arguments[0], $this->$name);
+			// handle generic string functions
+			else if (is_string($arguments[0])) {
+				if (preg_match('/(.+?)_like/', $name, $match)) { 			
+					$name = $match[1];
+					
+					return preg_match($arguments[0], $this->$name);
+				}
+			}
+			
+			// handle generic lamda/block callbacks
+			else if (is_callable($arguments[0])) {
+				// provide and each iterator on array properties
+				if (preg_match('/^each_(.+?)$/', $name, $match)) { 
+					if ($this->propertyExists($property = $match[1]) || 
+					    $this->propertyExists($property = \eGloo\Utilities\Inflections::pluralize($match[1]))) {
+
+					    // use reflection to determine parameter count
+					    $includeKey = (
+					    	count((new ReflectionFunction($arguments[0]))->getParameters()) > 1
+					    );
+					    
+					    $lambda = &$arguments[0];
+					    	
+					    if (is_array($this->$property)) {
+					    	foreach($this->$property as $key => $value) {
+					    		if ($includeKey) {
+					    			$lambda($key, $value);
+					    		}	
+					    		
+					    		else { 
+					    			$lambda($value);
+					    		}
+					    	}
+					    }
+					    
+					    else {
+					    	throw new Exception(
+					    		'Attempting dynamic iteration over non-array property : ' $property
+					    	);
+					    }
+					}
+				}
 			}
 			
 			else { 
-				throw new \eGloo\Dialect\Exception(
+				throw new Exception(
 					'ATTEMPTED TO ACCESS INVALID PROPERTY : ' . $name
 				);
 			}

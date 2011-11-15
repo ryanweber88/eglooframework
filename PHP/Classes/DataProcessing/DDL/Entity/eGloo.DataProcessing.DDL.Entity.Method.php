@@ -23,13 +23,6 @@ class Method extends \eGloo\Dialect\Object {
 	function __construct(Entity $entity, $name) { 
 		$this->entity = $entity;
 		$this->name   = $name;
-		
-		// throw exception if invalid		
-		if (!DDL\Statement\Bundle::create($entity)->valid($name)) { 
-			throw new DDL\Exception\Exception (
-				'Invalid Entity Method Invocation : ' . $entity->_class->class
-			);	
-		}
 	}
 	
 	/**

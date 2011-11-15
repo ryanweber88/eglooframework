@@ -72,13 +72,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 
 		//$this->entityInterface();
-				
-		foreach(DDL\Statement\Bundle::create($this)->names as $name) {	
-			$this->methods[$name] = function($arguments) use ($name) {
-				$method = new Method($this, $name);
-				return $method->call($arguments);
-			};
-		}
 		
 		// ENTITY CALLBACKS INITIALIZATION
 		// $this->entityCallbackStack();
@@ -134,7 +127,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 							
 							if ($runMethod) {
 
-								$results = $this->methods[$params['name']]($arguments); 
+								$result = MethodGateway::method($this, $params['name'])->call(
+									$arguments
+								);   
 								
 								foreach(array_reverse($params['middleware']) as $middleware) {
 									if (($results = $middleware->processResults($arguments, $results)) === false) {
@@ -214,9 +209,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									// at least managed from some outside perspective - find_ could change at anytime. 
 									
 									// we know that a method call on an entity is using a foreign key
-									$results = $this->methods['find_' . strtolower($relationship->to)](['fields' => [ 
-										$pk => [ 'values' => [ $this->id ], 'type' => $this->definition->primary_key ]
-									]]);
+									return MethodGateway::method($this, 'find_' . strtolower($relationship->to))->call([
+										'fields' => [ 
+											$pk => [ 'values' => [ $this->id ], 'type' => $this->definition->primary_key ]
+										]
+									]);
+									  
 									
 									return $results;									 															
 								})])
@@ -713,83 +711,76 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		$entity     = new static;
 		$methodName = $name;
 		
-		if (isset($entity->methods[$name])) { 
 			
-			$name = strtolower($name);
+		$name = strtolower($name);
+		
+		// @todo this should be simpler if/when following convention 
+		if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
+							
+			// parse field name by stripping known entities
 			
-			// @todo this should be simpler if/when following convention 
-			if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
-								
-				// parse field name by stripping known entities
-				
-				$whatsLeft = $name;
-				$delimiter = '.';
-				$arguments = [ ];
-				
-				foreach(['find','by','and','or', '_', 'like'] as $lookFor) { 
-					$whatsLeft = str_ireplace($lookFor, $delimiter, $whatsLeft);
-				}
-				
-				
-				// explode what remains, not counting empty
-				$fields = preg_split('/\./', $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
-				
-				// massage arguments into array, if passed as series of scalars
-				if (!is_array(current($dynamicArguments))) {
-					// if asking find_by_name_and_title (name, title) where name
-					// title and passed via scalar
-					if (count($fields) > 1) {
-						$counter = 0;
-						
-						foreach($fields as $ignore) {
-							$dynamicArguments[$counter++] = [ $dynamicArguments ];	
-						}
-					}
+			$whatsLeft = $name;
+			$delimiter = '.';
+			$arguments = [ ];
+			
+			foreach(['find','by','and','or', '_', 'like'] as $lookFor) { 
+				$whatsLeft = str_ireplace($lookFor, $delimiter, $whatsLeft);
+			}
+			
+			
+			// explode what remains, not counting empty
+			$fields = preg_split('/\./', $whatsLeft, null, PREG_SPLIT_NO_EMPTY);
+			
+			// massage arguments into array, if passed as series of scalars
+			if (!is_array(current($dynamicArguments))) {
+				// if asking find_by_name_and_title (name, title) where name
+				// title and passed via scalar
+				if (count($fields) > 1) {
+					$counter = 0;
 					
-					else {
-						$dynamicArguments = [ $dynamicArguments ];
+					foreach($fields as $ignore) {
+						$dynamicArguments[$counter++] = [ $dynamicArguments ];	
 					}
 				}
 				
-				// check that argument count is correct
-				if (count($fields) === 1 && !is_array(current($dynamicArguments))) {
+				else {
 					$dynamicArguments = [ $dynamicArguments ];
 				}
+			}
+			
+			// check that argument count is correct
+			if (count($fields) === 1 && !is_array(current($dynamicArguments))) {
+				$dynamicArguments = [ $dynamicArguments ];
+			}
+			
+			if (count($dynamicArguments) == count($fields)) {
 				
-				if (count($dynamicArguments) == count($fields)) {
-					
-					foreach ($fields as $name) {
-						$arguments[$name] = [
-							'values' =>  array_shift($dynamicArguments) , 'type' => $name
-						];
-					}
-									
-					$reflection = new \ReflectionMethod($entity, '_findBy');
-					$reflection->setAccessible(true);
-					
-					
-									
-					return $reflection->invokeArgs(
-						$entity, [$methodName, $arguments]
-					);
+				foreach ($fields as $name) {
+					$arguments[$name] = [
+						'values' =>  array_shift($dynamicArguments) , 'type' => $name
+					];
 				}
-				
-				// make sure arguments are congruent with number of fields specified
-				// in the case of more than one field, either an equal number of arguments
-				// which may be of type array or scalar must be passed
 								
-				else {
-					throw new DDL\Exception\Exception(
-						"Illegal Argument Exception : passed illegal argument collection\n". vvar_export(
-							$dynamicArguments, true
-						)
-					);
-				}
+				$reflection = new \ReflectionMethod($entity, '_findBy');
+				$reflection->setAccessible(true);
+				
+				
+								
+				return $reflection->invokeArgs(
+					$entity, [$methodName, $arguments]
+				);
+			}
+			
+			// make sure arguments are congruent with number of fields specified
+			// in the case of more than one field, either an equal number of arguments
+			// which may be of type array or scalar must be passed
 							
-
-								
-
-				
+			else {
+				throw new DDL\Exception\Exception(
+					"Illegal Argument Exception : passed illegal argument collection\n". vvar_export(
+						$dynamicArguments, true
+					)
+				);
 			}
 			
 		}
@@ -879,7 +870,4 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	
 	/** Abstraction of configurable definition */
 	protected $definition;
-	
-	/** Represents callable interface */
-	protected $methods = [ ]; 
 }
