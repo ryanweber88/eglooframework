@@ -31,7 +31,7 @@ class QuerySetManager extends Middleware {
 				// if entity is found then  
 				if (($entity = $manager->map->with($name)->with($key)->retrieves($this->entity)) !== false) {
 					$arguments['fields'][$name]['found'][] = [
-						'index' => $counter++ , 'value' => $key, 'entity' => $this->entity
+						'index' => $counter++ , 'value' => $key
 					];
 				}
 
@@ -63,12 +63,14 @@ class QuerySetManager extends Middleware {
 	 * @see MiddlewareInterface::processResults()
 	 */
 	public function processResults(array $arguments, $results) { 
-		$manager = Manager\Factory::factory();
-		
-		foreach($arguments['fields'] as $name => $composite) {
-				
-			foreach ($composite['values'] as $key) { 
-				
+		$manager = DDL\Entity\Manager\Factory::factory();
+
+		// appends to results the fields we are looking for, that will be 
+		// mapped during the evaluation aspect of queryset
+		// @todo this is sloppy, needs to be refactored
+		foreach ($results as $record) { 
+			foreach($arguments['fields'] as $fieldName => $composite) {	
+				$results['look_for'] = $arguments['fields'];
 			}
 		}
 		

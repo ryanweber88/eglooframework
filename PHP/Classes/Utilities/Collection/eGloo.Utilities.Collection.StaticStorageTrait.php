@@ -22,7 +22,6 @@ trait StaticStorageTrait {
 		// pop the last element as key and build multi-
 		// dimension path to array
 		if (is_array($key)) { 	
-			
 			$tmp = array_pop($key);
 			
 			foreach($key as $value) {
@@ -49,15 +48,18 @@ trait StaticStorageTrait {
 			// to extend reflectionfunction to provide quicker
 			// lookup
 			$reflection = new ReflectionFunction($key);
-			$key = base64_encode((string)$reflection);
+			$key        = base64_encode((string)$reflection);
 			
 		}
 		
-		if (!isset(static::$store[$key])) { 
-			$node = $fallback($key);
-		} 
 		
-		return static::$store[$key];
+		if (!isset($node[$key])) { 
+			$node[$key] = $fallback($key);
+		}
+
+	
+		
+		return $node[$key];
 	}
 	
 	protected static $store = [ ];

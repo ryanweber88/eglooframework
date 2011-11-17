@@ -53,7 +53,7 @@ class MethodGateway extends \eGloo\Dialect\Object {
 			if (DDL\Statement\Bundle::create($entity)->valid($name)) {
 				return new Method($entity, $name);	
 			}
-			
+						
 			return false;
 			
 		});

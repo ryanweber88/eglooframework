@@ -2,7 +2,6 @@
 namespace eGloo\DataProcessing\DDL\Utility;
 
 use \eGloo\DataProcessing\DDL;
-use \eGloo\DataProcessing\DDL\Entity\Entity;
 
 
 /**
@@ -19,7 +18,7 @@ class Entity extends \eGloo\Dialect\Object {
 	 * @param  Entity $entity
 	 * @return string
 	 */
-	public static function key(Entity $entity) {
-		return $entity->_class->class;
+	public static function key(DDL\Entity\Entity $entity) {
+		return base64_encode($entity->_class->class);
 	}
 }

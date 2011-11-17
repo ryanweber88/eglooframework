@@ -39,7 +39,7 @@ class Builder extends \eGloo\Dialect\Object {
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
 		);	
-
+		
 		// splat array ends/leaves 
 		extract($this->splatArray(
 			$this->arguments
@@ -55,15 +55,22 @@ class Builder extends \eGloo\Dialect\Object {
 
 	
 	private function splatArray($array) { 
-		
-		// a bit of misnormer - recursively splats the end points of array
+		// a bit of misnormer - recursively splats the end points of arra
 		foreach($array as $key => $value) {
 									
 			// look for leaf condition - current element is array, but child
 			// element is not
 			if (is_array($value)) { 
 				if (count($keys = array_keys($value)) && !is_array($value[$keys[0]])) { 
-					$array[$key] = implode (',', $value);
+					if (!is_numeric($value[$keys[0]])) { 
+						foreach($value as $index => $string) {
+							$array[$key][$index] = "'" .addslashes($string) . "'";
+						}
+					}
+					
+										
+					$array[$key] = implode (',', $array[$key]);	
+					
 				}
 				
 				//else if (!$this->isAssoc($value)) { 

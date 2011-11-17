@@ -41,9 +41,9 @@ class Bundle extends \eGloo\Dialect\Object {
 		
 		// retrieve bundle content
 		foreach ($this->files as $file) {
-			$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0];
-			$this->paths[] = $file;
-			$this->content[$this->names[] = explode('.', \eGloo\IO\File::basename($file))[0]] = file_get_contents(
+			$this->names[]           = $name = explode('.', \eGloo\IO\File::basename($file))[0];	
+			$this->paths[$name]      = $file;
+			$this->content[$name]    = file_get_contents(
 				$file
 			);
 			
@@ -105,7 +105,7 @@ class Bundle extends \eGloo\Dialect\Object {
 		if (isset($this->paths[$name])) {
 			return $this->paths[$name];
 		}
-		
+				
 		return false;
 	}	
 	
@@ -117,7 +117,7 @@ class Bundle extends \eGloo\Dialect\Object {
 	 * @throws DDL\Exception\Exception
 	 */
 	public function valid($name) {
-		return $this->path($name) !== false;
+		return isset($this->paths[$name]);
 	}
 
 	

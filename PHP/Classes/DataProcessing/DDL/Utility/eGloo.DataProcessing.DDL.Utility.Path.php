@@ -2,7 +2,6 @@
 namespace eGloo\DataProcessing\DDL\Utility;
 
 use eGloo\DataProcessing\DDL;
-use eGloo\DataProcessing\DDL\Entity\Entity;
 
 /**
  * 
@@ -17,7 +16,7 @@ class Path extends \eGloo\Dialect\Object {
 	 * Determines entity path based upon inheritance chain
 	 * @param Entity $entity
 	 */
-	static public function entity(Entity $entity) { 
+	static public function entity(DDL\Entity\Entity $entity) { 
 		$hierarchy = [ $entity->_class->name ];
 		
 		// TODO build hierarchy based on inheritance chain
@@ -44,7 +43,7 @@ class Path extends \eGloo\Dialect\Object {
 	 * Provide path to statement group, keyed by entity parameter
 	 * @param Entity $entity
 	 */
-	static public function statements(Entity $entity) { 
+	static public function statements(DDL\Entity\Entity  $entity) { 
 		// TODO this must be explanded upon to allow for loading
 		// statements at different contextual levels
 		// applicaiton, common, framework, etc

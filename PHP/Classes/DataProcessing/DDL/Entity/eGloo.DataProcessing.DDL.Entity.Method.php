@@ -40,11 +40,12 @@ class Method extends \eGloo\Dialect\Object {
 		$bundle    = DDL\Statement\Bundle::create($this->entity);
 		$statement = new DDL\Statement\Statement;	
 		
+		
 		// build statement and pass to statement instance
 		$data = $statement->execute(DDL\Statement\Builder::create(
 			$this->entity, $bundle->path($this->name), $arguments
 		));
-									
+											
 		// if data has returned an array, we have requested
 		// find method, or in all likilihood, entity
 		// has requested evaluation.

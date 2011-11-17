@@ -25,6 +25,10 @@ class Test extends Middleware {
 		
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
 		echo $set->count();
+		
+		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
+		echo $set->count();	
+
 		exit;
 		
 		//echo $user->name . "\n"; exit;

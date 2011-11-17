@@ -33,15 +33,22 @@ class Map extends \eGloo\Dialect\Object {
 		
 		// merge arrays so entity takes first position in chain
 		$chain = array_merge(
-			[ $entity->_class->name ], $this->chain
+			[ DDL\Utility\Entity::key($entity) ], $this->chain
 		);
+
+		// if calling retrieves, we reset our chain
+		$this->chain = [ ];
 				
 		// point node at &chain - we will use node
 		// to traverse dimensions of array
 		$node = &$this->profiles;
-		
+		$counter = 0;
+				
 		foreach ($chain as $domain) { 
 			if (!isset($node[$domain])) {
+				// if not set, then domain clearly cannot be found and
+				// we return false to indicate that entity has not
+				// yet been mapped
 				return false;
 			}
 			
@@ -64,13 +71,15 @@ class Map extends \eGloo\Dialect\Object {
 		
 		// merge arrays so entity takes first position in chain
 		$chain = array_merge(
-			[ $entity->_class->name ], $this->chain
+			[ DDL\Utility\Entity::key($entity) ], $this->chain
 		);
 		
 		// draw out chain into profiles
 		$node = &$this->profiles;
+		$counter = 0;
 		
 		foreach ($chain as $domain) { 
+					
 			if (!isset($node[$domain])) {
 				$node[$domain] = [ ];
 			}
@@ -97,7 +106,7 @@ class Map extends \eGloo\Dialect\Object {
 	 * @param mixed $domain
 	 */
 	public function with($domain) { 
-		$this->chain[] = $domain;
+		$this->chain[] = (string)$domain;
 		
 		return $this;
 	}

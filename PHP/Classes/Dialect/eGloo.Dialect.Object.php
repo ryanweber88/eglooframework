@@ -148,6 +148,8 @@ abstract class Object {
 	 */
 	public function __call($name, $arguments) { 
 		
+		//echo "$name\n";
+		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
 		// value at the fist index
@@ -159,6 +161,8 @@ abstract class Object {
 			// an attempt to access a property that does not exist is made
 			if ($this->propertyExists($name)) {
 				$this->$name = $arguments[0];
+				
+				return $this;
 			}
 			
 			// @todo refactor dynamic methods, since continual preg processing
@@ -173,6 +177,8 @@ abstract class Object {
 						return in_array($this->$name, $arguments[0]);	
 					}
 				}
+				
+				return false;
 			}
 			
 			// handle generic string functions
@@ -182,23 +188,39 @@ abstract class Object {
 					
 					return preg_match($arguments[0], $this->$name);
 				}
+				
+				return false;
 			}
 			
 			// handle generic lamda/block callbacks
 			else if (is_callable($arguments[0])) {
-				// provide and each iterator on array properties
-				if (preg_match('/^each_(.+?)$/', $name, $match)) { 
-					if ($this->propertyExists($property = $match[1]) || 
-					    $this->propertyExists($property = \eGloo\Utilities\Inflections::pluralize($match[1]))) {
-
-					    // use reflection to determine parameter count
+				
+				$lambda = &$arguments[0];
+				
+			
+				// parse property name, and determine if referring
+				// to plural or singular
+				preg_match('/^.+?_(.+?)$/', $subject, $match);
+				$property = $match[1];
+				
+				if (!$this->propertyExists($property)) {
+					$property = \eGloo\Utilities\Inflections::pluralize($property);
+				}
+				
+				if ($this->propertyExists($property)) { 
+								
+					// handle array-oriented callbacks
+					if (is_array($this->$property)) { 
+					    
+															
+						// use reflection to determine parameter count
 					    $includeKey = (
 					    	count((new ReflectionFunction($arguments[0]))->getParameters()) > 1
 					    );
-					    
-					    $lambda = &$arguments[0];
-					    	
-					    if (is_array($this->$property)) {
+						
+						// provide and each iterator on array properties
+						if (strpos($name, 'each_') === 0) { 
+	
 					    	foreach($this->$property as $key => $value) {
 					    		if ($includeKey) {
 					    			$lambda($key, $value);
@@ -208,22 +230,33 @@ abstract class Object {
 					    			$lambda($value);
 					    		}
 					    	}
-					    }
-					    
-					    else {
-					    	throw new Exception(
-					    		'Attempting dynamic iteration over non-array property : ' $property
-					    	);
-					    }
+						  
+						}
+						
+						// provide a find iterator for array properties
+						else if (strpos($name, 'find_') === 0) { 
+							foreach($this->$property as $key => $value) {
+								if ($includeKey) {
+									$found = $lambda($key, $value);
+								}
+								
+								else {
+									$found = $lambda($value);
+								}
+								
+								if ($found) { 
+									break ;
+								}
+							}	
+
+							return $found;
+						}
+						
 					}
 				}
+				
 			}
-			
-			else { 
-				throw new Exception(
-					'ATTEMPTED TO ACCESS INVALID PROPERTY : ' . $name
-				);
-			}
+
 			
 			// now return a reference to the current instance so as to allow for
 			// chaining: $this->name('christian')->doesWhat('sucks');	
@@ -232,11 +265,13 @@ abstract class Object {
 		
 		// otherwise we are attempting an accessor; try and return property
 		// fail gracefully ? (or throw exception) if property does not exist
-		else { 
+		else if ($this->propertyExists($name)) { 
 			return $this->$name;
 		}
 		
-		
+		throw new Exception(
+			'ATTEMPTED TO ACCESS INVALID PROPERTY : ' . $name
+		);		
 	}
 	
 	/** @deprecated */

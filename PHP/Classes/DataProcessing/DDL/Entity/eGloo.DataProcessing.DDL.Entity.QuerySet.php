@@ -17,11 +17,14 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
  	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
+
  		parent::__construct();
  		
  		// set entity - each query set represents a collection of a singular
  		// type of entity, so entity represents the "type" of this queryset
  		$this->entity = $entity;
+ 		
+ 		
  	
  		
  		// instantiate event manager and attach listeners
@@ -71,9 +74,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 								$results = MethodGateway::method($this->entity, $params['name'])->call(
 									$arguments
 								);  
-								
-								var_export($results); exit('suckit');
-								
+																
 								foreach(array_reverse($params['middleware']) as $middleware) {
 									if (($results = $middleware->processResults($arguments, $results)) === false) {
 										break ;
@@ -165,29 +166,76 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
 			$manager = Manager\Factory::factory();
+			
  			
  			// TODO write some measure of intelligence in the number
  			// of entities built on an evaluation
- 			$this->entities = new \SplFixedArray(count($results));
+ 			$this->entities = new \SplFixedArray(count($results)-1);
  			$counter = 0;
+ 		 			
  			 			 			
- 			foreach ($results as $record) {
- 				 				 				
- 				$this->entities[$counter++] = $manager->find(
- 					$this->entity->_class, 
- 					$record[$this->entity->definition->primary_key], function() use ($record) { 
- 						
- 						// instantiate entity
- 						$entity              = clone $this->entity;
- 						$entity->attributes  = $record;
- 						
- 						// returning entity to manager to handle persistence
- 						return $entity;
- 						
- 					}
- 				); 				
+ 			foreach ($results as $index => $record) {
+ 				
+ 				// @todo this is ugly - results should not be contingent
+ 				// upon numerical indicies - in other words - we need
+ 				// to find a way to pass results, that is not piled on
+ 				// top of results array
+
+ 				if (is_numeric($index)) { 
+ 		
+ 					
+	 				$this->entities[$counter++] = $manager->find(
+	 					$this->entity, 
+	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
+	 						
+	 						// instantiate entity
+	 						$entity              = clone $this->entity;
+	 						$entity->attributes  = $record;
+	 						
+	 						// returning entity to manager to handle persistence
+	 						return $entity;
+	 						
+	 					}
+	 				); 	
+	 				
+	 				echo "adding entity\n";
+	 				
+	 				
+	 				// now do side associations
+	 				// @todo abstract this into something nicer than associative
+	 				// array 
+	 				if (is_array($results['look_for'])) { 
+		 				foreach ($results['look_for'] as $fieldName => $composite) { 
+		 					if (isset($record[$fieldName])) { 
+		 						foreach ($composite['values'] as $value) {
+		 							
+		 							
+	 								
+		 										
+		 							// if we find a match, map a new association, unset value
+		 							// from looks for, and break loop
+		 							if ($record[$fieldName] == $value) {
+		 								$entity = $manager->map
+		 										->with($this->entity->definition->primary_key)
+		 										->with($record[$this->entity->definition->primary_key])
+		 										->retrieves($this->entity);
+		 										
+		 								$manager->map->with($fieldName)->with($value)->refers($entity);
+		 								
+		 								// unset value as we should not look for again
+		 								unset($results['looks_for'][$fieldName]);
+		 								
+		 								
+		 								
+		 								break;
+		 							}
+		 						}
+		 					}
+		 				}
+	 				}
+	 			}
  			}
-		}
+ 		}
 		
 		else { 
 			// initialize entities to empty fixed array

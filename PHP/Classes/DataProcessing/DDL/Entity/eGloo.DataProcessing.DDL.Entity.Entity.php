@@ -60,7 +60,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			// but will need to be limited in stateful environment
 			// @todo limit_static
 			// @todo limit_cache
-			$this->definition = static::retrieve((string)$this->_class, function() { 
+			$this->definition = static::retrieve(DDL\Utility\Entity::key($this), function() { 
 				return Definition::create($this);	
 			});
 		}
@@ -504,8 +504,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @return Entity
 	 */
 	protected function _findBy ($methodName, array $arguments) { 
-		$manager = Manager\Factory::factory();
-		$set     = new QuerySet($this);	
+		$manager = Manager\Factory::factory();		
+		$this->arbitrary = $this->definition;		
+		$set     = new QuerySet($this);
+
+		
 		
 		$set->events->trigger('call', $this, [
 			'name'            => $methodName,
@@ -699,8 +702,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * Serves as an interface to find_by_xxx methods
 	 */
 	public function __call($name, $args) {
-		
-		
+		return parent::__call($name, $args);
 	}
 	
 	/**
@@ -710,9 +712,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 
 		$entity     = new static;
 		$methodName = $name;
-		
-			
-		$name = strtolower($name);
+		$name       = strtolower($name);
 		
 		// @todo this should be simpler if/when following convention 
 		if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
@@ -870,4 +870,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	
 	/** Abstraction of configurable definition */
 	protected $definition;
+	
+	public $arbitrary;
 }
