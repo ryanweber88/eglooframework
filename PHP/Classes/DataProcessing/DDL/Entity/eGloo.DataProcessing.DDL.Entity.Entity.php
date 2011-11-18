@@ -699,10 +699,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	}
 	
 	/**
-	 * Serves as an interface to find_by_xxx methods
+	 * Provides magic methods to attributes and relationships - 
+	 * if those fail, then onto self
+	 * @todo this is a fairly expensive routine - figure out a way
+	 * to cutdown
 	 */
-	public function __call($name, $args) {
-		return parent::__call($name, $args);
+	public function __call($name, $arguments) {
+		
+		// iterate through attributes, relationships and finally
+		// self - it is important to note the order as that 
+		// dictates precedence 
+		foreach([$this->attributes, $this->relationships] as $container) {
+			if (($mixed = $this->callMagicOn($name, $arguments, $container)) !== false) {
+				return $mixed;
+			}
+		}
+		
+		// otherwise we bail out to object method
+		return parent::__construct($name, $arguments);
 	}
 	
 	/**

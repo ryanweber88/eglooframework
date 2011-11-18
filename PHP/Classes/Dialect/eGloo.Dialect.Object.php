@@ -3,15 +3,18 @@ namespace eGloo\Dialect;
 
 /**
  * 
- * The Java.Lang.Object of eGloo - provides stubs for object behavior as well
+ * The java.lang.Object of eGloo - provides stubs for object behavior as well
  * as some conrete functionality, that in theory, would be shared amongst all
  * objects within the system
  * 
  * @author Christian Calloway
+ * @todo   limit_static
  *
  */
 abstract class Object { 
 	
+	use \eGloo\Utilities\MagicMethodTrait;
+
 
 	function __construct() { 
 		
@@ -30,7 +33,13 @@ abstract class Object {
 		
 		// lets avoid infinite loops shall we
 		if (!($this instanceof _Class)) { 
-			$this->_class = new _Class($this);
+		 
+			// @todo limit_static
+			if (!isset(static::$classes[get_class($this)])) {
+				static::$classes[get_class($this)] = new _Class($this);
+			}
+			
+			$this->_class = static::$classes[get_class($this)];
 			
 			// this doesn't work polymorphically
 			//static::$_class = new _Class($this);
@@ -91,12 +100,13 @@ abstract class Object {
 		// been replaced
 		//if ($name == '_class') {
 			//return static::$_class;	
+			
 		//}
+		
+		echo "getting $name on " . get_class($this) . "\n";
 		
 		try { 
 			$tryMethod = "get" . ucfirst($name);
-			
-
 			
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
@@ -168,136 +178,19 @@ abstract class Object {
 			// flexible api/magic methods 
 			else { 
 				
-				$actions = [ 'in', 'each', 'find', 'includes', 'like' ];
-				
-				// find property name and action
-				preg_match('/^(.+?)_(.+?)$/', $name, $match);
-
-				// action is specified after '_' character
-				$indicies = (in_array($match[1], $actions)) 
-					? [ 1, 2 ]
-					: [ 2, 1 ];
-					
-				$action   = $match[array_shift($indicies)];
-				$property = $match[array_shift($indicies)];
-				
-				// check property existence - pluralize if
-				// it does not exist
-				if (!$this->propertyExists($property)) {
-					$property = \eGloo\Utilities\Inflections::pluralize(
-						$property
-					);
-				}
-
-				
-				// do a final check on property - if it fails
-				// processing will proceed to bottom where an
-				// exception will be raised				
-				if ($this->propertyExists($property)) { 
-				
-					// finally retrieve value at specified property
-					// name and passed in argument (just as a 
-					// convenience)
-					// below should throw conven
-					$value    = $this->$property;
-					$argument = &$arguments[0]; 
-					
-					
-					// now we manage the action processing type - ie, 
-					// the type of argument that has been passed. 
-				
-					// handle generic array functionality
-					if (is_array($argument)) {
-						
-						if (strpos($name, '_in') !== false) {
-							return in_array($value, $argument);
-						}
-						
-						else if (is_array($value) && strpos($name, '_includes') !== false) {
-							if (is_array($value)) {
-								$found = true;
-	
-								foreach($value as $single) {
-									if (!in_array($single, $argument)) {
-										$found = false;
-										break ;
-									}
-								}
-							}
-
-							
-							return $found;
-						}
-						
-					}
-					
-					// handle generic string functions
-					else if (is_string($arguments)) {
-						if (strpos($name, '_like') !== false) {
-							return preg_match($argument, $value);
-						}
-			
-					}
-					
-					// handle generic lamda/block callbacks
-					else if (is_callable($argument)) {
-						
-						$lambda = &$argument;
-						
-							
-						// handle array-oriented callbacks
-						if (is_array($value)) { 
-						    
-																
-							// use reflection to determine parameter count
-						    $includeKey = (
-						    	count((new ReflectionFunction($arguments[0]))->getParameters()) > 1
-						    );
-							
-							// provide and each iterator on array properties
-							if (strpos($name, 'each_') === 0) { 
-		
-						    	foreach($this->$property as $key => $value) {
-						    		if ($includeKey) {
-						    			$lambda($key, $value);
-						    		}	
-						    		
-						    		else { 
-						    			$lambda($value);
-						    		}
-						    	}
-							}
-							
-							// provide a find iterator for array properties
-							else if (strpos($name, 'find_') === 0) { 
-								foreach($this->$property as $key => $value) {
-									if ($includeKey) {
-										$found = $lambda($key, $value);
-									}
-									
-									else {
-										$found = $lambda($value);
-									}
-									
-									if ($found) { 
-										break ;
-									}
-								}	
-	
-								return $found;
-							}
-						}	
-					}	
-					
-					return false;
+				// use trait method to attempt or look for
+				// signature of magic method call - if any value
+				// other than absolute boolean false is returned
+				// we return that value to caller
+				if (($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) {
+					return $mixed;
 				}
 							
 			}
 		
 		}
 		
-		// otherwise we are attempting an accessor; try and return property
-		// fail gracefully ? (or throw exception) if property does not exist
+		// otherwise we are attempting an accessor
 		else if ($this->propertyExists($name)) { 
 			return $this->$name;
 		}
@@ -341,4 +234,5 @@ abstract class Object {
 	}
 	
 	protected $_class;
+	static private $classes;
 }

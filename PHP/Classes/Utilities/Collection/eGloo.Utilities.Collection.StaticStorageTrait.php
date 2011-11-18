@@ -16,7 +16,7 @@ trait StaticStorageTrait {
 		
 		// if passing multiple keys, these will be representative
 		// of dimension in array
-		$node = &static::$store;
+		$node = &static::$staticStorageTraitStore;
 		
 		// if key is passed as array of multiple keys,
 		// pop the last element as key and build multi-
@@ -62,5 +62,5 @@ trait StaticStorageTrait {
 		return $node[$key];
 	}
 	
-	protected static $store = [ ];
+	protected static $staticStorageTraitStore = [ ];
 }

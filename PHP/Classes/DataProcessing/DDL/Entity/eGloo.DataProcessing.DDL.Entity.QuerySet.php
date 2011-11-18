@@ -248,7 +248,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// so that it can honor iterator, arrayaccess
 			// countable implementations without having
 			// to ask if entities exists for each method
-			$this->entities = [ ]
+			$this->entities = [ ];
 		}
 		
 		
