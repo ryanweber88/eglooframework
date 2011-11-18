@@ -234,5 +234,5 @@ abstract class Object {
 	}
 	
 	protected $_class;
-	static private $classes;
+	static protected $classes;
 }
