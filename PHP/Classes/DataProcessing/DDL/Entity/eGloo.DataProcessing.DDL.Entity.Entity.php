@@ -652,12 +652,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		} catch(\Exception $ignore) { }
 		
 		// otherwise first check entity attributes
-		if ($this->attributes && isset($this->attributes[$name])) { 
+		if (is_array($this->attributes) && isset($this->attributes[$name])) { 
 			return $this->attributes[$name];
 		}
 		
 		// and then relationshipos
-		if ($this->relationships && isset($this->relationships[$name])) { 
+		if (is_array($this->relationships) && isset($this->relationships[$name])) { 
 			return $this->relationships[$name];
 		}
 		
@@ -859,6 +859,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	protected $state;
 	protected $events;
 	protected $callbacks;
+	
+	/** @todo remove this */
 	protected $evaluated = false;	
 	
 	protected $attributes    = [ ];
@@ -871,5 +873,4 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	/** Abstraction of configurable definition */
 	protected $definition;
 	
-	public $arbitrary;
 }

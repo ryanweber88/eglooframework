@@ -16,7 +16,7 @@ class EntityManager extends Middleware {
 	 * (non-PHPdoc)
 	 * @see MiddlewareInterface::processResults()
 	 */
-	public function processResults(array $arguments, $results) { 
+	public function processResults(array $arguments, array $results) { 
 		
 		if ($results !== false) {
 			$this->entity->attributes = $results[0];

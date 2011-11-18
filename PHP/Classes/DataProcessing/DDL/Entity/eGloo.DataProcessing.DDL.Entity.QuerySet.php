@@ -56,31 +56,36 @@ class QuerySet extends \eGloo\Dialect\Object implements
 						
 						$arguments = $params['arguments'];
 						$runMethod = true;
+						$results   = [ ];
 												
 						if (isset($params['middleware']) && is_array($params['middleware'])) {
 							foreach($params['middleware'] as $middleware) {
 								// a false return will indicate that method does not need to be
 								// called
 								if (($arguments = $middleware->processArguments($arguments)) === false) {
+									// flag false on run methods and break out (short-circuit) middleware
+									// processing loop
 									$runMethod = false;
 									break ;
 								}
 							}
 							
-							if ($runMethod) {
-
+							// if we have fields left after processing, then they will need to be queried
+							if ($runMethod && count($arguments['fields'])) {
 								// @todo figure out container for methods  
 								//$method  = new Method($this->entity, $params['name']);
 								$results = MethodGateway::method($this->entity, $params['name'])->call(
 									$arguments
-								);  
-																
-								foreach(array_reverse($params['middleware']) as $middleware) {
-									if (($results = $middleware->processResults($arguments, $results)) === false) {
-										break ;
-									}
+								); 
+							}
+							
+															
+							foreach(array_reverse($params['middleware']) as $middleware) {
+								if (($results = $middleware->processResults($arguments, $results)) === false) {
+									break ;
 								}
 							}
+							
 						}
 		
 						
@@ -170,19 +175,23 @@ class QuerySet extends \eGloo\Dialect\Object implements
  			
  			// TODO write some measure of intelligence in the number
  			// of entities built on an evaluation
- 			$this->entities = new \SplFixedArray(count($results)-1);
+ 			$this->entities = new \SplFixedArray(count($results));
  			$counter = 0;
  		 			
- 			 			 			
- 			foreach ($results as $index => $record) {
+ 			// iterate through results - remember that results can be a
+ 			// combination of records (as returned by the database) and
+ 			// entities, from persistence 			
+ 			foreach ($results as $index => $mixed) {
  				
- 				// @todo this is ugly - results should not be contingent
- 				// upon numerical indicies - in other words - we need
- 				// to find a way to pass results, that is not piled on
- 				// top of results array
-
- 				if (is_numeric($index)) { 
- 		
+				// result is an entity, which was gleaned from persistence context by 
+				// a middleware component			
+ 				if (is_object($mixed) && $mixed instanceof Entity) { 
+ 					$this->entities[$counter++] = $mixed;
+ 				}
+ 				
+ 				// otherwise result is coming from database, and we do search of persistence
+ 				// context for entity 
+ 				else {
  					
 	 				$this->entities[$counter++] = $manager->find(
 	 					$this->entity, 
@@ -208,24 +217,19 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		 				foreach ($results['look_for'] as $fieldName => $composite) { 
 		 					if (isset($record[$fieldName])) { 
 		 						foreach ($composite['values'] as $value) {
-		 							
-		 							
-	 								
-		 										
+
 		 							// if we find a match, map a new association, unset value
 		 							// from looks for, and break loop
 		 							if ($record[$fieldName] == $value) {
-		 								$entity = $manager->map
+		 								$entities = $manager->map
 		 										->with($this->entity->definition->primary_key)
 		 										->with($record[$this->entity->definition->primary_key])
 		 										->retrieves($this->entity);
 		 										
-		 								$manager->map->with($fieldName)->with($value)->refers($entity);
+		 								$manager->map->with($fieldName)->with($value)->refers($entities);
 		 								
 		 								// unset value as we should not look for again
 		 								unset($results['looks_for'][$fieldName]);
-		 								
-		 								
 		 								
 		 								break;
 		 							}
@@ -233,8 +237,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		 					}
 		 				}
 	 				}
-	 			}
+	 				
+ 				}
  			}
+ 			
  		}
 		
 		else { 
@@ -242,7 +248,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// so that it can honor iterator, arrayaccess
 			// countable implementations without having
 			// to ask if entities exists for each method
-			$this->entities = new \SplFixedArray(0);
+			$this->entities = [ ]
 		}
 		
 		

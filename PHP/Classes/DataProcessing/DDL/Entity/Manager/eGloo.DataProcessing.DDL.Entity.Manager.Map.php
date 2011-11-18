@@ -25,9 +25,10 @@ class Map extends \eGloo\Dialect\Object {
 	
 	/**
 	 * 
-	 * Determines if valid entity is pointed to by domain.
+	 * Determines if valid entity is pointed to by domain. Here entity
+	 * paarmeter acts as key
 	 * @param  Entity $entity
-	 * @return Entity
+	 * @return Entity[]
 	 */
 	public function retrieves(Entity $entity) {
 		
@@ -64,14 +65,29 @@ class Map extends \eGloo\Dialect\Object {
 	/**
 	 * 
 	 * Defines a valid entity to which map to
-	 * @param  Entity $entity
+	 * @param  Entity|Entity[] $entity
 	 * @return void
 	 */
-	public function refers(Entity $entity) { 
+	public function refers($mixed) {
+
+		if (is_array($mixed) && count()) { 
+			$entities = &$mixed;
+		}
+		
+		else if ($mixed instanceof Entity) { 
+			$entities = [ $mixed ];
+		}
+		
+		else {
+			throw new DDL\Exception\Exception (
+				'Illegal Argument Exception : argument must be an '.
+				'instance of Entity or Entity[]'
+			);
+		}
 		
 		// merge arrays so entity takes first position in chain
 		$chain = array_merge(
-			[ DDL\Utility\Entity::key($entity) ], $this->chain
+			[ DDL\Utility\Entity::key($entities[0]) ], $this->chain
 		);
 		
 		// draw out chain into profiles
@@ -90,13 +106,15 @@ class Map extends \eGloo\Dialect\Object {
 		// refer node, which is a pointer to profiles,
 		// but currently descended #domains dimensions
 		// to entity
-		$node = $entity;
+		if (!is_array($node)) {
+			$node = [ ];
+		}
+		
+		$node = array_merge($node, $entities);
 
 		// reset chain
 		$this->chain = [ ];
-		
-		// return entity
-		return $entity;
+
 	}
 	
 	

@@ -24,7 +24,7 @@ trait MiddlewareTrait {
 	 * @param  mixed   $results
 	 * @return mixed
 	 */
-	public function processResults(array $arguments, $results) {
+	public function processResults(array $arguments, array $results) {
 		return $results;
 	}
 }

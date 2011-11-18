@@ -19,58 +19,52 @@ class QuerySetManager extends Middleware {
 	 */
 	public function processArguments(array $arguments) { 
 		$manager = DDL\Entity\Manager\Factory::factory();
-		$allIn   = true;
-		
+				
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case
+		// @todo this needs to be moved an object relationship - horrifically
+		// ugly at the moment
 		foreach ($arguments['fields'] as $name => $composite) {
+			// found is where we stash a note that a particular field and
+			// value has been found
 			$arguments['fields'][$name]['found'] = [ ];
 			$counter = 0;
 						
-			foreach($composite['values'] as $key) {
-				// if entity is found then  
-				if (($entity = $manager->map->with($name)->with($key)->retrieves($this->entity)) !== false) {
-					$arguments['fields'][$name]['found'][] = [
-						'index' => $counter++ , 'value' => $key
-					];
+			foreach($composite['values'] as $index => $value) {
+				if ($manager->map->with($name)->with($value)->retrieves($this->entity) !== false) {
+					
+					// move value to found and unset from main args list
+					$arguments['fields'][$name]['found'][] = $value;
+					
+					// remove argument from list as it has already been persisted
+					unset($arguments['fields'][$name]['values'][$index]);
 				}
-
-				// check difference to see if all values are found
-				// in persitence context, if not flag it damnit
-				if ($allIn) { 
-					if (count($composite['values']) > count($arguments['fields'][$name]['found'])) {
-						$allIn = false;
-					}
-				}				
 			}
 		}
 		
-		// A false return will flag a short circuit results 
-		return $allIn 
-			? false 
-			: $arguments;
+		// A false return will flag to short circuit results, since
+		// all of our entities can be found
+		return $arguments;
 		
-		
-		// check if all entities are found, in which case, we flag short-circuit
-		// generating results (since we have no need to hit database if currently
-		// everything sought is currently in persistence context)
-		
-		return $arguments;		
 	}
 	
 	/**
 	 * (non-PHPdoc)
 	 * @see MiddlewareInterface::processResults()
 	 */
-	public function processResults(array $arguments, $results) { 
+	public function processResults(array $arguments, array $results) { 
 		$manager = DDL\Entity\Manager\Factory::factory();
 
 		// appends to results the fields we are looking for, that will be 
 		// mapped during the evaluation aspect of queryset
 		// @todo this is sloppy, needs to be refactored
-		foreach ($results as $record) { 
-			foreach($arguments['fields'] as $fieldName => $composite) {	
-				$results['look_for'] = $arguments['fields'];
+		
+		// iterate through arguments - any arguments that have reached this
+		// point HAVE been queried for
+		foreach ($arguments as $fieldName => $composite) {
+			
+			foreach($results as $record) {
+				
 			}
 		}
 		

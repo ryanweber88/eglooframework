@@ -64,7 +64,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 				$entityPersistent = $this->map
 					->with($entity->definition->primary_key)
 					->with($entity->id)
-					->retrieves($entity);
+					->retrieves($entity)[0];
 
 				// if unable to find entity via pk map, then entity has not yet
 				// been added to pool
@@ -87,10 +87,12 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 					// finally add pk map to entity, which will return
 					// reference to persistent entity (their actually
 					// all the same)
-					$entityPersistent = $this->map
+					$this->map
 						->with($entity->definition->primary_key)
 						->with($entity->id)	
-						->refers($entity);					
+						->refers($entity);	
+
+					$entityPersistent = $entity;
 				}
 
 				

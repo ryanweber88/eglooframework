@@ -23,5 +23,5 @@ interface MiddlewareInterface {
 	 * @param array $arguments
 	 * @param unknown_type $results
 	 */
-	public function processResults(array $arguments, $results);
+	public function processResults(array $arguments, array $results);
 }
