@@ -24,6 +24,8 @@ trait MagicMethodTrait {
 		}
 		
 		else { 
+			echo "calling magic on $name from " . get_class($this) . "\n";
+			
 			$actions = &static::$actions;
 					
 			// find property name and action

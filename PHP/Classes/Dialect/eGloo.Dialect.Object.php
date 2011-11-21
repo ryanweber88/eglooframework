@@ -42,6 +42,7 @@ abstract class Object {
 			
 			// this doesn't work polymorphically
 			//static::$_class = new _Class($this);
+			//$this->_class = new _Class(get_class($this));
 		}
 		
 	}
@@ -131,7 +132,7 @@ abstract class Object {
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
 			}		
-				
+
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -179,9 +180,7 @@ abstract class Object {
 	 * @param mixed* $arguments
 	 */
 	public function __call($name, $arguments) { 
-		
-		//echo "$name\n";
-		
+				
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collisions
@@ -193,6 +192,9 @@ abstract class Object {
 		
 		// define a default getter/setter 
 		else if (property_exists($this, $name)) {
+			// @todo static nature is causing overwrite of defined
+			// method - nasty error to track down
+			/*
 			$function = $this->defineMethod($name, function($argument = null) use ($name) {
 				// if an argument has been specfied, then
 				// this a set method
@@ -203,16 +205,26 @@ abstract class Object {
 				$this->$name = $argument;
 				return $this;
 			});
-
+			
+			
 			return count($arguments) 
 				? $function($arguments[0])
 				: $function();
+			*/
+			if (count($arguments)) {
+				$this->$name = $arguments[0];
+				return $this;
+			}
+			
+			return $this->$name;
+			
 		}
 		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
 		// value at the fist index
-		else if (($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) {
+		
+		else if (count($arguments) && ($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) {
 			return $mixed;
 		}
 

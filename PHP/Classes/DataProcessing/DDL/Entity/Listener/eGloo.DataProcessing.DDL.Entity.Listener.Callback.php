@@ -28,7 +28,7 @@ class Callback extends Listener {
 		// just shortcutting to params and results handler
 		$params  = $event->getParams();
 		$target  = $event->getTarget();
-		
+								
 		// push callback onto target stack
 		if (property_exists($target, 'callbacks')) { 
 			$target->callbacks->push(new DDL\Utility\Callback(
@@ -37,9 +37,7 @@ class Callback extends Listener {
 					$arguments = $params['arguments'];
 					$runMethod = true;
 					$results   = [ ];
-					
-					var_export($pass); exit;
-	
+						
 					// if middleware has been specified, we are processing a method call (call
 					// to underlying data layer) - middleware acts to process or make sence of 
 					// all deferred callback data, which is passed as organized set to method
@@ -109,26 +107,5 @@ class Callback extends Listener {
     	);
     }
     
-    /**
-     * 
-     */
-    public function eventEvaluate(Event $event) {
-    	// trigger evaluate method in target
-    	$target = $event->getTarget();
-    	
-    	// check that target responds to evaluate method
-    	if (method_exists($event->getTarget(), 'evaluate')) { 
-    		$event->getTarget()->evaluate();
-    		
-    		// a boolean false return indicates that event should be discarded
-    		// and not respond to any further evaluate triggers
-    		return false;
-    	}
-    	
-    	// throw exception as target does not respond to evaluate method
-    	throw new DDL\Exception\Exception(
-    		'Target does not respond to evaluate : ' . get_class($target)
-    	);
-    }
 	
 }

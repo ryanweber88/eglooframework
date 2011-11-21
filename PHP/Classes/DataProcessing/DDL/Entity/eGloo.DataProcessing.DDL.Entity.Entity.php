@@ -67,7 +67,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
 		}
-		
+				
 							
 		// ENTITY/STATEMENT INTERFACE
 		// TODO abstract adding of interfaces 
@@ -91,7 +91,23 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// Callback listener is responsible for evaluating all
 		// triggers to call and evaluate 
-		$this->events->attachAggregate(new Listener\Callback($this));	
+		$this->events->attachAggregate(new Listener\Callback($this));
+		$this->events->attachAggregate(new Listener\Listener($this, [
+			// listens for evaluate trigger
+			'evaluate' => function(Event $event) { 
+				// evaluates entity for substance (is this
+				// a fake entity or what not eh)
+				//echo "calling evaluate\n";		
+		
+				$this->evaluate();
+				
+				// false return indicates that listener will only respond once
+				// or is removed after initial run
+				return false;
+			}
+			
+		]));			
+				
 		
 	}
 	
@@ -337,17 +353,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @return Entity | QuerySet | boolean
 	 */
 	public static function find($key) { 
-		
+echo 'here we are';
+		var_dump(new static()); exit;
+
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static;
 		$pk      = $entity->definition->primary_key;
+		
+		
 
 		// this will allow users to pass keys as 1,2,3
 		if (count(func_get_args()) > 1) {
 			$key = func_get_args();	
 		}
-		
-	
 		
 		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
@@ -436,11 +454,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	protected function _findBy ($methodName, array $arguments) { 
 		$manager = Manager\Factory::factory();		
-		$set     = new QuerySet($this);
-
+		$set     = new QuerySet($this);		
 		
-		
-		$set->events->trigger('call', $this, [
+		$set->events->trigger('call', $set, [
 			'name'            => $methodName,
 		
 			// defines the calling method, and parameter values
@@ -459,7 +475,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			// manager, and if it 
 			'defer'           => true
 		]);	
-		
+
+				
 		return $set;
 		
 	}
@@ -574,31 +591,20 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * that if any attribute or relation name exists, it will take prescedence
 	 * over class protecteds
 	 */
-	public function __get($name) { 
+	//public function __get($name) { 
 		
 		// use reflection and static storage to retrieve list of entity properties
-		try {
-			return parent::__get($name);
-		} catch(\Exception $ignore) { 
-			var_export(property_exists($this, 'callbacks')); exit('asdf');
-		}
+		//foreach([$this->attributes, $this->relationships] as $hash) {
+			//if (is_array($hash) && isset($hash[$name])) {
+			//	return $hash[$name];
+			//}
+		//}
 		
-		// otherwise first check entity attributes
-		if (is_array($this->attributes) && isset($this->attributes[$name])) { 
-			return $this->attributes[$name];
-		}
+		//echo "sending $name to parent from class " . get_class($this). " from entity\n";
 		
-		// and then relationshipos
-		if (is_array($this->relationships) && isset($this->relationships[$name])) { 
-			return $this->relationships[$name];
-		}
+		//return parent::__get($name);
 		
-		
-		// otherwise throw big fat exception
-		throw new DDL\Exception\Exception(
-			'INVALID get for entity property : ' . $name
-		);
-	}
+	//}
 	
 	/**
 	 * Sets attribute value, or entity property; in this case,
@@ -626,7 +632,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			return $this;
 		}
 		*/
-		if (property_exists($class, $property))
+		//if (property_exists($class, $property))
 		
 		// otherwise class object implementation will handle
 		// set
@@ -644,11 +650,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// iterate through attributes, relationships and finally
 		// self - it is important to note the order as that 
 		// dictates precedence 
-		foreach([$this->attributes, $this->relationships] as $container) {
-			if (($mixed = $this->callMagicOn($name, $arguments, $container)) !== false) {
-				return $mixed;
-			}
-		}
+		//foreach([$this->attributes, $this->relationships] as $container) {
+			
+			//if (($mixed = $this->callMagicOn($name, $arguments, $container)) !== false) {
+			//	return $mixed;
+			//}
+		//}
 		
 		// otherwise we bail out to object method
 		return parent::__call($name, $arguments);
@@ -662,7 +669,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		$entity     = new static;
 		$methodName = $name;
 		$name       = strtolower($name);
-		
+				
 		// @todo this should be simpler if/when following convention 
 		if (strpos($name, 'find') !== false && (strpos($name, 'by') !== false || strpos($name, 'like') !== false)) {
 							

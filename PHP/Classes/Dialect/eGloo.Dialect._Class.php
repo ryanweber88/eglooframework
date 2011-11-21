@@ -12,7 +12,7 @@ class _Class extends Object {
 	function __construct($mixed) { 
 		parent::__construct();
 		
-		if (is_object($mixed)) {
+		if (is_object($mixed)) {			
 			$this->class    = get_class($mixed);
 			$this->instance = new \WeakRef($mixed);
 		}
@@ -87,8 +87,8 @@ class _Class extends Object {
 	}	
 	
 	
-	protected $name;
-	protected $class;
-	protected $instance;
-	protected $namespace = false;
+	public $name;
+	public $class;
+	public $instance;
+	public $namespace = false;
 }

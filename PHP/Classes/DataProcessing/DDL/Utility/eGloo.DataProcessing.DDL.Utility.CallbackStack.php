@@ -21,7 +21,9 @@ class CallbackStack extends \SplStack {
 			: [  ];
 		
 		while (!$this->isEmpty()) {
-						
+
+			$callback = $this->pop();
+			echo $callback->getEvent(); exit;
 			// @todo chain passthrough data
 			$results = $this->pop()->call($results);			
 		}

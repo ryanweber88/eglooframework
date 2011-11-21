@@ -30,7 +30,22 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// instantiate event manager and attach listeners 		
 		$this->events = new EventManager;		
 		$this->events->attachAggregate(new Listener\Callback($this->entity));
+		$this->events->attachAggregate(new Listener\Listener($this->entity, [
+			// listens for evaluate trigger
+			'evaluate' => function(Event $event) { 
+				// evaluates entity for substance (is this
+				// a fake entity or what not eh)
+				//echo "calling evaluate\n";		
 		
+				$this->evaluate();
+				
+				// false return indicates that listener will only respond once
+				// or is removed after initial run
+				return false;
+			}
+			
+		]));
+			
 		
 		// instantiate callback stack
 		if (is_null($stack)) { 
@@ -38,7 +53,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		}
 		
 		$this->callbacks = $stack;
+		
+	
  	}
+ 	
  	
  	/**
  	 * Provides bulk update for delete on querysets
@@ -93,12 +111,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
- 		echo 'calling evaluate';
- 		exit;
-	
+	 	
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
+ 			
+ 			var_export($results); exit;
+ 			
 			// middleware has ran - do we need to do anything here
 			// TODO write some measure of intelligence in the number
 			// of entities built on an evaluation

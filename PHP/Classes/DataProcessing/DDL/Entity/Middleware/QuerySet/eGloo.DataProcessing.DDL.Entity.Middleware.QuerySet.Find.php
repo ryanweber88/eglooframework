@@ -21,7 +21,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 		$manager = DDL\Entity\Manager\Factory::factory();
 		$allIn   = true;
 		
-		var_export($arguments); exit;
+		var_export($arguments);
 								
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case

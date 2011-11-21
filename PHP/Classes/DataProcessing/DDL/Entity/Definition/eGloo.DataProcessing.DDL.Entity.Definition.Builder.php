@@ -38,6 +38,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 			);
 		}
 		
+		//echo $this->entity->state;		
 		// use simplexml to load/parse entities file
 		// TODO abstract parsing mechanism, as we should be able
 		// to load entity information from any storage scheme			
@@ -46,6 +47,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 		$name       = $this->entity->_class->name;
 		$definition = new DDL\Entity\Definition($this->entity);
 		$attributes = [ ];
+		
 				
 		// check that entity definition exists
 		if (($nodes = $xml->xpath("/DataProcessing/Entities/Entity[@name='$name']")) !== false) {
