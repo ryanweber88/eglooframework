@@ -34,8 +34,8 @@ abstract class Object {
 		if (!($this instanceof _Class)) { 
 		 
 			// @todo limit_static
-			if (!isset(static::$classes[get_class($this)])) {
-				static::$classes[get_class($this)] = new _Class($this);
+			if (!isset(static::$_classes[get_class($this)])) {
+				static::$_classes[get_class($this)] = new _Class($this);
 			}
 			
 			$this->_class = static::$_classes[get_class($this)];

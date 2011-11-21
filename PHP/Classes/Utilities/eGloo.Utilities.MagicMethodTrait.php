@@ -12,7 +12,7 @@ trait MagicMethodTrait {
 		$functionContainer = 
 			is_object($container) && $container instanceof \eGloo\Dialect\Object
 			? static::$_methods
-			: static::$magicMethodTraitFunctionContainer
+			: static::$magicMethodTraitFunctionContainer;
 			
 
 		// check if specific magic call has been previously called - in

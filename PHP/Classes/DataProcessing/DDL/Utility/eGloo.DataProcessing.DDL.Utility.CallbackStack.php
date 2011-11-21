@@ -14,7 +14,7 @@ class CallbackStack extends \SplStack {
 	 * 
 	 * Executes all callbacks currently sitting on stack
 	 */
-	public function batch(array $middleware = [ ]) { 
+	public function batch() { 
 
 		$results = ($this->isEmpty()) 
 			? false 
@@ -22,17 +22,8 @@ class CallbackStack extends \SplStack {
 		
 		while (!$this->isEmpty()) {
 						
-			// call, retrieve results to pass to the next callback
-			// TODO results push through is not working
-			//if (!is_array(($results = $this->pop()->call($results)))) { // = function($results) { method->call($arguments, $results) }
-			//	$results = [ 'previous' => $results ];				
-			//}
-			
-			//$callback = $this->pop();
-			//$
-			
 			// @todo chain passthrough data
-			$results = $this->pop()->call([]);			
+			$results = $this->pop()->call($results);			
 		}
 		
 		return $results;

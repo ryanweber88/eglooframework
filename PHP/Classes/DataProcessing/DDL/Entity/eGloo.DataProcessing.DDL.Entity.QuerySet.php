@@ -19,7 +19,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	const ORDER_BY_ASCENDING  = 'ASC';
 	const ORDER_BY_DESCENDING = 'DESC';
 		
- 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
+ 	function __construct(Entity $entity, DDL\Utility\CallbackCollection $stack = null) { 
 
  		parent::__construct();
  		
@@ -27,85 +27,9 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// type of entity, so entity represents the "type" of this queryset
  		$this->entity = $entity;
  		
- 		
- 	
- 		
- 		// instantiate event manager and attach listeners
- 		// $this->querySetEvents();
- 		
+ 		// instantiate event manager and attach listeners 		
 		$this->events = new EventManager;		
-		$this->events->attachAggregate(new Listener\Callback([
-			// listens for evaluate trigger
-			'evaluate' => function(Event $event) { 
-				// evaluates entity for substance (is this
-				// a fake entity or what not eh)
-				//echo "calling evaluate\n";		
-		
-				$this->evaluate();
-				
-				// false return indicates that listener will only respond once
-				// or is removed after initial run
-				return false;
-			}, 
-			
-			// listens for call trigger
-			'call'     => function(Event $event) {
-				
-				// just shortcutting to params and results handler
-				$params  = $event->getParams();
-							
-				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], function(array $ignore = [ ]) use ($params) {
-						
-						$arguments = $params['arguments'];
-						$runMethod = true;
-						$results   = [ ];
-
-						// @todo
-						// arguments is acting as an arc of sorts, between processArguments
-						// and processResults - I hate this pattern right now 
-						if (isset($params['middleware']) && is_array($params['middleware'])) {
-							foreach($params['middleware'] as $middleware) {
-								// a false return will indicate that method does not need to be
-								// called
-								if (($arguments = $middleware->processArguments($arguments)) === false) {
-									// flag false on run methods and break out (short-circuit) middleware
-									// processing loop
-									$runMethod = false;
-									break ;
-								}
-							}
-							
-							// if we have fields left after processing, then they will need to be queried
-							if ($runMethod && count($arguments['fields'])) {
-								// @todo figure out container for methods  
-								$results = MethodGateway::method($this->entity, $params['name'])->call(
-									$arguments
-								); 
-							}
-							
-															
-							foreach(array_reverse($params['middleware']) as $middleware) {
-								if (($results = $middleware->processResults($arguments, $results)) === false) {
-									break ;
-								}
-							}
-							
-						}
-		
-						
-						
-						return $results;
-						
-						
-		
-					}
-				));
-				
-				// short-circuit listens on this aggregate
-				return true;
-			}
-		]));
+		$this->events->attachAggregate(new Listener\Callback($this->entity));
 		
 		
 		// instantiate callback stack
@@ -135,7 +59,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
 
- 	
  	/**
  	 * 
  	 * Provides a callback query interface for entities
@@ -170,81 +93,11 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
-
-
+	
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
-			$manager = Manager\Factory::factory();
-			
- 			
- 			// TODO write some measure of intelligence in the number
- 			// of entities built on an evaluation
- 			$this->entities = new \SplFixedArray(count($results));
- 			$counter = 0;
- 		 			
- 			// iterate through results - remember that results can be a
- 			// combination of records (as returned by the database) and
- 			// entities, from persistence 			
- 			foreach ($results as $index => $mixed) {
- 				
-				// result is an entity, which was gleaned from persistence context by 
-				// a middleware component			
- 				if (is_object($mixed) && $mixed instanceof Entity) { 
- 					$this->entities[$counter++] = $mixed;
- 				}
- 				
- 				// otherwise result is coming from database, and we do search of persistence
- 				// context for entity 
- 				else {
- 					
-	 				$this->entities[$counter++] = $manager->find(
-	 					$this->entity, 
-	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
-	 						
-	 						// instantiate entity
-	 						$entity              = clone $this->entity;
-	 						$entity->attributes  = $record;
-	 						
-	 						// returning entity to manager to handle persistence
-	 						return $entity;
-	 						
-	 					}
-	 				); 	
-	 				
-	 				echo "adding entity\n";
-	 				
-	 				
-	 				// now do side associations
-	 				// @todo abstract this into something nicer than associative
-	 				// array 
-	 				if (is_array($results['look_for'])) { 
-		 				foreach ($results['look_for'] as $fieldName => $composite) { 
-		 					if (isset($record[$fieldName])) { 
-		 						foreach ($composite['values'] as $value) {
-
-		 							// if we find a match, map a new association, unset value
-		 							// from looks for, and break loop
-		 							if ($record[$fieldName] == $value) {
-		 								$entities = $manager->map
-		 										->with($this->entity->definition->primary_key)
-		 										->with($record[$this->entity->definition->primary_key])
-		 										->retrieves($this->entity);
-		 										
-		 								$manager->map->with($fieldName)->with($value)->refers($entities);
-		 								
-		 								// unset value as we should not look for again
-		 								unset($results['looks_for'][$fieldName]);
-		 								
-		 								break;
-		 							}
-		 						}
-		 					}
-		 				}
-	 				}
-	 				
- 				}
- 			}
+			// middleware has ran - do we need to do anything here
  			
  		}
 		
@@ -260,41 +113,45 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
 
+ 	
+
 
 	// Retrieve Interfaces ------------------------------------------------- //
 	// Methods can be chained 
  
 	public function limit($amount) { 
-		$set = new QuerySet($this->callbacks);
-		$set->events->trigger('call', $entity, [
+		$this->events->trigger('call', $entity, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'amount' => $amount ], 
-		
+				
 			'definition' => function($arguments) {
-		
-				return [ 'limit' => $arguments['amount'] ];
+				return [ 'limit' => $amount ];
 			}
 		]);
 		
 		return $set;
 	}
 	
+	/**
+	 * Specifies result offset - defers til evaluate
+	 */
 	public function offset($start, $end = 0) { 
-		$set = new QuerySet($this->callbacks);
-		$set->events->trigger('call', $entity, [
+		$this->events->trigger('call', $entity, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'amount' => $amount ], 
 		
 			'definition' => function($arguments) {
-				return [ 'offset' => $arguments['amount'] ];
-			}
+				return [ 'start' => $start, 'end' => $end ];
+			},
+			
+			'defer'      => true;
 		]);
 		
-		return $set;
+		return $this;
 	}
 	
 	/**
@@ -324,16 +181,14 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		// finally, create new set, pass callbacks to and add
 		// orderby to stack
 		$this->events->trigger('call', $this->entity, [
-			'name'       => __FUNCTION__,
+			'name'       => 'order_by',
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'fields' => $fields ], 
 		
-			'definition' => function($arguments) {
-				return [ 'order_by' => $arguments['fields'] ];
-			},
+			'middleware' => [ new Middleware\QuerySet\OrderBy($this) ],
 			
-			'defer'     =>  true
+			'defer'      =>  true
 		]);
 		
 		return $this;	

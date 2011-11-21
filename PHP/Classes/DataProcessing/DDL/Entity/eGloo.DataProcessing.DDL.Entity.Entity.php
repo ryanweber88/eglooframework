@@ -89,77 +89,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// Stat listener is responsible for tracking accessed/modified data
 		$this->events->attachAggregate(new Listener\Stat);
 		
-		// TODO refactor into separate listener class
-		$this->events->attachAggregate(new Listener\Generic([
-			// listens for evaluate trigger
-			'evaluate' => function(Event $event) { 
-				// evaluates entity for substance (is this
-				// a fake entity or what not eh)
-				$this->evaluate();
-				
-				// false return indicates that listener will only respond once
-				// and be unbound
-				// return false;
-			}, 
-			
-			// listens for call trigger
-			'call'     => function(Event $event) {
-				
-				// just shortcutting to params and results handler
-				$params  = $event->getParams();
-				
-				
-				$this->callbacks->push(new DDL\Utility\Callback(
-					$params['name'], function(array $passThrough = [ ]) use ($params) {
-
-						$arguments = $params['arguments'];
-						$runMethod = true;
-												
-						if (isset($params['middleware']) && is_array($params['middleware'])) {
-							foreach($params['middleware'] as $middleware) {
-								// a false return will indicate that method does not need to be
-								// called
-								if (($arguments = $middleware->processArguments($arguments)) === false) {
-									$runMethod = false;
-									break ;
-								}
-							}
-							
-							if ($runMethod) {
-
-								$result = MethodGateway::method($this, $params['name'])->call(
-									$arguments
-								);   
-								
-								foreach(array_reverse($params['middleware']) as $middleware) {
-									if (($results = $middleware->processResults($arguments, $results)) === false) {
-										break ;
-									}
-								}
-							}
-						}
-		
-						
-						return $results;
-					}
-				));
-				
-				// unless defer flag has been exp specified, trigger evaluation
-				// immediately
-				if (!isset($params['defer']) || $params['defer'] !== true) { 
-					$this->events->trigger('evaluate');
-				}
-				
-				
-				// true return will short-curcuit any subsequent calls
-			
-				return true;
-			}
-		]));		
-		
-
-		// initialize attributes and relationships
-		//echo $this->state; exit;
+		// Callback listener is responsible for evaluating all
+		// triggers to call and evaluate 
+		$this->events->attachAggregate(new Listener\Callback($this));	
 		
 	}
 	
@@ -209,14 +141,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									// at least managed from some outside perspective - find_ could change at anytime. 
 									
 									// we know that a method call on an entity is using a foreign key
+									// @todo add exception handling
 									return MethodGateway::method($this, 'find_' . strtolower($relationship->to))->call([
 										'fields' => [ 
 											$pk => [ 'values' => [ $this->id ] ]
 										]
-									]);
-									  
+									]);  
 									
-									return $results;									 															
 								})])
 							);
 						}
@@ -437,7 +368,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				// here we define middleware, which acts layer between arguments to
 				// db calls
 				'middleware'      => [ 
-					new Middleware\QuerySetManager($entity) 
+					new Middleware\QuerySet\Find($set) 
 				],
 				
 				// we defer an evaluation of entity (running callback stack
@@ -474,7 +405,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					]], 
 					
 					'middleware'        => [
-						new Middleware\EntityManager($entity)
+						new Middleware\Entity\Find($entity)
 					],
 					
 					// we defer an evaluation of entity (running callback stack
@@ -505,7 +436,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	protected function _findBy ($methodName, array $arguments) { 
 		$manager = Manager\Factory::factory();		
-		$this->arbitrary = $this->definition;		
 		$set     = new QuerySet($this);
 
 		
@@ -521,7 +451,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			// here we define middleware, which acts layer between arguments to
 			// db calls
 			'middleware'      => [ 
-				new Middleware\QuerySetManager($this) 
+				new Middleware\QuerySet\Find($set) 
 			],
 			
 			// we defer an evaluation of entity (running callback stack
