@@ -24,7 +24,7 @@ class Test extends Middleware {
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
 		
-		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
+		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
 		
 		echo $set->count();
 		//$set->orderBy(

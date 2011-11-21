@@ -75,6 +75,22 @@ $target = $argv[count($argv)-1];
 
 // TESTING
 
+class test extends \eGloo\Dialect\Object {
+
+}
+
+class test2 extends \eGloo\Dialect\Object {
+	function __construct() {
+		echo "{$this->_class}\n";
+		
+		$test = new test;
+		echo "{$test->_class->name}\n";
+	}	
+}
+
+$t = new test2;
+exit;
+
 // NOTE : Everything defined in global context will exist in global context
 // amongst all EAS instances
 

@@ -32,6 +32,9 @@ abstract class Object implements MetaInterface {
 			}
 			
 			$this->_class = static::$_classes[get_class($this)];
+			echo "instantiating class object for " . get_class($this) . "\n";
+			
+			echo $this->_class->method('asdf');
 		}
 		
 		// instantiate singleton - a singleton represents a single
@@ -196,8 +199,18 @@ abstract class Object implements MetaInterface {
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collisions
+		//echo var_export(method_exists($this, 'method'), true);
 		
-		foreach ([$this->singleton, $this->_class, $this] as $meta) {
+		// assign to self necessary 
+		$self = $this;
+				
+		foreach ([$this->_singleton, $this->_class, $self] as $meta) {
+			
+			// write around to account for 
+			if (get_class($meta) == 'eGloo\Dialect\Object') {
+				//$meta = &$this;
+			//}
+			
 			if ($meta->method($name)) {
 				return call_user_func_array(
 					$meta->method($name), $arguments
@@ -208,6 +221,7 @@ abstract class Object implements MetaInterface {
 		// define a default getter/setter 
 		if (property_exists($this, $name)) {
 			// define a class level method
+			
 			
 			$function = $this->_class->defineMethod($name, function($argument = null) use ($name) {
 				// if an argument has been specfied, then
@@ -284,7 +298,7 @@ abstract class Object implements MetaInterface {
 	}
 	
 	protected $_class;
-	protected $_instance;
+	protected $_singleton;
 	static protected $_classes;
 	static protected $_methods;
 }
