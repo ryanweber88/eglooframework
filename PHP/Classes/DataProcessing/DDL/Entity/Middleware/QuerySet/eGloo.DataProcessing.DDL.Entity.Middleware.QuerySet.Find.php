@@ -10,7 +10,7 @@ use \eGloo\DataProcessing\DDL;
  * @author Christian Calloway
  *
  */
-class Find extends DDL\Entity\Middleware {
+class Find extends DDL\Entity\Middleware\Middleware {
 		
 	
 	/**
@@ -88,78 +88,9 @@ class Find extends DDL\Entity\Middleware {
 			}
 			
 		}
-		 			
-		// TODO write some measure of intelligence in the number
-		// of entities built on an evaluation
-		$this->entities = new \SplFixedArray(count($results));
-		$counter = 0;
-	 			
-		// iterate through results - remember that results can be a
-		// combination of records (as returned by the database) and
-		// entities, from persistence 			
-		foreach ($results as $index => $mixed) {
-			
-			// result is an entity, which was gleaned from persistence context by 
-			// a middleware component			
-			if (is_object($mixed) && $mixed instanceof Entity) { 
-				$this->entities[$counter++] = $mixed;
-			}
-			
-			// otherwise result is coming from database, and we do search of persistence
-			// context for entity 
-			else {
-				
-				$allIn = false;
-				
- 				$this->entities[$counter++] = $manager->find(
- 					$this->entity, 
- 					$record[$this->entity->definition->primary_key], function() use ($record) { 
- 						
- 						// instantiate entity
- 						$entity              = clone $this->entity;
- 						$entity->attributes  = $record;
- 						
- 						// returning entity to manager to handle persistence
- 						return $entity;
- 						
- 					}
- 				); 	
- 				
- 				echo "adding entity\n";
- 				
- 				
- 				// now do side associations
- 				// @todo abstract this into something nicer than associative
- 				// array 
- 				if (is_array($results['look_for'])) { 
-	 				foreach ($results['look_for'] as $fieldName => $composite) { 
-	 					if (isset($record[$fieldName])) { 
-	 						foreach ($composite['values'] as $value) {
-
-	 							// if we find a match, map a new association, unset value
-	 							// from looks for, and break loop
-	 							if ($record[$fieldName] == $value) {
-	 								$entities = $manager->map
-	 										->with($this->entity->definition->primary_key)
-	 										->with($record[$this->entity->definition->primary_key])
-	 										->retrieves($this->entity);
-	 										
-	 								$manager->map->with($fieldName)->with($value)->refers($entities);
-	 								
-	 								// unset value as we should not look for again
-	 								unset($results['looks_for'][$fieldName]);
-	 								
-	 								break;
-	 							}
-	 						}
-	 					}
-	 				}
- 				}
- 				
-			}
-		}		
 		
 		return $results;
+		 			
 	}
 	
 }

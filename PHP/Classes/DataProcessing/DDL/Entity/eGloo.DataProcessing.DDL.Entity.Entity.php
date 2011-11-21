@@ -204,13 +204,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		$results =  $this->callbacks->batch();
 		
+		// @todo do checking on results
+		
+		
+		// set attributes to results values
+		$this->attributes = $results;		
 		//var_export($results);
 		
-
-		
-		return $results;
-	
-			
 	}
 	
 

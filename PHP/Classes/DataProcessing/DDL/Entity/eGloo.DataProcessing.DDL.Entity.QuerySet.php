@@ -93,14 +93,84 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	protected function evaluate() { 
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
+ 		echo 'calling evaluate';
+ 		exit;
 	
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
 			// middleware has ran - do we need to do anything here
- 			
+			// TODO write some measure of intelligence in the number
+			// of entities built on an evaluation
+			$this->entities = new \SplFixedArray(count($results));
+			$counter = 0;
+		 			
+			// iterate through results - remember that results can be a
+			// combination of records (as returned by the database) and
+			// entities, from persistence 			
+			foreach ($results as $index => $mixed) {
+				
+				// result is an entity, which was gleaned from persistence context by 
+				// a middleware component			
+				if (is_object($mixed) && $mixed instanceof Entity) { 
+					$this->entities[$counter++] = $mixed;
+				}
+				
+				// otherwise result is coming from database, and we do search of persistence
+				// context for entity 
+				else {
+					
+					$allIn = false;
+					
+	 				$this->entities[$counter++] = $manager->find(
+	 					$this->entity, 
+	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
+	 						
+	 						// instantiate entity
+	 						$entity              = clone $this->entity;
+	 						$entity->attributes  = $record;
+	 						
+	 						// returning entity to manager to handle persistence
+	 						return $entity;
+	 						
+	 					}
+	 				); 	
+	 				
+	 				echo "adding entity\n";
+	 				
+	 				
+	 				// now do side associations
+	 				// @todo abstract this into something nicer than associative
+	 				// array 
+	 				if (is_array($results['look_for'])) { 
+		 				foreach ($results['look_for'] as $fieldName => $composite) { 
+		 					if (isset($record[$fieldName])) { 
+		 						foreach ($composite['values'] as $value) {
+	
+		 							// if we find a match, map a new association, unset value
+		 							// from looks for, and break loop
+		 							if ($record[$fieldName] == $value) {
+		 								$entities = $manager->map
+		 										->with($this->entity->definition->primary_key)
+		 										->with($record[$this->entity->definition->primary_key])
+		 										->retrieves($this->entity);
+		 										
+		 								$manager->map->with($fieldName)->with($value)->refers($entities);
+		 								
+		 								// unset value as we should not look for again
+		 								unset($results['looks_for'][$fieldName]);
+		 								
+		 								break;
+		 							}
+		 						}
+		 					}
+		 				}
+	 				}
+	 				
+				}
+	 		}
  		}
-		
+ 		
 		else { 
 			// initialize entities to empty fixed array
 			// so that it can honor iterator, arrayaccess
@@ -125,10 +195,9 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'amount' => $amount ], 
+		
+			'defer'      => true
 				
-			'definition' => function($arguments) {
-				return [ 'limit' => $amount ];
-			}
 		]);
 		
 		return $set;
@@ -142,13 +211,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
-			'arguments'  => [ 'amount' => $amount ], 
-		
-			'definition' => function($arguments) {
-				return [ 'start' => $start, 'end' => $end ];
-			},
+			'arguments'  => [ 'start' => $start, 'end' => $end ], 
+
 			
-			'defer'      => true;
+			'defer'      => true
 		]);
 		
 		return $this;
@@ -161,21 +227,24 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 */
 	public function orderBy($fields) {
 		
-		// sanitize fields - first check if passing as multi|single parameter
-		if (func_num_args() > 1) {
+		// if fields are passed as 'field', 'field2'
+		// convert to array
+		if (!is_array($fields)) {
 			$fields = func_get_args();
 		}
 		
-		else if (!is_array($fields)) {
-			$fields = [ $fields ]
-		};
-		
 		// iterate through fields to determine
-		// sort order
+		// sort order of field using -+ syntax
 		foreach ($fields as $index => $field) {
 			if ($field[0] == '-') {
-				$fields[$index] = substr($fields, 1) . ' ' . self::ORDER_BY_DESCENDING;
+				$fields[$index] = substr($field, 1) . ' ' . self::ORDER_BY_DESCENDING;
 			}
+			
+			else if ($field[0] == '+') {
+				$fields[$index] = substr($field, 1);
+			}
+				
+			// @todo determine if ASC is ascii sql standard
 		}
 		
 		// finally, create new set, pass callbacks to and add
@@ -185,8 +254,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'fields' => $fields ], 
-		
-			'middleware' => [ new Middleware\QuerySet\OrderBy($this) ],
 			
 			'defer'      =>  true
 		]);
@@ -195,20 +262,23 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	}
 	
 	
-	public function groupBy(array $fields) {
-		$set = new QuerySet($this->callbacks);
-		$set->events->trigger('call', $entity, [
+	public function groupBy($fields) {
+		
+		// convert to array if passed as singular parameters
+		if (!is_array($fields)) {
+			$fields = func_get_args();
+		}
+				
+		$this->events->trigger('call', $entity, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
 			'arguments'  => [ 'fields' => $fields ], 
 		
-			'definition' => function($arguments) {	
-				return [ 'group_by' => $arguments['fields'] ];
-			}
+			'defer'      => true
 		]);
 		
-		return $set;
+		return $this;
 	}
 		
  	// ArrayAccess Interface ----------------------------------------------- //

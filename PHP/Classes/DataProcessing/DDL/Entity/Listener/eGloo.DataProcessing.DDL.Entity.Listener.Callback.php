@@ -14,7 +14,7 @@ use \Zend\EVentManager\EventCollection;
  * 
  *
  */
-class Callback extends Listener
+class Callback extends Listener {
 	
 	/**
 	 * Keeps track of method calls made - resets on commit
@@ -37,6 +37,8 @@ class Callback extends Listener
 					$arguments = $params['arguments'];
 					$runMethod = true;
 					$results   = [ ];
+					
+					var_export($pass); exit;
 	
 					// if middleware has been specified, we are processing a method call (call
 					// to underlying data layer) - middleware acts to process or make sence of 

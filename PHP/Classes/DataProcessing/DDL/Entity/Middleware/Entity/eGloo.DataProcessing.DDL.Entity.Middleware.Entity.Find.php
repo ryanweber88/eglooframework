@@ -10,7 +10,7 @@ use \eGloo\DataProcessing\DDL;
  * @author Christian Calloway
  *
  */
-class Find extends DDL\Entity\Middleware {
+class Find extends DDL\Entity\Middleware\Middleware {
 	
 	/**
 	 * (non-PHPdoc)
@@ -18,11 +18,7 @@ class Find extends DDL\Entity\Middleware {
 	 */
 	public function processResults(array $arguments, array $results) { 
 		
-		if ($results !== false) {
-			$this->container->attributes = $results[0];
-		}
-		
-		return true;
+		return $results;
 	}
 	
 }
