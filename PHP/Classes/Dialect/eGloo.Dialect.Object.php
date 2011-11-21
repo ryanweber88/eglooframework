@@ -11,27 +11,20 @@ namespace eGloo\Dialect;
  * @todo   limit_static
  *
  */
-abstract class Object { 
+abstract class Object implements MetaInterface { 
 	
 	use \eGloo\Utilities\MagicMethodTrait;
 
 
 	function __construct() { 
 		
-		// TODO perform static initialization using reflection
-		// - the problem though is that reflection is overhead
-		// heavy
+		// lets avoid infinite loops shall we - instantiate
+		// our meta classes which in turn extend object
 		
-		// does not work - will stop once set
-		//if (is_null(static::$class)) { 
-		//	static::$class = new _Class($this);
-		//}
-		
-
-		//$this->_class = new _Class($this);
-		
-		// lets avoid infinite loops shall we
-		if (!($this instanceof _Class)) { 
+		// instantiate class - class instantiation is pull from
+		// a static repository, as classes are unique and can
+		// be uniquely identified
+		if (!($this instanceof _Class) && !($this instanceof Singleton)) { 
 		 
 			// @todo limit_static
 			if (!isset(static::$_classes[get_class($this)])) {
@@ -39,16 +32,23 @@ abstract class Object {
 			}
 			
 			$this->_class = static::$_classes[get_class($this)];
-			
-			// this doesn't work polymorphically
-			//static::$_class = new _Class($this);
-			//$this->_class = new _Class(get_class($this));
+		}
+		
+		// instantiate singleton - a singleton represents a single
+		// instance of an object, and every single object instance
+		// will have one
+		if (!($this instanceof Singleton)) {
+			$this->_singleton = new Singleton($this);
 		}
 		
 	}
 	
-	/** @todo limit_static */
-	protected function defineMethod($name, $lambda) { 
+	/**
+	 * (Returns static method)
+	 * @see eGloo\Dialect.MetaInterface::defineMethod()
+	 */
+	public function defineMethod($name, $lambda) { 
+		// defines static methods across class hierarchy
 		if (is_callable($lambda)) {
 			static::$_methods[$name] = $lambda;
 			
@@ -60,6 +60,18 @@ abstract class Object {
 		    'must be of type lambda'
 		);
 	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see eGloo\Dialect.MetaInterface::method()
+	 */
+	public function method($name) {
+		return isset(static::$_methods[$name])
+			? static::$_methods[$name]
+			: false;
+	}
+	
+
 	
 	/**
 	 * 
@@ -184,18 +196,20 @@ abstract class Object {
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collisions
-		if (isset(static::$_methods[$name])) {
-			return call_user_func_array(
-				static::$_methods[$name], $arguments
-			);
+		
+		foreach ([$this->singleton, $this->_class, $this] as $meta) {
+			if ($meta->method($name)) {
+				return call_user_func_array(
+					$meta->method($name), $arguments
+				);
+			}
 		}
 		
 		// define a default getter/setter 
-		else if (property_exists($this, $name)) {
-			// @todo static nature is causing overwrite of defined
-			// method - nasty error to track down
-			/*
-			$function = $this->defineMethod($name, function($argument = null) use ($name) {
+		if (property_exists($this, $name)) {
+			// define a class level method
+			
+			$function = $this->_class->defineMethod($name, function($argument = null) use ($name) {
 				// if an argument has been specfied, then
 				// this a set method
 				if (is_null($argument)) { 
@@ -210,13 +224,15 @@ abstract class Object {
 			return count($arguments) 
 				? $function($arguments[0])
 				: $function();
-			*/
+			
+			/*	
 			if (count($arguments)) {
 				$this->$name = $arguments[0];
 				return $this;
 			}
 			
 			return $this->$name;
+			*/
 			
 		}
 		
@@ -268,6 +284,7 @@ abstract class Object {
 	}
 	
 	protected $_class;
+	protected $_instance;
 	static protected $_classes;
 	static protected $_methods;
 }

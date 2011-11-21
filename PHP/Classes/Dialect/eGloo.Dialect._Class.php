@@ -7,7 +7,7 @@ namespace eGloo\Dialect;
  * @author Christian Calloway
  *
  */
-class _Class extends Object { 
+class _Class extends Object implements MetaInterface { 
 	
 	function __construct($mixed) { 
 		parent::__construct();
@@ -43,8 +43,39 @@ class _Class extends Object {
 		}
 	}
 	
+
 	
+	/**
+	 * Defines a method on class - which is to say that method is available to 
+	 * all instances of this class, but not its descendants
+	 * @return lambda
+	 */
+	public function defineMethod($name, $lambda) {
+		
+		// defines static methods across class hierarchy
+		if (is_callable($lambda)) {
+			$this->methods[$name] = $lambda;
+			
+			return $lambda;
+		}
+		
+		throw new DDL\Exception\Exception(
+			'Illegal argument exception : parameter ' . 
+		    'must be of type lambda'
+		);
+		
+	}
 	
+	/**
+	 * 
+	 * Enter description here ...
+	 * @param string $name
+	 */
+	public function method($name) {
+		return isset($this->methods[$name])
+			? $this->methods[$name]
+			: false;
+	}
 
 	
 	/**
@@ -83,12 +114,14 @@ class _Class extends Object {
 		
 		return $reflection->newInstanceArgs($arguments);
 		
-		
 	}	
 	
 	
-	public $name;
-	public $class;
-	public $instance;
-	public $namespace = false;
+	
+	
+	protected $name;
+	protected $class;
+	protected $instance;
+	protected $namespace = false;
+	protected $methods   = [ ];
 }
