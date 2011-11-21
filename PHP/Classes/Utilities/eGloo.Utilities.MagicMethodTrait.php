@@ -223,6 +223,6 @@ trait MagicMethodTrait {
 	}
 	
 	protected static $magicMethodTraitFunctionContainer = [ ];
-	private   static $actions = [ 'in', 'each', 'find', 'includes', 'like' ];
+	protected static $actions = [ 'in', 'each', 'find', 'includes', 'like' ];
 			
 }

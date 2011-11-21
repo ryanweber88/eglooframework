@@ -130,15 +130,20 @@ abstract class Object {
 			
 		//}
 		
-		echo "getting $name on " . get_class($this) . "\n";
+
+		//echo "getting $name on " . get_class($this) . "\n";
 		
 		try { 
 			$tryMethod = "get" . ucfirst($name);
 			
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
-			}
+			}		
 			
+			if ($name == 'callbacks') {
+				echo 'callbacks in object::__get' . "\n";
+				$this->callbackss();
+			}	
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -163,7 +168,8 @@ abstract class Object {
 			if (method_exists($this, $tryMethod)) { 
 				$this->$tryMethod($value);
 				return $this;	
-			}			
+			}
+						
 			
 			$this->$name($value);
 		}
@@ -186,6 +192,9 @@ abstract class Object {
 	public function __call($name, $arguments) { 
 		
 		//echo "$name\n";
+		if ($name == 'callbackss') {
+			exit('fuck yasdf');
+		}
 		
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
@@ -227,7 +236,10 @@ abstract class Object {
 		}
 		
 		// otherwise we are attempting an accessor
-		else if ($this->propertyExists($name)) { 
+		else if (property_exists($this, $name)) { 
+			if ($name == 'callbacks') {
+				exit('here');
+			}
 			return $this->$name;
 		}
 		

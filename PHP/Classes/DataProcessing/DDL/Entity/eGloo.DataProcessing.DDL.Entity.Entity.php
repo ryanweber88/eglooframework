@@ -564,7 +564,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * A "magic" getter/setter - used retrieve primary_key value, but always
 	 * under the pseudoname id
 	 */
-	public function getId() { 
+	public function id() { 
 		$pk = $this->definition->primary_key;
 		return $this->$pk;
 	}
@@ -579,7 +579,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// use reflection and static storage to retrieve list of entity properties
 		try {
 			return parent::__get($name);
-		} catch(\Exception $ignore) { }
+		} catch(\Exception $ignore) { 
+			var_export(property_exists($this, 'callbacks')); exit('asdf');
+		}
 		
 		// otherwise first check entity attributes
 		if (is_array($this->attributes) && isset($this->attributes[$name])) { 
@@ -646,7 +648,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		}
 		
 		// otherwise we bail out to object method
-		return parent::__construct($name, $arguments);
+		return parent::__call($name, $arguments);
 	}
 	
 	/**
