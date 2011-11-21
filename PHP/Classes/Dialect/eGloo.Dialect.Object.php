@@ -50,6 +50,8 @@ abstract class Object {
 	protected function defineMethod($name, $lambda) { 
 		if (is_callable($lambda)) {
 			static::$_methods[$name] = $lambda;
+			
+			return $lambda;
 		}
 		
 		throw new DDL\Exception\Exception(
@@ -122,28 +124,14 @@ abstract class Object {
 	 * @return  mixed
 	 */
 	public function __get($name) {
-		
-		// @todo replace after references to instance members have
-		// been replaced
-		//if ($name == '_class') {
-			//return static::$_class;	
-			
-		//}
-		
-
-		//echo "getting $name on " . get_class($this) . "\n";
-		
+		// route getProperty or get method call through call
 		try { 
 			$tryMethod = "get" . ucfirst($name);
 			
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
 			}		
-			
-			if ($name == 'callbacks') {
-				echo 'callbacks in object::__get' . "\n";
-				$this->callbackss();
-			}	
+				
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -162,6 +150,7 @@ abstract class Object {
 	 * @return void
 	 */
 	public function __set($name, $value) { 
+		// route set through setProperty or property method call
 		try { 
 			$tryMethod = "set" . ucfirst($name);
 			
@@ -192,9 +181,6 @@ abstract class Object {
 	public function __call($name, $arguments) { 
 		
 		//echo "$name\n";
-		if ($name == 'callbackss') {
-			exit('fuck yasdf');
-		}
 		
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
@@ -205,43 +191,31 @@ abstract class Object {
 			);
 		}
 		
+		// define a default getter/setter 
+		else if (property_exists($this, $name)) {
+			$function = $this->defineMethod($name, function($argument = null) use ($name) {
+				// if an argument has been specfied, then
+				// this a set method
+				if (is_null($argument)) { 
+					return $this->$name;
+				}
+			
+				$this->$name = $argument;
+				return $this;
+			});
+
+			return count($arguments) 
+				? $function($arguments[0])
+				: $function();
+		}
+		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
 		// value at the fist index
-		if (count($arguments) && !is_null($arguments[0])) { 
-			
-			// set property, but only if it exists! since php allows you
-			// to arbitrarily create public members, we are specifically
-			// disallowing that behavior here - an exception is thrown if
-			// an attempt to access a property that does not exist is made
-			if ($this->propertyExists($name)) {
-				$this->$name = $arguments[0];
-				
-				return $this;
-			}
-			
-			// flexible api/magic methods 
-			else { 
-				
-				// use trait method to attempt or look for
-				// signature of magic method call - if any value
-				// other than absolute boolean false is returned
-				// we return that value to caller
-				if (($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) {
-					return $mixed;
-				}
-							
-			}
-		
+		else if (($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) {
+			return $mixed;
 		}
-		
-		// otherwise we are attempting an accessor
-		else if (property_exists($this, $name)) { 
-			if ($name == 'callbacks') {
-				exit('here');
-			}
-			return $this->$name;
-		}
+
 		
 		// A bailout exception in the case that above processing
 		// failed to find appropriate exception

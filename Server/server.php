@@ -84,7 +84,7 @@ $application = new \eGloo\System\Server\Application(
 
 // run application bootstrap - load required dependencies
 // into current application context
-$bootstrap = &$application->bootstrap()
+$bootstrap = &$application->bootstrap
 ->bootstrap('photon')
 ->bootstrap('zend');
 

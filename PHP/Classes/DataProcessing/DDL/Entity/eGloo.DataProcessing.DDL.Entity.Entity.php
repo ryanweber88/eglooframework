@@ -607,6 +607,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public function __set($name, $value) { 
 		// use reflection and static storage to retrieve list of entity properties
+		/*
 		$properties = static::retrieve('properties', function() { 
 			$reflection = new \ReflectionClass($this);
 			$properties = [ ];
@@ -624,6 +625,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			$this->attributes[$name] = $value;
 			return $this;
 		}
+		*/
+		if (property_exists($class, $property))
 		
 		// otherwise class object implementation will handle
 		// set
