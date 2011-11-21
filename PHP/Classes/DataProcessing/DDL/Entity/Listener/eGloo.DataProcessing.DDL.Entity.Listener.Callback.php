@@ -32,11 +32,10 @@ class Callback extends Listener {
 		// push callback onto target stack
 		if (property_exists($target, 'callbacks')) { 
 			$target->callbacks->push(new DDL\Utility\Callback(
-				$params['name'], function(array $pass) use ($params) {
-	
+				$params['name'], function($pass = null) use ($params) {
+						
 					$arguments = $params['arguments'];
 					$runMethod = true;
-					$results   = [ ];
 						
 					// if middleware has been specified, we are processing a method call (call
 					// to underlying data layer) - middleware acts to process or make sence of 
@@ -44,6 +43,9 @@ class Callback extends Listener {
 					// call - finally results will be processed by appropriate handler and
 					// returned to evaluate method
 					if (isset($params['middleware']) && is_array($params['middleware'])) {
+						
+						$results = [ ];
+						
 						foreach($params['middleware'] as $middleware) {
 							// a false return will indicate that method does not need to be
 							// called
@@ -57,11 +59,12 @@ class Callback extends Listener {
 						
 						// if we have fields left after processing, then they will need to be queried
 						if ($runMethod && count($arguments['fields'])) {
-							
+						
 							try { 
-								$result = MethodGateway::method($this->entity, $params['name'])->call(
+								$results = DDL\Entity\MethodGateway::method($this->entity, $params['name'])->call(
 									$arguments
 								);  
+								
 							}
 							catch (DDL\Exception\Exception $pass) {
 								throw $pass;

@@ -56,7 +56,6 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 				
 			// check that entity is new, or removed, then push back to manage		
 			if ($entity->state_in([ self::ENTITY_STATE_NEW, self::ENTITY_STATE_REMOVED ])) {
-				
 				// check to see if entity has already been added to persistence
 				// which could be the case if entity was found/evaluated
 				// using field other than primary - since we now have the primary
@@ -65,6 +64,8 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 					->with($entity->definition->primary_key)
 					->with($entity->id)
 					->retrieves($entity)[0];
+					
+				// NEED FIX RIGHT HERE
 
 				// if unable to find entity via pk map, then entity has not yet
 				// been added to pool
@@ -92,7 +93,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 						->with($entity->id)	
 						->refers($entity);	
 
-					$entityPersistent = $entity;
+					var_export($entity); exit;
 				}
 
 				
@@ -169,7 +170,7 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 			if ($entity) {
 				// persist the entity value
 				$entity = $this->persist($entity);
-				
+								
 				// map/reference to primary key location
 				//$this->map[$class->name]['_primary_key'][$key] = &$this->pool[$entity->pid];
 				

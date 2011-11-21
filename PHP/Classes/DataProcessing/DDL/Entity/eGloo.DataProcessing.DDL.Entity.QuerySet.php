@@ -109,6 +109,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
  	protected function evaluate() { 
+		$manager = Manager\Factory::factory();
+ 		 		
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
 	 	
@@ -116,7 +118,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
  			
- 			var_export($results); exit;
+ 			
  			
 			// middleware has ran - do we need to do anything here
 			// TODO write some measure of intelligence in the number
@@ -139,16 +141,17 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				// context for entity 
 				else {
 					
-					$allIn = false;
+					$allIn  = false;
+					$record = &$mixed;
 					
 	 				$this->entities[$counter++] = $manager->find(
 	 					$this->entity, 
 	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
-	 						
+	 							 						
 	 						// instantiate entity
 	 						$entity              = clone $this->entity;
 	 						$entity->attributes  = $record;
-	 						
+	 							 						
 	 						// returning entity to manager to handle persistence
 	 						return $entity;
 	 						
@@ -368,6 +371,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	protected $entities;
 	protected $events;
 	protected $evaluated = false;
-	private   $entity;
+	protected $entity;
 	
 }

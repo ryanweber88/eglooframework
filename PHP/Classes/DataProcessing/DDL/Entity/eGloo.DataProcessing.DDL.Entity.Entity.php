@@ -591,20 +591,20 @@ echo 'here we are';
 	 * that if any attribute or relation name exists, it will take prescedence
 	 * over class protecteds
 	 */
-	//public function __get($name) { 
+	public function __get($name) { 
 		
 		// use reflection and static storage to retrieve list of entity properties
-		//foreach([$this->attributes, $this->relationships] as $hash) {
-			//if (is_array($hash) && isset($hash[$name])) {
-			//	return $hash[$name];
-			//}
-		//}
+		foreach([$this->attributes, $this->relationships] as $hash) {
+			if (is_array($hash) && isset($hash[$name])) {
+				return $hash[$name];
+			}
+		}
 		
 		//echo "sending $name to parent from class " . get_class($this). " from entity\n";
 		
-		//return parent::__get($name);
+		return parent::__get($name);
 		
-	//}
+	}
 	
 	/**
 	 * Sets attribute value, or entity property; in this case,
@@ -713,7 +713,7 @@ echo 'here we are';
 				
 				foreach ($fields as $name) {
 					$arguments[$name] = [
-						'values' =>  array_shift($dynamicArguments) , 'type' => $name
+						'values' =>  array_shift($dynamicArguments) 
 					];
 				}
 								
