@@ -19,6 +19,7 @@ class QuerySetManager extends Middleware {
 	 */
 	public function processArguments(array $arguments) { 
 		$manager = DDL\Entity\Manager\Factory::factory();
+		$allIn   = $byPrimaryKey;
 				
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case
@@ -39,11 +40,23 @@ class QuerySetManager extends Middleware {
 					// remove argument from list as it has already been persisted
 					unset($arguments['fields'][$name]['values'][$index]);
 				}
+				
+				// if entity cannot be found
+				else {
+					$allIn = false;
+					break ;
+				}
 			}
 		}
 		
+
+		
 		// A false return will flag to short circuit results, since
-		// all of our entities can be found
+		// all of our entities can be found		
+		return $allIn 
+			? false
+			: $arguments;
+
 		return $arguments;
 		
 	}
@@ -63,9 +76,14 @@ class QuerySetManager extends Middleware {
 		// point HAVE been queried for
 		foreach ($arguments as $fieldName => $composite) {
 			
-			foreach($results as $record) {
-				
+			// append found values to the end of results
+			foreach($composite['found'] as $value) { 
+				$results = array_merge(
+					$results, $map->with($fieldName)->with($value)->retrieves($this->entity)
+				);
 			}
+			
+			
 		}
 		
 		return $results;

@@ -15,7 +15,10 @@ use \Zend\EventManager\Event;
  */
 class QuerySet extends \eGloo\Dialect\Object implements
 	Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
-
+		
+	const ORDER_BY_ASCENDING  = 'ASC';
+	const ORDER_BY_DESCENDING = 'DESC';
+		
  	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
 
  		parent::__construct();
@@ -57,7 +60,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 						$arguments = $params['arguments'];
 						$runMethod = true;
 						$results   = [ ];
-												
+
+						// @todo
+						// arguments is acting as an arc of sorts, between processArguments
+						// and processResults - I hate this pattern right now 
 						if (isset($params['middleware']) && is_array($params['middleware'])) {
 							foreach($params['middleware'] as $middleware) {
 								// a false return will indicate that method does not need to be
@@ -73,7 +79,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
 							// if we have fields left after processing, then they will need to be queried
 							if ($runMethod && count($arguments['fields'])) {
 								// @todo figure out container for methods  
-								//$method  = new Method($this->entity, $params['name']);
 								$results = MethodGateway::method($this->entity, $params['name'])->call(
 									$arguments
 								); 
@@ -292,9 +297,33 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		return $set;
 	}
 	
-	public function orderBy(array $fields) { 
-		$set = new QuerySet($this->callbacks);
-		$set->events->trigger('call', $entity, [
+	/**
+	 * Prepares query sort order; order_by is specialized 
+	 * 
+	 * @param mixed $fields
+	 */
+	public function orderBy($fields) {
+		
+		// sanitize fields - first check if passing as multi|single parameter
+		if (func_num_args() > 1) {
+			$fields = func_get_args();
+		}
+		
+		else if (!is_array($fields)) {
+			$fields = [ $fields ]
+		};
+		
+		// iterate through fields to determine
+		// sort order
+		foreach ($fields as $index => $field) {
+			if ($field[0] == '-') {
+				$fields[$index] = substr($fields, 1) . ' ' . self::ORDER_BY_DESCENDING;
+			}
+		}
+		
+		// finally, create new set, pass callbacks to and add
+		// orderby to stack
+		$this->events->trigger('call', $this->entity, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
@@ -302,10 +331,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 			'definition' => function($arguments) {
 				return [ 'order_by' => $arguments['fields'] ];
-			}
+			},
+			
+			'defer'     =>  true
 		]);
 		
-		return $set;	
+		return $this;	
 	}
 	
 	

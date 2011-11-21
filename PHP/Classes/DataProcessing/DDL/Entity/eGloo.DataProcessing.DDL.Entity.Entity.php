@@ -211,7 +211,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 									// we know that a method call on an entity is using a foreign key
 									return MethodGateway::method($this, 'find_' . strtolower($relationship->to))->call([
 										'fields' => [ 
-											$pk => [ 'values' => [ $this->id ], 'type' => $this->definition->primary_key ]
+											$pk => [ 'values' => [ $this->id ] ]
 										]
 									]);
 									  
@@ -353,7 +353,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 			// defines the calling method, and parameter values
 			'arguments'            => [ 'fields' => [ 
-				$pk => [ 'values' => $key, 'type' => $this->definition->primary_key ]
+				$pk => [ 'values' => $key ]
 			]], 
 			
 			// scrub arguments and determine if any data can be retrieve from
@@ -383,7 +383,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 			// defines the calling method, and parameter values
 			'arguments'         => [ 'fields' => [ 
-				$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+				$pk => [ 'values' => $key ]
 			]], 		
 			
 			// 
@@ -431,7 +431,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 				// defines the calling method, and parameter values
 				'arguments'       => [ 'fields' => [ 
-					$pk => [ 'values' => $key, 'type' => $entity->definition->primary_key ]
+					$pk => [ 'values' => $key ]
 				]], 
 				
 				// here we define middleware, which acts layer between arguments to

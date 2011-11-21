@@ -27,8 +27,7 @@ abstract class Object {
 		//	static::$class = new _Class($this);
 		//}
 		
-		// @todo this needs to be deprecated as class should represent
-		// class, not an instance
+
 		//$this->_class = new _Class($this);
 		
 		// lets avoid infinite loops shall we
@@ -47,6 +46,7 @@ abstract class Object {
 		
 	}
 	
+	/** @todo limit_static */
 	protected function defineMethod($name, $lambda) { 
 		if (is_callable($lambda)) {
 			static::$_methods[$name] = $lambda;
