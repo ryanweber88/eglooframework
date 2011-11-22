@@ -18,31 +18,34 @@ abstract class Object implements MetaInterface {
 
 	function __construct() { 
 		
+		
+		
 		// lets avoid infinite loops shall we - instantiate
 		// our meta classes which in turn extend object
+		
 		
 		// instantiate class - class instantiation is pull from
 		// a static repository, as classes are unique and can
 		// be uniquely identified
-		if (!($this instanceof _Class) && !($this instanceof Singleton)) { 
 		 
-			// @todo limit_static
-			if (!isset(static::$_classes[get_class($this)])) {
-				static::$_classes[get_class($this)] = new _Class($this);
-			}
-			
-			$this->_class = static::$_classes[get_class($this)];
-			echo "instantiating class object for " . get_class($this) . "\n";
-			
-			echo $this->_class->method('asdf');
+		// @todo limit_static
+		if (!isset(static::$__classes[get_class($this)])) {
+			static::$__classes[get_class($this)] = new _Class($this);
 		}
+		
+		$this->_class = static::$__classes[get_class($this)];
+
+		
 		
 		// instantiate singleton - a singleton represents a single
 		// instance of an object, and every single object instance
 		// will have one
-		if (!($this instanceof Singleton)) {
-			$this->_singleton = new Singleton($this);
-		}
+		$this->_singleton = new Singleton($this);
+		
+		
+		// point instance to static methods
+		$this->_methods = &static::$__methods;
+		
 		
 	}
 	
@@ -50,28 +53,19 @@ abstract class Object implements MetaInterface {
 	 * (Returns static method)
 	 * @see eGloo\Dialect.MetaInterface::defineMethod()
 	 */
-	public function defineMethod($name, $lambda) { 
+	public function defineMethod($name, callable $lambda) { 
 		// defines static methods across class hierarchy
-		if (is_callable($lambda)) {
-			static::$_methods[$name] = $lambda;
-			
-			return $lambda;
-		}
+		$this->_methods[$name] = $lambda;
 		
-		throw new DDL\Exception\Exception(
-			'Illegal argument exception : parameter ' . 
-		    'must be of type lambda'
-		);
+		return $lambda;
 	}
 	
 	/**
 	 * (non-PHPdoc)
-	 * @see eGloo\Dialect.MetaInterface::method()
+	 * @see eGloo\Dialect.MetaInterface::retrieveMethod()
 	 */
-	public function method($name) {
-		return isset(static::$_methods[$name])
-			? static::$_methods[$name]
-			: false;
+	public function retrieveMethod($name) {
+		return $this->_methods[$name];
 	}
 	
 
@@ -81,9 +75,9 @@ abstract class Object implements MetaInterface {
 	 * Determines if methodName is callable on object
 	 * @param string $methodName
 	 */
-	public function respondsTo($methodName) { 
+	public function respondTo($methodName) { 
 		return ( 
-			method_exists($this, $methodName) || isset(static::$_methods[$methodName]) 
+			method_exists($this, $methodName) || isset($this->_methods[$methodName]) 
 		);
 	}
 	
@@ -155,6 +149,7 @@ abstract class Object implements MetaInterface {
 		}
 	}
 	
+	
 	/**
 	 * 
 	 * Provides attr_writer quality to php objects - $obj->property = value
@@ -205,25 +200,25 @@ abstract class Object implements MetaInterface {
 		$self = $this;
 				
 		foreach ([$this->_singleton, $this->_class, $self] as $meta) {
-			
-			// write around to account for 
-			if (get_class($meta) == 'eGloo\Dialect\Object') {
-				//$meta = &$this;
-			//}
-			
-			if ($meta->method($name)) {
+
+			// write around to account for some odd bug in relation to using
+			// $this/$self above in foreach construct
+			if (!is_object($meta)) {
+				$meta = $this;
+			}
+
+			if (isset($meta->_methods[$name])) {
 				return call_user_func_array(
-					$meta->method($name), $arguments
+					$meta->retrieveMethod($name), $arguments
 				);
 			}
 		}
 		
-		// define a default getter/setter 
+		// define a default getter/setter and cache into 
+		// class level method for quicker retrieval in future
 		if (property_exists($this, $name)) {
 			// define a class level method
-			
-			
-			$function = $this->_class->defineMethod($name, function($argument = null) use ($name) {
+			$function = function($argument = null) use ($name) {
 				// if an argument has been specfied, then
 				// this a set method
 				if (is_null($argument)) { 
@@ -232,7 +227,33 @@ abstract class Object implements MetaInterface {
 			
 				$this->$name = $argument;
 				return $this;
-			});
+			};
+			
+			// @todo for now, we do singleton level method cache
+			if (is_object($this->_singleton)) {
+				$this->_singleton->defineMethod($name, $function);
+			}
+			/*
+			// if object is not an explicit meta class (class, singleton)
+			// then define a class level method
+			if (is_object($this->_class)) {
+				$this->_class->defineMethod($name, $function);
+			}
+			
+			// otherwise define method on meta class which responds to
+			// defineMethod 
+			else if (method_exists($this, 'defineMethod')) {
+				$this->defineMethod($name, $function);
+			}
+			
+			// otherwise there is an issue - most likely a class extending
+			// object that did not call parent constructor
+			else {
+				throw new Exception(
+					'Cannot define class level method, and object is not meta interface >> ' . get_class($this)
+				);
+			}
+			*/
 			
 			
 			return count($arguments) 
@@ -299,6 +320,8 @@ abstract class Object implements MetaInterface {
 	
 	protected $_class;
 	protected $_singleton;
-	static protected $_classes;
-	static protected $_methods;
+	protected $_methods;
+	
+	static protected $__classes  = [ ];
+	static protected $__methods  = [ ];
 }

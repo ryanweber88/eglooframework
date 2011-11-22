@@ -11,14 +11,22 @@ namespace eGloo\Dialect;
 class Singleton extends Object implements MetaInterface { 
 	
 	function __construct($instance) { 
-		parent::__construct();
-		
+		//parent::__construct();
+
+		// define class for singleton statically - this cannot be
+		// done in object as it would create an infinite loop
+		if (is_null(static::$class)) {
+			static::$class = new _Class($this);
+		}
+
+		$this->_class   = static::$class;
 		$this->id       = spl_object_hash($instance);
 		$this->instance = $instance;
+			
 	}
 	
 
-	public function defineMethod($name, $lambda) {
+	public function defineMethod($name, callable $lambda) {
 		// defines static methods across class hierarchy
 		if (is_callable($lambda)) {
 			$this->methods[$name] = $lambda;
@@ -32,10 +40,16 @@ class Singleton extends Object implements MetaInterface {
 		);
 	}
 	
-	public function method($name) { 
-		return isset($this->methods[$name])
-			? $this->methods[$name]
-			: false;
+	/**
+	 * Overrides object respondTo to check for singleton level
+	 * method response
+	 */
+	public function respondTo($name) {
+		if (isset($this->methods[$name])) {
+			return true;
+		}
+		
+		return parent::respondTo($name);
 	}
 	
 	public function __toString() {
@@ -46,4 +60,5 @@ class Singleton extends Object implements MetaInterface {
 	protected $id;
 	protected $instance;
 	protected $methods = [ ];
+	protected static $class;
 }

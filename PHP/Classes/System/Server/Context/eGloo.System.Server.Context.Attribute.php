@@ -15,6 +15,8 @@ class Attribute extends \eGloo\Dialect\Object {
 	use \eGloo\Utilities\SubjectTrait;
 	
 	function __construct($name, $value, &$owner) { 
+		parent::__construct();
+		
 		$this->name     = $name;
 		$this->value    = $value;
 		$this->accessed = time();

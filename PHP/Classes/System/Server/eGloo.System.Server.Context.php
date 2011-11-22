@@ -22,6 +22,8 @@ class Context extends \eGloo\Dialect\Object {
 	
 	/** @TODO implement storage interface */
 	function __construct(&$owner, Server\Context\Storage\StorageInterface $store = null) { 
+		parent::__construct();
+		
 		// add reference to context's owner: application, request, session, etc
 		$this->owner = &$owner;
 		

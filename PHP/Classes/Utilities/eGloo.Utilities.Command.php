@@ -22,7 +22,7 @@ abstract class Command extends \eGloo\Dialect\Object {
 		parent::__construct();
 		
 		// set name property; this can be overriden in child classes
-		$this->name($name);
+		$this->name = $name;
 	}	
 	
 	

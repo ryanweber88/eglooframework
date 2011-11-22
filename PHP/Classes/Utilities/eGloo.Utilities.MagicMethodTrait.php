@@ -11,7 +11,7 @@ trait MagicMethodTrait {
 		
 		$functionContainer = 
 			is_object($container) && $container instanceof \eGloo\Dialect\Object
-				? $container->methods
+				? $container->_class->methods
 				: static::$magicMethodTraitFunctionContainer;
 			
 
@@ -24,7 +24,7 @@ trait MagicMethodTrait {
 		}
 		
 		else { 
-			echo "calling magic on $name from " . get_class($this) . "\n";
+			//echo "calling magic on $name from " . get_class($this) . "\n";
 			
 			$actions = &static::$actions;
 					
@@ -148,7 +148,7 @@ trait MagicMethodTrait {
 								
 								// use reflection to determine parameter count
 							    $includeKey = (
-							    	count((new ReflectionFunction($lambda))->getParameters()) > 1
+							    	count((new \ReflectionFunction($lambda))->getParameters()) > 1
 							    );							
 								
 						    	foreach($values as $key => $value) {

@@ -66,7 +66,7 @@ abstract class Object {
 	 * Determines if methodName is callable on object
 	 * @param string $methodName
 	 */
-	public function respondsTo($methodName) { 
+	public function respondTo($methodName) { 
 		return ( 
 			method_exists($this, $methodName) || isset(static::$_methods[$methodName]) 
 		);

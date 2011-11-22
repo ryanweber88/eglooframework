@@ -75,22 +75,33 @@ $target = $argv[count($argv)-1];
 
 // TESTING
 
+/*
 class test extends \eGloo\Dialect\Object {
+	protected $value = ['1', '2', '3'];
+}
+
+class test2 extends test {
+	public function value() {
+		return 'asdf';
+	}
+	
 
 }
 
-class test2 extends \eGloo\Dialect\Object {
-	function __construct() {
-		echo "{$this->_class}\n";
-		
-		$test = new test;
-		echo "{$test->_class->name}\n";
-	}	
-}
+$test = new test2;
 
-$t = new test2;
+$test->value_each(function($key, $value) { 
+	//echo $value;
+});
+
+$test->value_each(function($key, $value) { 
+	echo "$value\n";
+});
+
+
 exit;
 
+*/
 // NOTE : Everything defined in global context will exist in global context
 // amongst all EAS instances
 

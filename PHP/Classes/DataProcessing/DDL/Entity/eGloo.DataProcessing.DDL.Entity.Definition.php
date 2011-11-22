@@ -16,6 +16,8 @@ class Definition extends \eGloo\Dialect\Object {
 	use \eGloo\Utilities\Collection\StaticStorageTrait;
 	
 	function __construct(Entity $entity) { 
+		parent::__construct();
+		
 		$this->entity = $entity;
 	}	
 	

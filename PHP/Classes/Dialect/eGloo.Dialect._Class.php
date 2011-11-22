@@ -10,7 +10,7 @@ namespace eGloo\Dialect;
 class _Class extends Object implements MetaInterface { 
 	
 	function __construct($mixed) { 
-		parent::__construct();
+		//parent::__construct();
 		
 		if (is_object($mixed)) {			
 			$this->class    = get_class($mixed);
@@ -33,7 +33,6 @@ class _Class extends Object implements MetaInterface {
 				));
 			}
 			
-			
 		}
 	
 		else { 
@@ -50,7 +49,7 @@ class _Class extends Object implements MetaInterface {
 	 * all instances of this class, but not its descendants
 	 * @return lambda
 	 */
-	public function defineMethod($name, $lambda) {
+	public function defineMethod($name, callable $lambda) {
 		
 		// defines static methods across class hierarchy
 		if (is_callable($lambda)) {
@@ -65,17 +64,7 @@ class _Class extends Object implements MetaInterface {
 		);
 		
 	}
-	
-	/**
-	 * 
-	 * Enter description here ...
-	 * @param string $name
-	 */
-	public function method($name) {
-		return isset($this->methods[$name])
-			? $this->methods[$name]
-			: false;
-	}
+
 
 	
 	/**
