@@ -10,6 +10,7 @@ class CallbackStack extends \SplStack {
 			$this->push($callback);
 		}
 	}
+	
 	/**
 	 * 
 	 * Executes all callbacks currently sitting on stack
@@ -22,11 +23,12 @@ class CallbackStack extends \SplStack {
 		
 		while (!$this->isEmpty()) {
 
-			//$callback = $this->pop();
-			//echo $callback->getEvent(); exit;
 			// @todo chain passthrough data
-			$results = $this->pop()->call($results);
+			// results must be wrapped when passing through, as containing
+			// array is stripped when call_user_func_array is called
+			$results = $this->pop()->call([ $results ]);	
 		}
+		
 		
 		return $results;
 	}

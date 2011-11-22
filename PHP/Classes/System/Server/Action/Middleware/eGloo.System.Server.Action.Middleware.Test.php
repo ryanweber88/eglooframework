@@ -24,14 +24,15 @@ class Test extends Middleware {
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
 		
-		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
-		$set2 = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
+		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
+		$set2 = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1, 12, 38, 41)->orderBy('-uid', 'name');
+		echo $set2->count();
 		//echo $set->count();
 		//$set->orderBy(
 			//'-uid', 'name'
 		//);
 		
-		$set->count();
+		//$set->count();
 		$set2->count();
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');

@@ -20,31 +20,38 @@ class Find extends DDL\Entity\Middleware\Middleware {
 	public function processArguments(array $arguments) { 
 		$manager = DDL\Entity\Manager\Factory::factory();
 		$allIn   = true;
-		
-								
+										
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case
 		// @todo this needs to be moved an object relationship - horrifically
 		// ugly at the moment
-		foreach ($arguments['fields'] as $name => $composite) {
+		foreach ($arguments['fields'] as $fieldName => $composite) {
 			// found is where we stash a note that a particular field and
 			// value has been found
-			$arguments['fields'][$name]['found'] = [ ];
+			$arguments['fields'][$fieldName]['found'] = [ ];
 			$counter = 0;
+			
+			// only the primary key can have a gaurente of whether in memory or not - 
+			// at some point the pool/event manager will act to determine if changes
+			// occur to records not identified by primary key
+			// @todo remove and allow pool event manager to handle this step
+			if ($this->container->entity->definition->primary_key == $fieldName) { 
 						
-			foreach($composite['values'] as $index => $value) {
-				if ($manager->map->with($name)->with($value)->retrieves($this->container->entity) !== false) {
+				foreach($composite['values'] as $index => $value) {
 					
-					// move value to found and unset from main args list
-					$arguments['fields'][$name]['found'][] = $value;
+					if ($manager->map->with($fieldName)->with($value)->retrieves($this->container->entity) !== false) {
+											
+						// move value to found and unset from main args list
+						$arguments['fields'][$fieldName]['found'][] = $value;
+						
+						// remove argument from list as it has already been persisted
+						unset($arguments['fields'][$fieldName]['values'][$index]);
+					}
 					
-					// remove argument from list as it has already been persisted
-					unset($arguments['fields'][$name]['values'][$index]);
-				}
-				
-				// if entity cannot be found
-				else if ($allIn) {
-					$allIn = false;
+					// if entity cannot be found
+					else if ($allIn) {
+						$allIn = false;
+					}
 				}
 			}
 		}
@@ -87,7 +94,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 			}
 			
 		}
-		
+				
 		return $results;
 		 			
 	}

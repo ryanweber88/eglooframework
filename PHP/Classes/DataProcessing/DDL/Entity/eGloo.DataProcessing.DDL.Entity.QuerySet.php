@@ -113,13 +113,11 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		 		
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
-	 	
+
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
- 			
- 			
- 			
+ 			 			
 			// middleware has ran - do we need to do anything here
 			// TODO write some measure of intelligence in the number
 			// of entities built on an evaluation
@@ -158,12 +156,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 					}
 	 				); 	
 	 				
-	 				//echo "adding entity\n";
+	 				echo "adding entity\n";
 	 				
 	 				
 	 				// now do side associations
 	 				// @todo abstract this into something nicer than associative
 	 				// array 
+	 				/*
 	 				if (isset($results['look_for']) && is_array($results['look_for'])) { 
 		 				foreach ($results['look_for'] as $fieldName => $composite) { 
 		 					if (isset($record[$fieldName])) { 
@@ -188,12 +187,14 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		 					}
 		 				}
 	 				}
+	 				*/
 	 				
 				}
 	 		}
  		}
  		
 		else { 
+
 			// initialize entities to empty fixed array
 			// so that it can honor iterator, arrayaccess
 			// countable implementations without having
@@ -212,7 +213,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Methods can be chained 
  
 	public function limit($amount) { 
-		$this->events->trigger('call', $entity, [
+		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
@@ -229,7 +230,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 * Specifies result offset - defers til evaluate
 	 */
 	public function offset($start, $end = 0) { 
-		$this->events->trigger('call', $entity, [
+		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
@@ -271,7 +272,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 		// finally, create new set, pass callbacks to and add
 		// orderby to stack
-		$this->events->trigger('call', $this->entity, [
+		$this->events->trigger('call', $this, [
 			'name'       => 'order_by',
 		
 			// defines the calling method, and parameter values
@@ -291,7 +292,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			$fields = func_get_args();
 		}
 				
-		$this->events->trigger('call', $entity, [
+		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values

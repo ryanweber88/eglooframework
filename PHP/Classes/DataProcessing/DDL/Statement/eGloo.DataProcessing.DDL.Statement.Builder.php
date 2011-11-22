@@ -39,12 +39,12 @@ class Builder extends \eGloo\Dialect\Object {
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
 		);	
-		
+				
 		// splat array ends/leaves 
 		extract($this->splatArray(
 			$this->arguments
 		));
-						
+								
 		// "parse" required content and place into buffer
 		ob_start();
 		require $this->path;
@@ -64,7 +64,7 @@ class Builder extends \eGloo\Dialect\Object {
 				if (count($keys = array_keys($value)) && !is_array($value[$keys[0]])) { 
 					if (!is_numeric($value[$keys[0]])) { 
 						foreach($value as $index => $string) {
-							$array[$key][$index] = "'" .addslashes($string) . "'";
+							$array[$key][$index] = "" .addslashes($string) . "";
 						}
 					}
 					

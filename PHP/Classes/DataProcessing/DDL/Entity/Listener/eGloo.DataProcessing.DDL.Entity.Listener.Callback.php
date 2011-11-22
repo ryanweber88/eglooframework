@@ -28,13 +28,15 @@ class Callback extends Listener {
 		// just shortcutting to params and results handler
 		$params  = $event->getParams();
 		$target  = $event->getTarget();
+		
 								
 		// push callback onto target stack
-		if (property_exists($target, 'callbacks')) { 
+		if (property_exists($target, 'callbacks')) {
 			$target->callbacks->push(new DDL\Utility\Callback(
-				$params['name'], function($pass = null) use ($params) {
-						
-					$arguments = $params['arguments'];
+				$params['name'], function(array $pass = [ ]) use ($params) {
+					// must be careful that pass does not conflict/collide with
+					// any hash keys used in arguments
+					$arguments = array_merge($params['arguments'], $pass);
 					$runMethod = true;
 						
 					// if middleware has been specified, we are processing a method call (call
@@ -43,7 +45,6 @@ class Callback extends Listener {
 					// call - finally results will be processed by appropriate handler and
 					// returned to evaluate method
 					if (isset($params['middleware']) && is_array($params['middleware'])) {
-						
 						$results = [ ];
 						
 						foreach($params['middleware'] as $middleware) {
@@ -56,7 +57,7 @@ class Callback extends Listener {
 								break ;
 							}
 						}
-						
+												
 						// if we have fields left after processing, then they will need to be queried
 						if ($runMethod && count($arguments['fields'])) {
 						

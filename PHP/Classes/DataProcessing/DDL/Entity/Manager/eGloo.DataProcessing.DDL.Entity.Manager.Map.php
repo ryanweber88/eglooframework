@@ -73,7 +73,7 @@ class Map extends \eGloo\Dialect\Object {
 	 */
 	public function refers($mixed) {
 
-		if (is_array($mixed) && count()) { 
+		if (is_array($mixed) && count($mixed)) { 
 			$entities = &$mixed;
 		}
 		

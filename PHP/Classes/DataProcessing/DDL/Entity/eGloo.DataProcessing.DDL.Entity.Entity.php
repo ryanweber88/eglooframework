@@ -353,8 +353,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @return Entity | QuerySet | boolean
 	 */
 	public static function find($key) { 
-echo 'here we are';
-		var_dump(new static()); exit;
+
 
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static;
@@ -375,7 +374,7 @@ echo 'here we are';
 			// @todo alot of this work should fall on queryset side, but moreso convenient to
 			// do here
 			$set = new QuerySet($entity);
-			$set->events->trigger('call', $entity, [
+			$set->events->trigger('call', $set, [
 				'name'            => __FUNCTION__,
 			
 				// defines the calling method, and parameter values
@@ -394,7 +393,7 @@ echo 'here we are';
 				// manager, and if it 
 				'defer'           => true
 			]);	
-	
+				
 			return $set;
 		}
 		
@@ -733,7 +732,7 @@ echo 'here we are';
 							
 			else {
 				throw new DDL\Exception\Exception(
-					"Illegal Argument Exception : passed illegal argument collection\n". vvar_export(
+					"Illegal Argument Exception : passed illegal argument collection\n". var_export(
 						$dynamicArguments, true
 					)
 				);
