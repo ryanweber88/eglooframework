@@ -39,7 +39,8 @@ class Builder extends \eGloo\Dialect\Object {
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
 		);	
-				
+
+
 		// splat array ends/leaves 
 		extract($this->splatArray(
 			$this->arguments

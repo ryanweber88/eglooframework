@@ -27,7 +27,7 @@ class CallbackStack extends \SplStack {
 			// results must be wrapped when passing through, as containing
 			// array is stripped when call_user_func_array is called
 			$results = $this->pop()->call([ $results ]);	
-		}
+		}		
 		
 		
 		return $results;

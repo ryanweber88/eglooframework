@@ -25,8 +25,21 @@ class Test extends Middleware {
 		
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
-		$set2 = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1, 12, 38, 41)->orderBy('-uid', 'name');
-		echo $set2->count();
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1);
+		
+		foreach($user->Products as $product) {
+			
+		}
+		
+		exit;
+
+		foreach ($set2 as $user) {
+			foreach($user->Products as $product) {
+				echo "{$product->title}\n";
+			}
+		}
+		
+		exit;
 		//echo $set->count();
 		//$set->orderBy(
 			//'-uid', 'name'

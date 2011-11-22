@@ -16,8 +16,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 	 * (non-PHPdoc)
 	 * @see MiddlewareInterface::processResults()
 	 */
-	public function processResults(array $arguments, array $results) { 
-		
+	public function processResults(array $arguments, array $results) {
 		return $results;
 	}
 	

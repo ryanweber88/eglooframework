@@ -41,9 +41,7 @@ class Statement extends \eGloo\Dialect\Object {
 	 * @todo   refactor statement call-chain to replace any uneeded steps
 	 */	
 	public function execute($statement) { 
-		
-		echo "\n\n$statement\n\n"; 
-		
+				
 		$preparedStatement = new \QueryTransaction($statement);
 		$preparedStatement->setQueryDialect(\DBConnectionManager::getConnection( $this->_connection_name )->getConnectionDialect());
 		

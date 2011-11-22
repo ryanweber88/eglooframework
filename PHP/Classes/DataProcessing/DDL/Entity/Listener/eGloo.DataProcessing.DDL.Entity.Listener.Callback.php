@@ -46,6 +46,7 @@ class Callback extends Listener {
 					// returned to evaluate method
 					if (isset($params['middleware']) && is_array($params['middleware'])) {
 						$results = [ ];
+						//var_export($arguments); exit;
 						
 						foreach($params['middleware'] as $middleware) {
 							// a false return will indicate that method does not need to be
@@ -78,7 +79,7 @@ class Callback extends Listener {
 								break ;
 							}
 						}
-						
+												
 						return $results;
 						
 					}

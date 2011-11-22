@@ -19,7 +19,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	const ORDER_BY_ASCENDING  = 'ASC';
 	const ORDER_BY_DESCENDING = 'DESC';
 		
- 	function __construct(Entity $entity, DDL\Utility\CallbackCollection $stack = null) { 
+ 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
 
  		parent::__construct();
  		
@@ -149,7 +149,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 						// instantiate entity
 	 						$entity              = clone $this->entity;
 	 						$entity->attributes  = $record;
-	 							 						
+
 	 						// returning entity to manager to handle persistence
 	 						return $entity;
 	 						
@@ -212,12 +212,16 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Retrieve Interfaces ------------------------------------------------- //
 	// Methods can be chained 
  
+ 	/**
+ 	 * (non-PHPdoc)
+ 	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::limit()
+ 	 */
 	public function limit($amount) { 
 		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
-			'arguments'  => [ 'amount' => $amount ], 
+			'arguments'  => $amount,
 		
 			'defer'      => true
 				
@@ -229,12 +233,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	/**
 	 * Specifies result offset - defers til evaluate
 	 */
-	public function offset($start, $end = 0) { 
+	public function offset($start) { 
 		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
 			// defines the calling method, and parameter values
-			'arguments'  => [ 'start' => $start, 'end' => $end ], 
+			'arguments'  => $start, 
 
 			
 			'defer'      => true
@@ -276,7 +280,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			'name'       => 'order_by',
 		
 			// defines the calling method, and parameter values
-			'arguments'  => [ 'fields' => $fields ], 
+			'arguments'  => $fields , 
 			
 			'defer'      =>  true
 		]);
@@ -337,17 +341,25 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	// Iterator Interface -------------------------------------------- //
 	
 	public function current() { 
+		$this->events->trigger('evaluate', $this);
+		
 		return $this->entities->current();
 	}
 	
 	public function key() { 
+		$this->events->trigger('evaluate', $this);
+		
 		return $this->entities->key();
 	}
-	public function next() { 
+	public function next() {
+		$this->events->trigger('evaluate', $this);
+		
 		return $this->entities->next();
 	}
 	
 	public function rewind() { 
+		$this->events->trigger('evaluate', $this);
+		
 		return $this->entities->rewind();
 	}
 	

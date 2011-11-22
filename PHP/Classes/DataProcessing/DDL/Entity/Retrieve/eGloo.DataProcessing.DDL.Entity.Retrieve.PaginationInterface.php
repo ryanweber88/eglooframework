@@ -26,7 +26,7 @@ interface PaginationInterface {
 	 * @param integer $end
 	 * @return Find
 	 */
-	public function offset($start, $end = 0);
+	public function offset($start);
 	
 
 }

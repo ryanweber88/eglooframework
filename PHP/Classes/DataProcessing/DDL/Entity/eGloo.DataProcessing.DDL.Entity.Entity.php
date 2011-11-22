@@ -136,7 +136,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					// evaluating object existence - these need to be seperated somehow
 					// evaluate entity relationships
 					foreach($this->definition->relationships as $relationship) { 
-									
+															
 						// create entity representation of relationship
 						$entityRelation = DDL\Entity\Factory::factory(
 							"{$this->_class->namespace}\\{$relationship->to}"
@@ -169,10 +169,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						}
 						
 						else {
-							$this->relationships[(string)$relationships] = $entityRelation;
+							$this->relationships[(string)$relationship] = $entityRelation;
 						}
 						
 					}
+										
+					return $pass;
 					
 			}) ], 
 			
@@ -216,16 +218,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// callbacks->batch must always return mutlidim
 		// array for singular entity evaluation
 		
-		// inspect data to determine evaluation performed
-		
-		$results =  $this->callbacks->batch();
-		
-		// @todo do checking on results
+		// @todo inspect data to determine evaluation performed
 		
 		
-		// set attributes to results values
-		$this->attributes = $results;		
-		//var_export($results);
+		if (($results = $this->callbacks->batch()) !== false) {
+			$this->attributes = $results[0];
+		}
 		
 	}
 	
@@ -236,8 +234,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// copy data, as we do not want to data values to 
 		// overwritten from entity to entity
-		$this->attributes    = false;
-		$this->relationships = false;
+		//$this->attributes    = false;
+		
+		// relationships must be clone separately
+		$relationships = [ ];
+		
+		foreach($this->relationships as $relationship) {
+			$relationships[] = clone $relationship;
+		}
+		
+		$this->relationships = $relationships;
 		
 	}
 
@@ -404,7 +410,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			// retrieve entity from manager, or use callback to do explicit
 			// find, which is then persisted by manager and returned here
-			return $manager->find($entity, $key, function($entity, $key)  {	
+			return $manager->find($entity, $key, function() use ($entity, $key) {	
 				
 				$pk = $entity->definition->primary_key;
 				
@@ -591,6 +597,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * over class protecteds
 	 */
 	public function __get($name) { 
+		
+		var_export(array_keys($this->relationships));
 		
 		// use reflection and static storage to retrieve list of entity properties
 		foreach([$this->attributes, $this->relationships] as $hash) {
