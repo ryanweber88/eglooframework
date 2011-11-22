@@ -28,7 +28,7 @@ class Map extends \eGloo\Dialect\Object {
 	 * Determines if valid entity is pointed to by domain. Here entity
 	 * paarmeter acts as key
 	 * @param  Entity $entity
-	 * @return Entity[]
+	 * @return Entity[] | boolean
 	 */
 	public function retrieves(Entity $entity) {
 		
@@ -58,7 +58,10 @@ class Map extends \eGloo\Dialect\Object {
 		
 		// node should be pointing to entity, if it has reached
 		// this point
-		return $node;
+		return count($node) == 1
+			? $node[0]
+			: $node;
+			
 	}
 	
 	

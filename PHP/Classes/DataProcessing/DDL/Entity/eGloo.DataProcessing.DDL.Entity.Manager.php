@@ -63,9 +63,10 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 				$entityPersistent = $this->map
 					->with($entity->definition->primary_key)
 					->with($entity->id)
-					->retrieves($entity)[0];
+					->retrieves($entity);
 					
 				// NEED FIX RIGHT HERE
+				
 
 				// if unable to find entity via pk map, then entity has not yet
 				// been added to pool
@@ -93,7 +94,10 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 						->with($entity->id)	
 						->refers($entity);	
 
-					var_export($entity); exit;
+					// simply pointing name 'entityPersistent' to 'entity' - 
+					// though they are two different object pointers, they are
+					// in fact point to the same instance
+					$entityPersistent = $entity;
 				}
 
 				
@@ -156,7 +160,8 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
 		if (($persistentEntity = $this->map->with($pk)->with($key)->retrieves($entity)) !== false) { 
-			return $persistentEntity;
+			echo "found entity\n";
+			return clone $persistentEntity;
 		}
 				
 		
@@ -169,19 +174,10 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 			// function) 
 			if ($entity) {
 				// persist the entity value
-				$entity = $this->persist($entity);
+				return clone $this->persist($entity);
 								
-				// map/reference to primary key location
-				//$this->map[$class->name]['_primary_key'][$key] = &$this->pool[$entity->pid];
-				
-				$this->map
-					->with($pk)
-					->with($entity->id)					
-					->refers($this->pool[$entity->pid]);
 			}
 			
-			
-			return $entity;
 		}
 		
 		

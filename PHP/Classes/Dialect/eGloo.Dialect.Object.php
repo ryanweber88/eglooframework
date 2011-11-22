@@ -233,6 +233,9 @@ abstract class Object implements MetaInterface {
 			if (is_object($this->_singleton)) {
 				$this->_singleton->defineMethod($name, $function);
 			}
+			
+			// @todo figure out how to integrate class-level method
+			// definitions
 			/*
 			// if object is not an explicit meta class (class, singleton)
 			// then define a class level method

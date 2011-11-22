@@ -25,15 +25,14 @@ class Test extends Middleware {
 		
 		
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
-		
-		echo $set->count();
+		$set2 = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
+		//echo $set->count();
 		//$set->orderBy(
 			//'-uid', 'name'
 		//);
 		
-		exit('check');
-		
-		echo $set->count();
+		$set->count();
+		$set2->count();
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3');
 		//echo $set->count();	

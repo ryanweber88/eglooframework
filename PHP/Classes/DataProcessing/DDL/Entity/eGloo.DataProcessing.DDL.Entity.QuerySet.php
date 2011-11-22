@@ -158,13 +158,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 					}
 	 				); 	
 	 				
-	 				echo "adding entity\n";
+	 				//echo "adding entity\n";
 	 				
 	 				
 	 				// now do side associations
 	 				// @todo abstract this into something nicer than associative
 	 				// array 
-	 				if (is_array($results['look_for'])) { 
+	 				if (isset($results['look_for']) && is_array($results['look_for'])) { 
 		 				foreach ($results['look_for'] as $fieldName => $composite) { 
 		 					if (isset($record[$fieldName])) { 
 		 						foreach ($composite['values'] as $value) {
