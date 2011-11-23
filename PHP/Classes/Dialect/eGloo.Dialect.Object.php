@@ -49,6 +49,7 @@ abstract class Object implements MetaInterface {
 		
 	}
 	
+<<<<<<< HEAD
 	/**
 	 * (Returns static method)
 	 * @see eGloo\Dialect.MetaInterface::defineMethod()
@@ -56,6 +57,15 @@ abstract class Object implements MetaInterface {
 	public function defineMethod($name, callable $lambda) { 
 		// defines static methods across class hierarchy
 		$this->_methods[$name] = $lambda;
+=======
+	/** @todo limit_static */
+	protected function defineMethod($name, $lambda) { 
+		if (is_callable($lambda)) {
+			static::$_methods[$name] = $lambda;
+			
+			return $lambda;
+		}
+>>>>>>> origin/feature/ddl
 		
 		return $lambda;
 	}
@@ -134,14 +144,23 @@ abstract class Object implements MetaInterface {
 	 * @return  mixed
 	 */
 	public function __get($name) {
+<<<<<<< HEAD
 		// route getProperty or get method call through call
+=======
+		
+		// @todo cache into $methods
+>>>>>>> origin/feature/ddl
 		try { 
 			$tryMethod = "get" . ucfirst($name);
 			
 			if (method_exists($this, $tryMethod)) { 
 				return $this->$tryMethod();	
 			}		
+<<<<<<< HEAD
 
+=======
+				
+>>>>>>> origin/feature/ddl
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -190,7 +209,13 @@ abstract class Object implements MetaInterface {
 	 * @param mixed* $arguments
 	 */
 	public function __call($name, $arguments) { 
+<<<<<<< HEAD
 				
+=======
+		
+		//echo "$name\n";
+		
+>>>>>>> origin/feature/ddl
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collisions
@@ -214,6 +239,7 @@ abstract class Object implements MetaInterface {
 			}
 		}
 		
+<<<<<<< HEAD
 		// define a default getter/setter and cache into 
 		// class level method for quicker retrieval in future
 		if (property_exists($this, $name)) {
@@ -282,6 +308,32 @@ abstract class Object implements MetaInterface {
 			return $mixed;
 		}
 
+=======
+		// secondly, check if property exists - if that is the case
+		// then provide basic setter/getter functionality
+		if($this->propertyExists($name)) {
+			$function = $this->defineMethod($name, function($argument) {
+				if (count($argument) > 0) {
+					$this->$name = $argument[0];
+					
+					return $this;
+				}
+				
+				return $this->$name;
+			});
+			
+			return $function($arguments);
+		}
+		
+		// finally determine if method call is "flexible" using
+		// magic-method trait method; if any value
+		// other than absolute boolean false is returned
+		// we return that value to caller
+		else if (($mixed = $this->callMagicOn($name, $arguments, $this)) !== false) { 
+			return $mixed;
+		}
+		
+>>>>>>> origin/feature/ddl
 		
 		// A bailout exception in the case that above processing
 		// failed to find appropriate exception

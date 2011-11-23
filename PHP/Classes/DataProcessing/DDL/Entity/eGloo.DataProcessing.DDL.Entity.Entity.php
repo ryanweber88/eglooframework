@@ -708,9 +708,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * Sets attribute value, or entity property; in this case,
 	 * entity property take prescedence over attribute value
 	 * @todo limit_static
+	 * @todo How to limit conflicts between attributes and
+	 * entity properties, given dynamic read/write nature?
 	 */
 	public function __set($name, $value) { 
 		// use reflection and static storage to retrieve list of entity properties
+<<<<<<< HEAD
 		/*
 		$properties = static::retrieve('properties', function() { 
 			$reflection = new \ReflectionClass($this);
@@ -722,6 +725,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			return $properties;
 		});
+=======
+		if ($this->properyExists($name) && isset($this->attributes[$name])) {
+	 		throw new DDL\Exception\Exception(
+	 			''
+	 		);
+		}
+>>>>>>> origin/feature/ddl
 		
 		// if $name is not a part of entity properties, then we are setting 
 		// an attribute value
