@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\DataProcessing\Connection;
-use  eGloo\DataProcessing\ConnectionManagement\DBConnectionManager as DBConnectionManager;
+use \eGloo\DataProcessing\ConnectionManagement\DBConnectionManager;
+use \eGloo\DataProcessing\Connection\DatabaseErrorException;
 /**
  * PostgreSQLDBConnection Class File
  *
@@ -42,37 +43,50 @@ use  eGloo\DataProcessing\ConnectionManagement\DBConnectionManager as DBConnecti
 class PostgreSQLDBConnection extends DBConnection {
 	
 	/** @var resource connection oobject */
-	protected	$link;
+	protected	$link = null;
 	
-	/** @var result oobject */
-	protected	$result;
-	
-	/** @var string query statement object */
-	protected	$statement = '';
-	
-	/** @var used to check connection state */
-	protected	$is_connected = false;
-	
-
+	/**
+	 * Database connection method
+	 * 
+	 * @param resource $rawConnectionResource 
+	 */
 	public function __construct( $rawConnectionResource = null ) {
+		$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
+
 		if (is_null ($rawConnectionResource)) {
 			\DBConnectionManager::resetConnections();
-			$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
 			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
-			$this->is_connected = true;
 		} else {
-			$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
 			$this->setRawConnectionResource( $rawConnectionResource );
-			$this->link = $rawConnectionResource;
-			$this->is_connected = isset ($this->link) ? true : false;
 		}
+		
 	}
 	
+	/**
+	 * Establis connection when unavailable
+	 * 
+	 * @return resource DB connection resource
+	 */
+	public function getConnection () {
+		if ($this->link === null) {
+			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+		}
+		return $this->link;
+	}
+	
+	/**
+	 * Mysql like PDO using execute method. 
+	 * Replace ? with $ for postgres
+	 * 
+	 * @param string $sql
+	 * @param array $params
+	 * @return string 
+	 */
 	protected function prepareStatment ( &$sql, $params ) {
 		$sqlarray = explode('?', $sql);
 		$sql = ''; $index = 1;
 		$last = sizeof($sqlarray) -1;
-		foreach ($sqlarray as $part ){
+		foreach ($sqlarray as $part){
 			if($last < $index) {			
 				$sql .= $part;
 			} else {
@@ -80,26 +94,46 @@ class PostgreSQLDBConnection extends DBConnection {
 			}
 			$index++;
 		}
-		$this->statement = $sql;
+		return $sql;
 	}
 
+	/**
+	 * Postgres execution routine
+	 * 
+	 * @param string $sql
+	 * @param array $params
+	 * @param string/function $callback
+	 * @return string postgres result
+	 * @exception throw \Connection\DatabaseErrorException
+	 */
 	public function executeQuery ($sql, array $params = null, $callback = null ) {
 		$result = '';
 		$this->prepareStatment($sql, $params);
+
+		if ($this->link === null) {
+			$this->getConnection();
+		}
 		
-		if (false !== ( $pg_result = pg_query_params( $this->link, $this->statement, $params ))) {
+		if (false !== ($pg_result = pg_query_params($this->link, $sql, $params))) {
 			if ( $callback !== null ) {
-				$result = $callback( $pg_result, $this->link );
+				$result = $callback($pg_result, $this->link);
 			} else {
-				return $result = pg_fetch_all( $pg_result );
+				return $result = pg_fetch_all($pg_result);
 			}
 		}
-		if ( !$pg_result ) {
-			$this->handleQueryError( $this->statement );
+		if (!$pg_result) {
+			throw new \Connection\DatabaseErrorException($this->link->pg_last_error, $sql);
 		}
 		return $result;
 	}
 	
+	/**
+	 *
+	 * @param type $sql
+	 * @param array $params
+	 * @param type $callback
+	 * @return type 
+	 */
 	public function getList( $sql, array $params = null, $callback = null ) {
 		return $this->executeQuery($sql, $params, function($result, $link) use ($callback){
 			$index = 0;
@@ -113,6 +147,13 @@ class PostgreSQLDBConnection extends DBConnection {
 		});		
 	}
 	
+	/**
+	 *
+	 * @param type $sql
+	 * @param array $params
+	 * @param type $callback
+	 * @return type 
+	 */
 	public function getUnique( $sql, array $params = null, $callback = null ) {
 		return $this->executeQuery($sql, $params, function ($result, $link) use ($callback) {
 			if($row = pg_fetch_assoc( $result )) {
@@ -121,18 +162,48 @@ class PostgreSQLDBConnection extends DBConnection {
 			return $object;
 		});
 	}
+	
+	/**
+	 * 
+	 */
+	public function beginTransaction() {
+		if ($this->link === null) {
+			$this->getConnection();
+		}
+		$this->link->pg_query('START TRANSACTION');
+		if ($conn->errno != 0) {
+			throw  new \DatabaseErrorException();
+		}
+	}
 
 	/**
-	 *
-	 * @param type $sql 
+	 * 
 	 */
-	public function handleQueryError( $sql ) {
-		$error_msg = pg_last_error( $this->link );
-		throw new Exception( empty ($error_msg) ? 'Unknown PostgreSQL Error' : $error_msg );
+	protected function commitTransaction () {
+		if ($this->link === null) {
+			$this->getConnection();
+		}
+		$this->link->pg_query('COMMIT');
+		if ($conn->errno != 0) {
+			throw  new \DatabaseErrorException();
+		}
+	}
+
+	/**
+	 * 
+	 */
+	protected function rollbackTransaction () {
+		if ($this->link === null) {
+			$this->getConnection();
+		}
+		$this->link->pg_query('ROLLBACK');
+		if ($this->link->pg_last_error != 0) {
+			throw  new \DatabaseErrorException();
+		}
 	}
 	
 	/**
-	 * Connection desctructor method
+	 * Clean database resource
 	 * 
 	 * @return void
 	 */

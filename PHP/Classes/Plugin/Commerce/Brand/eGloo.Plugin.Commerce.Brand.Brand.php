@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Plugin\Commerce\Brand;
-use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PostgreSQLDBConnection;
+use \eGloo\Plugin\Commerce\Brand\BrandDAO,
+	\eGloo\Utilities\Utilities;
 
 /**
  * Brand Class File
@@ -56,7 +57,14 @@ class Brand {
 	/** @var boolean active */
 	public		$status;
 	
-	protected	$brand_products;
+	/** @var brand firendlyy url */
+	public		$friendly_url	=	'';
+	
+	/** @var array of brand Product  */
+	public		$brand_products = array();
+	
+	/** @var array for Brand Images */
+	public		$brand_images	= array();
 
 	/** @var array/Mix properties of Brands */
 	protected	$properties;
@@ -70,45 +78,38 @@ class Brand {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
-		$this->getProducts();
-		//$this->properties = $args;
 	}
 	
-	/*public function getBrandProducts( ){
-		if ($key = $this->__get('brand_id' )){
-			if ( false  === ($this->__get('brand_products' ))) {
-		
-			}
-		} else {
-			return false;
+	/**
+	 * Get Brand images
+	 * 
+	 * @return array brand Images
+	 */
+	public function loadBrandImages() {
+		if (empty ($this->brand_images)) {
+			$this->brand_images = BrandDAO::fetch()->getBrandImages($this->brand_id);
 		}
-		//return $this->brand_products = function ( $result ) use ( $this->brand_id ) {};
-	}*/
-	
-	public function getProducts(){
-		return $this->brand_products;
+		$this->brand_images;
+		return $this;
 	}
-
-	public function setBrandProduct( array $products ){
-		$this->brand_products = $products;
+	
+	public function loadBrandProducts() {
+		if (empty ($this->brand_products)) {
+			$this->brand_products = BrandDAO::fetch()->getBrandProducts($this->brand_id);
+		}
+		$this->brand_products;
+		return $this;
+	}
+	
+	public function loadBrandSlug() {
+		if ($this->friendly_url == '') {
+			$this->friendly_url = BrandDAO::fetch()->loadBrandSlug($this->brand_id);
+		}
+		$this->friendly_url;
 		return $this;
 	}
 
-
-	public function getBrandImages() {
-		
-	}
-
-	/**
-	 * Extract brand property out for clean UI display
-	 * 
-	 * @return array of brand property 
-	 */
-	public function getPropertiesArray(){
-		return (array)  $this->properties;
-	}
-	
-	/**
+		/**
 	 * Populate data int the brand object
 	 * 
 	 * @param type $key
@@ -138,5 +139,81 @@ class Brand {
 	 */
 	public function __toString(){
 		return serialize($this);
+	}
+	
+	/**
+	 * Get list of published brand
+	 * 
+	 * @param type $limit
+	 * @param type $offset
+	 * @return Brand object
+	 */
+	public static function getPublishedBrands($limit = null, $offset = null) {
+		$result = array();
+		$rows = BrandDAO::fetch()->getBrandList($limit, $offset);
+		foreach ($rows as $row) {
+			$result[] = new Brand($row);
+		}
+		return $result;
+	}
+	
+	
+	public static function loadBrandList() {
+		$result = array();
+		$rows = BrandDAO::fetch()->loadBrandList();
+		foreach ($rows as $row) {
+			$result[] = new Brand($row);
+		}
+		return $result;
+	}
+
+
+	/**
+	 * Load Brand by Brand Id
+	 * 
+	 * @param type $brand_id
+	 * @return Brand 
+	 */
+	public static function loadBrandById($brand_id) {
+		if ((int)$brand_id <= 0) {
+			throw new \InvalidArgumentException();
+		}
+		$rows = BrandDAO::fetch()->loadBrandById($brand_id);
+		return new Brand($rows);
+	}
+	
+	/**
+	 * Load Brand By Name
+	 * 
+	 * @param type $brand_name
+	 * @return Brand object
+	 */
+	public static function loadBrandByName($brand_name) {
+		if ($brand_name == '') {
+			throw new \InvalidArgumentException();
+		}
+		$rows = BrandDAO::fetch()->loadBrandByName($brand_name);
+		return new Brand($rows);
+	}
+	
+	/**
+	 * Load featured brand by Id
+	 * 
+	 * @param array $brands id
+	 * @return array Brand
+	 */
+	public static function getFeaturedBrand(array $brands) {
+		$result = array();
+		if (empty ($brands)) {
+			throw new \InvalidArgumentException();
+		}
+		foreach ($brands as $brand_id) {
+			$brand					= self::loadBrandById($brand_id);
+			$brand->brand_images	= BrandDAO::fetch()->getBrandImages((int)$brand->brand_id);
+			$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
+			//BrandData::fetch()->loadBrandSlug((int)$brand->brand_id);
+			$result[]				= $brand;
+		}
+		return $result;
 	}
 }
