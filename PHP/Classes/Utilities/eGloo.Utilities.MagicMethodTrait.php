@@ -191,7 +191,21 @@ trait MagicMethodTrait {
 						}
 										
 					}	
-				}	
+				}
+
+				// handle all other calls that do not fit into above
+				// constraints based on value
+				else {
+					
+					if ($action == 'push' && is_array($this->$property)) {
+						$functionContainer[$name] = function($argument) use ($property) {
+							$property = &$this->$property;
+							$property[] = $argument;
+						};
+						
+						return $functionContainer[$name]($argument);
+					}
+				}
 			}
 		}
 		
@@ -225,6 +239,6 @@ trait MagicMethodTrait {
 	}
 	
 	protected static $magicMethodTraitFunctionContainer = [ ];
-	protected static $actions = [ 'in', 'each', 'find', 'includes', 'like' ];
+	protected static $actions = [ 'in', 'each', 'find', 'includes', 'like', 'push' ];
 			
 }

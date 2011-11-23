@@ -109,6 +109,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				// false return indicates that listener will only respond once
 				// or is removed after initial run
 				return false;
+				//return true;
 			}
 			
 		]));			
@@ -141,7 +142,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			[ new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
 					
-					
+					//echo "running relationships callback\n";
+					//var_export($pass);
 					// @todo change this - need a way to determine if entity is valid without
 					// explicit checks on attributes - current valid method is cyclical and
 					// will perform an evaluate 
@@ -318,6 +320,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		}
 		
 		$this->relationships = $relationships;
+		$this->callbacks     = clone $this->callbacks;
 		
 	}
 
@@ -713,7 +716,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public function __set($name, $value) { 
 		// use reflection and static storage to retrieve list of entity properties
-<<<<<<< HEAD
 		/*
 		$properties = static::retrieve('properties', function() { 
 			$reflection = new \ReflectionClass($this);
@@ -725,13 +727,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			return $properties;
 		});
-=======
-		if ($this->properyExists($name) && isset($this->attributes[$name])) {
-	 		throw new DDL\Exception\Exception(
-	 			''
-	 		);
-		}
->>>>>>> origin/feature/ddl
+
 		
 		// if $name is not a part of entity properties, then we are setting 
 		// an attribute value

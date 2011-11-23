@@ -35,16 +35,21 @@ class Callback extends Listener {
 			$target->callbacks->push(new DDL\Utility\Callback(
 				$params['name'], function(array $pass = [ ]) use ($params) {
 					
-					$runMethod = true;
-										
+					// @todo this entire callback mechanism needs to be refactored
+					// - to many odd parameters being passed
+					if (isset($params['definition']) && is_callable($params['definition'])) {
+						return $params['definition']();
+					}					
 						
 					// if middleware has been specified, we are processing a method call (call
 					// to underlying data layer) - middleware acts to process or make sence of 
 					// all deferred callback data, which is passed as organized set to method
 					// call - finally results will be processed by appropriate handler and
 					// returned to evaluate method
-					if (isset($params['middleware']) && is_array($params['middleware'])) {
+					else if (isset($params['middleware']) && is_array($params['middleware'])) {
 						
+						$runMethod = true;
+							
 						// must be careful that pass does not conflict/collide with
 						// any hash keys used in arguments
 						$arguments = array_merge($params['arguments'], $pass);

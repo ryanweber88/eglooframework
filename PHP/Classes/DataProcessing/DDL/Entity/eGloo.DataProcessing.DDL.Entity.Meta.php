@@ -10,6 +10,7 @@ namespace eGloo\DataProcessing\DDL\Entity;
  */
 class Meta extends \eGloo\Dialect\Object {
 	
+	
 	protected $lastUpdated;
-	protected $fieldsChanged;
+	protected $fieldsChanged = [ ];
 }

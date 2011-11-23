@@ -31,9 +31,16 @@ class Test extends Middleware {
 		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1);
 
 		//echo $user->Products->limit(10)->count(); exit ('here');
+		//$user->Products->limit(1)->count();
+		//exit;
+		
+		$set = $user->Products->limit(10);
+		echo $set[0]->Users[0]; exit;
+		echo "suck = " . $user->Products->limit(5)->count(); 
+		exit;
 		
 		//echo "hash on user is " . spl_object_hash($user->Products) . "\n";
-		foreach($user->Products->limit(1) as $product) {
+		foreach($user->Products->limit(2) as $product) {
 			echo "$product\n";
 		}
 		

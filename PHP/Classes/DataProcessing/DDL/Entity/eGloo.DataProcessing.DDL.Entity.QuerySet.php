@@ -36,7 +36,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
 				// a fake entity or what not eh)
-				//echo "calling evaluate\n";		
+				//echo "calling evaluate on queryset\n";		
 		
 				if (is_null($event->getTarget())) {
 					throw new DDL\Exception\Exception(
@@ -128,12 +128,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// of entities built on an evaluation
 			$this->entities = new \SplFixedArray(count($results));
 			$counter = 0;
-		 			
+					 			
 			// iterate through results - remember that results can be a
 			// combination of records (as returned by the database) and
 			// entities, from persistence 			
 			foreach ($results as $index => $mixed) {
-								
+				
 				// result is an entity, which was gleaned from persistence context by 
 				// a middleware component			
 				if (is_object($mixed) && $mixed instanceof Entity) { 
@@ -149,23 +149,48 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 				$this->entities[$counter++] = $manager->find(
 	 					$this->entity, 
 	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
-	 							 						
-	 						// instantiate entity
-	 						$entity = clone $this->entity;
-	 						$entity->attributes = $record;
-	 						
-	 						// @todo need a way to moreso eloquently push a callback
-	 						// entity and keep callback structure
-	 						$entity->callbacks->push(new DDL\Utility\Callback('attributes', function(array $pass = [ ]) use ($record) { 
-	 							exit ('in attributes callback');
-	 							return $record;
-	 						}));
 
-	 						// returning entity to manager to handle persistence
-	 						return $entity;
+	 						//echo "in queryset, cannot find entity, calling fallback\n";
+	 						
+	 						// instantiate entity
+	 						//$entity = clone $this->entity;
+	 						//$entityClass = $this->entity->_class->class;
+	 						//$entity = new $entityClass;
+	 						//exit('fuck yourself');
+	 						$entity = $this->entity->_class->instantiate(); 
+	 						//$entity->attributes = $record;
+	 							 						
+	 						
+	 						// run entity evaluation, as it must be evaluated prior to
+	 						// being placed into persistence
+	 						// @todo need a way to moreso elegantly push a callback
+	 						// entity and keep callback structure
+	 						
+	 						$entity->callbacks->push(new DDL\Utility\Callback('attributes', function(array $pass = [ ]) use ($record) { 
+	 							//echo "calling attributes callback\n";
+	 							// entity must be passed multidimensional array when using injection/passthrough method
+	 							return [ $record ];
+	 						}));
+	 						
+	 						//echo "entity has # callbacks = " . count($entity->callbacks) . "\n";
+
+	 						// returning entity to manager to handle persistence - call
+	 						// on valid will trigger evaluation of entity
+	 						if ($entity->valid()) {
+	 							//var_export($entity->attributes); 
+	 							//echo "entity should be valid, and its primary key is {$entity->nid}\n";
+	 							return $entity;
+	 						}
+	 						
+	 						// entity should be valid if it has reached this point - if not, 
+	 						// throw an exception to that fact
+	 						throw new DDL\Exception\Exception(
+	 							'Entity is not valid in QuerySet evaluation'
+	 						);
 	 						
 	 					}
 	 				); 	
+	 				
 	 				
 	 				//echo "adding entity\n";
 	 				
@@ -212,6 +237,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// to ask if entities exists for each method
 			$this->entities = new \SplFixedArray(0);
 		}
+		
 
  	}
  	

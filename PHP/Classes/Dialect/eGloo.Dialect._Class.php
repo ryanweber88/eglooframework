@@ -93,7 +93,7 @@ class _Class extends Object {
 		return false;
 	}
 	
-	protected function instantiate(array $arguments = [ ]) {
+	public function instantiate(array $arguments = [ ]) {
 		// instantiates dynamic class with given arguments
 		
 		// use reflection to retrieve constructor and read parameter list
@@ -104,6 +104,8 @@ class _Class extends Object {
 		return $reflection->newInstanceArgs($arguments);
 		
 	}	
+	
+
 	
 	
 	
