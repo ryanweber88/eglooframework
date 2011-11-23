@@ -372,6 +372,39 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	// Provides standard crud methods - entity will only
 
 	/**
+	 * Retrieves all records associated to entity object - take note that
+	 * entirety of table will be loaded into memory
+	 */
+	public static function all() {
+		$manager = Manager\Factory::factory(); 
+		$entity  = new static;
+		$pk      = $entity->definition->primary_key;
+		
+		$set = new QuerySet($entity);
+		$set->events->trigger('call', $set, [
+			'name'            => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			// @todo shouldn't have to specify fields if empty - right
+			// now it currently fits into middleware codebase
+			'arguments'       => [ 'fields' => [ ] ], 
+			
+			// here we define middleware, which acts layer between arguments to
+			// db calls
+			'middleware'      => [ 
+				new Middleware\QuerySet\Find($set) 
+			],
+			
+			// we defer an evaluation of entity (running callback stack
+			// batch) to determine first, if the entity exists in the 
+			// manager, and if it 
+			'defer'           => true
+		]);	
+			
+		return $set;		
+	}
+	
+	/**
 	 * 
 	 * Place entity into persistence context and flags record insertion
 	 * on underlying data layer
@@ -386,13 +419,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				$pk => [ 'values' => $key ]
 			]], 
 			
-			// scrub arguments and determine if any data can be retrieve from
-			// persistence context
-			'arguments_handler'    => null,
-		
-			// callback handling will be defined/managed by queryset
-			// instance
-			'results_handler'      => null
 		]);	
 		
 		// persist entity

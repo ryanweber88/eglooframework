@@ -67,9 +67,10 @@ class Callback extends Listener {
 							}
 						}
 						
+						
 												
 						// if we have fields left after processing, then they will need to be queried
-						if ($runMethod && count($arguments['fields'])) {
+						if ($runMethod) {
 						
 							try { 
 								$method = isset($params['method']) 

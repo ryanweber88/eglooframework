@@ -26,17 +26,24 @@ class Test extends Middleware {
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1,47, 53)->orderBy('-name')->limit(1);
+		//echo \eGloo\DataProcessing\DDL\Entity\Test\User::all()->limit(10)->count(); exit;
+		
+		/*
+		foreach(\eGloo\DataProcessing\DDL\Entity\Test\User::all()->limit(10) as $user) {
+			echo "$user\n";
+		}
+		exit;
+		*/
 		
 		//echo $set->count(); exit;
-		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (47);
-
-		//echo $user->Products->limit(10)->count(); exit ('here');
-		//$user->Products->limit(1)->count();
-		//exit;
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1);
 		
-		echo $user->Products[0]->nid;exit;
+		echo "user is $user\n";
+		echo "fifth user product is " . $user->Products->orderBy('title')->limit(5)->offset(5)[0];exit;
 		
-		foreach ($user->Products->orderBy('-title')->limit(50)->offset(5)[35]->Users->orderBy('-name') as $ambiguous) {
+		//echo $user->Products->limit(1)[0]->nid;exit;
+		
+		foreach ($user->Products->orderBy('title')->limit(5)->offset(5)[0]->Users->orderBy('-name') as $ambiguous) {
 			echo "$ambiguous\n";
 		} 
 		

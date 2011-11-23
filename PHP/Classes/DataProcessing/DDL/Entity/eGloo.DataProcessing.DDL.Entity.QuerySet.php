@@ -115,15 +115,16 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	
  	protected function evaluate() { 
 		$manager = Manager\Factory::factory();
- 		 		
+		
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
 		
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
- 			 			
-			// middleware has ran - do we need to do anything here
+			//var_export($results); exit;
+			
+ 			// middleware has ran - do we need to do anything here
 			// TODO write some measure of intelligence in the number
 			// of entities built on an evaluation
 			$this->entities = new \SplFixedArray(count($results));
@@ -246,7 +247,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 
 	// Retrieve Interfaces ------------------------------------------------- //
 	// Methods can be chained 
- 
+	 
  	/**
  	 * (non-PHPdoc)
  	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::limit()
@@ -302,6 +303,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		// backticks, etc
 		foreach ($fields as $index => $field) {
 			
+			$order = '';
+			
 			// if order has been specified, then make note of order
 			// and remove specifying character
 			if (in_array($field[0], ['-', '+'])) {
@@ -310,7 +313,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 					: self::ORDER_BY_ASCENDING;
 					
 				$fields[$index] = substr($field, 1);
-							}
+			}
 			
 			// @temp add backtick
 			// @todo replace with engine syntax domain parser

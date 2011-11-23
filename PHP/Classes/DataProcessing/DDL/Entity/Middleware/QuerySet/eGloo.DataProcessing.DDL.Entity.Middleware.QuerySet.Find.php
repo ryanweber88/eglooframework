@@ -22,9 +22,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 		$manager = 	DDL\Entity\Manager\Factory::factory();
 		$allIn   = 	count($arguments['fields']) == 1 &&		
 					array_keys($arguments['fields'])[0] == $pk;
-					
-		//var_export($arguments); 
-															
+																				
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case
 		// @todo this needs to be moved an object relationship - horrifically
@@ -59,7 +57,6 @@ class Find extends DDL\Entity\Middleware\Middleware {
 			}
 		}
 				
-
 		
 		// A false return will flag to short circuit results, since
 		// all of our entities can be found		
