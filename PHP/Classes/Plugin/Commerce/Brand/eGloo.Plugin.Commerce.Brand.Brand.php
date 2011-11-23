@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\Brand;
-use \eGloo\Plugin\Commerce\Brand\BrandDAO,
+use \eGloo\Plugin\Commerce\Brand\BrandDataAccess,
 	\eGloo\Utilities\Utilities;
 
 /**
@@ -87,7 +87,7 @@ class Brand {
 	 */
 	public function loadBrandImages() {
 		if (empty ($this->brand_images)) {
-			$this->brand_images = BrandDAO::fetch()->getBrandImages($this->brand_id);
+			$this->brand_images = BrandDataAccess::fetch()->getBrandImages($this->brand_id);
 		}
 		$this->brand_images;
 		return $this;
@@ -95,7 +95,7 @@ class Brand {
 	
 	public function loadBrandProducts() {
 		if (empty ($this->brand_products)) {
-			$this->brand_products = BrandDAO::fetch()->getBrandProducts($this->brand_id);
+			$this->brand_products = BrandDataAccess::fetch()->getBrandProducts($this->brand_id);
 		}
 		$this->brand_products;
 		return $this;
@@ -103,7 +103,7 @@ class Brand {
 	
 	public function loadBrandSlug() {
 		if ($this->friendly_url == '') {
-			$this->friendly_url = BrandDAO::fetch()->loadBrandSlug($this->brand_id);
+			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlug($this->brand_id);
 		}
 		$this->friendly_url;
 		return $this;
@@ -150,7 +150,7 @@ class Brand {
 	 */
 	public static function getPublishedBrands($limit = null, $offset = null) {
 		$result = array();
-		$rows = BrandDAO::fetch()->getBrandList($limit, $offset);
+		$rows = BrandDataAccess::fetch()->getBrandList($limit, $offset);
 		foreach ($rows as $row) {
 			$result[] = new Brand($row);
 		}
@@ -160,7 +160,7 @@ class Brand {
 	
 	public static function loadBrandList() {
 		$result = array();
-		$rows = BrandDAO::fetch()->loadBrandList();
+		$rows = BrandDataAccess::fetch()->loadBrandList();
 		foreach ($rows as $row) {
 			$result[] = new Brand($row);
 		}
@@ -178,7 +178,7 @@ class Brand {
 		if ((int)$brand_id <= 0) {
 			throw new \InvalidArgumentException();
 		}
-		$rows = BrandDAO::fetch()->loadBrandById($brand_id);
+		$rows = BrandDataAccess::fetch()->loadBrandById($brand_id);
 		return new Brand($rows);
 	}
 	
@@ -192,7 +192,7 @@ class Brand {
 		if ($brand_name == '') {
 			throw new \InvalidArgumentException();
 		}
-		$rows = BrandDAO::fetch()->loadBrandByName($brand_name);
+		$rows = BrandDataAccess::fetch()->loadBrandByName($brand_name);
 		return new Brand($rows);
 	}
 	
@@ -209,7 +209,7 @@ class Brand {
 		}
 		foreach ($brands as $brand_id) {
 			$brand					= self::loadBrandById($brand_id);
-			$brand->brand_images	= BrandDAO::fetch()->getBrandImages((int)$brand->brand_id);
+			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImages((int)$brand->brand_id);
 			$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
 			//BrandData::fetch()->loadBrandSlug((int)$brand->brand_id);
 			$result[]				= $brand;

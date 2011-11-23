@@ -11,7 +11,7 @@ use \eGloo\DataProcessing\Connection;
  *
  * @author gilbert
  */
-class BrandDAO extends Connection\PostgreSQLDBConnection {
+class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	
 	/** @var resource Object */
 	protected static $instance = null;
