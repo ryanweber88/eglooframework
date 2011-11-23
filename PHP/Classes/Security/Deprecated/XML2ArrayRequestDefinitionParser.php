@@ -1225,8 +1225,9 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					if ( !is_array($variableValues)  && !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $variableArg['id'] . '\' is type \'' .
 							gettype($variableValues) . '\', not type \'' . gettype(array()) . '\'');
-					} else if ( !is_array($variableValues)  && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
-						return false;
+					} else if ( !is_array($variableValues) && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
+						continue;
+						// return false;
 					}
 
 					$regexFormat = $variableArg['regex'];
@@ -1429,7 +1430,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $formArg['id'] . '\' is type \'' .
 							gettype($formArray) . '\', not type \'' . gettype(array()) . '\'');
 					} else if ( !is_array($formArray) && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
-						return false;
+						continue;
+						// return false;
 					}
 				}
 			} else if ( $formArg['type'] === 'postarray') {
@@ -1645,7 +1647,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $complexArg['id'] . '\' is type \'' .
 							gettype($complexValues) . '\', not type \'' . gettype(array()) . '\'');
 					} else if ( !is_array($complexValues) && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
-						return false;
+						continue;
+						// return false;
 					}
 
 					$validator = $complexArg['validator'];
