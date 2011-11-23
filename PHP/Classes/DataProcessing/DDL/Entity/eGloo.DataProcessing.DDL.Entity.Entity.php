@@ -98,8 +98,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				// evaluates entity for substance (is this
 				// a fake entity or what not eh)
 				//echo "calling evaluate\n";		
-		
-				$this->evaluate();
+				if (is_null($event->getTarget())) {
+					throw new DDL\Exception\Exception(
+						'Must provide a target to evaluate event'
+					);
+				}		
+				
+				$event->getTarget()->evaluate();
 				
 				// false return indicates that listener will only respond once
 				// or is removed after initial run
@@ -127,54 +132,123 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	protected function initCallbacks(array $callbacks = [ ]) {
 		// Defines "initializing" callbacks - these will be run once
 		// but are vital to entity evaluation
+		// !!An entity must be evaluated (either from database
+		// or from persistence context) prior to initcallbacks!!
+		
 		return array_merge(
 			
 			// defines relationship initialization  
 			[ new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
-								
-					// evaluating object existence - these need to be seperated somehow
-					// evaluate entity relationships
-					foreach($this->definition->relationships as $relationship) { 
-															
-						// create entity representation of relationship
-						$entityRelation = DDL\Entity\Factory::factory(
-							"{$this->_class->namespace}\\{$relationship->to}"
-						);
+					
+					
+					// @todo change this - need a way to determine if entity is valid without
+					// explicit checks on attributes - current valid method is cyclical and
+					// will perform an evaluate 
+					if (isset($pass[0])) {
+
+						// shortcut pass to mixed
+						$mixed = &$pass[0];
+					
+						// make sure pass through value is either a returned entity from
+						// persistence or database record
+						if (is_object($mixed) && $mixed instanceof Entity) {
+							$primaryKeyValue = $mixed->id;
+						}
 						
-						//echo "$relationship\n";
-						//echo $this->uid; exit;
-						
-						// if has-many relationship, then a queryset is instantiated with a single 
-						// callback on stack (a call to find_xxx statement)
-						if ($relationship->hasMany()) { 
-							$this->relationships[(string)$relationship] = new QuerySet(
-								$entityRelation, new DDL\Utility\CallbackStack([ new DDL\Utility\Callback('init', function() use ($relationship) {
-									
-									$pk = $this->definition->primary_key;
-									 
-									// @todo name conventions will be have to be centralized (find_) around configurable, or 
-									// at least managed from some outside perspective - find_ could change at anytime. 
-									
-									// we know that a method call on an entity is using a foreign key
-									// @todo add exception handling
-									return MethodGateway::method($this, 'find_' . strtolower($relationship->to))->call([
-										'fields' => [ 
-											$pk => [ 'values' => [ $this->id ] ]
-										]
-									]);  
-									
-								})])
-							);
+						else if (is_array($mixed)) {
+							$primaryKeyValue = $mixed[$this->definition->primary_key];
 						}
 						
 						else {
-							$this->relationships[(string)$relationship] = $entityRelation;
+							
+							throw new DDL\Exception\Exception (
+								'Pass through value does not contain Entity evaluation data'
+							);
 						}
-						
-					}
+												
+									
+						// evaluating object existence - these need to be seperated somehow
+						// evaluate entity relationships
+						foreach($this->definition->relationships as $relationship) { 
+																
+							// create entity representation of relationship
+							$entityRelation = DDL\Entity\Factory::factory(
+								"{$this->_class->namespace}\\{$relationship->to}"
+							);
+							
+							
+							//echo "$relationship\n";
+							//echo $this->uid; exit;
+							
+							// if has-many relationship, then a queryset is instantiated with a single 
+							// callback on stack (a call to find_xxx statement)
+							if ($relationship->hasMany()) {
+								 
+								$set = new QuerySet($entityRelation);
+								$set->events->trigger('call', $set, [
+									'name'            => 'find_' . strtolower($relationship->to),
+								
+									'method'          => DDL\Entity\MethodGateway::method(
+										$this, 'find_' . strtolower($relationship->to)
+									),
+								
+									// defines the calling method, and parameter values
+									'arguments'       => [ 'fields' => [ $this->definition->primary_key => [ 'values' => [ $primaryKeyValue ] ]]],
+									
+									// scrub arguments and determine if any data can be retrieve from
+									// persistence context
+									// here we define middleware, which acts layer between arguments to
+									// db calls
+									'middleware'      => [ 
+										new Middleware\QuerySet\Find($set) 
+									],
+									
+									// we defer an evaluation of entity (running callback stack
+									// batch) to determine first, if the entity exists in the 
+									// manager, and if it 
+									'defer'           => true
+								]);
+								
+								$this->relationships[(string)$relationship] = $set;
+	
+								/*
+								$this->relationships[(string)$relationship] = new QuerySet(
+									$entityRelation, new DDL\Utility\CallbackStack([ new DDL\Utility\Callback('init', function() use ($relationship) {
 										
-					return $pass;
+										$pk = $this->definition->primary_key;
+										 
+										// @todo name conventions will be have to be centralized (find_) around configurable, or 
+										// at least managed from some outside perspective - find_ could change at anytime. 
+										
+										// we know that a method call on an entity is using a foreign key
+										// @todo add exception handling
+										return MethodGateway::method($this, 'find_' . strtolower($relationship->to))->call([
+											'fields' => [ 
+												$pk => [ 'values' => [ $this->id ] ]
+											]
+										]);  
+										
+									})])
+									
+								);
+								*/
+							}
+							
+							else {
+								$this->relationships[(string)$relationship] = $entityRelation;
+							}
+							
+						}
+											
+						return $pass;
+					}
+					
+					// throw an exception if the entity has not been identified in 
+					// datastore or persistence context
+					throw new DDL\Exception\Exception(
+						'Entity has not yet been evaluated; this must be done prior to initCallbacks'
+					);
 					
 			}) ], 
 			
@@ -199,7 +273,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @return boolean
 	 */
 	public function valid() { 
-		$this->events->trigger('evaluate');
+		$this->events->trigger('evaluate', $this);
 		
 		// Data shoud ALWAYS be either valid or absolute false
 		return ($this->attributes !== false);
@@ -211,7 +285,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// evaluate is responsible for running callback stack
 		// and acting upon resulting data
 				
-		echo "calling eval\n";
+		echo "calling eval on entity\n";
 				
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
@@ -224,7 +298,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		if (($results = $this->callbacks->batch()) !== false) {
 			$this->attributes = $results[0];
 		}
-		
+				
 	}
 	
 
@@ -239,8 +313,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// relationships must be clone separately
 		$relationships = [ ];
 		
-		foreach($this->relationships as $relationship) {
-			$relationships[] = clone $relationship;
+		foreach($this->relationships as $key => $relationship) {
+			$relationships[$key] = clone $relationship;
 		}
 		
 		$this->relationships = $relationships;
@@ -596,20 +670,37 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * that if any attribute or relation name exists, it will take prescedence
 	 * over class protecteds
 	 */
-	public function __get($name) { 
+	public function __get($name) {
 		
-		var_export(array_keys($this->relationships));
+		// @todo define this behavior at object level 
+		$singletonMethodName = "get_$name";
 		
-		// use reflection and static storage to retrieve list of entity properties
-		foreach([$this->attributes, $this->relationships] as $hash) {
-			if (is_array($hash) && isset($hash[$name])) {
-				return $hash[$name];
-			}
+		//if ($this->_singleton->respondTo($singletonMethodName)) { 
+		if (0) {
+			return $this->_singleton->methods[$singletonMethodName]();
 		}
 		
-		//echo "sending $name to parent from class " . get_class($this). " from entity\n";
-		
-		return parent::__get($name);
+		else {
+			
+			if ($name == 'Products') {
+				//echo spl_object_hash($this->relationships['Products']); exit;
+			}
+
+			//$function = $this->_singleton->defineMethod($singletonMethodName, function() use ($name) { 
+				// use reflection and static storage to retrieve list of entity properties
+				foreach([$this->attributes, $this->relationships] as $hash) {
+					if (is_array($hash) && isset($hash[$name])) {
+						return $hash[$name];
+					}
+				}
+				
+				//echo "sending $name to parent from class " . get_class($this). " from entity\n";
+				
+				return parent::__get($name);
+			//});
+			
+			//return $function();
+		}
 		
 	}
 	

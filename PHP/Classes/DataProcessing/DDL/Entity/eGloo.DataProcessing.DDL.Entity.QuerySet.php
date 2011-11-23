@@ -27,6 +27,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// type of entity, so entity represents the "type" of this queryset
  		$this->entity = $entity;
  		
+ 		
  		// instantiate event manager and attach listeners 		
 		$this->events = new EventManager;		
 		$this->events->attachAggregate(new Listener\Callback($this->entity));
@@ -37,8 +38,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				// a fake entity or what not eh)
 				//echo "calling evaluate\n";		
 		
-				$this->evaluate();
+				if (is_null($event->getTarget())) {
+					throw new DDL\Exception\Exception(
+						'Must provide a target to evaluate event'
+					);
+				}
 				
+				$event->getTarget()->evaluate();				
 				// false return indicates that listener will only respond once
 				// or is removed after initial run
 				return false;
@@ -53,7 +59,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		}
 		
 		$this->callbacks = $stack;
-		
 	
  	}
  	
@@ -103,7 +108,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	}
  	
  	public function isEmpty() { 
- 		$this->events->trigger('evaluate');
+ 		$this->events->trigger('evaluate', $this);
  			
  		return $this->count() === 0;
  	}
@@ -113,7 +118,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		 		
  		// @todo we need to scrub ids from query if some are not needed
  		// since they already exist in persistence context
-
+		
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
@@ -128,7 +133,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// combination of records (as returned by the database) and
 			// entities, from persistence 			
 			foreach ($results as $index => $mixed) {
-				
+								
 				// result is an entity, which was gleaned from persistence context by 
 				// a middleware component			
 				if (is_object($mixed) && $mixed instanceof Entity) { 
@@ -139,7 +144,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				// context for entity 
 				else {
 					
-					$allIn  = false;
 					$record = &$mixed;
 					
 	 				$this->entities[$counter++] = $manager->find(
@@ -147,8 +151,15 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
 	 							 						
 	 						// instantiate entity
-	 						$entity              = clone $this->entity;
-	 						$entity->attributes  = $record;
+	 						$entity = clone $this->entity;
+	 						$entity->attributes = $record;
+	 						
+	 						// @todo need a way to moreso eloquently push a callback
+	 						// entity and keep callback structure
+	 						$entity->callbacks->push(new DDL\Utility\Callback('attributes', function(array $pass = [ ]) use ($record) { 
+	 							exit ('in attributes callback');
+	 							return $record;
+	 						}));
 
 	 						// returning entity to manager to handle persistence
 	 						return $entity;
@@ -156,7 +167,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 					}
 	 				); 	
 	 				
-	 				echo "adding entity\n";
+	 				//echo "adding entity\n";
 	 				
 	 				
 	 				// now do side associations
@@ -199,14 +210,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// so that it can honor iterator, arrayaccess
 			// countable implementations without having
 			// to ask if entities exists for each method
-			$this->entities = [ ];
+			$this->entities = new \SplFixedArray(0);
 		}
-		
-		
+
  	}
  	
 
- 	
 
 
 	// Retrieve Interfaces ------------------------------------------------- //
@@ -227,7 +236,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 				
 		]);
 		
-		return $set;
+		return $this;
 	}
 	
 	/**

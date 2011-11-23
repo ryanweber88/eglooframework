@@ -18,9 +18,13 @@ class Find extends DDL\Entity\Middleware\Middleware {
 	 * @see MiddlewareInterface::processArguments()
 	 */
 	public function processArguments(array $arguments) { 
-		$manager = DDL\Entity\Manager\Factory::factory();
-		$allIn   = true;
-										
+		$pk      =	$this->entity->definition->primary_key;	
+		$manager = 	DDL\Entity\Manager\Factory::factory();
+		$allIn   = 	count($arguments['fields']) == 1 &&		
+					array_keys($arguments['fields'])[0] == $pk;
+					
+		//var_export($arguments); 
+															
 		// check fields for entities that already exist in database - 
 		// flag them if that is the case
 		// @todo this needs to be moved an object relationship - horrifically
@@ -35,12 +39,11 @@ class Find extends DDL\Entity\Middleware\Middleware {
 			// at some point the pool/event manager will act to determine if changes
 			// occur to records not identified by primary key
 			// @todo remove and allow pool event manager to handle this step
-			if ($this->container->entity->definition->primary_key == $fieldName) { 
-						
+			if ($this->entity->definition->primary_key == $fieldName) { 				
 				foreach($composite['values'] as $index => $value) {
 					
-					if ($manager->map->with($fieldName)->with($value)->retrieves($this->container->entity) !== false) {
-											
+					if ($manager->map->with($fieldName)->with($value)->retrieves($this->entity) !== false) {
+
 						// move value to found and unset from main args list
 						$arguments['fields'][$fieldName]['found'][] = $value;
 						
@@ -55,7 +58,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 				}
 			}
 		}
-		
+				
 
 		
 		// A false return will flag to short circuit results, since
@@ -63,8 +66,6 @@ class Find extends DDL\Entity\Middleware\Middleware {
 		return $allIn 
 			? false
 			: $arguments;
-
-		return $arguments;
 		
 	}
 	
@@ -88,7 +89,7 @@ class Find extends DDL\Entity\Middleware\Middleware {
 				// append found values to the end of results
 				foreach($composite['found'] as $value) { 
 					$results = array_merge(
-						$results, $map->with($fieldName)->with($value)->retrieves($this->container->entity)
+						$results, $map->with($fieldName)->with($value)->retrieves($this->entity)
 					);
 				}
 			}

@@ -34,10 +34,9 @@ class Callback extends Listener {
 		if (property_exists($target, 'callbacks')) {
 			$target->callbacks->push(new DDL\Utility\Callback(
 				$params['name'], function(array $pass = [ ]) use ($params) {
-					// must be careful that pass does not conflict/collide with
-					// any hash keys used in arguments
-					$arguments = array_merge($params['arguments'], $pass);
+					
 					$runMethod = true;
+										
 						
 					// if middleware has been specified, we are processing a method call (call
 					// to underlying data layer) - middleware acts to process or make sence of 
@@ -45,9 +44,13 @@ class Callback extends Listener {
 					// call - finally results will be processed by appropriate handler and
 					// returned to evaluate method
 					if (isset($params['middleware']) && is_array($params['middleware'])) {
-						$results = [ ];
-						//var_export($arguments); exit;
 						
+						// must be careful that pass does not conflict/collide with
+						// any hash keys used in arguments
+						$arguments = array_merge($params['arguments'], $pass);
+						$results   = [ ];
+						
+												
 						foreach($params['middleware'] as $middleware) {
 							// a false return will indicate that method does not need to be
 							// called
@@ -58,12 +61,17 @@ class Callback extends Listener {
 								break ;
 							}
 						}
+						
 												
 						// if we have fields left after processing, then they will need to be queried
 						if ($runMethod && count($arguments['fields'])) {
 						
 							try { 
-								$results = DDL\Entity\MethodGateway::method($this->entity, $params['name'])->call(
+								$method = isset($params['method']) 
+									? $params['method']
+									: DDL\Entity\MethodGateway::method($this->entity, $params['name']);
+								
+								$results = $method->call(
 									$arguments
 								);  
 								
@@ -87,8 +95,8 @@ class Callback extends Listener {
 					// if no middleware components are specified, we are simply passing arguments to next
 					// callback handler
 					else {
-						$pass[$params['name']] = $arguments;
-						
+						$pass[$params['name']] = $params['arguments'];
+
 						return $pass;
 					}
 	

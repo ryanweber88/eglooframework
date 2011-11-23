@@ -25,21 +25,21 @@ class Test extends Middleware {
 		
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
+		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1,47, 53)->orderBy('-name')->limit(1);
+		
+		//echo $set->count(); exit;
 		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1);
-		
-		foreach($user->Products as $product) {
-			
-		}
-		
-		exit;
 
-		foreach ($set2 as $user) {
-			foreach($user->Products as $product) {
-				echo "{$product->title}\n";
-			}
+		//echo $user->Products->limit(10)->count(); exit ('here');
+		
+		//echo "hash on user is " . spl_object_hash($user->Products) . "\n";
+		foreach($user->Products->limit(1) as $product) {
+			echo "$product\n";
 		}
 		
 		exit;
+		
+
 		//echo $set->count();
 		//$set->orderBy(
 			//'-uid', 'name'

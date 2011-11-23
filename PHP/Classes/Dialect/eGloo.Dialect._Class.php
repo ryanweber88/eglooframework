@@ -7,7 +7,7 @@ namespace eGloo\Dialect;
  * @author Christian Calloway
  *
  */
-class _Class extends Object implements MetaInterface { 
+class _Class extends Object { 
 	
 	function __construct($mixed) { 
 		//parent::__construct();

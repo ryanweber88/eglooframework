@@ -15,8 +15,12 @@ abstract class Middleware extends \eGloo\Dialect\Object implements MiddlewareInt
 	use MiddlewareTrait;
 	
 	function __construct($container) { 
-		$this->container = $container;
+		$this->container = $container;	
+		$this->entity    = $container instanceof DDL\Entity\Entity
+			? $container 
+			: $container->entity;
 	}
 	
 	protected $container;
+	protected $entity;
 }

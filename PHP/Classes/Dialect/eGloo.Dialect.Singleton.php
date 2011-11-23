@@ -8,7 +8,7 @@ namespace eGloo\Dialect;
  * @author Christian Calloway
  *
  */
-class Singleton extends Object implements MetaInterface { 
+class Singleton extends Object { 
 	
 	function __construct($instance) { 
 		//parent::__construct();
@@ -40,17 +40,6 @@ class Singleton extends Object implements MetaInterface {
 		);
 	}
 	
-	/**
-	 * Overrides object respondTo to check for singleton level
-	 * method response
-	 */
-	public function respondTo($name) {
-		if (isset($this->methods[$name])) {
-			return true;
-		}
-		
-		return parent::respondTo($name);
-	}
 	
 	public function __toString() {
 		return $this->id;

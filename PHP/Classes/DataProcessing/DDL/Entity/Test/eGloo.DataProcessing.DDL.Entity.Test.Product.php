@@ -12,8 +12,15 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
 class Product extends Entity {
 
 	public function __toString() { 
-		if ($this->valid()) { 
-			return $this->title;
+		try {
+			$this->events->trigger('evaluate', $this);
 		}
+		catch (\Exception $e) {
+			echo $e->getMessage(); exit;
+		}
+			return $this->title;
+		//}
+		
+		return "N/A";
 	}
 }
