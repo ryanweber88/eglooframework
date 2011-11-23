@@ -849,6 +849,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			// Should this instruct to build an ErrorRequestProcessor on failure?  Not sure...
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -858,6 +860,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if ( !$this->executeInitRoutines( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -867,6 +871,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateBooleanArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -876,6 +882,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateVariableArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -885,6 +893,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateFormArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -894,6 +904,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateComplexArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -903,6 +915,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateSelectArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -912,6 +926,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateFileArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -921,6 +937,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if( !$this->validateDependArguments( $requestNode, $requestInfoBean, $requestType ) ) {
 			if ($errorProcessorID) {
 				$retVal = false;
+			} else if ( $requestType === 'page') {
+				
 			} else {
 				return false;
 			}
@@ -1204,13 +1222,15 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					$variableValues = $_GET[ $variableArg['id'] ];
 
 					// Throw an exception if we attempt to access a non-GET array variable as an array
-					if (!is_array($variableValues)) {
+					if ( !is_array($variableValues)  && !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $variableArg['id'] . '\' is type \'' .
 							gettype($variableValues) . '\', not type \'' . gettype(array()) . '\'');
+					} else if ( !is_array($variableValues)  && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
+						return false;
 					}
 
 					$regexFormat = $variableArg['regex'];
-					
+
 					$sanitizedValues = array();
 
 					foreach($variableValues as $key => $variableValue) {
@@ -1405,9 +1425,11 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					$formArray = $_GET[ $formArg['id'] ];
 
 					// Throw an exception if we attempt to access a non-GET array variable as an array
-					if (!is_array($formArray)) {
+					if ( !is_array($formArray) && !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $formArg['id'] . '\' is type \'' .
 							gettype($formArray) . '\', not type \'' . gettype(array()) . '\'');
+					} else if ( !is_array($formArray) && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
+						return false;
 					}
 				}
 			} else if ( $formArg['type'] === 'postarray') {
@@ -1619,9 +1641,11 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					$complexValues = $_GET[ $complexArg['id'] ];
 
 					// Throw an exception if we attempt to access a non-GET array variable as an array
-					if (!is_array($complexValues)) {
+					if (!is_array($complexValues) && !isset($requestNode['errorProcessorID']) && $requestType !== 'page' ) {
 						throw new eGlooRequestDefinitionParserException('GET Array Access Error: GET ID \'' . $complexArg['id'] . '\' is type \'' .
 							gettype($complexValues) . '\', not type \'' . gettype(array()) . '\'');
+					} else if ( !is_array($complexValues) && (isset($requestNode['errorProcessorID']) || $requestType === 'page') ) {
+						return false;
 					}
 
 					$validator = $complexArg['validator'];
