@@ -28,13 +28,20 @@ class Test extends Middleware {
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1,47, 53)->orderBy('-name')->limit(1);
 		
 		//echo $set->count(); exit;
-		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (1);
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find (47);
 
 		//echo $user->Products->limit(10)->count(); exit ('here');
 		//$user->Products->limit(1)->count();
 		//exit;
 		
-		$set = $user->Products->limit(10);
+		echo $user->Products[0]->nid;exit;
+		
+		foreach ($user->Products->orderBy('-title')->limit(50)->offset(5)[35]->Users->orderBy('-name') as $ambiguous) {
+			echo "$ambiguous\n";
+		} 
+		
+		exit;
+		
 		echo $set[0]->Users[0]; exit;
 		echo "suck = " . $user->Products->limit(5)->count(); 
 		exit;

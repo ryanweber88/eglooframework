@@ -65,7 +65,11 @@ class Builder extends \eGloo\Dialect\Object {
 				if (count($keys = array_keys($value)) && !is_array($value[$keys[0]])) { 
 					if (!is_numeric($value[$keys[0]])) { 
 						foreach($value as $index => $string) {
-							$array[$key][$index] = "'" .addslashes($string) . "'";
+							// @todo this shouldn't be looking at engine domain syntax 
+							// (backtick character)
+							if (strpos($string, '`') === false) { 
+								$array[$key][$index] = "" .addslashes($string) . "";
+							}
 						}
 					}
 					

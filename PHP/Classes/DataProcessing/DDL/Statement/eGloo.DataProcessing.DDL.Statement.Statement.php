@@ -43,7 +43,7 @@ class Statement extends \eGloo\Dialect\Object {
 	public function execute($statement) { 
 		
 		//if (strpos($statement, 'dr_content_type_product') !== false) {
-			//echo $statement; exit;
+			//echo "\n\n$statement\n\n"; 
 		//}
 		
 		$preparedStatement = new \QueryTransaction($statement);

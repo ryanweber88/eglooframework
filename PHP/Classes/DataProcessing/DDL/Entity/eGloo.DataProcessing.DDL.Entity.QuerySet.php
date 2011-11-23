@@ -297,16 +297,24 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 		// iterate through fields to determine
 		// sort order of field using -+ syntax
+		// @todo we need engine specific parser to specify
+		// such ideas as ASC/DESC, syntax issues like 
+		// backticks, etc
 		foreach ($fields as $index => $field) {
-			if ($field[0] == '-') {
-				$fields[$index] = substr($field, 1) . ' ' . self::ORDER_BY_DESCENDING;
-			}
 			
-			else if ($field[0] == '+') {
+			// if order has been specified, then make note of order
+			// and remove specifying character
+			if (in_array($field[0], ['-', '+'])) {
+				$order = $field[0] == '-'
+					? self::ORDER_BY_DESCENDING
+					: self::ORDER_BY_ASCENDING;
+					
 				$fields[$index] = substr($field, 1);
-			}
-				
-			// @todo determine if ASC is ascii sql standard
+							}
+			
+			// @temp add backtick
+			// @todo replace with engine syntax domain parser
+			$fields[$index] = "`{$fields[$index]}` $order";
 		}
 		
 		// finally, create new set, pass callbacks to and add

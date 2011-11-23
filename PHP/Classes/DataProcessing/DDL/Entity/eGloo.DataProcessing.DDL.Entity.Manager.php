@@ -154,13 +154,13 @@ class Manager extends \eGloo\Dialect\Object implements Manager\ManagerInterface 
 	 */
 	public function find(Entity $entity, $key, \Closure $lambda = null) {
 	
-		echo "calling find\n";
+		//echo "calling find\n";
 		$pk = $entity->definition->primary_key;
 		
 		// we assume, that once an entity is retrieved via db operation
 		// that it will be mapped 
 		if (($persistentEntity = $this->map->with($pk)->with($key)->retrieves($entity)) !== false) { 
-			echo "found entity\n";
+			//echo "found entity\n";
 			return clone $persistentEntity;
 		}
 				

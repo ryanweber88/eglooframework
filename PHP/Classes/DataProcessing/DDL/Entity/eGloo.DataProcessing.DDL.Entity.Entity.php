@@ -287,7 +287,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// evaluate is responsible for running callback stack
 		// and acting upon resulting data
 				
-		echo "calling eval on entity\n";
+		//echo "calling eval on entity\n";
 				
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
