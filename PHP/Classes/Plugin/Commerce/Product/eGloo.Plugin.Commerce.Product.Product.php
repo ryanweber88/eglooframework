@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\Product;
-use eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
+use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 
 /**
  * Product Class File
@@ -82,10 +82,10 @@ class Product {
 	public			$wholesale_price;
 
 	/** @var array of Images */
-	public			$images = array();
+	public			$product_images = array();
 
 	/** @var array of variant sizes */
-	public			$sizes = array();
+	public			$product_sizes = array();
 
 	/** @var boolean on_sale */
 	public			$on_sale = false;
@@ -159,8 +159,6 @@ class Product {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
-		//$this->loadImages();
-		//$this->properties = $args;
 	}
 	
 	public function loadImages( $id = null ) {

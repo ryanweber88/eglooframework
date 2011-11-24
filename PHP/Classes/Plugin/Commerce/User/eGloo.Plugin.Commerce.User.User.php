@@ -1,5 +1,6 @@
 <?php
 namespace eGloo\Plugin\Commerce\User;
+use eGloo\Plugin\Commerce;
 
 /**
  * User Class File
@@ -38,10 +39,13 @@ namespace eGloo\Plugin\Commerce\User;
 class User {
 
 	/** @var integer user id */
-	public $uid;
+	public $user_id;
 
 	/** @var string user email address */
 	public $email;
+	
+	/** @var string user name */
+	public $username;
 
 	/** @var string password */
 	public $password;
@@ -75,24 +79,16 @@ class User {
 
 	const PRIVILEGES_REGULAR_USER	= 0;
 	const PRIVILEGES_ADMIN_USER		= 1;
-	const PRIVILEGES_SUPER_USER		= 2;
-	/**
-	 *
-	 * @return type
-	 */
-	public function getUserInfo(){
-		if (isset ($this->uid)){
+	
 
+	public function __contruct ($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
+		if ($uname == '' || $pwd == '') {
+			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
-		return $user;
-	}
-
-	public function __contruct ($uname, $pwd, User::PRIVILEGES_REGULAR_USER) {
 		$this->username		= $uname;
-		$this->password = $password;
-		if ($uname == '' || $password == '') {
-			throw new \Exception("Invalid User Data Exception: Username or Password is invalid");
-		}
+		$this->password		= $pwd;
+		$this->privileges	= $priv;
+		
 	}
 
 	public function checkPassword ($password) {

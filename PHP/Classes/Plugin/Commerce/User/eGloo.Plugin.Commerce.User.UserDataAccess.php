@@ -1,6 +1,7 @@
 <?php
+namespace eGloo\Plugin\Commerce\User;
 use eGloo\DataProcessing\Connection;
-use eGloo\Plugin\Commerce;
+use eGloo\Plugin\Commerce\User;
 
 /**
  * UserDataAccess Class File
@@ -37,10 +38,20 @@ use eGloo\Plugin\Commerce;
  * @subpackage Commerce
  */
 class UserDataAccess extends Connection\PostgreSQLDBConnection{
+	
 	protected static $instance = null;
 
+	/**
+	 * Pass Connection resource to parent constructor 
+	 * if needed
+	 * @return void
+	 */
 	protected function __construct() { }
 
+	/**
+	 * Generate an instance of this class
+	 * @return object of this class
+	 */
 	public static function fetch () {
 		if (static::$instance === null) {
 			static::$instance = new User\UserDataAccess();
@@ -48,12 +59,51 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		return static::$instance;
 	}
 
-	public function createUser ($uname, $pwd, $priviledges) {
-		if ($uname == '' || $password == '') {
+	public function createUser ($uname, $pwd, $priv) {
+		if ($uname == '' || $password == '' || $priv == '') {
 			throw new \InvalidArgumentException();
 		}
-		$conn = $this->getConnection();
-		// Do Insert User
+		$this->beginTransaction();
+		try {
+			
+		} catch (\Exception $e) {
+			throw  $e;
+		}
+	}
+	
+	public function loadUserById($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+	}
+	
+	public function loadUserByName($user_name) {
+		if ($user_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
+		}
+	}
+
+	public function loadUser($field_name, $field_value) {
+		if ($field_name == '' || $field_value == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = '';
+		return parent::getUnique($sql, array($field_value, 1), function ($row) {
+							return $row;
+		});
+	}
+	
+	public function deleteUserById($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+		
+	}
+	
+	public function deleteSessionByName($user_name) {
+		if ($user_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
+		}
+		
 	}
 }
-
