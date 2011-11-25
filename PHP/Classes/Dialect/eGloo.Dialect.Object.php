@@ -197,7 +197,12 @@ abstract class Object implements MetaInterface {
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collisions
-		//echo var_export(method_exists($this, 'method'), true);
+		// check if referring to singleton property
+		$singletonExists = false;
+		
+		if (($singletonExists = is_object($this->_singleton)) && property_exists($this->_singleton, $name)) {
+			return $this->_singleton->$name;
+		}
 		
 		// assign to self necessary 
 		$self = $this;
@@ -220,6 +225,15 @@ abstract class Object implements MetaInterface {
 		// define a default getter/setter and cache into 
 		// class level method for quicker retrieval in future
 		if (property_exists($this, $name)) {
+			
+			// @todo below does not work - getting 
+			// PHP Fatal error:  Cannot assign by reference to overloaded object 
+			
+			if ($singletonExists) {
+				$this->_singleton->$name = &$this->$name;
+			}
+			
+						
 			// define a class level method
 			$function = function($argument = null) use ($name) {
 				// if an argument has been specfied, then
@@ -232,8 +246,7 @@ abstract class Object implements MetaInterface {
 				return $this;
 			};
 			
-			// @todo for now, we do singleton level method cache
-			if (is_object($this->_singleton)) {
+			if ($singletonExists) { 
 				$this->_singleton->defineMethod($name, $function);
 			}
 			
@@ -260,7 +273,6 @@ abstract class Object implements MetaInterface {
 				);
 			}
 			*/
-			
 			
 			return count($arguments) 
 				? $function($arguments[0])

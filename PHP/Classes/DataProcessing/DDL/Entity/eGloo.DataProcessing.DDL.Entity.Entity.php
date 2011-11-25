@@ -548,6 +548,44 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		}
 		
 	}
+	
+	/**
+	 * Retrieves a batched queryset of all records for the given entity, and
+	 * pass batch size and lambda function
+	 */
+	public static function findEach($mixed, $lambda = null) {
+		$manager = Manager\Factory::factory(); 
+		$entity  = new static;
+		$pk      = $entity->definition->primary_key;
+		
+		// determine if batch size has been specified
+		if (is_callable($mixed)) {
+			$lamba = &$mixed;
+		}
+		
+		$set = new QuerySet($entity);
+		$set->events->trigger('call', $set, [
+			'name'            => __FUNCTION__,
+		
+			// defines the calling method, and parameter values
+			// @todo shouldn't have to specify fields if empty - right
+			// now it currently fits into middleware codebase
+			'arguments'       => [ 'fields' => [ ] ], 
+			
+			// here we define middleware, which acts layer between arguments to
+			// db calls
+			'middleware'      => [ 
+				new Middleware\QuerySet\Find($set) 
+			],
+			
+			// we defer an evaluation of entity (running callback stack
+			// batch) to determine first, if the entity exists in the 
+			// manager, and if it 
+			'defer'           => true
+		]);	
+			
+		return $set;	
+	}
 			
 
 	
