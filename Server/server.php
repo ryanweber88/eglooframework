@@ -76,15 +76,7 @@ $target = $argv[count($argv)-1];
 // TESTING
 
 
-class test extends \eGloo\Dialect\Object {
-	protected $value = ['1', '2', '3'];
-}
 
-$t = new test;
-$t->value;
-
-
-exit;
 
 
 // NOTE : Everything defined in global context will exist in global context

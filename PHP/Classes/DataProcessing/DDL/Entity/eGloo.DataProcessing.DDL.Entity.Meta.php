@@ -10,7 +10,19 @@ namespace eGloo\DataProcessing\DDL\Entity;
  */
 class Meta extends \eGloo\Dialect\Object {
 	
+	function __construct(Entity $entity) {
+		$this->entity = $entity;
+	}
 	
-	protected $lastUpdated;
+	// STAT meta information
+	protected $created;
+	protected $modified;
+	protected $accessed;
+	
+	// RECORD/TABLE information
 	protected $fieldsChanged = [ ];
+	protected $recordCount;
+	
+	
+	protected $entity;
 }

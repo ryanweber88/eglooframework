@@ -12,7 +12,7 @@ use \Zend\EVentManager\EventCollection;
  * @author Christian Calloway
  *
  */
-class Listener extends \eGloo\Utilities\EventManager\Listener\Listener {
+class Generic extends Listener {
 	
 
 	

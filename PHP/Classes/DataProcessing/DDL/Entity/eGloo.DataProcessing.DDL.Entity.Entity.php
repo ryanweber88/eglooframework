@@ -49,8 +49,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// SET ENTITY STATE
 		$this->state = Manager::ENTITY_STATE_NEW;
+			
 		
-		// BUILD ENTITY DEFINITION
+		// BUILD ENTITY DEFINITION AND INSTANTIATE META 
 		// Defined in entities xml
 		//$this->entityDefinition();
 		
@@ -67,6 +68,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
 		}
+		
+		// entity meta is used to track runtime information about an
+		// instance
+		//$this->meta = new Meta($this);
 				
 							
 		// ENTITY/STATEMENT INTERFACE
@@ -85,14 +90,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// ENTITY EVENT LISTENERS
 		//$this->entityEventListeners();
 		$this->events = new EventManager;
-		
-		// Stat listener is responsible for tracking accessed/modified data
-		$this->events->attachAggregate(new Listener\Stat);
+			
 		
 		// Callback listener is responsible for evaluating all
 		// triggers to call and evaluate 
+		$this->events->attachAggregate(new Listener\Meta($this));
 		$this->events->attachAggregate(new Listener\Callback($this));
-		$this->events->attachAggregate(new Listener\Listener($this, [
+		$this->events->attachAggregate(new Listener\Generic($this, [
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
@@ -114,6 +118,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 		]));			
 				
+		// fire 'created' event
+		//$this->events->trigger('created', $this);
 		
 	}
 	

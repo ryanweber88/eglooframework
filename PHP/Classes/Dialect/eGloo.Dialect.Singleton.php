@@ -11,6 +11,8 @@ namespace eGloo\Dialect;
  * @author Christian Calloway
  *
  */
+use eGloo\Utilities\instance;
+
 class Singleton extends Object { 
 	
 	function __construct($instance) { 
@@ -18,7 +20,7 @@ class Singleton extends Object {
 
 		// define class for singleton statically - this cannot be
 		// done in object as it would create an infinite loop
-		if (is_null(static::$class)) {
+		if (is_null(static::$class) && !($this instanceof _Class)) {
 			static::$class = new _Class($this);
 		}
 

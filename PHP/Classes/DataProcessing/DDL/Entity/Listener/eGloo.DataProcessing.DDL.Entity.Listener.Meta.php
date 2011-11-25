@@ -1,24 +1,25 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity\Listener;
 
+
 use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
 use \Zend\EVentManager\EventCollection;
 
 /**
  * 
- * Provides abstract functionality for monitoring 
+ * Provides runtime monitoring functionality for entity instances
  * @author Christian Calloway
  *
  */
-class Stat extends \eGloo\Utilities\EventManager\Listener\Listener {
+class Meta extends Listener{
 	
 	public function eventAccessed(Event $event) { 
-		$event->getTarget()->updateAccessed();	
+		$event->getTarget()->meta->accessed = time();
 	}
 	
 	public function eventModified(Event $event) { 
-		$event->getTarget()->updateModified();
+		$event->getTarget()->meta->modified = time();
 	}
 	
 	/**
@@ -28,6 +29,14 @@ class Stat extends \eGloo\Utilities\EventManager\Listener\Listener {
 	 */
 	public function eventCreated(Event $event) {
 		
+		// shortcut to target
+		$target = &$event->getTarget();
+		
+		// update record count on static basis?
+		
+		// fire accessed/modified
+		$target->events->trigger('accessed', $target);
+		$target->events->trigger('modified', $target);
 	}
 	
 }

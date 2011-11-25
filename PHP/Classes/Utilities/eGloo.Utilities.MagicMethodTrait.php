@@ -9,6 +9,8 @@ trait MagicMethodTrait {
 	
 	protected function callMagicOn($name, $arguments, $container) {
 		
+		//echo "caling magic on $name from ". get_class($this) ."\n";
+		
 		$functionContainer = 
 			is_object($container) && $container instanceof \eGloo\Dialect\Object
 				? $container->_class->methods

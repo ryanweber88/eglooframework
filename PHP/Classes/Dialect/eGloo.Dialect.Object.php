@@ -34,8 +34,6 @@ abstract class Object implements MetaInterface {
 		}
 		
 		$this->_class = static::$__classes[get_class($this)];
-
-		
 		
 		// instantiate singleton - a singleton represents a single
 		// instance of an object, and every single object instance
@@ -196,11 +194,12 @@ abstract class Object implements MetaInterface {
 
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
-		// collisions
-		// check if referring to singleton property
-		$singletonExists = false;
+		// collision
 		
-		if (($singletonExists = is_object($this->_singleton)) && property_exists($this->_singleton, $name)) {
+		// check if referring to singleton property
+		$singletonExists = is_object($this->_singleton);
+		
+		if ($singletonExists && property_exists($this->_singleton, $name)) {
 			return $this->_singleton->$name;
 		}
 		
@@ -229,9 +228,7 @@ abstract class Object implements MetaInterface {
 			// @todo below does not work - getting 
 			// PHP Fatal error:  Cannot assign by reference to overloaded object 
 			
-			if ($singletonExists) {
-				$this->_singleton->$name = &$this->$name;
-			}
+			//$this->_singleton->$name = &$this->$name;
 			
 						
 			// define a class level method

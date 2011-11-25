@@ -35,10 +35,16 @@ class Builder extends \eGloo\Dialect\Object {
 	 */
 	public function build() { 
 		
+		// add meta information to arguments
+		// @todo we need a meta "namespace" in which
+		// to store all meta names - for now, kiss
+		
 		// add entity type (class name) to arguments
 		$this->arguments['type'] = strtolower(
 			$this->entity->_class->name
 		);	
+		
+		$this->arguments['primary_key'] = $this->entity->definition->primary_key;
 
 
 		// splat array ends/leaves 

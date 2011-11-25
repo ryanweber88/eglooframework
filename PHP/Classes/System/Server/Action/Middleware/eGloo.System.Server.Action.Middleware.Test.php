@@ -27,7 +27,13 @@ class Test extends Middleware {
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1,47, 53)->orderBy('-name')->limit(1);
 		//echo \eGloo\DataProcessing\DDL\Entity\Test\User::all()->limit(10)->count(); exit;
+		//exit ('adsf');
 		
+		/*
+		foreach (\eGloo\DataProcessing\DDL\Entity\Test\User::all() as $user) {
+			
+		}
+		*/
 	
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::all();
 		$set->limit(5);
