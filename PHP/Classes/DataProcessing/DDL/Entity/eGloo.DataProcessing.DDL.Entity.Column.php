@@ -1,0 +1,34 @@
+<?php
+namespace eGloo\DataProcessing\DDL\Entity;
+
+use \eGloo\DataProcessing\DDL;
+
+/**
+ * 
+ * Represents an entity column
+ * @author Christian Calloway
+ *
+ */
+class Column extends \eGloo\Dialect\Object {
+	
+	function __construct($name) {
+		parent::__construct();
+		
+		$this->name = $name;
+	}
+	
+	
+	public function __toString() {
+		return $this->name;
+	}
+	
+	/**
+	 * Determines column equality 
+	 */
+	public function equals(Column $column) {
+		return $column->name == $this->name;
+	}
+	
+	protected $name;
+	
+}

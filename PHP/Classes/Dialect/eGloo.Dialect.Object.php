@@ -53,10 +53,48 @@ abstract class Object implements MetaInterface {
 	 */
 	public function defineMethod($name, callable $lambda) { 
 		// defines static methods across class hierarchy
-		$this->_methods[$name] = $lambda;
+		//$this->_methods[$name] = $lambda;
 
+		// defines a method for this instance only
+		return $this->_singleton->defineMethod(
+			$name, $lambda
+		);
+	}
+	
+	/**
+	 * 
+	 * Determines if methodName is callable on object
+	 * @param string $methodName
+	 */
+	public function respondTo($methodName) { 
+		return ( 
+			method_exists($this, $methodName) || isset($this->methods[$methodName]) 
+		);
+	}	
+	
+	/**
+	 * 
+	 * Used to call method on singleton/class defined dynamic methods - 
+	 * does not gaurentee that they exist prior to execution
+	 * @param  string  $name
+	 * @param  mixed[] $arguments
+	 * @return mixed
+	 */
+	public function send($name, $arguments) {
 		
-		return $lambda;
+		// methods declared/defined in class definition will take precedence
+		if (method_exists($this, $name)) {
+			return call_user_func_array([ $this, $name ], $arguments);
+		}
+		
+		// otherwise, mine method from singleton, then class context
+		foreach([ $this->_singleton, $this->_class ] as $meta) { 
+			return call_user_func_array($meta->send[$name], $arguments);
+		}
+		
+		throw new Exception(
+			"Could not call method $name on reciever " . get_class($this)
+		);
 	}
 	
 	/**
@@ -69,16 +107,7 @@ abstract class Object implements MetaInterface {
 	
 
 	
-	/**
-	 * 
-	 * Determines if methodName is callable on object
-	 * @param string $methodName
-	 */
-	public function respondTo($methodName) { 
-		return ( 
-			method_exists($this, $methodName) || isset($this->_methods[$methodName]) 
-		);
-	}
+
 	
 	/**
 	 * 
@@ -197,22 +226,16 @@ abstract class Object implements MetaInterface {
 		// collision
 		
 		// check if referring to singleton property
-		$singletonExists = is_object($this->_singleton);
 		
-		if ($singletonExists && property_exists($this->_singleton, $name)) {
+		if (property_exists($this->_singleton, $name)) {
 			return $this->_singleton->$name;
 		}
 		
 		// assign to self necessary 
 		$self = $this;
 				
-		foreach ([$this->_singleton, $this->_class, $self] as $meta) {
+		foreach ([$this->_singleton, $this->_class ] as $meta) {
 
-			// write around to account for some odd bug in relation to using
-			// $this/$self above in foreach construct
-			if (!is_object($meta)) {
-				$meta = $this;
-			}
 
 			if (isset($meta->_methods[$name])) {
 				return call_user_func_array(
@@ -243,9 +266,8 @@ abstract class Object implements MetaInterface {
 				return $this;
 			};
 			
-			if ($singletonExists) { 
-				$this->_singleton->defineMethod($name, $function);
-			}
+			$this->_singleton->defineMethod($name, $function);
+			
 			
 			// @todo figure out how to integrate class-level method
 			// definitions

@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
+use eGloo\DataProcessing\DDL\Entity\Listener\Meta;
+
 use eGloo\DataProcessing\DDL\Utility\CallbackStack;
 
 use \eGloo\DataProcessing\DDL;
@@ -45,6 +47,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// CALL INITILIZATION METHOD
 		$this->init();
 		$this->initStatTrait();
+		
+		// @todo don't know if meta init should be here
+		// or wether it should even be used
+		$this->meta = new Meta($this);
 
 		
 		// SET ENTITY STATE
@@ -117,9 +123,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			}
 			
 		]));			
-				
+		
+		// STATIC 
+		
+		// add columns to meta object
+		foreach(static::columns() as $column) {
+			$this->meta->addColumn($column->name); 
+		}
+
 		// fire 'created' event
-		//$this->events->trigger('created', $this);
+		$this->events->trigger('created', $this);
 		
 	}
 	
@@ -305,12 +318,21 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		if (($results = $this->callbacks->batch()) !== false) {
 			$this->attributes = $results[0];
+			
+			// mark initial values in meta object
+			foreach($this->attributes as $name => $value) {
+				$this->meta->column($name)->change($value);
+			}
 		}
+		
 				
 	}
 	
 
 	public function __clone() { 
+		// @todo FUNDAMENTAL PROBLEMS WITH CLONE - WILL NEED TO
+		// TAKE ANOTHER LOOK
+		
 		// TODO copies will have to take circular ref 
 		// into account so as that data will not 
 		
@@ -331,7 +353,101 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	}
 
 	// EXPERIMENTAL INTERFACE ---------------------------------------------- //
+	
+	/**
+	 * Returns list of available columns, or domain of columns within which
+	 * to work
+	 * @return Column[]
+	 * @tod    limit_static
+	 */
+	public static function columns() {
+		
+		// @todo limit_static
+		return static::retrieve(get_called_class(), function() {
+			// call all method, and iterate through returned entity
+			// attributes to build columns
+			// @todo columns shouldn't be based on 
+			$columns = [ ];
+			$set     = static::all()->limit(1);
+			
+			if (!$set->isEmpty()) { 
+				$attributes = [0]->attributes;
+				 
+				foreach($attributes as $name => $value) {
+					$columns[] = new Column($name);	
+				};
+				
+				return $columns;
+			}
+			
+			throw new DDL\Exception\Exception(
+				'Unfortunately this method relies on at least one record being '    .
+				'available in order to determine columns - this behavior will have '.
+				'to be changed' 
+			);
+		});
+		
+	}
+	
+	/**
+	 * Similar to columns, but returns hash with column
+	 * name as key, and value as column object
+	 * @return Column[]
+	 * @tod    limit_static
+	 */
+	public static function columnsHash() {
+		$columns = [ ];
 
+		foreach(static::columns() as $column) {
+			$columns[$column->name] = $column;
+		}
+		
+		return $columns;
+	}
+
+	/**
+	 * Return a list of changed fields, or false if no changes
+	 * @return string[] | boolean
+	 */
+	public function changed() {
+		
+		$changed = [ ];
+		
+		foreach($this->meta->columns as $column) {
+			if ($column->changed()) {
+				$changed[] = $column->name;
+			}
+		}
+		
+		return count($changed) > 0
+			? $changed 
+			: false;
+	}
+	
+	/**
+	 * Returns list of changed fields (including history) or false
+	 * if no changes
+	 * @return string[] | boolean
+	 */
+	public function changes() {
+		
+		$changes = [ ];
+		
+		foreach($this->meta->columns as $column) {
+			if ($column->changed()) {
+				$changes[$column->name] = $column->changes;
+			}
+		}
+	}
+	
+	/**
+	 * Simple boolean questions as to whether object is dirty
+	 * @return boolean
+	 */
+	public function isChanged() {
+		return count($this->changed()) > 0;
+	}
+	
 	/**
 	 * 
 	 * Specifies included relationships (default is all) for a specific query
@@ -354,24 +470,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	
 
 	
-	/**
-	 * 
-	 * The purpose of this method is to an idea of underlying 
-	 * data layer; will perform a find, persist if need be
-	 * and return available fields
-	 * @todo limit_static
-	 */
-	public static function inspect() { 
-		// parses fields available
-		$entity = new static;
-		
-		return static::retrieve($entity->_class->class, function() use ($entity) { 
-			// pass
-			return DDL\Statement\Parser::fields(DDL\Statement\Bundle::create($entity)->statement(
-				'find'
-			));
-		});
-	}	
 	
 	
 	// CRUD METHODS -------------------------------------------------------- //
@@ -746,71 +844,99 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	public function __get($name) {
 		
 		// @todo define this behavior at object level 
-		$singletonMethodName = "get_$name";
+		//$singletonMethodName = "get_$name";
 		
 		//if ($this->_singleton->respondTo($singletonMethodName)) { 
+		//if ($this->respondTo($name)) {
 		if (0) {
 			return $this->_singleton->methods[$singletonMethodName]();
 		}
 		
 		else {
 			
-			if ($name == 'Products') {
-				//echo spl_object_hash($this->relationships['Products']); exit;
+			// check if referring explicitly to attributes or relationshipo
+			foreach([$this->attributes, $this->relationships] as $hash) {
+				if (is_array($hash) && isset($hash[$name])) {
+					return $hash[$name];
+				}
 			}
-
-			//$function = $this->_singleton->defineMethod($singletonMethodName, function() use ($name) { 
-				// use reflection and static storage to retrieve list of entity properties
-				foreach([$this->attributes, $this->relationships] as $hash) {
-					if (is_array($hash) && isset($hash[$name])) {
-						return $hash[$name];
+			
+			// check entity-specific magic method invocation
+			
+			// check for individual field update
+			if (preg_match('/^(.+?)_(changed|change|was|changes)$/', $name, $match)) {
+				$field  =  $match[1];
+				$changes = $this->meta->changes;
+				
+				if (isset($changes[$field])) { 
+					$column = $changes[$field];
+					
+					// switch between actions
+					switch($match[2]) {
+						
+						// if changed 
+						case 'changed' : case 'was' :
+							return $column->{$match[2]}();
+							break;
+							
+						case 'change'  : case 'changes' :
+							return $column->changes;
+							break;
 					}
 				}
-				
-				//echo "sending $name to parent from class " . get_class($this). " from entity\n";
-				
-				return parent::__get($name);
-			//});
-			
-			//return $function();
+			}	
+					
+			// other
+			return parent::__get($name);
+
 		}
 		
 	}
 	
 	/**
 	 * Sets attribute value, or entity property; in this case,
-	 * entity property take prescedence over attribute value
+	 * entity attributes take prescedence over property value
 	 * @todo limit_static
 	 * @todo How to limit conflicts between attributes and
 	 * entity properties, given dynamic read/write nature?
 	 */
 	public function __set($name, $value) { 
-		// use reflection and static storage to retrieve list of entity properties
-		/*
-		$properties = static::retrieve('properties', function() { 
-			$reflection = new \ReflectionClass($this);
-			$properties = [ ];
-			
-			foreach($reflection->getProperties(\ReflectionProperty::IS_PROTECTED) as $property) { 
-				$properties[] = $property->getName();	
-			}
-			
-			return $properties;
-		});
-
+				
+	
 		
+		// throw exception if property exists in
+		// both entity and attributes
+		// @todo need a methodology to clear collisions
+		if ($this->propertyExists($name) && in_array($name, array_key_exists($name, $this->attributes))) {
+			throw new DDL\Exception\Exception(
+				'There is a collision in entity and attributes property - this must be fixed!'
+			);
+		}
+			
 		// if $name is not a part of entity properties, then we are setting 
 		// an attribute value
-		if (!in_array($name, $properties)) { 
+		if (in_array($name, static::columns())) { 
+			
+			// fire change event and note change history
+			$this->event->trigger('modified', $this, [
+				'fields' => [ $name => $value ]
+			]);
+			
+			// set attribute value and return self
 			$this->attributes[$name] = $value;
 			return $this;
 		}
-		*/
-		//if (property_exists($class, $property))
+		
 		
 		// otherwise class object implementation will handle
 		// set
-		return parent::__set($name, $value);
+		try {
+			return parent::__set($name, $value);
+		} catch (\Exception $e) {
+			throw new DDL\Exception\Exception (
+				'Attempted to set property that does not exist in entity'
+			)
+		}
 	}
 	
 	/**
@@ -993,6 +1119,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	/** @todo remove this */
 	protected $evaluated = false;	
 	
+	protected $columns       = [ ];
 	protected $attributes    = [ ];
 	protected $relationships = [ ];
 	
