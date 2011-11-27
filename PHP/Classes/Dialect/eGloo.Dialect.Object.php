@@ -48,7 +48,8 @@ abstract class Object implements MetaInterface {
 	}
 	
 	/**
-	 * (Returns static method)
+	 * Defines a method on instances singleton instance - defining
+	 * a method on class requires doing so explicitly
 	 * @see eGloo\Dialect.MetaInterface::defineMethod()
 	 */
 	public function defineMethod($name, callable $lambda) { 
@@ -63,13 +64,22 @@ abstract class Object implements MetaInterface {
 	
 	/**
 	 * 
-	 * Determines if methodName is callable on object
-	 * @param string $methodName
+	 * Determines if $name is callable on object - also
+	 * takes a look at 
+	 * @param string $name
 	 */
-	public function respondTo($methodName) { 
-		return ( 
-			method_exists($this, $methodName) || isset($this->methods[$methodName]) 
-		);
+	public function respondTo($name) { 
+		$exists = false;
+		
+		if (!($exists = method_exists($this, $name))) {
+			foreach ([ $this->_singleton, $this->_class ] as $meta) {
+				if ($meta->respondTo($name)) {
+					return true;
+				}
+			}	
+		}
+		
+		return $exists;
 	}	
 	
 	/**

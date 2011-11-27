@@ -42,30 +42,17 @@ class _Class extends Object {
 		}
 	}
 	
-
-	
 	/**
-	 * Defines a method on class - which is to say that method is available to 
-	 * all instances of this class, but not its descendants
-	 * @return lambda
+	 * Override parent class to provide _Class specific funcitonality
+	 * for defining a dynamic method
 	 */
-	public function defineMethod($name, callable $lambda) {
-		
-		// defines static methods across class hierarchy
-		if (is_callable($lambda)) {
-			$this->methods[$name] = $lambda;
-			
-			return $lambda;
-		}
-		
-		throw new DDL\Exception\Exception(
-			'Illegal argument exception : parameter ' . 
-		    'must be of type lambda'
-		);
-		
+	public function respondTo($name) {
+		return isset($this->methods[$name]);
 	}
 
-
+	public function defineMethod($name, callable $lambda) {
+		$this->methods[$name] = $lambda;
+	}
 	
 	/**
 	 * 
