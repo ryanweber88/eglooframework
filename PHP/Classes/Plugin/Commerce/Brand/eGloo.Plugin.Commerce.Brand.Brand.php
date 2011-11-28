@@ -40,10 +40,10 @@ use \eGloo\Plugin\Commerce\Brand\BrandDataAccess,
 class Brand {
 
 	/** @var integer brand id */
-	public      $brand_id;
+	public		$brand_id;
 
 	/** @var string Name */
-	public      $name;
+	public		$name;
 	
 	/** @var string description */
 	public 		$description;
@@ -67,7 +67,7 @@ class Brand {
 	public		$brand_images	= array();
 
 	/** @var array/Mix properties of Brands */
-	protected	$properties;
+	public		$properties;
 
 	/**
 	 * Create a new Brand object

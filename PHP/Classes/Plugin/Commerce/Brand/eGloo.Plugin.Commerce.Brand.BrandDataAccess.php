@@ -51,7 +51,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if ($brand_name == '') {
 			throw new Connection\DatabaseErrorException('::Missing argument error: brand_name is required!', __METHOD__);
 		}
-		return $this->loadBrand('lower(name)', $brand_name);
+		return $this->loadBrand('name', $brand_name);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	}
 	
 	public function loadBrandList() {
-		$sql = "SELECT brand_id, name FROM brands WHERE status = ?";
+		$sql = "SELECT brand_id, name FROM brands WHERE status = ? ORDER BY name ASC";
 		return $this->executeQuery($sql, array(1));
 	}
 
@@ -112,6 +112,16 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		return $result;
 	}
 	
+	/** @todo Inject Cache object
+	 * 
+	protected function getCacheGetaway() {
+		return CacheGateway::getCacheGateway();
+	}
+	
+	protected function loadFromCache( $object) {
+		
+	}*/
+
 	/**
 	 *
 	 * @param type $brand_id

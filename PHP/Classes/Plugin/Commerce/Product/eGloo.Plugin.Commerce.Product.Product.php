@@ -216,5 +216,13 @@ class Product {
 	public function __toString(){
 		return serialize($this);
 	}
+	
+	public static function loadProductById($product_id) {
+		if ((int)$product_id <= 0) {
+			throw new \InvalidArgumentException();
+		}
+		$rows = ProductDataAccess::fetch()->loadProductById($product_id);
+		return new Product($rows);
+	}
 
 }
