@@ -31,18 +31,19 @@ class Singleton extends Object {
 	}
 	
 
+	/**
+	 * Override parent class to provide _Class specific funcitonality
+	 * for defining a dynamic method
+	 */
+	public function respondTo($name) {
+		return method_exists($this, $name) || isset($this->methods[$name]);
+	}
+
+	/**
+	 * Overrides parent to define class-level dynamic methods
+	 */
 	public function defineMethod($name, callable $lambda) {
-		// defines static methods across class hierarchy
-		if (is_callable($lambda)) {
-			$this->methods[$name] = $lambda;
-			
-			return $lambda;
-		}
-		
-		throw new DDL\Exception\Exception(
-			'Illegal argument exception : parameter ' . 
-		    'must be of type lambda'
-		);
+		$this->methods[$name] = $lambda;
 	}
 	
 	

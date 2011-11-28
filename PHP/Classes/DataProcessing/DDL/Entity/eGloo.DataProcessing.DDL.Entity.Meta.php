@@ -13,7 +13,9 @@ use \eGloo\DataProcessing\DDL;
 class Meta extends \eGloo\Dialect\Object {
 	
 	function __construct(Entity $entity) {
-		$this->entity = $entity;
+		parent::__construct();
+		
+		$this->entity = $entity;		
 	}
 	
 	/**
@@ -37,8 +39,13 @@ class Meta extends \eGloo\Dialect\Object {
 	 * @param  string $name
 	 * @return self
 	 */
-	public function addColumn($name) {
-		$this->columns[$name] = new Meta\Column($name);
+	public function addColumn($name, $value = null) {
+		
+		$this->columns[$name] = is_null($value)
+			? new Meta\Column($name)
+			: new Meta\Column($name, $value);
+		
+		
 		return $this;
 	}
 	

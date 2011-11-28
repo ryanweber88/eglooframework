@@ -28,7 +28,7 @@ class Definition extends \eGloo\Dialect\Object {
 	 * @todo limit_static;
 	 * @return Definition
 	 */
-	static public function create(DDL\Entity\Entity $entity) { 	
+	static public function create(DDL\Entity\Entity $entity) { 
 		return static::retrieve($entity->_class->name, function() use ($entity) { 
 			return Definition\Builder::create($entity);
 		});

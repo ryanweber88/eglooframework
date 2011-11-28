@@ -25,7 +25,7 @@ class Column extends \eGloo\Dialect\Object {
 	/**
 	 * Determines column equality 
 	 */
-	public function equals(Column $column) {
+	public function equals($column) {
 		return $column->name == $this->name;
 	}
 	

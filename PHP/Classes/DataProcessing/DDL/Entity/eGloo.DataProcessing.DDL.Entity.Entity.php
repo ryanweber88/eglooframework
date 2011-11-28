@@ -1,9 +1,6 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
 
-use eGloo\DataProcessing\DDL\Entity\Listener\Meta;
-
-use eGloo\DataProcessing\DDL\Utility\CallbackStack;
 
 use \eGloo\DataProcessing\DDL;
 use \Zend\EventManager\EventManager;
@@ -41,8 +38,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	// INITIALIZTAION  ----------------------------------------------------- //
 	
 	
-	function __construct() { 
+	function __construct($evaluate = true) { 
 		parent::__construct();
+		
+		//echo "entity::construct on " . get_class($this) . "\n";
 		
 		// CALL INITILIZATION METHOD
 		$this->init();
@@ -51,11 +50,10 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// @todo don't know if meta init should be here
 		// or wether it should even be used
 		$this->meta = new Meta($this);
-
+		
 		
 		// SET ENTITY STATE
 		$this->state = Manager::ENTITY_STATE_NEW;
-			
 		
 		// BUILD ENTITY DEFINITION AND INSTANTIATE META 
 		// Defined in entities xml
@@ -74,6 +72,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		catch (\eGloo\Dialect\Exception $pass) { 
 			throw $pass;
 		}
+				
+		
 		
 		// entity meta is used to track runtime information about an
 		// instance
@@ -91,7 +91,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		foreach($this->initCallbacks() as $callback) { 
 			$this->callbacks->push($callback);
 		}
-		
+		exit;
 		
 		// ENTITY EVENT LISTENERS
 		//$this->entityEventListeners();
@@ -102,34 +102,39 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// triggers to call and evaluate 
 		$this->events->attachAggregate(new Listener\Meta($this));
 		$this->events->attachAggregate(new Listener\Callback($this));
-		$this->events->attachAggregate(new Listener\Generic($this, [
-			// listens for evaluate trigger
-			'evaluate' => function(Event $event) { 
-				// evaluates entity for substance (is this
-				// a fake entity or what not eh)
-				//echo "calling evaluate\n";		
-				if (is_null($event->getTarget())) {
-					throw new DDL\Exception\Exception(
-						'Must provide a target to evaluate event'
-					);
-				}		
+		
+		// @todo this is horribly ugly, but currently dealing with infinite
+		// callbacks when creating entities within the context of entity evaluation
+		// (construction, initCalblbacks, evaluation)
+		if ($evaluate) { 
+			$this->events->attachAggregate(new Listener\Generic($this, [
+				// listens for evaluate trigger
+				'evaluate' => function(Event $event) { 
+					// evaluates entity for substance (is this
+					// a fake entity or what not eh)
+					//echo "calling evaluate\n";		
+					if (is_null($event->getTarget())) {
+						throw new DDL\Exception\Exception(
+							'Must provide a target to evaluate event'
+						);
+					}		
+					
+					$event->getTarget()->evaluate();
+					
+					// false return indicates that listener will only respond once
+					// or is removed after initial run
+					return false;
+					//return true;
+				}
 				
-				$event->getTarget()->evaluate();
-				
-				// false return indicates that listener will only respond once
-				// or is removed after initial run
-				return false;
-				//return true;
-			}
-			
-		]));			
+			]));
+		}			
 		
 		// STATIC 
-		
+				
 		// add columns to meta object
-		foreach(static::columns() as $column) {
-			$this->meta->addColumn($column->name); 
-		}
+		//echo get_class($this); exit('exit on entity.construct');
+		
 
 		// fire 'created' event
 		$this->events->trigger('created', $this);
@@ -154,11 +159,43 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// but are vital to entity evaluation
 		// !!An entity must be evaluated (either from database
 		// or from persistence context) prior to initcallbacks!!
+		echo 'entity::initCallbacks on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
 		
 		return array_merge(
 			
-			// defines relationship initialization  
-			[ new DDL\Utility\Callback(
+			 
+			[ 
+			  // defines meta columns
+			  
+			  new DDL\Utility\Callback(
+				'meta_columns', function(array $pass = [ ]) {   
+
+					if (isset($pass[0])) { 
+				 		foreach(static::columns() as $column) {
+				 			
+				 			// Gaurente pass interface, and retrieve column value - 
+				 			// this is then used to pass to meta to create meta
+				 			// columns
+				 			$record = \eGloo\Utilities\ArrayAccess::create($pass[0]);
+										 			
+				 			$this->meta->addColumn(
+				 				$column->name, $record[$column->name]
+				 			);
+				 		}
+				  
+				  		return $pass;
+					}
+					
+					// throw an exception if the entity has not been identified in 
+					// datastore or persistence context
+					throw new DDL\Exception\Exception(
+						'Entity has not yet been evaluated; this must be done prior to initCallbacks'
+					);					
+				}
+			  ),
+				
+			  // defines relationship initialization 
+			  new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
 					
 					//echo "running relationships callback\n";
@@ -168,35 +205,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					// will perform an evaluate 
 					if (isset($pass[0])) {
 
-						// shortcut pass to mixed
-						$mixed = &$pass[0];
-					
-						// make sure pass through value is either a returned entity from
-						// persistence or database record
-						if (is_object($mixed) && $mixed instanceof Entity) {
-							$primaryKeyValue = $mixed->id;
-						}
-						
-						else if (is_array($mixed)) {
-							$primaryKeyValue = $mixed[$this->definition->primary_key];
-						}
-						
-						else {
-							
-							throw new DDL\Exception\Exception (
-								'Pass through value does not contain Entity evaluation data'
-							);
-						}
-												
-									
+
+						// because passed in data can either be a "fully realized" entity
+						// or a simple record, we provide an ArrayAccess interface to, and
+						// then grab the primary key
+				 		$record          = \eGloo\Utilities\ArrayAccess::create($pass[0]);
+						$primaryKeyValue = $record[$this->definition->primary_key];
+											
+		
 						// evaluating object existence - these need to be seperated somehow
 						// evaluate entity relationships
 						foreach($this->definition->relationships as $relationship) { 
 																
 							// create entity representation of relationship
-							$entityRelation = DDL\Entity\Factory::factory(
+							$entityRelation = Factory::factory(
 								"{$this->_class->namespace}\\{$relationship->to}"
 							);
+							
+							//echo "{$this->_class->namespace}\\{$relationship->to}"; exit;
 							
 							
 							//echo "$relationship\n";
@@ -321,7 +347,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			
 			// mark initial values in meta object
 			foreach($this->attributes as $name => $value) {
-				$this->meta->column($name)->change($value);
+				$this->meta->addColumn($name, $value);
 			}
 		}
 		
@@ -362,16 +388,19 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public static function columns() {
 		
+		$class = get_called_class();
+		$key   = "$class/" . __METHOD__;
+				
 		// @todo limit_static
-		return static::retrieve(get_called_class(), function() {
+		return static::retrieve($key, function() use ($class) {
 			// call all method, and iterate through returned entity
 			// attributes to build columns
 			// @todo columns shouldn't be based on 
 			$columns = [ ];
-			$set     = static::all()->limit(1);
+			$set     = $class::all()->limit(1);
 			
 			if (!$set->isEmpty()) { 
-				$attributes = [0]->attributes;
+				$attributes = $set[0]->attributes;
 				 
 				foreach($attributes as $name => $value) {
 					$columns[] = new Column($name);	
@@ -383,7 +412,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			throw new DDL\Exception\Exception(
 				'Unfortunately this method relies on at least one record being '    .
 				'available in order to determine columns - this behavior will have '.
-				'to be changed' 
+				'to be changed!' 
 			);
 		});
 		
@@ -396,13 +425,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @tod    limit_static
 	 */
 	public static function columnsHash() {
-		$columns = [ ];
 
-		foreach(static::columns() as $column) {
-			$columns[$column->name] = $column;
-		}
-		
-		return $columns;
+		// we need a reference to class, as calling static method
+		// within static::retrieve defaults to base entity class
+		$class = get_called_class();
+		$key   = "$class/" . __METHOD__;
+				
+		// @todo limit_static
+		return static::retrieve($key, function() use ($class) {
+
+			$columns = [ ];
+			
+			foreach($class::columns() as $column) {
+				$columns[$column->name] = new Column($name);	
+			};
+			
+			return $columns;
+	
+		});
 	}
 
 	/**
@@ -480,9 +520,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * entirety of table will be loaded into memory
 	 */
 	public static function all() {
+		echo "entity::all on " . get_called_class() . " with\n";
+		
+		
 		$manager = Manager\Factory::factory(); 
-		$entity  = new static;
+		$entity  = new static(false);
+		exit;
 		$pk      = $entity->definition->primary_key;
+		
+		$entity->events->trigger('evaluate');
+		echo "{$entity->_singleton->id}\n";
+		exit('check');
 		
 		$set = new QuerySet($entity);
 		$set->events->trigger('call', $set, [
@@ -845,51 +893,52 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// @todo define this behavior at object level 
 		//$singletonMethodName = "get_$name";
-		
-		//if ($this->_singleton->respondTo($singletonMethodName)) { 
-		//if ($this->respondTo($name)) {
-		if (0) {
-			return $this->_singleton->methods[$singletonMethodName]();
+				
+		try {
+			return parent::__get($name);
+		} catch(\Exception $ignore) { 
+			echo "exception ignore is {$ignore->getMessage()}";
+		}
+
+			
+		// check if referring explicitly to attributes or relationshipo
+		foreach([$this->attributes, $this->relationships] as $hash) {
+			if (is_array($hash) && isset($hash[$name])) {
+				return $hash[$name];
+			}
 		}
 		
-		else {
+		// check entity-specific magic method invocation
+		
+		// check for individual field update
+		if (preg_match('/^(.+?)_(changed|change|was|changes)$/', $name, $match)) {
+			$field  =  $match[1];
+			$changes = $this->meta->changes;
 			
-			// check if referring explicitly to attributes or relationshipo
-			foreach([$this->attributes, $this->relationships] as $hash) {
-				if (is_array($hash) && isset($hash[$name])) {
-					return $hash[$name];
+			if (isset($changes[$field])) { 
+				$column = $changes[$field];
+				
+				// switch between actions
+				switch($match[2]) {
+					
+					// if changed 
+					case 'changed' : case 'was' :
+						return $column->{$match[2]}();
+						break;
+						
+					case 'change'  : case 'changes' :
+						return $column->changes;
+						break;
 				}
 			}
-			
-			// check entity-specific magic method invocation
-			
-			// check for individual field update
-			if (preg_match('/^(.+?)_(changed|change|was|changes)$/', $name, $match)) {
-				$field  =  $match[1];
-				$changes = $this->meta->changes;
+		}	
 				
-				if (isset($changes[$field])) { 
-					$column = $changes[$field];
-					
-					// switch between actions
-					switch($match[2]) {
-						
-						// if changed 
-						case 'changed' : case 'was' :
-							return $column->{$match[2]}();
-							break;
-							
-						case 'change'  : case 'changes' :
-							return $column->changes;
-							break;
-					}
-				}
-			}	
-					
-			// other
-			return parent::__get($name);
-
-		}
+		// if we have reached this point, throw an entity-specific
+		// exception
+		throw new DDL\Exception\Exception(
+			"Cannot find property $name on reciever " . get_class($this)
+		);
+		
 		
 	}
 	
@@ -900,10 +949,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * @todo How to limit conflicts between attributes and
 	 * entity properties, given dynamic read/write nature?
 	 */
-	public function __set($name, $value) { 
+	public function __set($name, $value) { 		
 				
-	
-		
 		// throw exception if property exists in
 		// both entity and attributes
 		// @todo need a methodology to clear collisions
@@ -912,10 +959,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				'There is a collision in entity and attributes property - this must be fixed!'
 			);
 		}
+		
+		// try parent set - ignore exception as we can continue to do
+		// further processing
+		try {
+			return parent::__set($name, $value);
+		} catch (\Exception $ignore) { }		
 			
 		// if $name is not a part of entity properties, then we are setting 
 		// an attribute value
-		if (in_array($name, static::columns())) { 
+		if (in_array($name, array_keys(static::columnsHash()))) { 
 			
 			// fire change event and note change history
 			$this->event->trigger('modified', $this, [
@@ -928,15 +981,12 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		}
 		
 		
-		// otherwise class object implementation will handle
-		// set
-		try {
-			return parent::__set($name, $value);
-		} catch (\Exception $e) {
-			throw new DDL\Exception\Exception (
-				'Attempted to set property that does not exist in entity'
-			)
-		}
+		// if we have reached this point, throw an entity-specific
+		// exception
+		throw new DDL\Exception\Exception(
+			"Cannot set property $name on reciever " . get_class($this)
+		);
+
 	}
 	
 	/**
@@ -1108,6 +1158,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	final private function entityEventListener() { 
 		
 	}
+	
+
 
 	
 	// PROPERTIES ---------------------------------------------------------- // 
@@ -1115,6 +1167,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	protected $state;
 	protected $events;
 	protected $callbacks;
+	protected $meta;
 	
 	/** @todo remove this */
 	protected $evaluated = false;	

@@ -8,6 +8,7 @@ namespace eGloo\DataProcessing\DDL\Entity;
  * facing factory within an entity, and its descendants, would be in bad 
  * form 
  * @author Christian Calloway
+ * @todo   unless this gets more complicated, it should be removed
  *
  */
 use eGloo\Dialect\_Class;
@@ -19,7 +20,6 @@ class Factory extends \eGloo\Dialect\Object {
 			return $class->instance;
 		}
 		
-		$class = new _Class($class);
-		return $class->instance;
+		return (new _Class($class))->instantiate();
 	}
 }

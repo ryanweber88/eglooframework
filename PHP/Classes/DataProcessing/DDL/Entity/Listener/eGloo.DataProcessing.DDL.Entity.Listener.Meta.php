@@ -40,13 +40,7 @@ class Meta extends Listener {
 		$this->updateStat($event);	
 	}
 	
-	public function eventCreated(Event $event) {
-		$target = $event->getTarget();
-		$meta   = $target->meta;
-		
-		$this->updateStat($event);
-	}
-	
+
 	/**
 	 * 
 	 * Fired on entity creation/construction

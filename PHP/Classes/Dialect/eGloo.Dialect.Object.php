@@ -155,9 +155,9 @@ abstract class Object implements MetaInterface {
 	/**
 	 * 
 	 * Provides equality interface for classes implementing Object
-	 * @param unknown_type $object
+	 * @param mixed $object
 	 */
-	public function equals(\eGloo\Dialect\Object &$object) { 
+	public function equals($object) { 
 		return true;
 	}
 	

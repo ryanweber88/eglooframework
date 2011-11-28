@@ -47,9 +47,12 @@ class _Class extends Object {
 	 * for defining a dynamic method
 	 */
 	public function respondTo($name) {
-		return isset($this->methods[$name]);
+		return method_exists($this, $name) || isset($this->methods[$name]);
 	}
 
+	/**
+	 * Overrides parent to define class-level dynamic methods
+	 */
 	public function defineMethod($name, callable $lambda) {
 		$this->methods[$name] = $lambda;
 	}
@@ -93,13 +96,9 @@ class _Class extends Object {
 	}	
 	
 
-	
-	
-	
-	
-	protected $name;
-	protected $class;
-	protected $instance;
-	protected $namespace = false;
-	protected $methods   = [ ];
+	public $name;
+	public $class;
+	public $instance;
+	public $namespace = false;
+	public $methods   = [ ];
 }
