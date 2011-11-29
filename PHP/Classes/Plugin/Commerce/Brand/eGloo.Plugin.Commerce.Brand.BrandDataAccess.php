@@ -156,8 +156,10 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if ($brand_id == '') {
 			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
 		}
-		$sql = '';
-		return 'brand/';
+		$sql = "SELECT dst FROM product_slug WHERE source ='B' AND value = ?";
+		return parent::getUnique($sql, array($brand_id), function ($row) {
+							return $row['dst'];
+		});
 	}
 
 		/**

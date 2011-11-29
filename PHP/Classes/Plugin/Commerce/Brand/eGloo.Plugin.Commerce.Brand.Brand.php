@@ -210,8 +210,8 @@ class Brand {
 		foreach ($brands as $brand_id) {
 			$brand					= self::loadBrandById($brand_id);
 			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImages((int)$brand->brand_id);
-			$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
-			//BrandDataAccess::fetch()->loadBrandSlug((int)$brand->brand_id);
+			//$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
+			$brand->friendly_url	= BrandDataAccess::fetch()->loadBrandSlug((int)$brand->brand_id);
 			$result[]				= $brand;
 		}
 		return $result;
