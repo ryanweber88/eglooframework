@@ -24,7 +24,8 @@ class Meta extends Listener {
 	public function eventModified(Event $event) { 
 		$target = $event->getTarget();
 		$meta   = $target->meta;
-		
+		$params = $event->getParams();
+
 		// update fields changed if applicable
 		if (isset($params['fields'])) {
 			foreach($params['fields'] as $name => $value) {
@@ -32,6 +33,7 @@ class Meta extends Listener {
 			}
 		}
 		
+
 		// update modified for use with LRU operations
 		$this->updateStat($event);		
 	}

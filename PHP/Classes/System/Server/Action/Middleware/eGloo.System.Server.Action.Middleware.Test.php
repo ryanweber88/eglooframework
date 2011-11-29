@@ -23,9 +23,13 @@ class Test extends Middleware {
 		$counter = 0;
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
-		foreach(\eGloo\DataProcessing\DDL\Entity\Test\User::columns() as $column) {
-			echo "$column\n";
-		};
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1);
+		echo $user->mail; exit;
+		//$user->mail = 'superperrito@sucks.com';
+		//$user->save();
+		exit ('Test::processRequest');
+		//$user->mail = 'super@perritosucks.com';
+		//$user->save();
 		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::all();
 		//exit;

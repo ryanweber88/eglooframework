@@ -34,6 +34,8 @@ class Callback extends Listener {
 		if (property_exists($target, 'callbacks')) {
 			$target->callbacks->push(new DDL\Utility\Callback(
 				$params['name'], function(array $pass = [ ]) use ($params) {
+
+					echo "Callback::eventCall firing callback on {$params['name']}\n";
 					
 					// @todo this entire callback mechanism needs to be refactored
 					// - to many odd parameters being passed
@@ -87,10 +89,11 @@ class Callback extends Listener {
 							}
 						}
 						
-														
-						foreach(array_reverse($params['middleware']) as $middleware) {
-							if (($results = $middleware->processResults($arguments, $results)) === false) {
-								break ;
+						if (is_array($results)) { 								
+							foreach(array_reverse($params['middleware']) as $middleware) {
+								if (($results = $middleware->processResults($arguments, $results)) === false) {
+									break ;
+								}
 							}
 						}
 												
@@ -112,7 +115,7 @@ class Callback extends Listener {
 			// unless defer flag has been exp specified, trigger evaluation
 			// immediately
 			if (!isset($params['defer']) || $params['defer'] !== true) { 
-				$target->events->trigger('evaluate');
+				$target->events->trigger('evaluate', $target);
 			}
 			
 			return true;

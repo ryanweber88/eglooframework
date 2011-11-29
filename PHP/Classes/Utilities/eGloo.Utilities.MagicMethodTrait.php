@@ -13,7 +13,7 @@ trait MagicMethodTrait {
 		
 		$functionContainer = 
 			is_object($container) && $container instanceof \eGloo\Dialect\Object
-				? $container->_class->methods
+				? $container->_methods
 				: static::$magicMethodTraitFunctionContainer;
 			
 

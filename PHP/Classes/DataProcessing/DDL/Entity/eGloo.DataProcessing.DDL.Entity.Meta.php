@@ -50,6 +50,7 @@ class Meta extends \eGloo\Dialect\Object {
 	}
 	
 	
+	
 	// STAT meta information
 	protected $created;
 	protected $modified;

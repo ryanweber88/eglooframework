@@ -245,13 +245,18 @@ abstract class Object implements MetaInterface {
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collision
-				
-			
-		foreach ([$this, $this->_class ] as $meta) {
-			if (isset($meta->_methods[$name])) {
-				return call_user_func_array(
-					$meta->retrieveMethod($name), $arguments
-				);
+
+		// @todo similar issue as before - calling below is causing child
+		// classes with same properties to overwrite one another - what the
+		// fuck
+
+		if (0) {
+			foreach ([$this, $this->_class ] as $meta) {
+				if (isset($meta->_methods[$name])) {
+					return call_user_func_array(
+						$meta->retrieveMethod($name), $arguments
+					);
+				}
 			}
 		}
 		

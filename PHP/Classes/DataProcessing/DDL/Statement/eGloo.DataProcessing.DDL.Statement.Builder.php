@@ -46,7 +46,6 @@ class Builder extends \eGloo\Dialect\Object {
 		
 		$this->arguments['primary_key'] = $this->entity->definition->primary_key;
 
-
 		// splat array ends/leaves 
 		extract($this->splatArray(
 			$this->arguments

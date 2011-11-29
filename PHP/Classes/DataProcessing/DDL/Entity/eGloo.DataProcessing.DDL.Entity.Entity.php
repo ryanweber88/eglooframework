@@ -114,7 +114,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					//echo "calling evaluate\n";		
 					if (is_null($event->getTarget())) {
 						throw new DDL\Exception\Exception(
-							'Must provide a target to evaluate event'
+							"A target has not been provided to evaluate event on reciever " . get_class($this)
 						);
 					}		
 					
@@ -122,7 +122,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					
 					// false return indicates that listener will only respond once
 					// or is removed after initial run
-					return false;
+					//return false;
 					//return true;
 				}
 				
@@ -220,15 +220,17 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						// evaluating object existence - these need to be seperated somehow
 						// evaluate entity relationships
 						foreach($this->definition->relationships as $relationship) { 
-																
+
+							
 							// create entity representation of relationship
 							// @todo use factory once issue with callbacks is fixed
-							//$entityRelation = Factory::factory(
-							//	"{$this->_class->namespace}\\{$relationship->to}"
-							//);
-							
-							$class = new \eGloo\Dialect\_Class("{$this->_class->namespace}\\{$relationship->to}");
-							$entityRelation = $class->instantiate([true]);
+							$entityRelation = Factory::factory(
+								"{$this->_class->namespace}\\{$relationship->to}", false
+							);
+							//$entityRelationship = new $class;
+						
+							//$class = new \eGloo\Dialect\_Class("{$this->_class->namespace}\\{$relationship->to}");
+							//$entityRelation = $class->instantiate([true]);
 							
 							//echo "{$this->_class->namespace}\\{$relationship->to}"; exit;
 							
@@ -238,7 +240,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 							
 							// if has-many relationship, then a queryset is instantiated with a single 
 							// callback on stack (a call to find_xxx statement)
-							if ($relationship->hasMany()) {
+							if ($relationship->hasMany()) {							
 								 
 								$set = new QuerySet($entityRelation);
 								$set->events->trigger('call', $set, [
@@ -458,7 +460,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			$columns = [ ];
 			
 			foreach($class::columns() as $column) {
-				$columns[$column->name] = new Column($name);	
+				$columns[$column->name] = new Column($column->name);	
 			};
 			
 			return $columns;
@@ -578,7 +580,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * Place entity into persistence context and flags record insertion
 	 * on underlying data layer
 	 */
-	protected function _create() { 
+	protected function create() { 
 		$manager = Manager\Factory::factory();
 		$this->events->trigger('call', $this, [
 			'name'                 => 'create',
@@ -601,21 +603,24 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * 
 	 * @see eGloo\DataProcessing\DDL\Entity\EntityInterface.EntityInterface::update()
 	 */
-	protected function _update() { 
+	protected function update() { 
 		$manager = Manager\Factory::factory();
-		$entity->events->trigger('call', $this, [
+		$pk      = $this->definition->primary_key;
+		
+		
+		$this->events->trigger('call', $this, [
 			'name'              => 'update',
 		
 			// defines the calling method, and parameter values
 			'arguments'         => [ 'fields' => [ 
-				$pk => [ 'values' => $key ]
-			]], 		
+				$pk => [ 'values' => $this->id ]
+			]], 
 			
-			// 
-			'arguments_handler' => null, 
-			
-			// we do not need a handler for results for deletion
-			'results_handler'   => null,
+			// here we define middleware, which acts layer between arguments to
+			// db calls
+			'middleware'      => [ 
+				new Middleware\Entity\Save($this) 
+			],
 		
 		]);
 		
@@ -632,13 +637,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public static function find($key) { 
 
-
+		$entity =  new static(false);
 		$manager = Manager\Factory::factory(); 
-		$entity  = new static;
 		$pk      = $entity->definition->primary_key;
 		
-		
-
+	
 		// this will allow users to pass keys as 1,2,3
 		if (count(func_get_args()) > 1) {
 			$key = func_get_args();	
@@ -646,6 +649,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// if keys is array of primary keys, hand callback to 
 		if (is_array($key)) { 
+			
 			
 			// trigger call to add the call "action" (find) to callback stack
 			// and specify results_handler to handle 
@@ -678,6 +682,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// otherwise - retrieve singular/entity
 		else {		
 
+			$entity = new static;
 
 			
 			// retrieve entity from manager, or use callback to do explicit
@@ -686,7 +691,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				
 				$pk = $entity->definition->primary_key;
 				
-
 				// trigger call to add the call "action" (find) to callback stack
 				// and specify results_handler to handle - it does not matter
 				// if finding a singular entity or returning a queryset, the
@@ -868,8 +872,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public function save() {
 		return ($this->state == MANAGER::ENTITY_STATE_MANAGED)  
-			? $this->create()
-			: $this->update(); 
+			? $this->update()
+			: $this->create(); 
 	}	
 	
 
@@ -914,7 +918,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		try {
 			return parent::__get($name);
 		} catch(\Exception $ignore) { 
-			echo "exception ignore is {$ignore->getMessage()}";
+			//echo "exception ignore is {$ignore->getMessage()}";
 		}
 
 			
@@ -971,7 +975,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// throw exception if property exists in
 		// both entity and attributes
 		// @todo need a methodology to clear collisions
-		if ($this->propertyExists($name) && in_array($name, array_key_exists($name, $this->attributes))) {
+	
+		if ($this->propertyExists($name) && in_array($name, array_keys(static::columnsHash()))) {
 			throw new DDL\Exception\Exception(
 				'There is a collision in entity and attributes property - this must be fixed!'
 			);
@@ -988,7 +993,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		if (in_array($name, array_keys(static::columnsHash()))) { 
 			
 			// fire change event and note change history
-			$this->event->trigger('modified', $this, [
+			$this->events->trigger('modified', $this, [
 				'fields' => [ $name => $value ]
 			]);
 			

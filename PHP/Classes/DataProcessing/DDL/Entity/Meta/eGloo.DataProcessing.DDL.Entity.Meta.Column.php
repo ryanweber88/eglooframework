@@ -15,7 +15,8 @@ class Column extends DDL\Entity\Column {
 		parent::__construct($name);
 				
 		if (!is_null($value)) {
-			$this->value = $value;
+			$this->value     = $value;
+			$this->changes[] = $value;
 		}
 	}
 	
@@ -26,20 +27,22 @@ class Column extends DDL\Entity\Column {
 	 */
 	public function change($value) {
 		$this->changes[] = $value;
+		$this->value     = $value;
 	}
 	
 	/**
 	 * 
-	 * Enter description here ...
-	 * @param unknown_type $value
+	 * Determines if column value has changed
+	 * @return boolean
 	 */
-	public function changed($value) {
+	public function changed() {
 		return count($this->changes) > 1;
 	}
 	
 	/**
 	 * 
 	 * Retrieves original value
+	 * @return string
 	 */
 	public function defaultValue() {
 		return count($this->changes) 
@@ -49,7 +52,38 @@ class Column extends DDL\Entity\Column {
 	
 	/**
 	 * 
+	 * Retrieves current value
+	 * @return string
+	 */
+	public function currentValue() {
+		return $this->changes[count($this->changes)-1];
+	}
+	
+	/**
+	 * 
+	 * Synonym for currentValue
+	 * @return string
+	 */
+	public function is() {
+		return $this->currentValue();	
+	}
+	
+	/**
+	 * 
+	 * Change history has been accounted for and thus we
+	 * reset changes and move default to latest change
+	 * @return void
+	 */
+	public function commit() {
+		$this->changes = [ 
+			$this->value = $this->changes[count($this->changes)-1] 
+		];
+	}
+	
+	/**
+	 * 
 	 * A synonym for defaultValue
+	 * @return string
 	 */
 	public function was() {
 		return $this->defaultValue();

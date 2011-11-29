@@ -66,7 +66,8 @@ class MethodGateway extends \eGloo\Dialect\Object {
 		
 		// if we have reached this point, then method is invalid
 		throw new DDL\Exception\Exception (
-			'Invalid Entity Method Invocation : ' . $this->entity->_class->class
+			'Invalid entity method invocation for entity ' . 
+			$this->entity->_class->class . 'on statement/method' . $name
 		);	
 		
 	}

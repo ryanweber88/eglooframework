@@ -15,11 +15,11 @@ use eGloo\Dialect\_Class;
 
 class Factory extends \eGloo\Dialect\Object { 
 
-	public static function factory($class) {
+	public static function factory($class, $evaluate = true) {
 		if (is_object($class) && $class instanceof \eGloo\Dialect\_Class) { 
 			return $class->instance;
 		}
 		
-		return (new _Class($class))->instantiate();
+		return (new _Class($class))->instantiate([$evaluate]);
 	}
 }
