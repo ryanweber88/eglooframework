@@ -53,13 +53,10 @@ abstract class Object implements MetaInterface {
 	 * @see eGloo\Dialect.MetaInterface::defineMethod()
 	 */
 	public function defineMethod($name, callable $lambda) { 
-		// defines static methods across class hierarchy
-		//$this->_methods[$name] = $lambda;
-
 		// defines a method for this instance only
-		return $this->_singleton->defineMethod(
-			$name, $lambda
-		);
+		$this->_methods[$name] = $lambda;
+		
+		return $lambda;
 	}
 	
 	/**
@@ -69,17 +66,7 @@ abstract class Object implements MetaInterface {
 	 * @param string $name
 	 */
 	public function respondTo($name) { 
-		$exists = false;
-		
-		if (!($exists = method_exists($this, $name))) {
-			foreach ([ $this->_singleton, $this->_class ] as $meta) {
-				if ($meta->respondTo($name)) {
-					return true;
-				}
-			}	
-		}
-		
-		return $exists;
+		return method_exists($this, $name) || isset($this->_methods[$name]);
 	}	
 	
 	/**
@@ -98,8 +85,8 @@ abstract class Object implements MetaInterface {
 		}
 		
 		// otherwise, mine method from singleton, then class context
-		foreach([ $this->_singleton, $this->_class ] as $meta) { 
-			return call_user_func_array($meta->send[$name], $arguments);
+		foreach([ $this, $this->_class ] as $meta) { 
+			return call_user_func_array($meta->_methods[$name], $arguments);
 		}
 		
 		throw new Exception(
@@ -258,19 +245,9 @@ abstract class Object implements MetaInterface {
 		// check defined methods - this takes precedence, so its
 		// up to the developer to ensure an avoidance of 
 		// collision
-		
-		// check if referring to singleton property
-		
-		if (property_exists($this->_singleton, $name)) {
-			return $this->_singleton->$name;
-		}
-		
-		// assign to self necessary 
-		$self = $this;
 				
-		foreach ([$this->_singleton, $this->_class ] as $meta) {
-
-
+			
+		foreach ([$this, $this->_class ] as $meta) {
 			if (isset($meta->_methods[$name])) {
 				return call_user_func_array(
 					$meta->retrieveMethod($name), $arguments
@@ -300,45 +277,11 @@ abstract class Object implements MetaInterface {
 				return $this;
 			};
 			
-			$this->_singleton->defineMethod($name, $function);
-			
-			
-			// @todo figure out how to integrate class-level method
-			// definitions
-			/*
-			// if object is not an explicit meta class (class, singleton)
-			// then define a class level method
-			if (is_object($this->_class)) {
-				$this->_class->defineMethod($name, $function);
-			}
-			
-			// otherwise define method on meta class which responds to
-			// defineMethod 
-			else if (method_exists($this, 'defineMethod')) {
-				$this->defineMethod($name, $function);
-			}
-			
-			// otherwise there is an issue - most likely a class extending
-			// object that did not call parent constructor
-			else {
-				throw new Exception(
-					'Cannot define class level method, and object is not meta interface >> ' . get_class($this)
-				);
-			}
-			*/
+			$this->defineMethod($name, $function);
 			
 			return count($arguments) 
 				? $function($arguments[0])
 				: $function();
-			
-			/*	
-			if (count($arguments)) {
-				$this->$name = $arguments[0];
-				return $this;
-			}
-			
-			return $this->$name;
-			*/
 			
 		}
 		
