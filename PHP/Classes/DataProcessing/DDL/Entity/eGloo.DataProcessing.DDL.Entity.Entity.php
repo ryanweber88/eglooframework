@@ -91,7 +91,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		foreach($this->initCallbacks() as $callback) { 
 			$this->callbacks->push($callback);
 		}
-		exit;
 		
 		// ENTITY EVENT LISTENERS
 		//$this->entityEventListeners();
@@ -159,7 +158,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// but are vital to entity evaluation
 		// !!An entity must be evaluated (either from database
 		// or from persistence context) prior to initcallbacks!!
-		echo 'entity::initCallbacks on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
+		//echo 'entity::initCallbacks on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
 		
 		return array_merge(
 			
@@ -169,6 +168,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			  
 			  new DDL\Utility\Callback(
 				'meta_columns', function(array $pass = [ ]) {   
+			  
+			  		//echo 'entity::initCallbacks::meta_columns on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
 
 					if (isset($pass[0])) { 
 				 		foreach(static::columns() as $column) {
@@ -197,6 +198,9 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			  // defines relationship initialization 
 			  new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
+			  
+			  		//echo 'entity::initCallbacks::relationships on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
+			  
 					
 					//echo "running relationships callback\n";
 					//var_export($pass);
@@ -218,9 +222,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						foreach($this->definition->relationships as $relationship) { 
 																
 							// create entity representation of relationship
-							$entityRelation = Factory::factory(
-								"{$this->_class->namespace}\\{$relationship->to}"
-							);
+							// @todo use factory once issue with callbacks is fixed
+							//$entityRelation = Factory::factory(
+							//	"{$this->_class->namespace}\\{$relationship->to}"
+							//);
+							
+							$class = new \eGloo\Dialect\_Class("{$this->_class->namespace}\\{$relationship->to}");
+							$entityRelation = $class->instantiate([true]);
 							
 							//echo "{$this->_class->namespace}\\{$relationship->to}"; exit;
 							
@@ -388,23 +396,36 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 */
 	public static function columns() {
 		
-		$class = get_called_class();
-		$key   = "$class/" . __METHOD__;
+		//$class = get_called_class();
+		
+		$entity = new static(false);
+		$key   =  DDL\Utility\Entity::key($entity) . "/" . __METHOD__;
 				
 		// @todo limit_static
-		return static::retrieve($key, function() use ($class) {
+		return static::retrieve($key, function() use ($entity) {
 			// call all method, and iterate through returned entity
 			// attributes to build columns
 			// @todo columns shouldn't be based on 
 			$columns = [ ];
-			$set     = $class::all()->limit(1);
 			
-			if (!$set->isEmpty()) { 
-				$attributes = $set[0]->attributes;
+			// @todo unfortunately set creation via all
+			// method causes an infinite loop - this will have to
+			// be done via methodgateway in the meantime
+			//$set     = $class::all()->limit(1);
+			$results = MethodGateway::method($entity, 'all')->call(
+				[ 'limit' => 1 ]
+			);
+						
+			
+			//if (!$set->isEmpty()) { 
+			if (isset($results[0])) {
+				//$attributes = $set[0]->attributes;
+				//$attributes = $results[0];
 				 
-				foreach($attributes as $name => $value) {
+				foreach(array_keys($results[0]) as $name) {
 					$columns[] = new Column($name);	
 				};
+				
 				
 				return $columns;
 			}
@@ -520,17 +541,13 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * entirety of table will be loaded into memory
 	 */
 	public static function all() {
-		echo "entity::all on " . get_called_class() . " with\n";
+		//echo "entity::all on " . get_called_class() . "\n";
 		
 		
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static(false);
-		exit;
 		$pk      = $entity->definition->primary_key;
 		
-		$entity->events->trigger('evaluate');
-		echo "{$entity->_singleton->id}\n";
-		exit('check');
 		
 		$set = new QuerySet($entity);
 		$set->events->trigger('call', $set, [

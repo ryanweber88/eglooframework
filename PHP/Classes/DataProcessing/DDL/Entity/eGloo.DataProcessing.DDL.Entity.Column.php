@@ -17,10 +17,14 @@ class Column extends \eGloo\Dialect\Object {
 		$this->name = $name;
 	}
 	
-	
+	/**
+	 * 
+	 * Provides string cast of column
+	 */
 	public function __toString() {
 		return $this->name;
 	}
+	
 	
 	/**
 	 * Determines column equality 

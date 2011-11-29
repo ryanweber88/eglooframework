@@ -23,8 +23,10 @@ class Test extends Middleware {
 		$counter = 0;
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
-		var_export(\eGloo\DataProcessing\DDL\Entity\Test\User::columns());
-		exit;
+		foreach(\eGloo\DataProcessing\DDL\Entity\Test\User::columns() as $column) {
+			echo "$column\n";
+		};
+		
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::all();
 		//exit;
 		//$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('ian_1', 'ian_2', 'ian_3')->orderBy('-name');
@@ -39,8 +41,9 @@ class Test extends Middleware {
 		*/
 	
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::all();
-		$set->limit(5);
-		$set->offset(0)->orderBy('name');
+		//$set->limit(5);
+		//$set->offset(0)->orderBy('name');
+		exit ('fuck');
 		
 		foreach($set as $user) {
 			echo "$user\n";

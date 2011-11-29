@@ -161,6 +161,30 @@ abstract class Object implements MetaInterface {
 		return true;
 	}
 	
+	/**
+	 * 
+	 * Provides basic/generic toArray functionality
+	 */
+	public function toArray() {
+		// @todo cache into singleton
+		// @todo do this later
+		/*
+		$properties = [ ];
+		$filter     = \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED;
+		
+		foreach((new \ReflectionClass($this))->getProperties($filter) as $property) {
+			$value = $property->getValue();
+			
+			if (is_object($value) && $value instanceof Object) {
+				$value = $value->toArray();
+			}
+			
+			else if (is_)
+			$properties[$property->getName()] = is_object($property->getValue())	
+		}
+		*/
+	}
+	
 	
 	/**
 	 * 
