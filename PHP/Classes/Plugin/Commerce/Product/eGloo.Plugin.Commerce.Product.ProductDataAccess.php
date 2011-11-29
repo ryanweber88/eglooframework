@@ -73,7 +73,7 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 	
 	public function loadProductCategory($category_id) {
 		$result = array();
-		$sql = 'SELECT * FROM product_tag_subcategory WHERE product_tag_category_id = ?';
+		$sql = 'SELECT * FROM product_tag_subcategory WHERE product_tag_category_id = ? ORDER BY title ASC';
 		$categories = parent::executeQuery($sql, array($category_id));
 		foreach ($categories as $category) {
 			$result[] = $category['title'];

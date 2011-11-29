@@ -211,7 +211,7 @@ class Brand {
 			$brand					= self::loadBrandById($brand_id);
 			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImages((int)$brand->brand_id);
 			$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
-			//BrandData::fetch()->loadBrandSlug((int)$brand->brand_id);
+			//BrandDataAccess::fetch()->loadBrandSlug((int)$brand->brand_id);
 			$result[]				= $brand;
 		}
 		return $result;
