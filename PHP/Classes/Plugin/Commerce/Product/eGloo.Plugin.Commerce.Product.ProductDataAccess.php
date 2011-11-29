@@ -34,16 +34,16 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 	}
 	
 	public function loadProductById($product_id) {
-		if ($user_id == '') {
-			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
+		if ($product_id == '') {
+			throw new \InvalidArgumentException('[: Missing argument error:] product_id is required!', __METHOD__);
 		}
 	}
 	
 	public function loadProductByName($product_name) {
-		if ($user_name == '') {
+		if ($product_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_name is required!', __METHOD__);
 		}
-		return $this->loadBrand('name', $brand_name);
+		return $this->loadBrand('name', $product_name);
 	}
 
 	public function loadProduct($field_name, $field_value) {
@@ -56,15 +56,15 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 		});
 	}
 	
-	public function deleteProductById($user_id) {
-		if ($user_id == '') {
+	public function deleteProductById($product_id) {
+		if ($product_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
 		}
 		
 	}
 	
 	public function deleteProductByName($product_name) {
-		if ($user_name == '') {
+		if ($product_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_name is required!', __METHOD__);
 		}
 		
@@ -76,7 +76,7 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 		$sql = 'SELECT * FROM product_tag_subcategory WHERE product_tag_category_id = ?';
 		$categories = parent::executeQuery($sql, array($category_id));
 		foreach ($categories as $category) {
-			$result[$category['product_tag_category_id']][] = $category['title'];
+			$result[] = $category['title'];
 		}
 		return $result;
 	}
