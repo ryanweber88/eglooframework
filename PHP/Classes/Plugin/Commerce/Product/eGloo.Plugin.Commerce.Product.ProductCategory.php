@@ -49,4 +49,14 @@ class ProductCategory {
 	public static function loadCategories() {
 		return ProductDataAccess::fetch()->loadProductCategory(self::CATEGORY);
 	}
+	
+	public static function loadProductCategories() {
+		$result = array();
+		$result['Pets']			= self::loadSpecies();
+		$result['Ages']			= self::loadAges();
+		$result['Lifestyles']	= self::loadLifestyles();
+		$result['Conditions']	= self::loadConditions();
+		$result['Categories']	= self::loadCategories();
+		return $result;
+	}
 }
