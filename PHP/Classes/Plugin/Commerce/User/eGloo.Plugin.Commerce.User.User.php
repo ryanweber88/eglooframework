@@ -43,7 +43,7 @@ class User {
 
 	/** @var string user email address */
 	public $email;
-	
+
 	/** @var string user name */
 	public $username;
 
@@ -79,7 +79,7 @@ class User {
 
 	const PRIVILEGES_REGULAR_USER	= 0;
 	const PRIVILEGES_ADMIN_USER		= 1;
-	
+
 
 	public function __contruct ($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
 		if ($uname == '' || $pwd == '') {
@@ -88,7 +88,7 @@ class User {
 		$this->username		= $uname;
 		$this->password		= $pwd;
 		$this->privileges	= $priv;
-		
+
 	}
 
 	public function checkPassword ($password) {
@@ -110,7 +110,7 @@ class User {
 		}
 		return $user_data;
 	}
-	
+
 	public static function createUser($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
 		if ($uname == '' || $pwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
@@ -118,11 +118,86 @@ class User {
 		$this->username		= $uname;
 		$this->password		= $pwd;
 		$this->privileges	= $priv;
-		
+
 		$row = Commerce\User\UserDataAccess::fetch()->createUser();
 		return new User(self::createUserFromArray($row));
 	}
-	
+
+	public static function loadUserByZipCode($zip_code) {
+		$result = array();
+		if ((int) $zip_code == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserByZipCode($zip_code);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+	public static function loadUserByEmail($email) {
+		$result = array();
+		if ($email == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserByEmail($email);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+	public static function loadUserByCreditCardCode($cc_code) {
+		$result = array();
+		if ((int) $cc_code == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserByCCCode($cc_code);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+	public static function loadUserByState($state) {
+		$result = array();
+		if ((int) $state == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserByState($state);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+
+	public static function loadUserByProgramId($program_id) {
+		$result = array();
+		if ((int) $program_id == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserProgramId($program_id);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+
+	public static function loadUserByOrderId($order_id) {
+		$result = array();
+		if ((int) $order_id == '') {
+			throw new \InvalidArgumentException();
+		}
+		$users = Commerce\User\UserDataAccess::loadUserByOrderId($order_id);
+		foreach ($users as $user) {
+			$result[] = new User($user);
+		}
+		return $result;
+	}
+
+
 	public static function createUserFromArray(array $args) {
 		return ;
 	}
