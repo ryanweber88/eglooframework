@@ -1,7 +1,6 @@
 <?php
-namespace eGloo\Plugin\Commerce\User;
-use eGloo\DataProcessing\Connection,
-		\eGloo\Plugin\Commerce\User;
+namespace eGloo\Commerce\User;
+use eGloo\DataProcessing\Connection;
 
 /**
  * UserDataAccess Class File
@@ -38,11 +37,11 @@ use eGloo\DataProcessing\Connection,
  * @subpackage Commerce
  */
 class UserDataAccess extends Connection\PostgreSQLDBConnection{
-	
+
 	protected static $instance = null;
 
 	/**
-	 * Pass Connection resource to parent constructor 
+	 * Pass Connection resource to parent constructor
 	 * if needed
 	 * @return void
 	 */
@@ -65,18 +64,18 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		}
 		$this->beginTransaction();
 		try {
-			
+
 		} catch (\Exception $e) {
 			throw  $e;
 		}
 	}
-	
+
 	public function loadUserById($user_id) {
 		if ($user_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
 		}
 	}
-	
+
 	public function loadUserByName($user_name) {
 		if ($user_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
@@ -92,18 +91,18 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 							return $row;
 		});
 	}
-	
+
 	public function deleteUserById($user_id) {
 		if ($user_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
 		}
-		
+
 	}
-	
+
 	public function deleteSessionByName($user_name) {
 		if ($user_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
 		}
-		
+
 	}
 }

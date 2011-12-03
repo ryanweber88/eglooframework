@@ -1,6 +1,6 @@
 <?php
-namespace eGloo\Plugin\Commerce\User;
-use eGloo\Plugin\Commerce;
+namespace eGloo\Commerce\User;
+use eGloo\Commerce;
 
 /**
  * User Class File
