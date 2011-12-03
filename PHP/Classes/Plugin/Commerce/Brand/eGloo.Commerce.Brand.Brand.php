@@ -1,6 +1,6 @@
 <?php
-namespace eGloo\Plugin\Commerce\Brand;
-use \eGloo\Plugin\Commerce\Brand\BrandDataAccess,
+namespace eGloo\Commerce\Brand;
+use \eGloo\Commerce\Brand\BrandDataAccess,
 	\eGloo\Utilities\Utilities;
 
 /**

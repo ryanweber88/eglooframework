@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\Plugin\Commerce\Slug;
+namespace eGloo\Commerce\Slug;
 use \eGloo\DataProcessing\Connection;
 /**
  * SlugData Class File

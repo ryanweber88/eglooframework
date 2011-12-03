@@ -1,9 +1,9 @@
 <?php
-namespace eGloo\Plugin\Commerce\Slug;
-use \eGloo\Plugin\Commerce\Slug\SlugDataAccess;
+namespace eGloo\Commerce\Coupon;
+use \eGloo\Commerce;
 
 /**
- * Slug Class File
+ * Coupon Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -28,21 +28,14 @@ use \eGloo\Plugin\Commerce\Slug\SlugDataAccess;
  */
 
 /**
- * Description of Slug
+ * Description of Coupon
  * 
- * Representation of Slug Entity
- * Hold CRUD functionalities and Slug related method
+ * Representation of Coupon Entity
+ * Hold CRUD functionalities and Coupon related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class Slug {
+class Coupon {
 	
-	public static function loadBrandSlugs() {
-		return SlugDataAccess::fetch()->loadBrandSlugs();
-	}
-	
-	public static function loadProductSlugs() {
-		return SlugDataAccess::fetch()->loadProductSlugs();
-	}
 }
