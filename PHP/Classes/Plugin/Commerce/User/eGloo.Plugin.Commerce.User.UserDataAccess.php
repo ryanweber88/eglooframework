@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Plugin\Commerce\User;
-use eGloo\DataProcessing\Connection;
-use eGloo\Plugin\Commerce\User;
+use eGloo\DataProcessing\Connection,
+		\eGloo\Plugin\Commerce\User;
 
 /**
  * UserDataAccess Class File

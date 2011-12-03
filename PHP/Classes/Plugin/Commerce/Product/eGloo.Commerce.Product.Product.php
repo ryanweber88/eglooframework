@@ -1,6 +1,5 @@
 <?php
-namespace eGloo\Plugin\Commerce\Product;
-use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
+namespace eGloo\Commerce\Product;
 
 /**
  * Product Class File
@@ -39,6 +38,9 @@ use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection as PGDBConnection;
 
 class Product {
 
+	/** @var integer Product ID */
+	public			$product_id;
+	
 	/** @var integer Product ID */
 	public			$product_line_id;
 
@@ -127,7 +129,7 @@ class Product {
 	public			$ingredients;
 
 	/** @var string Friendly URL */
-	public			$link_rewrite;
+	public			$friendly_url;
 
 	/** @var string creation date */
 	public			$date_added;
@@ -161,13 +163,41 @@ class Product {
 		}
 	}
 	
-	public function loadImages( $id = null ) {
-		if (isset ($this->product_line_id )) {
-			$this->images = array();
+	public function loadProductImages() {
+		if (empty ($this->product_images)) {
+			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_line_id);
 		}
-		return false;
+		$this->product_images;
+		return $this;
 	}
 	
+	public function getProductImages() {
+		if (empty ($this->product_images)) {
+			$this->loadProductImages();
+		}
+		return $this->product_images;
+	}
+
+	public function getProductSizes() {
+		
+	}
+
+	public function loadProductLineProducts() {
+		if (empty ($this->product_images)) {
+			$this->loadProductSizes();
+		}
+		return $this->product_sizes;
+	}
+	
+	public function loadProductSizes() {
+		if (empty ($this->product_sizes)) {
+			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_line_id);
+		}
+		$this->product_sizes;
+		return $this;
+	}
+
+
 	public function getSizes() {
 		return $this->__get('sizes');
 	}
@@ -216,5 +246,20 @@ class Product {
 	public function __toString(){
 		return serialize($this);
 	}
-
+	
+	public static function loadProductById($product_id) {
+		if ((int)$product_id <= 0) {
+			throw new \InvalidArgumentException();
+		}
+		$rows = ProductDataAccess::fetch()->loadProductById($product_id);
+		return new Product($rows);
+	}
+	
+	public static function loadProductBySlug($slug) {
+		if ($slug == '') {
+			throw new \InvalidArgumentException();
+		}
+		$row = ProductDataAccess::fetch()->loadProductBySlug($slug);
+		return new Product($row);
+	}
 }

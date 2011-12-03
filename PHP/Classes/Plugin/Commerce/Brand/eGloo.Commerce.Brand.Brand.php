@@ -1,6 +1,6 @@
 <?php
-namespace eGloo\Plugin\Commerce\Brand;
-use \eGloo\Plugin\Commerce\Brand\BrandDataAccess,
+namespace eGloo\Commerce\Brand;
+use \eGloo\Commerce\Brand\BrandDataAccess,
 	\eGloo\Utilities\Utilities;
 
 /**
@@ -40,10 +40,10 @@ use \eGloo\Plugin\Commerce\Brand\BrandDataAccess,
 class Brand {
 
 	/** @var integer brand id */
-	public      $brand_id;
+	public		$brand_id;
 
 	/** @var string Name */
-	public      $name;
+	public		$name;
 	
 	/** @var string description */
 	public 		$description;
@@ -67,7 +67,7 @@ class Brand {
 	public		$brand_images	= array();
 
 	/** @var array/Mix properties of Brands */
-	protected	$properties;
+	public		$properties;
 
 	/**
 	 * Create a new Brand object
@@ -210,8 +210,8 @@ class Brand {
 		foreach ($brands as $brand_id) {
 			$brand					= self::loadBrandById($brand_id);
 			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImages((int)$brand->brand_id);
-			$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
-			//BrandData::fetch()->loadBrandSlug((int)$brand->brand_id);
+			//$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
+			$brand->friendly_url	= BrandDataAccess::fetch()->loadBrandSlug((int)$brand->brand_id);
 			$result[]				= $brand;
 		}
 		return $result;

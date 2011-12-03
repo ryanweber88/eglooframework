@@ -1,15 +1,40 @@
 <?php
-namespace eGloo\Plugin\Commerce\Brand;
+namespace eGloo\Commerce\Brand;
 use \eGloo\DataProcessing\Connection;
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+
+/**
+ * BrandDataAccess Class File
+ * 
+ * Copyright 2011 eGloo, LLC
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *  
+ * @author Gilbert Sewovoe-Ekoue
+ * @copyright 2011 eGloo, LLC
+ * @license http://www.apache.org/licenses/LICENSE-2.0
+ * @package package
+ * @subpackage subpackage
+ * @version 1.0
  */
 
 /**
- * Description of eGloo
+ * Description of BrandDataAccess
+ * 
+ * Representation of BrandDataAccess Entity
+ * Hold CRUD functionalities and BrandDataAccess related method
  *
- * @author gilbert
+ * @package Plugins
+ * @subpackage Commerce
  */
 class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	
@@ -51,7 +76,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if ($brand_name == '') {
 			throw new Connection\DatabaseErrorException('::Missing argument error: brand_name is required!', __METHOD__);
 		}
-		return $this->loadBrand('lower(name)', $brand_name);
+		return $this->loadBrand('name', $brand_name);
 	}
 
 	/**
@@ -85,7 +110,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	}
 	
 	public function loadBrandList() {
-		$sql = "SELECT brand_id, name FROM brands WHERE status = ?";
+		$sql = "SELECT brand_id, name FROM brands WHERE status = ? ORDER BY name ASC";
 		return $this->executeQuery($sql, array(1));
 	}
 
@@ -112,6 +137,16 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		return $result;
 	}
 	
+	/** @todo Inject Cache object
+	 * 
+	protected function getCacheGetaway() {
+		return CacheGateway::getCacheGateway();
+	}
+	
+	protected function loadFromCache( $object) {
+		
+	}*/
+
 	/**
 	 *
 	 * @param type $brand_id
@@ -146,8 +181,10 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if ($brand_id == '') {
 			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
 		}
-		$sql = '';
-		return 'brand/';
+		$sql = "SELECT dst FROM product_slug WHERE source ='B' AND value = ?";
+		return parent::getUnique($sql, array($brand_id), function ($row) {
+							return $row['dst'];
+		});
 	}
 
 		/**

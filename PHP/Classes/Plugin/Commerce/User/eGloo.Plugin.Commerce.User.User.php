@@ -110,4 +110,20 @@ class User {
 		}
 		return $user_data;
 	}
+	
+	public static function createUser($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
+		if ($uname == '' || $pwd == '') {
+			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+		}
+		$this->username		= $uname;
+		$this->password		= $pwd;
+		$this->privileges	= $priv;
+		
+		$row = Commerce\User\UserDataAccess::fetch()->createUser();
+		return new User(self::createUserFromArray($row));
+	}
+	
+	public static function createUserFromArray(array $args) {
+		return ;
+	}
 }
