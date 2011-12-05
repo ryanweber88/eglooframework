@@ -36,7 +36,7 @@ use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection;
  * @package Plugins
  * @subpackage Commerce
  */
-class PurchaseOrderDataAccess extends PostgreSQLDBConnection {
+class SupplierInvoiceDataAccess extends PostgreSQLDBConnection {
 	
 	/** @var resource Object */
 	protected static $instance = null;
