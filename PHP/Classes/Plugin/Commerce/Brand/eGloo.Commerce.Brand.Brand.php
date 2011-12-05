@@ -148,7 +148,7 @@ class Brand {
 	 * @param type $offset
 	 * @return Brand object
 	 */
-	public static function getPublishedBrands($limit = null, $offset = null) {
+	public static function loadPublishedBrands($limit = null, $offset = null) {
 		$result = array();
 		$rows = BrandDataAccess::fetch()->getBrandList($limit, $offset);
 		foreach ($rows as $row) {

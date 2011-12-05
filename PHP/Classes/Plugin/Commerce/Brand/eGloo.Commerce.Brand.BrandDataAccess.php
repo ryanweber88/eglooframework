@@ -127,14 +127,14 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		}
 		
 		$sql = "SELECT * FROM brands b WHERE b.status = 1 LIMIT ? OFFSET ?";	
-		$brand_result = $this->executeQuery($sql, array($limit, $offset));
+		return $this->executeQuery($sql, array($limit, $offset));
 		
-		foreach ($brand_result as $brand) {
+		/*foreach ($brand_result as $brand) {
 			$brand['brand_images'] = $this->getBrandImages($brand['brand_id']);
 			$brand['brand_products'] = $this->getBrandProducts($brand['brand_id']);
 			$result[] = $brand;
 		}
-		return $result;
+		return $result;*/
 	}
 	
 	/** @todo Inject Cache object
