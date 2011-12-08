@@ -65,6 +65,7 @@ class Dispatcher extends \photon\core\Dispatcher {
 								
 
 		if ($response instanceof \eGloo\System\Server\Action\HTTP\Response) { 
+			$response->content = 'suckit';
 			return $response;
 		}
 

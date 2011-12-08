@@ -19,12 +19,20 @@ class Test extends Middleware {
 	 */
 	public function processRequest(Request &$request) { 
 
+		return ;
+		
 		$start = time();
 		$counter = 0;
 		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
-		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1);
-		echo $user->mail; exit;
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1); 
+		$r    = new Response();
+		$r->content = 'suckit';
+		return $r;
+		
+		
+		
+		
 		//$user->mail = 'superperrito@sucks.com';
 		//$user->save();
 		exit ('Test::processRequest');
