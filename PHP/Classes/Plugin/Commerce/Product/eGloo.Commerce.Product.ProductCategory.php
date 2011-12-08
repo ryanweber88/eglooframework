@@ -55,33 +55,38 @@ class ProductCategory {
 		return new Brand($rows);
 	}*/
 	
-	public static function loadSpecies() {
-		return ProductDataAccess::fetch()->loadProductCategory(self::SPECIES);
-	}
-	
-	public static function loadAges() {
-		return ProductDataAccess::fetch()->loadProductCategory(self::AGE);
-	}
-	
-	public static function loadLifestyles() {
-		return ProductDataAccess::fetch()->loadProductCategory(self::LIFESTYLE);
-	}
-	
-	public static function loadConditions() {
-		return ProductDataAccess::fetch()->loadProductCategory(self::CONDITIONS);
-	}
-	
 	public static function loadCategories() {
-		return ProductDataAccess::fetch()->loadProductCategory(self::CATEGORY);
+		return ProductDataAccess::fetch()->loadCategories();
+	}
+
+
+	public static function loadProductSpecies() {
+		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::SPECIES);
+	}
+	
+	public static function loadProductAges() {
+		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::AGE);
+	}
+	
+	public static function loadProductLifestyles() {
+		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::LIFESTYLE);
+	}
+	
+	public static function loadProductConditions() {
+		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::CONDITIONS);
 	}
 	
 	public static function loadProductCategories() {
+		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::CATEGORY);
+	}
+	
+	public static function loadProductSubCategories() {
 		$result = array();
-		$result['Pets']			= self::loadSpecies();
-		$result['Ages']			= self::loadAges();
-		$result['Lifestyles']	= self::loadLifestyles();
-		$result['Conditions']	= self::loadConditions();
-		$result['Categories']	= self::loadCategories();
+		$result['Species']		= self::loadProductSpecies();
+		$result['Age']			= self::loadProductAges();
+		$result['Lifestyle']	= self::loadProductLifestyles();
+		$result['Conditions']	= self::loadProductConditions();
+		$result['Category']		= self::loadProductCategories();
 		return $result;
 	}
 }

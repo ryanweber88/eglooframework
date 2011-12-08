@@ -98,14 +98,36 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 		}
 		
 	}
+		
 	
+	public function loadCategories() {
+		$result = array();
+		$rows = parent::executeQuery('SELECT * FROM product_tag_category', array());
+		foreach ($rows as $category) {
+			$result[$category['product_tag_category_id']] = $category['title'];
+		}
+		return $result;
+	}
 	
-	public function loadProductCategory($category_id) {
+	public function loadSubCategoriesByCategoryId($category_id) {
+		if ($category_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: category id is required!', __METHOD__);
+		}
+	}
+	
+	public function loadSubCategoriesByCategoryName($category_name) {
+		if ($category_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: category Name is required!', __METHOD__);
+		}
+	}
+
+
+	public function loadProductSubCategoriesById($category_id) {
 		$result = array();
 		$sql = 'SELECT * FROM product_tag_subcategory WHERE product_tag_category_id = ? ORDER BY title ASC';
 		$categories = parent::executeQuery($sql, array($category_id));
 		foreach ($categories as $category) {
-			$result[] = $category['title'];
+			$result[$category['product_tag_subcategory_id']] = $category['title'];
 		}
 		return $result;
 	}

@@ -126,7 +126,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			throw new \Connection\DatabaseErrorException();
 		}
 		
-		$sql = "SELECT * FROM brands b WHERE b.status = 1 LIMIT ? OFFSET ?";	
+		$sql = "SELECT * FROM brands b WHERE b.status = 1 ORDER BY name ASC LIMIT ? OFFSET ?";	
 		return $this->executeQuery($sql, array($limit, $offset));
 		
 		/*foreach ($brand_result as $brand) {
