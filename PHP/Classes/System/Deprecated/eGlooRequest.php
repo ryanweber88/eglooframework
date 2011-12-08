@@ -163,3 +163,4 @@ class eGlooRequest {
 	*/
 }
 
+deprecate( __FILE__, '\eGloo\HTTP\Request' );

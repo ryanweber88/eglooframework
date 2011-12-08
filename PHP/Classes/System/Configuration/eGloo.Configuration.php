@@ -1,6 +1,8 @@
 <?php
 namespace eGloo;
 
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * eGloo\Configuration Class File
  *
@@ -1105,9 +1107,9 @@ final class Configuration {
 			// Grab our environment variables to determine which application and deployment to run
 
 			foreach (self::$system_configuration as $key => $value) {
-				self::$configuration_options[$key] = $value['value'];
-				
-				if ($value['override'] === 'true') {
+				self::$configuration_options[$key] = (isset ($value['value']) ? $value['value'] : '');
+
+				if (isset ($value['override']) && $value['override'] === 'true') {
 					self::$configuration_possible_options[$key] = $value;
 				}
 			}
