@@ -80,8 +80,17 @@ class ProductCategory {
 		return ProductDataAccess::fetch()->loadProductSubCategoriesById(self::CATEGORY);
 	}
 	
+	/**
+	 * Method to load Product Categories and Subcategories
+	 * 
+	 * @todo Pets and Species are redondant but useful for lagacy codes
+	 * @todo remove Pets 
+	 * 
+	 * @return array of Categories + Subcategories
+	 */
 	public static function loadProductSubCategories() {
 		$result = array();
+		$result['Pets']			= self::loadProductSpecies();
 		$result['Species']		= self::loadProductSpecies();
 		$result['Age']			= self::loadProductAges();
 		$result['Lifestyle']	= self::loadProductLifestyles();
