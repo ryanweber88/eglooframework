@@ -11,6 +11,7 @@
 require 'eventmachine'
 require 'sys/proctable'
 require 'net/telnet'
+require 'socket'
 
 ###  CONSTANTS 
 Host          = '127.0.0.1'
@@ -50,9 +51,12 @@ end
 ###  FUNCTIONS
 
 def dispatch_request_to_apache(request)
-  apache   = Net::Telnet.new("Port" => 80)
+ 
+  apache   = Net::Telnet.new(
+    "Port"       => 80,
+  )
   response = apache.cmd(request) 
-  
+
   # close connection return response
   apache.close
   response 
