@@ -33,13 +33,12 @@ class RequestStore < EM::Connection
     @callbacks = [ ]
     
     def receive_data(request)
-
       # push request data to be forwarded 
       # after apache has successfuly kicked
       self.class.callbacks.push(lambda do
-        response = dispatch_request_to_apache request
+        #response = dispatch_request_to_apache request
         
-        send_data(response)
+        send_data('response')
       end)
     end
     
@@ -51,7 +50,7 @@ end
 
 def dispatch_request_to_apache(request)
   apache   = Net::Telnet.new("Port" => 80)
-  response = apache.cmd(request) 
+  response = apache.cmd('GET /echo.php') 
   
   # close connection return response
   apache.close
@@ -96,7 +95,7 @@ EM.run do
   EM.start_server Host, Port, RequestStore
   
   # handle apache graceful restart on separate thread
-  EM.defer do    
+  operation = lambda do    
     
     # start apache if not currently running
     # @todo remove from production
@@ -128,16 +127,16 @@ EM.run do
       request.call
     end
            
-    # kill event loop - for whatever reason this has to be placed into
-    # separate thread to work?? 
-    # @todo look up reason as to
-    EM.add_timer(1) do
-      EM.stop_event_loop  
-    end
+    # kill event loop
 
   end
   
-   
+  callback = lambda do
+    puts callback
+  end
+  
+  EM.defer operation, callback
+
   puts "Started EchoServer on #{Host}:#{Port}"
 end
 
