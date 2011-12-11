@@ -1,5 +1,4 @@
 <?php
-namespace eGloo\Daemon;
 
 use \eGloo\Configuration as Configuration;
 use \System_Daemon as System_Daemon;
@@ -92,5 +91,3 @@ abstract class Daemon {
 	}
 
 }
-
-deprecate( __FILE__, '\eGloo\Daemons\Daemon' );
