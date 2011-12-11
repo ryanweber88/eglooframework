@@ -109,7 +109,7 @@ class DaemonMaster extends Combine {
 		} else if ( isset( $this->_command_arguments[0]) ) {
 			$daemon_name = $this->_command_arguments[0];
 
-			if ( strpos($daemon_name, '\eGloo\Daemon') === false ) {
+			if ( strpos($daemon_name, '\eGloo\Daemon') === false && strpos($daemon_name, '\\') === false ) {
 				$daemon_name = '\eGloo\Daemon\\' . $daemon_name;
 			}
 
