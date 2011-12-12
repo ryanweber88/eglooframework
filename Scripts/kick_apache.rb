@@ -43,13 +43,46 @@ class RequestStore < EM::Connection
         
         send_data(response)
       end)
-    end
-    
- 
-    
+    end    
 end
 
+class UFW
+  
+  @@file_ufw       = '/etc/ufw/before.rules'
+  @@redirect_rules = 
+    "#kick_apache start_redirect\n"+
+    "*nat\n"+
+    ":PREROUTING ACCEPT [0:0]\n"+
+    "-A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 6767\n"+
+    "COMMIT\n"+
+    "#kick_apache end_redirect"
+   
+  def self.deny(port)
+    try_exec "Denying traffic to port #{port}" do
+      system "ufw allow #{port}"
+    end
+  end
+  
+  def self.allow(port)
+    try_exec "Denying traffic to port #{port}" do
+      system "ufw allow #{port}"
+    end  
+  end
+  
+  def self.redirect_to(port)
+    # read in rules file, and write new new rules
+   IO.write(@@file_ufw, "#{@@redirect_rules}\n" + IO.read(@@file_ufw))
+    
+  end
+  
+  def self.remove_redirect
+    IO.write(@@file_ufw, IO.read(@@file_ufw).gsub(/#kick_apache start_redirect.+?#kick_apache end_redirect/im))    
+  end
+end
+ 
+
 ###  FUNCTIONS
+
 
 def dispatch_request_to_apache(request)
  
@@ -94,6 +127,10 @@ def apache_running?
 end
 
 ###  TEST
+
+UFW.redirect_to 6767
+UFW.remove_redirect
+exit
 
 
 ###  PRODUCTION
