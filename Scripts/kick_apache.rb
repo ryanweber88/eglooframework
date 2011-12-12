@@ -12,11 +12,14 @@ require 'eventmachine'
 require 'sys/proctable'
 require 'net/telnet'
 require 'socket'
+require 'net/http'
 
 ###  CONSTANTS 
-Host          = '127.0.0.1'
+Host          = '0.0.0.0'
 Port          = 6767
+PortRedirect  = 6767
 PortAccept    = 80
+PortHttp      = 80
 ServiceApache = 'apache2'
 ControlApache = 'apache2ctl'
 BinaryApache  = '/usr/sbin/apache2'
@@ -42,20 +45,58 @@ class RequestStore < EM::Connection
         
         send_data(response)
       end)
+    end    
+end
+
+class Firewall
+  
+  IpTablesChain    = 'ufw-user-input'
+   
+  def self.deny(port)
+    try_exec "Denying traffic to port #{port}" do
+      system "ufw deny #{port}"
+    end
+  end
+  
+  def self.allow(port)
+    try_exec "Denying traffic to port #{port}" do
+      system "ufw allow #{port}"
+    end  
+  end
+  
+  def self.redirect_to(port)        
+    # read in rules file, and write new new rules
+    try_exec "Using iptables to redirect to #{port}" do
+      system "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport #{PortAccept} -j REDIRECT --to-port #{port}"
     end
     
- 
-    
+  end
+  
+  def self.remove_redirect(port)
+    puts "remove_redirect"
+    try_exec "Removing redirect rule using iptables" do
+      system "sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport #{PortAccept} -j REDIRECT --to-port #{port}"
+    end
+  end
+  
+
 end
+ 
 
 ###  FUNCTIONS
 
+
 def dispatch_request_to_apache(request)
  
+
   apache   = Net::Telnet.new(
     "Port"       => 80,
+    "Telnetmode" => false
   )
-  response = apache.cmd(request) 
+
+  # for some bizarre reason, passing HTTP/1.1. in request header
+  # is causing apache to freeze
+  response = apache.cmd(request.gsub /HTTP\/1.1/i, '') 
 
   # close connection return response
   apache.close
@@ -70,9 +111,16 @@ end
 
 def run_commands(commands)
   commands.each do |hash|   
-
-    try_exec hash[:message] do
-      system hash[:command] ||= false
+    
+    if (hash[:block])
+      puts "here"
+      puts  hash[:message]
+      hash[:block].call  
+    
+    else 
+      try_exec hash[:message] do
+        system hash[:command] ||= false
+      end
     end
   end
 end
@@ -88,7 +136,6 @@ def apache_running?
 end
 
 ###  TEST
-
 
 ###  PRODUCTION
 
@@ -109,8 +156,8 @@ EM.run do
    
     # block http port, forward to new port and graceful stop apache
     run_commands [
-      { message: "Blocking traffic on http port #{PortAccept}",   command: "ufw deny #{PortAccept}" },
-      { message: "Forwarding http traffic to port #{Port}",       command: "true" },
+      #{ message: "Blocking traffic on http port #{PortAccept}",   command: "ufw deny #{PortAccept}" },
+      { message: "Forwarding http traffic to port #{Port}",       block:   lambda { Firewall.redirect_to PortRedirect }},
       { message: "Gracefully stopping apache",                    command: "#{ControlApache} graceful-stop" },
     ]
     
@@ -122,8 +169,8 @@ EM.run do
     # start apache and reopen blocked http port and remove forward
     run_commands [
         { message: 'Starting apache',                                     command: "#{ControlApache} start"  },
-        { message: "Allowing traffic on http port #{PortAccept}",         command: "ufw allow #{PortAccept}" },
-        { message: "Removing forwarding rule on http port #{PortAccept}", command: "true" }
+        #{ message: "Allowing traffic on http port #{PortAccept}",         command: "ufw allow #{PortAccept}" },
+        { message: "Removing forwarding rule on http port #{PortAccept}", block:   lambda { Firewall.remove_redirect(PortRedirect) } }
     ] 
     
     puts "Forwarding #{RequestStore.callbacks.length} requests to apache"
@@ -144,10 +191,4 @@ EM.run do
    
   puts "Started EchoServer on #{Host}:#{Port}"
 end
-
-
-  
-
-
-
 
