@@ -12,6 +12,7 @@ require 'eventmachine'
 require 'sys/proctable'
 require 'net/telnet'
 require 'socket'
+require 'net/http'
 
 ###  CONSTANTS 
 Host          = '127.0.0.1'
@@ -52,10 +53,15 @@ end
 
 def dispatch_request_to_apache(request)
  
+
   apache   = Net::Telnet.new(
     "Port"       => 80,
+    "Telnetmode" => false
   )
-  response = apache.cmd(request) 
+
+  # for some bizarre reason, passing HTTP/1.1. in request header
+  # is causing apache to freeze
+  response = apache.cmd(request.gsub /HTTP\/1.1/i, '') 
 
   # close connection return response
   apache.close
