@@ -34,5 +34,6 @@ class Column extends \eGloo\Dialect\Object {
 	}
 	
 	protected $name;
+	protected $required = false;
 	
 }

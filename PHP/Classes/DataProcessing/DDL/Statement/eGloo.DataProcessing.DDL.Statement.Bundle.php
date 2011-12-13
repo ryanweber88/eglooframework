@@ -15,7 +15,9 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  */
 class Bundle extends \eGloo\Dialect\Object { 
 	
-	use \eGloo\Utilities\Collection\StaticStorageTrait;
+	use \eGloo\Utilities\Collection\StaticStorageTrait {
+		\eGloo\Utilties\Collection\StaticStorageTrait::retrieve as retrieveFromClass;
+	};
 	
 	// this would be better as a const, but not
 	// available in php
@@ -120,18 +122,29 @@ class Bundle extends \eGloo\Dialect\Object {
 		return isset($this->paths[$name]);
 	}
 
+	/**
+	 * Alias to create
+	 */
+	public static function retrieve(Entity $entity) {
+		return static::create($entity);
+	}
 	
+		
 	/**
 	 * Retrieve a bundle instance based on
 	 * @todo limit_static 
+	 * @deprecated
 	 */
 	public static function create(Entity $entity) { 
-		return static::retrieve($entity->_class->name, function() use ($entity) { 
+		// @todo limit_static
+		return static::retrieveFromStatic($entity->_class->name, function() use ($entity) { 
 			return new Bundle(DDL\Utility\Path::statements(
 				$entity
 			));		
 		});
 	}
+	
+
 
 	public function statementContent($name) { 
 		if (isset($this->content[$name])) { 

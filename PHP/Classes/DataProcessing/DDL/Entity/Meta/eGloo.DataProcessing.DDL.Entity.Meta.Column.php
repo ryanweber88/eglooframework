@@ -88,6 +88,19 @@ class Column extends DDL\Entity\Column {
 	public function was() {
 		return $this->defaultValue();
 	}
+	
+	/**
+	 * 
+	 * Determines if field validates against constraints
+	 * @todo determine constraint system, for the time being
+	 * constraint is to check value against notnull
+	 * @deprecated
+	 */
+	public function validates() {
+		return $this->required 
+			? !is_null($this->value)
+			: true;			
+	}
 
 	
 	protected $name;

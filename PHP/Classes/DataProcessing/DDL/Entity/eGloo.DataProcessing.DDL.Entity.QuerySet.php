@@ -253,6 +253,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	 * @see eGloo\DataProcessing\DDL\Entity\Retrieve.PaginationInterface::limit()
  	 */
 	public function limit($amount) { 
+		
+		// @todo load from configuration
+		$adapter = DDL\Statement\Adadpter\SQL::alias();
+				
 		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
@@ -269,7 +273,11 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	/**
 	 * Specifies result offset - defers til evaluate
 	 */
-	public function offset($start) { 
+	public function offset($start) { 		
+		
+		// @todo load from configuration
+		$adapter = DDL\Statement\Adadpter\SQL::alias();
+				
 		$this->events->trigger('call', $this, [
 			'name'       => __FUNCTION__,
 		
@@ -290,11 +298,16 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 */
 	public function orderBy($fields) {
 		
+		// @todo load from configuration
+		$adapter = DDL\Statement\Adadpter\SQL::alias();
+		
 		// if fields are passed as 'field', 'field2'
 		// convert to array
 		if (!is_array($fields)) {
 			$fields = func_get_args();
 		}
+		
+		$fields = $adapter::processOrderBy($fields);
 		
 		// iterate through fields to determine
 		// sort order of field using -+ syntax
@@ -303,7 +316,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		// backticks, etc
 		foreach ($fields as $index => $field) {
 			
-			$order = '';
+			/*$order = '';
 			
 			// if order has been specified, then make note of order
 			// and remove specifying character
@@ -317,7 +330,8 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			
 			// @temp add backtick
 			// @todo replace with engine syntax domain parser
-			$fields[$index] = "`{$fields[$index]}` $order";
+			$fields[$index] = "{$fields[$index]} $order";
+			*/
 		}
 		
 		// finally, create new set, pass callbacks to and add
@@ -336,6 +350,9 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	
 	
 	public function groupBy($fields) {
+
+		// @todo load from configuration
+		$adapter = DDL\Statement\Adadpter\SQL::alias();		
 		
 		// convert to array if passed as singular parameters
 		if (!is_array($fields)) {

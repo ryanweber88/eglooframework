@@ -48,6 +48,30 @@ abstract class Object implements MetaInterface {
 	}
 	
 	/**
+	 * 
+	 * Binds lambda to instance of this - used to test lambda
+	 * within scope of new instance
+	 * @param callable $lambda
+	 */
+	public static function instanceEval(callable $lambda) {
+		
+	}
+	
+	/**
+	 * 
+	 * Simple returns a string containing calling class
+	 */
+	public static function alias($alias = null) {
+		if (is_null($alias)) { 
+			return get_called_class();
+		}
+		
+		else {
+			class_alias(get_called_class(), $alias);
+		}
+	}
+	
+	/**
 	 * Defines a method on instances singleton instance - defining
 	 * a method on class requires doing so explicitly
 	 * @see eGloo\Dialect.MetaInterface::defineMethod()

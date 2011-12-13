@@ -47,9 +47,11 @@ class Builder extends \eGloo\Dialect\Object {
 		$this->arguments['primary_key'] = $this->entity->definition->primary_key;
 
 		// splat array ends/leaves 
-		extract($this->splatArray(
+		// @todo, adapter must be specified either by injection or configuration 
+		// (or combination of the two)
+		extract(Adapter\SQL::processArguments($this->splatArray(
 			$this->arguments
-		));
+		)));
 								
 		// "parse" required content and place into buffer
 		ob_start();
@@ -68,17 +70,8 @@ class Builder extends \eGloo\Dialect\Object {
 			// element is not
 			if (is_array($value)) { 
 				if (count($keys = array_keys($value)) && !is_array($value[$keys[0]])) { 
-					if (!is_numeric($value[$keys[0]])) { 
-						foreach($value as $index => $string) {
-							// @todo this shouldn't be looking at engine domain syntax 
-							// (backtick character)
-							if (strpos($string, '`') === false) { 
-								$array[$key][$index] = "" .addslashes($string) . "";
-							}
-						}
-					}
-					
-										
+
+					// splat array to list of comma seperated values
 					$array[$key] = implode (',', $array[$key]);	
 					
 				}

@@ -165,7 +165,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			 
 			[ 
 			  // defines meta columns
-			  
+				  
 			  new DDL\Utility\Callback(
 				'meta_columns', function(array $pass = [ ]) {   
 			  
@@ -187,6 +187,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				  		return $pass;
 					}
 					
+					
+
 					// throw an exception if the entity has not been identified in 
 					// datastore or persistence context
 					throw new DDL\Exception\Exception(
@@ -428,6 +430,20 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					$columns[] = new Column($name);	
 				};
 				
+				// now check columns against insert statement, this will define
+				// which columns are required
+				// @todo use a statement specifically garnered to what is required
+				$requiredStatement = DDL\Statement\Bundle::retrieve($entity)->statement(
+					'insert'
+				);
+				
+				// @todo regular expression is pretty stupid here - beef up once we
+				// figure out best approach
+				foreach($columns as $index => $column) {
+					if (preg_match("/{$column->name}/is", $requiredStatement)) {
+						$columns[$index]->required = true;
+					}
+				}
 				
 				return $columns;
 			}
@@ -612,9 +628,11 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			'name'              => 'update',
 		
 			// defines the calling method, and parameter values
-			'arguments'         => [ 'fields' => [ 
-				$pk => [ 'values' => $this->id ]
-			]], 
+			'arguments'         => [ 
+				'fields' => [ 
+					$pk => [ 'values' => $this->id ]
+				]
+			], 
 			
 			// here we define middleware, which acts layer between arguments to
 			// db calls
