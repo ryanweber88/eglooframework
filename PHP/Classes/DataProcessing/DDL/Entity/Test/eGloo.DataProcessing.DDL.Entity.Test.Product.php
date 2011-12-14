@@ -9,6 +9,18 @@ use eGloo\DataProcessing\DDL\Entity\Entity;
  * @author Christian Calloway
  *
  */
-class Product extends Entity\Entity {
-	
+class Product extends Entity {
+
+	public function __toString() { 
+		try {
+			$this->events->trigger('evaluate', $this);
+		}
+		catch (\Exception $e) {
+			echo $e->getMessage(); exit;
+		}
+			return $this->title;
+		//}
+		
+		return "N/A";
+	}
 }

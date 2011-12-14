@@ -1,1 +1,3 @@
 /nbproject/private/
+mongrel2/log/*.log
+mongrel2/run/*.pid

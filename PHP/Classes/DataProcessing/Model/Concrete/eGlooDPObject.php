@@ -36,7 +36,7 @@
  * @package $package
  * @subpackage $subpackage
  */
-class eGlooDPObject {
+class eGlooDPObject extends \eGloo\Dialect\Object {
 
 }
 

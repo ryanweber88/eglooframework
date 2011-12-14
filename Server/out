@@ -1,0 +1,597 @@
+<!--{********************************************************* 
+
+@ author: Elan Trybuch
+@ maintainer: Elan Trybuch
+@ para: $selected_nav, $title
+@ support: elan@petflow.com
+
+**********************************************************}-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+{{ if $expressions[42] }}
+<meta property="og:title" content="{{ $product->title }}" />
+<meta property="og:type" content="product" />
+<meta property="og:url" content="http://www.petflow.com/{{ $product->slug }}" />
+<meta property="og:image" content="{{ $product->img_thumb }}" />
+<meta property="og:site_name" content="PetFlow" />
+<meta property="og:description" content="{{ $product->description|escape }}" />
+{{ end  }}
+<title>{{ $title|default:"PetFlow" }}</title>
+<meta name="title" content="PetFlow Food For Life!" />
+<link rel="shortcut icon" href="/sites/all/themes/petflow/favicon.ico" type="image/x-icon" />
+<meta name="description" content="{{ $meta_description|default:"PetFlow is a new hassle free way to shop for pet food! We make it easy for you to set a delivery schedule, so you never have to shop for pet food again!" }}" />
+{{ if $expressions[41] }}
+<meta name="google-site-verification" content="GXjS7Emt38wkIdyYArJYiR9O8RifIc0svJ-eicZ1YPI" />
+{{ end  }}
+{{ if $expressions[40] }}
+<script src="{{ $rewriteBase }}js/brandsForm.js" type="text/javascript"></script>
+{{ end  }}
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/global.css"/>
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}xcss/page:{{ if $expressions[39] }}products{{   }}{{ $page }}{{ end  }}/styles.css"/>
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/nav.css"/>
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}xcss/page:{{ if $expressions[38] }}products{{   }}{{ $page }}{{ end  }}/sidebar.css"/>
+<!--[if IE 7]>
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/ie7.css"/>
+<![endif]-->
+<!--[if IE 8]>
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/ie8.css"/>
+<![endif]-->
+{{ if $expressions[37] }}
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/jqueryUI.css"/>
+{{ end  }}
+{{ if $expressions[36] }}
+<link rel="stylesheet" type="text/css" href="{{ $rewriteBase }}css/colorbox.css"/>
+{{ end  }}
+<script src="{{ $rewriteBase }}js/jquery.js" type="text/javascript"></script>
+{{ if $expressions[35] }}
+<script src="{{ $rewriteBase }}js/imghover.js" type="text/javascript"></script>
+{{ end  }}
+{{ if $expressions[34] }}
+<script src="{{ $rewriteBase }}js/typewatch.js" type="text/javascript"></script>
+{{ end  }}
+{{ if $expressions[33] }}
+<script src="{{ $rewriteBase }}js/jqueryUI.js" type="text/javascript"></script>
+<script src="{{ $rewriteBase }}js/jquery-select.js" type="text/javascript"></script>
+<script src="{{ $rewriteBase }}js/jquery-cycle.js" type="text/javascript"></script>
+{{ end  }}
+<script src="{{ $rewriteBase }}js/jquery.hints.js" type="text/javascript"></script>
+{{ if $expressions[32] }}
+<script src="{{ $rewriteBase }}js/ZeroClipboard.js" type="text/javascript"></script>
+<link type="text/css" rel="stylesheet" media="all" href="{{ $rewriteBase }}media/ZeroClipboard10.swf" />
+{{ end  }}
+{{ if $expressions[31] }}
+<script src="{{ $rewriteBase }}js/bezoom.js" type="text/javascript"></script>
+{{ end  }}
+{{ if $expressions[30] }}
+<script src="{{ $rewriteBase }}js/textarea.js" type="text/javascript"></script>
+{{ end  }}
+<script src="{{ $rewriteBase }}xjs/page:{{ if $expressions[29] }}products{{   }}{{ $page }}{{ end  }}/pf-init.js" type="text/javascript"></script>
+<script src="{{ $rewriteBase }}js/pf-global.js" type="text/javascript"></script>
+{{ if $expressions[28] }}
+<script src="{{ $rewriteBase }}js/checkout.js" type="text/javascript"></script>
+<script src="{{ $rewriteBase }}js/pf-forms.js" type="text/javascript"></script>
+{{ elseif $expressions[27] }}
+<script src="{{ $rewriteBase }}js/pf-start.js" type="text/javascript"></script>
+<script src="{{ $rewriteBase }}js/pf-explorer.js" type="text/javascript"></script>
+{{ end  }}
+{{ if $expressions[26] }}
+<script src="{{ $rewriteBase }}js/pf-user.js" type="text/javascript"></script>
+{{ elseif $expressions[25] }}
+<script src="{{ $rewriteBase }}js/pf-explorer.js" type="text/javascript"></script>
+{{ end  }}
+{{ if $expressions[24] }}
+<script src="{{ $rewriteBase }}js/colorbox-min.js" type="text/javascript"></script>
+{{ end  }}
+
+
+</head>
+<body class="{{ $body_classes }}">
+	<!--{********************************************************* 
+
+@ author: Elan Trybuch
+@ maintainer: Elan Trybuch
+@ para: $selected_nav
+@ css: nav.css
+@ support: elan@petflow.com
+
+**********************************************************}-->
+<!--{*$selected_nav*}-->
+
+{{ if $expressions[23] }}
+<div id="header">
+		<div id="login-wrapper" class="right">
+		<div id="login-tabs">
+			{{ if $expressions[19] }}
+				<a class="login" id="login-open" href="{{ $rewriteBase }}user/login" target="_self"><img src="{{ $rewriteBase }}images/nav/nav_existing_member_login.png" alt="Existing Members Login." /></a>
+			{{ end  }}
+			<a class="login" href="{{ $rewriteBase }}" target="_self"><img src="{{ $rewriteBase }}images/nav/nav_shop_petflow_now.png" alt="Shop PetFlow Now!"></a>
+		</div>
+
+		<!--{*include file='LoginPopup.tpl'*}-->
+
+		<div class="clear"></div>
+	</div>
+
+	<div class="logo">
+		<a href="{{ $rewriteBase }}"><img alt="PetFlow Food For Life! - logo" src="{{ $rewriteBase }}images/nav/logo.png" /></a>
+	</div>
+
+<div id="navigation-links" class="navigation"><a href="{{ $rewriteBase }}site">
+<img src="{{ $rewriteBase }}images/nav/nav_home<!--{('home'==$selected_nav)?'_on':''}-->.png" width="74" height="33" alt="Home" class="<!--{('home'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}aboutus"><img src="{{ $rewriteBase }}images/nav/nav_about<!--{('about'==$selected_nav)?'_on':''}-->.png" width="103" height="33"  alt="About Us" class="<!--{('about'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}howitworks"><img src="{{ $rewriteBase }}images/nav/nav_howitworks<!--{('howitworks'==$selected_nav)?'_on':''}-->.png" width="134" height="33" alt="How It Works" class="<!--{('howitworks'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}brands"><img src="{{ $rewriteBase }}images/nav/nav_brands<!--{('brands'==$selected_nav)?'_on':''}-->.png" width="86" height="33" alt="Brands" class="<!--{('brands'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}faq"><img src="{{ $rewriteBase }}images/nav/nav_faq<!--{('faq'==$selected_nav)?'_on':''}-->.png" width="76" height="33" alt="FAQ" class="<!--{('faq'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}shipping"><img src="{{ $rewriteBase }}images/nav/nav_shipping<!--{('shipping'==$selected_nav)?'_on':''}-->.png" width="136" height="33" alt="Shipping" class="<!--{('shipping'==$selected_nav)?'':'navhover'}-->" /></a><a href="{{ $rewriteBase }}ambassador"><img src="{{ $rewriteBase }}images/nav/nav_ambassador<!--{('ambassador'==$selected_nav)?'_on':''}-->.png" width="130" height="33" alt="Ambassador" class="<!--{('ambassador'==$selected_nav)?'':'navhover'}-->" /></a></div>
+<div class="clear"></div>
+</div>
+
+{{   }}
+
+<div align="center">
+	<div id="loginBar-wrapper">
+	<div align="center">
+	<div id="loginBar">
+		<div class="left">
+			{{ if $expressions[18] }}
+				{{ $chat_link }} or <span id="pf-phone-number" style="font-size:12px;font-weight:bold;"> call 1-888-316-7297</span>
+			{{   }}
+				<a href="#">Live chat is currently unavailable.</a>
+			{{ end  }}
+		</div>
+		<div class="right">
+			{{ if $expressions[17] }}
+	    		<a class="cart" href="{{ $client_url_ssl }}checkout">My Cart ({{ $cart['item_count'] }} item{{ if $expressions[16] }}s{{ end  }})</a> 
+				&nbsp;<a href="{{ $rewriteBase }}">Home</a>
+				| <a href="{{ $rewriteBase }}user/{{ $user->id }}/programs">My Orders</a> 
+				| <a href="{{ $rewriteBase }}user/{{ $user->id }}/edit">Account Info</a> 
+				| <a href="{{ $rewriteBase }}logout">Log out</a>
+			{{   }}
+	    		<a class="cart" href="{{ $client_url_ssl }}checkout">View Shopping Cart</a> 
+				<!--{*<span class="toggle">*}-->
+					| <a id="login-open" href="{{ $rewriteBase }}user/login">Existing Member</a>
+					<a id="login-close" href="#" class="hide" >X Close Login Panel</a>
+				<!--{*</span>*}-->
+			{{ end  }}
+		</div>
+	</div>
+	<div class="clear"></div>
+	</div>
+</div>
+	<div id="page-wrapper">
+	<div id="page">
+
+	<div id="header">
+		<div id="login-wrapper" class="right">
+			<!--{*include file='LoginPopup.tpl'*}-->
+		</div>
+
+	<div class="logo">
+		<a target="_self" href="{{ $rewriteBase }}"><img height="86" alt="PetFlow Food For Life! - logo" src="{{ $rewriteBase }}images/headerLogo.jpg" /></a>
+	</div>
+
+	{{ if $expressions[22] }}
+    	<div class="navigation" style="margin-top:0px;">
+            <div id="font-size-switcher-header" style="float:right;">
+                <div class="font-size-switcher right" style="padding:7px;color:white !important;">
+                    <span id="font-size-switcher-label" style="font-size:12px;font-weight:bold;">Font Size:</span>
+                    <span id="decrease-font-size" style="font-size:10pt;">A-</span>
+                    <span id="increase-font-size" style="font-size:12pt;">A+</span>
+                </div>
+            </div>
+        	<div class="clear"></div>
+            <div id="search-wrapper" style="margin-top:0px;">
+    {{ end  }}
+    {{ if $expressions[21] }}
+    	<div class="navigation">
+        	<div id="search-wrapper">
+    {{ end  }}
+		<form id="search-form" action="{{ $rewriteBase }}explorer" method="get">
+			<input type="image" value="submit" class="right search-btn" alt="Search and picture of a magnifying glass" src="{{ $rewriteBase }}images/buttons/search.gif" />&nbsp;
+			<input type="text" class="input right" id="search" name="search" title="Type here and search Food &amp; treats" value="{{ $search_string }}"/>
+			<h1 class="white right" id="search-title">SEARCH FOOD &amp; TREATS</h1>
+		</form>
+	</div><!--{*end #search-wrapper*}-->
+	<div class="clear"></div>
+	
+	<div class="right taf">
+		{{ if $expressions[20] }}
+		<span class="smred">New:</span> 
+		<a href="{{ $rewriteBase }}tellafriend"><span class="blue-link">Tell a friend about PetFlow!</span></a>
+		{{ end  }}
+	</div>
+</div><!--{*end .navigation*}-->
+<div class="clear"></div>
+</div><div><img src="{{ $rewriteBase }}images/headerdropshadow.jpg" height="4" alt="dropshadow" border="0"/></div>
+{{ end  }}
+
+
+	<div id="content-wrapper">
+		<div style="height:580px;" class="page-explorer">
+		<div style="height:580px;" id="block-views--exp-Explorer-page_1" class="block block-views region-odd odd region-count-1 count-3 with-block-editing">
+ 		<div style="height:580px;" class="block-inner">
+		<div id="content">
+            <form action="{{ $rewriteBase }}explorer" accept-charset="UTF-8" method="get" id="views-exposed-form-Explorer-page-1" style="margin-top:-1px;">
+                <div>
+              		<div class="views-exposed-form">
+	<div class="views-exposed-widgets clear-block">
+		{{ if $expressions[15] }}
+		<ul class="topnav">
+		<!--{foreach from=$drop_downs key=name item=label}-->
+			<li class="views-exposed-widget" id="drop_container_{{ $name }}">
+				<label>
+					{{ $label }}: <span>{{ $sel_attrs[$name]|escape:'html' }}</span>
+				</label>
+				<ul class="views-widget subnav">
+				<!--{foreach from=$attributes[$name] key=title item=nid}-->
+					<li{{ if $expressions[14] }} class="selected"{{ end  }}>
+						<input type="checkbox" name="{{ $name }}[]" value="{{ $nid }}" id="{{ $name }}-{{ $nid }}" {{ if $expressions[13] }} checked="checked"{{ end  }} />
+						<label for="{{ $name }}-{{ $nid }}">
+							<span class="raquo">&raquo;</span> {{ $title|escape:'html' }}
+						</label>
+					</li>
+				<!--{/foreach}-->
+				</ul>
+			</li>
+		<!--{/foreach}-->
+			<li class="apply" style="width:0 !important;"><input class="explorer-update" type="image" src="{{ $rewriteBase }}images/explorer/update-dark.png" name="update" id="search_value" value="Update" /></li>
+		</ul>
+		<input type="hidden" name="search" id="attribute_form_search" value="" />
+		{{   }}no widgets{{ end  }}
+	</div>
+</div>
+
+
+                </div>
+                {{ if $expressions[12] }}
+<div id="alerts" class="messages">
+<img class="left" src="{{ $rewriteBase }}images/alerts/message.png" height="22" width="25" alt="message icon" border="0"/>
+<ul id="alert-list">
+<!--{foreach from=$messages item=alert}-->
+<li class="messages-item">{{ $alert }}</li>
+<!--{/foreach}-->
+</ul>
+<div class="clear"></div>
+</div>
+{{ end  }}
+
+{{ if $expressions[11] }}
+<div id="alerts" class="warnings">
+<img class="left" src="{{ $rewriteBase }}images/alerts/warning.png" height="22" width="21" alt="message icon" border="0"/>
+<ul id="alert-list">
+<!--{foreach from=$warnings item=alert}-->
+<li class="warnings-item">{{ $alert }}</li>
+<!--{/foreach}-->
+</ul>
+<div class="clear"></div>
+</div>
+{{ end  }}
+
+{{ if $expressions[10] }}
+<div id="alerts" class="errors">
+<img class="left" src="{{ $rewriteBase }}images/alerts/error.png" height="20" width="24" alt="message icon" border="0"/>
+<ul id="alert-list">
+<!--{foreach from=$errors item=alert}-->
+<li class="errors-item">{{ $alert }}</li>
+<!--{/foreach}-->
+</ul>
+<div class="clear"></div>
+</div>
+{{ end  }}
+
+                <div id="welcome-wrapper">
+                
+                    <div class="welcome-outer">
+                        <div class="welcome-inner">
+                            <div class="left" style="width:570px;">
+                                {{ if $expressions[49] }}
+                                    {{ if $expressions[48] }}
+                                        {{ $utm_source.pages.$egCMSCurrentPage.content_zone_overrides.welcome_inner_left }}
+                                    {{   }}
+                                        <span class="dog-lft"><img src="{{ $rewriteBase }}images/start/dog2.gif" alt="dog" /></span><h1 id="start-title">Welcome to PetFlow!</h1>
+                                        <div class="newh2">Your trips to the store are over!</div>
+                                    {{ end  }}
+                                {{   }}
+                                    <span class="dog-lft"><img src="{{ $rewriteBase }}images/start/dog2.gif" alt="dog" /></span><h1 id="start-title">Welcome to PetFlow!</h1>
+                                    <div class="newh2">Your trips to the store are over!</div>
+                                {{ end  }}
+                                <p style="font-family: Verdana,Arial,Helvetica,sans-serif; color: rgb(0, 0, 0); font-size: 15px;padding-top:15px;line-height: 22px">
+                                    <div class="order-from-petflow">Order from PetFlow in 3 easy steps!</div>
+                                    <span class="onetwothreestyles"><img src="{{ $rewriteBase }}images/start/1.gif" alt="1" /> Browse by brand below</span><br />
+                                    <span class="onetwothreestyles"><img src="{{ $rewriteBase }}images/start/2.gif" alt="2" /> Find the items you need</span><br />
+                                    <span class="onetwothreestyles"><img src="{{ $rewriteBase }}images/start/3.gif" alt="3" /> Setup a delivery schedule &amp; checkout</span>
+                                </p>
+                            </div><!--{* end left *}-->
+                            <div id="movie-placeholder" class="right"><object style="height: 273px; width: 330px"><param name="movie" value="http://www.youtube.com/v/MTXTO_XzBnE"><param name="allowFullScreen" value="true"><param name="wmode" value="transparent"><embed src="http://www.youtube.com/v/MTXTO_XzBnE" type="application/x-shockwave-flash" wmode="transparent" allowfullscreen="true" width="330" height="273"></object></div><!--{* end right *}-->
+                            <div class="clear"></div>
+                        </div><!--{*start-welcome-inner*}-->   
+                    </div><!--{*start-welcome-outer*}--> 
+                    
+                    <div class="browse-the-brands-outer corner-8 left">
+                        <div class="browse-the-brands corner-8">
+                            <div class="in-browse-the-brands txt-center">
+                            PetFlow's recommended &amp; featured brands:
+                            </div><!--{* end in-browse-the-brands *}-->
+                            <div class="icons-in-browse-the-brands txt-center corner-8">
+                                <!--{foreach from=$featured_brands item=brand}-->
+                                    <div class="outer-image-icons-in-browse-the-brands corner-8">
+                                        <span style="z-index:1000;" class="image-icons-in-browse-the-brands corner-8">
+                                            <a href="{{ $rewriteBase }}explorer/{{ $brand->slug }}">
+                                                <img id="img-brand-{{ $brand->nid }}" alt="{{ $brand->title|escape:'html' }}" width="75" height="75" src="{{ $brand->img_thumb }}" />
+                                            </a>
+                                        </span><!--{* end image-icons-in-browse-the-brands *}-->
+                                    </div><!--{* end outer-image-icons-in-browse-the-brands *}-->
+                                <!--{/foreach}-->
+                            </div><!--{* end icons-in-browse-the-brands *}-->
+                            <div class="spacer in-browse-the-brands txt-center">
+                            <a href="#brand-select" class="start-brand-select"><img src="{{ $rewriteBase }}images/start/showmorebrands_btn_noshadow2.gif" alt="Show More Brands" /></a>
+                            </div><!--{* end in-browse-the-brands *}-->
+                        </div><!--{* end browse-the-brands *}-->
+                    </div><!--{* end browse-the-brands-outer *}-->
+                    
+                    <span class="catImg"><img src="{{ $rewriteBase }}images/start/cat3.gif" alt="cat" /></span>
+                    <div class="clear"></div>
+                    
+                    <div class="start-rght">
+                        <div class="z5">
+                            <img src="{{ $rewriteBase }}images/start/yellowscroll.gif" alt="" />
+                        </div>
+                        <div class="yell-banner txt-center">
+                            {{ if $expressions[47] }}
+                                {{ if $expressions[46] }}
+                                    <span class="z10000">
+                                        <span class="redBold">TODAY ONLY:</span> Free Shipping on {{ $utm_source.variables.coupon_min_threshold }} 
+                                            scheduled deliveries. Use code: {{ $utm_source.variables.coupon_code }}
+                                    </span>
+                                {{   }}
+                                    <span class="z10000">
+                                        <span class="redBold">TODAY ONLY:</span> Free Shipping on $49+ scheduled deliveries. Use code: PFLW49
+                                    </span>
+                                {{ end  }}
+                            {{   }}
+                                <span class="z10000">
+                                    <span class="redBold">TODAY ONLY:</span> Free Shipping on $49+ scheduled deliveries. Use code: PFLW49
+                                </span>
+                            {{ end  }}
+                        </div><!--{* end yell-banner *}-->
+                        
+                        <div class="under-yell-banner txt-center">
+                            All other orders ship for just $4.95
+                        </div>
+                        <div class="new-skip">
+                            <a href="{{ $rewriteBase }}explorer" class="skip">Skip, just show me products!</a>
+                        </div>
+                        <div class="clear"></div>
+                    </div><!--{* end start-rght *}-->
+                    
+                </div><!--{* end welcome-wrapper *}-->
+            </form>
+            <div class="the-spacer"></div>
+            <div class="clear"></div>
+        </div><!--{* end content *}-->
+        </div><!--{* end block-inner *}-->
+    	</div><!--{* end block-views *}-->
+		</div><!--{* end page-explorer *}-->
+        <div class="clear"></div>
+        <div id="start-options">
+            <a name="brand-select" href=""></a>
+{{ if $expressions[9] }}
+<div id="brands-wrapper" class="blue corner-8 {{ if $expressions[8] }}shadow{{ end  }}">
+{{   }}
+<div id="brands-wrapper" class="hide blue corner-8 ">
+	<div id="brands-title" class="corner-8800 blue-light">
+		<h1 id="browse-brands" class="text-shadow">Browse Brands (Option 2 Selected)</h1>
+	</div>
+{{ end  }}
+	<form method="get" action="{{ $rewriteBase }}explorer" id="brand-select-form">
+		<div class="right" id="brands-select">
+			<input type="image" src="{{ $rewriteBase }}images/buttons/go.png" class="right" value="Go" style="margin-top: 8px; margin-right: 15px;" />
+
+			<!-- input type="submit" class="right quicksrch_btn" value="Go" onclick='brandsForm()' style="margin-top: 8px; margin-right: 15px;" /-->
+
+	 		<select style="float: right; margin-top: 13px; margin-right: 10px;" id="edit-brand" class="form-select" name="brands[]">
+					<option selected="selected" value="">-Choose Brand-</option>
+				<!--{foreach from=$brands item=row}-->
+				<!--{foreach from=$row item=brand}-->
+					<option value="{{ $brand.slug }}" > {{ $brand.title }}</option>
+				<!--{/foreach}-->
+				<!--{/foreach}-->
+			</select><!-- end drop down for brands -->
+		</div>
+		<div class="clear-right"></div>
+
+		<table id="brand-select-list">
+		<tbody>
+		<!--{foreach name=brand_loop from=$brands item=row}-->
+			<tr valign="top">
+			<!--{foreach from=$row item=brand}-->
+				<td width="13%" style="v-align:center;text-align:center">
+					<label for="brand-{{ $brand.nid }}">
+						<img alt="{{ $brand.title|escape:'html' }}" src="{{ $brand.img_thumb }}" width="70" height="70" id="img-brand-{{ $brand.nid }}" />
+						<br />
+						<input type="checkbox" value="{{ $brand.title }}" class="brand-check" id="brand-{{ $brand.nid }}" name="brands[]"/>
+					</label>
+					<a href="{{ $rewriteBase }}explorer/{{ $brand.slug }}">{{ $brand.title }}</a>
+				</td>
+			<!--{/foreach}-->
+			</tr>
+			{{ if $expressions[7] }}
+				<tr><td><br /></td></tr>
+			{{ end  }}
+		<!--{/foreach}-->
+		</tbody>
+		</table>
+
+		<div class="right start-buttons">
+ 			<a href="{{ $rewriteBase }}explorer"><img alt="skip" src="{{ $rewriteBase }}images/buttons/skip.png" /></a>
+	 		<input type="image" src="{{ $rewriteBase }}images/buttons/show_products.png" value="Show Products" class="quicksrch" />
+		</div><!--{*end .start-buttons *}-->
+
+		<div class="clear"></div>
+	</form>
+
+</div><!--{* END #brands*}-->
+
+
+            <a name="quick-select" href=""></a><a name="special-conditions" href=""></a>
+<div id="quick-wrapper" class="hide yellow corner-8 ">
+	<div id="quick-title" class="corner-8800 yellow-dark">
+		<h1 id="quick-select" class="text-shadow">Quick Select (Option 1 Selected)</h1>
+	</div>
+    <form id="quick-select-form" action="{{ $rewriteBase }}explorer" method="get">
+	    <div id="pet-age" class="left">
+	    	<h4>Pet Age:</h4>
+
+			<div id="pet-age-wrapper">
+			<!--{foreach from=$pets item=pet}-->
+				<div class="{{ $pet.type }} {{ if $expressions[6] }}left{{   }}right{{ end  }}">
+					<img class="left" src="{{ $rewriteBase }}images/start/quick/{{ $pet.type }}.png" alt="{{ $pet.type }}" height="" width=""/>
+        		    <div class="left">
+						<input type="hidden" name="pet[]" id="pet-{{ $pet.type }}-hidden" class="hidden-pet" value="{{ $pet.id }}" disabled="disabled" />
+					<!--{foreach from=$pet.ages key=display item=age_id}-->
+						<input type="checkbox" name="age[]" id="field-age-{{ $pet.type }}-{{ $age_id }}" value="{{ $age_id }}"{{ if $expressions[5] }} checked="checked"{{ end  }} />
+						<label for="field-age-{{ $pet.type }}-{{ $age_id }}">{{ $display }}</label>
+						<div class="clr"></div>
+					<!--{/foreach}-->
+					</div>
+				</div>
+			<!--{/foreach}-->
+			</div>
+		</div>
+		<div id="food-form" class="right">
+	    	<h4>Choose:</h4>
+			<div id="food-form-wrapper">
+				<table>
+					<tbody>
+                	   	<!--{foreach from=$categories item=row}-->
+            			<tr>
+                	    	<!--{foreach from=$row item=cat}-->
+							<td>
+								<label for="wcategory_{{ $cat.id }}"><img id="food-form-image-{{ $cat.id }}" src="{{ $rewriteBase }}images/start/quick/{{ $cat.image }}.png" alt="{{ $cat.display }}" border="0" /></label>
+							</td>
+							<td style="width:140px; height: 30px;font-size:11px">
+								<input type="checkbox" name="category[]" id="wcategory_{{ $cat.id }}" value="{{ $cat.id }}"/><br />
+								<label for="wcategory_{{ $cat.id }}">{{ $cat.display }}</label>
+							</td>
+   		            		<!--{/foreach}-->
+   	        	    	</tr>
+   		            	<!--{/foreach}-->
+					</tbody>
+				</table><!--{*end # *}-->
+			</div><!--{*end .food-form-wrapper *}-->
+			<div class="clr"></div>
+		</div><!--{*end #food-form *}-->
+		<div class="clear"></div>
+<!--{*
+	    <div id="lifestyles">
+	    	<h4>Lifestyles &amp; Special Conditions:</h4>
+	    	<div id="lifestyles-wrapper">
+	    		<a class="start-special-conditions" href="#special-conditions"><img alt="" width="13" height="13" src="{{ $rewriteBase }}images/buttons/show_more.gif" /></a>
+    	    	<a class="start-special-conditions blue-link" href="#special-conditions">Show All Lifestyle &amp; Special Conditions</a>
+	    	    <div style="margin: 0pt 10px 0pt 25px; display: none;" id="conditions">
+					<table style="border-collapse: separate;">
+        	    		<tbody>
+                	   		<!--{foreach from=$lifestyles_and_conditions item=row}-->
+            				<tr>
+                	    		<!--{foreach from=$row item=lc}-->
+								<td>
+                    	    		<input type="checkbox" name="{{ $lc.name }}[]" id="field-{{ $lc.type }}-{{ $lc.id }}" value="{{ $lc.id }}" />
+                        	    	<label for="field-{{ $lc.type }}-{{ $lc.id }}">{{ $lc.display }}</label>
+						        </td>
+    		            		<!--{/foreach}-->
+    	        	    	</tr>
+    		            	<!--{/foreach}-->
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	    <div class="clr"></div>
+*}-->
+    	<div class="right start-buttons">
+    		<a href="{{ $rewriteBase }}explorer"><img alt="skip" height="" width="" src="{{ $rewriteBase }}images/buttons/skip.png" /></a>
+	        <input type="image" id="quick-submit" name="quicksrch" src="{{ $rewriteBase }}images/buttons/show_products.png" />
+		</div>
+		<div class="clear"></div>
+	</form>
+	</div>
+</div>
+
+        </div>
+    </div><!--{* end content-wrapper *}-->
+
+	{{ if $expressions[45] }}
+		<script src='http://www.adreadytractions.com/rt/294491?p=16752'></script>
+	{{ elseif $expressions[44] }}
+		<script src='http://www.adreadytractions.com/rt/294491?p=16701'></script>
+	{{ elseif $expressions[43] }}
+		<script src='http://www.adreadytractions.com/rt/294491?p=16691'></script>
+	{{ end  }}
+
+		</div><!--end 'content-wrapper'-->
+	</div><!--end 'page'-->
+</div><!--end 'page-wrapper'-->
+<div align="center">
+	<p class="footer-shadow-up"><img src="{{ $rewriteBase }}images/footer/shadow.png" alt="Footer Shadow" /></p>
+	<div id="footer-wrapper">
+		<div id="foot">
+        	<a href="{{ $rewriteBase }}shipping">Shipping &amp; Returns Policy</a> | <a href="{{ $rewriteBase }}privacy">Privacy Policy</a> | <a href="{{ $rewriteBase }}terms-of-service">Terms of Service</a> | <a href="{{ $rewriteBase }}contact">Contact Us</a> | <a href="{{ $rewriteBase }}content/suggest-product">Suggest a Product</a> | {{ if $expressions[4] }}<a href="{{ $rewriteBase }}user/{{ $user->uid }}/ambassador">Ambassador</a>{{   }}<a href="{{ $rewriteBase }}ambassador">Ambassador</a>{{ end  }} | <a href="{{ $rewriteBase }}press">Press</a> | <a href="{{ $rewriteBase }}testimonials">Testimonials</a> | <a href="http://blog.petflow.com">Blog</a>
+    	    <br />
+            <br />
+            <div class="footer-pics-wrapper corner-8">
+            	<p class="footer-icon-text">Follow Us!</p>
+            	<a target="_blank" href="http://www.facebook.com/petflow"><img class="in-footer-pic" src="{{ $rewriteBase }}images/sidebar/contact/icon_facebook.png" /></a>
+                <a target="_blank" href="http://twitter.com/#!/petflow"><img class="in-footer-pic" src="{{ $rewriteBase }}images/sidebar/contact/icon_twitter.png" /></a>
+                <a target="_blank" href="http://blog.petflow.com/?feed=rss2"><img class="in-footer-pic" src="{{ $rewriteBase }}images/sidebar/contact/icon_rss.png" /></a>
+                <a target="_blank" href="mailto:help@petflow.com"><img class="in-footer-pic" src="{{ $rewriteBase }}images/sidebar/contact/icon_email2.png" /></a>
+            </div>
+            <div class="clear"></div>
+            <br />
+			&copy; Copyright 2011 PetFlow.com, All Rights Reserved
+		</div>
+	</div>
+</div>
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-11683782-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<!-- BEGIN LivePerson Monitor. -->
+	<script language="javascript"> var lpMTagConfig = {"lpServer" : "server.iad.liveperson.net","lpNumber" : "81464111","lpProtocol" : (document.location.toString().indexOf("https:")==0) ? "https" : "http"}; function lpAddMonitorTag(src){if(typeof(src)=="undefined"||typeof(src)=="object"){src=lpMTagConfig.lpMTagSrc?lpMTagConfig.lpMTagSrc:"/hcp/html/mTag.js";}if(src.indexOf("http")!=0){src=lpMTagConfig.lpProtocol+"://"+lpMTagConfig.lpServer+src+"?site="+lpMTagConfig.lpNumber;}else{if(src.indexOf("site=")<0){if(src.indexOf("?")<0)src=src+"?";else src=src+"&";src=src+"site="+lpMTagConfig.lpNumber;}};var s=document.createElement("script");s.setAttribute("type","text/javascript");s.setAttribute("charset","iso-8859-1");s.setAttribute("src",src);document.getElementsByTagName("head").item(0).appendChild(s);} if (window.attachEvent) window.attachEvent("onload",lpAddMonitorTag); else window.addEventListener("load",lpAddMonitorTag,false);</script>
+<!-- END LivePerson Monitor. -->
+<div id="hover-container"></div>
+
+{{ if $expressions[3] }}
+<script src='http://www.adreadytractions.com/rt/294491?p=16691'></script>
+{{ elseif $expressions[2] }}
+<script src='https://www.adreadytractions.com/rt/294491?p=14471'></script>
+{{ end  }}
+
+<!--{* Retargeting pixels *}-->
+{{ if $expressions[1] }}
+<img height="1" width="1" src="https://a.triggit.com/px?u=68eccb251c29685d&rtv=petflow,pfsite,pfmember">
+{{   }}
+<img height="1" width="1" src="https://a.triggit.com/px?u=68eccb251c29685d&rtv=petflow,pfsite,pfvisitor">
+{{ end  }}
+
+{{ if $expressions[0] }}
+<!-- Begin Monetate tag, place before end of document body. DO NOT ALTER. -->
+<script type="text/javascript">
+var monetateT = new Date().getTime();
+if (document.location.protocol == "http:" || document.location.protocol == "https:") { document.write(unescape("%3Cscript type='text/javascript' src='" + (document.location.protocol == "https:" ? "https://s" : "http://") + "b.monetate.net/js/1/a-8c85895a/p/petflow.com/" + Math.floor(monetateT / 3600000) + "'%3E%3C/script%3E")); }
+</script>
+<script type="text/javascript">
+if (this.monetate) { monetate.a(); }
+</script>
+<!-- End Monetate tag. -->
+{{ end  }}
+<!-- Alertra Check -->
+</body>
+</html>
+

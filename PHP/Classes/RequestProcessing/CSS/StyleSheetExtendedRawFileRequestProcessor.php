@@ -55,85 +55,95 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 	public function processRequest() {
 	   eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetExtendedRawFileRequestProcessor: Entered processRequest()" );
 
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
-		$templateBuilder = new CSSBuilder();
-
-		$original_file_name = $file_name = $this->requestInfoBean->getGET( 'css_name' );
-
-		$templateVariables = array();
-
-		// Strip out all key/value pairs
-		$matches = array();
-		preg_match_all('~([0-9a-zA-Z_ -]+):([0-9a-zA-Z_ -]+)/~', $file_name, $matches, PREG_SET_ORDER);
-
-		foreach($matches as $match_set) {
-			if ( count($match_set) === 3 && isset($match_set[1]) && isset($match_set[2]) ) {
-				$templateVariables[$match_set[1]] = $match_set[2];
-			}
-		}
-
-		// Strip out all key/value pairs
-		$matches = array();
-
-		preg_match('~^[^:]+(/([0-9a-zA-Z_ -]+:[0-9a-zA-Z_ -]+/)+)[^:]+$~', $file_name, $matches);
-
-		if ( count($matches) === 3 && isset($matches[1]) ) {
-			$key_value_set_string = $matches[1];
-		} else {
-			$key_value_set_string = '/';
-		}
-
-		foreach($matches as $match_set) {
-			if ( count($match_set) === 3 && isset($match_set[1]) && isset($match_set[2]) ) {
-				$templateVariables[$match_set[1]] = $match_set[2];
-			}
-		}
-
-		$file_name = preg_replace('~([0-9a-zA-Z_ -]+):([0-9a-zA-Z_ -]+)/~', '', $file_name);
-
-		if ( $this->requestInfoBean->issetGET( 'xvars' ) ) {
-			$xvars = $this->requestInfoBean->getGET( 'xvars' );
-			$templateVariables = array_merge($xvars, $templateVariables);
-		}
-
-		$matches = array();
-		preg_match('~^([^/]*)?/?([^/]*)$~', $file_name, $matches);
-
+		$application = &\eGloo\System\Server\Application::instance();
 		$cache_to_webroot = false;
 
-		if ( isset($matches[1]) && isset($matches[2]) && trim($matches[2]) === '') {
-			$file_name = $matches[1];
-			$user_agent_hash = '';
-			$cache_to_webroot = true;
-		} else if ( isset($matches[1]) && isset($matches[2]) ) {
-			$file_name = $matches[2];
-			$user_agent_hash = $matches[1];
+		// TODO this may be need to be removed, especially if stylesheet and javascript files
+		// dynamically pull content outside of what is explicitly passed	
+		$output = $application->context()->retrieve($this->requestInfoBean->getGET('css_name'), function(&$context) { 
 
-			if ( trim($user_agent_hash) === eGlooHTTPRequest::getUserAgentHash() ) {
-				$cache_to_webroot = true;
+			$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+			$templateBuilder = new CSSBuilder();
+			$original_file_name = $file_name = $this->requestInfoBean->getGET( 'css_name' );
+			$templateVariables = array();
+			$cache_to_webroot = false;
+
+			// Strip out all key/value pairs
+			$matches = array();
+			preg_match_all('~([0-9a-zA-Z_ -]+):([0-9a-zA-Z_ -]+)/~', $file_name, $matches, PREG_SET_ORDER);
+
+			foreach($matches as $match_set) {
+				if ( count($match_set) === 3 && isset($match_set[1]) && isset($match_set[2]) ) {
+					$templateVariables[$match_set[1]] = $match_set[2];
+				}
 			}
-		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'StyleSheetExtendedRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
+			// Strip out all key/value pairs
+			$matches = array();
 
-		$templateDirector->setTemplateBuilder( $templateBuilder, $file_name ); // <=-- custom request ID
+			preg_match('~^[^:]+(/([0-9a-zA-Z_ -]+:[0-9a-zA-Z_ -]+/)+)[^:]+$~', $file_name, $matches);
 
-		try {
-			$templateDirector->preProcessTemplate();
-		} catch (ErrorException $e) {
-			if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
-				 eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
-				throw $e;
+			if ( count($matches) === 3 && isset($matches[1]) ) {
+				$key_value_set_string = $matches[1];
 			} else {
-				eGlooLogger::writeLog( eGlooLogger::WARN, 'StyleSheetExtendedRawFileRequestProcessor: Template requested but not found: "' .
-					$this->requestInfoBean->getGET( 'css_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
-				eGlooHTTPResponse::issueCustom404Response();
+				$key_value_set_string = '/';
 			}
-		}
 
-		$templateDirector->setTemplateVariables($templateVariables, true);
+			foreach($matches as $match_set) {
+				if ( count($match_set) === 3 && isset($match_set[1]) && isset($match_set[2]) ) {
+					$templateVariables[$match_set[1]] = $match_set[2];
+				}
+			}
 
-		$output = $templateDirector->processTemplate();
+			$file_name = preg_replace('~([0-9a-zA-Z_ -]+):([0-9a-zA-Z_ -]+)/~', '', $file_name);
+
+			if ( $this->requestInfoBean->issetGET( 'xvars' ) ) {
+				$xvars = $this->requestInfoBean->getGET( 'xvars' );
+				$templateVariables = array_merge($xvars, $templateVariables);
+			}
+
+			$matches = array();
+			preg_match('~^([^/]*)?/?([^/]*)$~', $file_name, $matches);
+
+			$cache_to_webroot = false;
+
+			if ( isset($matches[1]) && isset($matches[2]) && trim($matches[2]) === '') {
+				$file_name = $matches[1];
+				$user_agent_hash = '';
+				$cache_to_webroot = true;
+			} else if ( isset($matches[1]) && isset($matches[2]) ) {
+				$file_name = $matches[2];
+				$user_agent_hash = $matches[1];
+
+				if ( trim($user_agent_hash) === eGlooHTTPRequest::getUserAgentHash() ) {
+					$cache_to_webroot = true;
+				}
+			}
+
+			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'StyleSheetExtendedRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
+
+			$templateDirector->setTemplateBuilder( $templateBuilder, $file_name ); // <=-- custom request ID
+
+
+			try {
+				$templateDirector->preProcessTemplate();
+			} catch (ErrorException $e) {
+			
+				if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
+					 eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
+					throw $e;
+				} else {
+					eGlooLogger::writeLog( eGlooLogger::WARN, 'StyleSheetExtendedRawFileRequestProcessor: Template requested but not found: "' .
+						$this->requestInfoBean->getGET( 'css_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
+					eGlooHTTPResponse::issueCustom404Response();
+				}
+			}
+
+
+			$templateDirector->setTemplateVariables($templateVariables, true);
+
+			return $templateDirector->processTemplate();
+		});
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetExtendedRawFileRequestProcessor: Echoing Response" );
 
@@ -142,9 +152,13 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 		// TODO buffer output
 		echo $output;
 
+
+
 		if ( $cache_to_webroot && (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION ||
 			eGlooConfiguration::getUseHotFileCSSClustering()) ) {
+		//if (1) {
 
+			//exit ('caching');
 			StaticContentCacheManager::buildStaticContentCache('xcss', $user_agent_hash . $key_value_set_string, $file_name . '.css', $output );
 		}
 

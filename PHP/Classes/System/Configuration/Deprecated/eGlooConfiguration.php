@@ -571,6 +571,7 @@ final class eGlooConfiguration {
 
 	public static function loadRuntimeCacheClass() {
 		$retVal = false;
+		
 
 		$runtime_cache_path = self::getRuntimeConfigurationCachePath() . self::getRuntimeConfigurationCacheFilename();
 

@@ -27,6 +27,9 @@ use \eGloo\Utility\Logger as Logger;
  * @version 1.0
  */
 
+// namespace context
+use eGloo\Utilities\ClassBuilder;
+
 // Bring up the eGlooConfiguration: 12% Hit
 if ( !class_exists( 'eGlooConfiguration', false ) ) {
 	include( 'PHP/Classes/System/Configuration/Deprecated/eGlooConfiguration.php' );
@@ -95,6 +98,11 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 	spl_autoload_register(array('Doctrine', 'autoload'));
 }
 
+// Load Pimple DIC
+// TODO place into configuration
+require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php';
+
+
 /**
  * Defines the class and interface autoload runtime handler.
  * 
@@ -110,6 +118,7 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
  *
  * @param string $class_name class or interface to load
  */
+
 function eglooAutoload( $class_name ) {
 	/* Hack for https://bugs.php.net/bug.php?id=50731 */
 	if ( strpos($class_name, '\\') === 0 ) {
@@ -122,7 +131,7 @@ function eglooAutoload( $class_name ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include( $autoload_hash[$class_name] );
+				include_once( $autoload_hash[$class_name] );
 			}
 
 			return;
@@ -179,7 +188,7 @@ function eglooAutoload( $class_name ) {
 	if ($sanityCheckClassLoading) {
 		$instances = array();
 	}
-
+	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();
@@ -255,7 +264,8 @@ function eglooAutoload( $class_name ) {
 					}
 				}
 
-				include( $realPath );
+				include_once( $realPath );
+
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 				break;
@@ -334,7 +344,7 @@ function eglooAutoload( $class_name ) {
 		}
 
 		if ( $realPath !== null ) {
-			include( $realPath );
+			include_once ( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 		}
@@ -393,89 +403,81 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 			umask($old_umask);
 		}
 
+		// TODO build bridge between dynamic object definition and class builder; remove
+		// build process entirely from autoload
+		
 		$eglooDPDirector = eGlooDPDirector::getInstance();
 		$dynamic_object_definition = $eglooDPDirector->getDPDynamicObjectDefinition( $base_class_name );
 
-		$class_definition = '<?php' . "\n\n" . 'namespace eGloo\DP;' . "\n\n" . 'class ' . $base_class_name . ' extends DynamicObject {' . "\n\n";
-
+		$rclass = ClassBuilder::create()
+			->name($base_class_name)
+			->extends('DynamicObject') // fix to constant determined in config
+			->namespace('eGloo\DP');   // same
+		
 		foreach( $dynamic_object_definition['constants'] as $constantID => $constant ) {
 			// TODO handle more cases than this, obviously
-			$defaultValue = $constant['defaultValue'];
-
-			$class_definition .= "\t" . 'const ' . strtoupper($constantID) . ' = ' . $defaultValue . ';' . "\n\n";
+			
+			$rclass
+				->constant($constantID)
+				->value($constant['defaultValue']);
 		}
-
+		
 		foreach( $dynamic_object_definition['staticMembers'] as $staticMemberID => $staticMember ) {
 			// TODO handle more cases than this, obviously
-			$defaultValue = $staticMember['defaultValue'];
-			$scope = $staticMember['scope'];
-
-			$class_definition .= "\t" . $scope . ' static $' . $staticMemberID . ' = ' . $defaultValue . ';' . "\n\n";
+			
+			$rclass
+				->property($staticMemberID)
+				->value($staticMember['defaultValue'])
+				->visibility($staticMember['scope'])
+				->static(true);
 		}
-
-		$managed_members = array();
-
+		
 		foreach( $dynamic_object_definition['members'] as $memberID => $member ) {
 			// TODO handle more cases than this, obviously
 			$defaultValue = $member['defaultValue'];
 			$scope = $member['scope'];
 			$managed = $member['managed'];
-
-			if ( $managed ) {
-				$managed_members[$memberID] = $member;
-				continue;
-			} else {
-				$class_definition .= "\t" . $scope . ' $' . $memberID . ' = ' . $defaultValue . ';' . "\n\n";
-			}
+			
+			
+			$rclass
+				->property($memberID)
+				->visibility($scope)
+				->value($defaultValue)	
+				->managed($managed);				
 		}
 
-		if ( !empty($managed_members) ) {
-			$class_definition .= "\t" . 'protected $_managed_members = array(' . "\n";
-
-			foreach( $managed_members as $memberID => $member ) {
-				// TODO handle more cases than this, obviously
-				$member['value'] = $member['defaultValue'];
-				unset( $member['managed'] );
-
-				$class_definition .= "\t\t" . '"' . $memberID . '"' . ' => ' .
-					getArrayDefinitionString($member) . ',' . "\n";
-			}
-
-			$class_definition .= "\t" . ');' . "\n\n";
-		}
+				
 
 		foreach( $dynamic_object_definition['staticMethods'] as $staticMethodID => $staticMethod ) {
-			$class_definition .= "\t" . 'public static function ' . $staticMethodID . '( ';
-
-			$i = 1;
-
+			$rmethod = $rclass
+				->method($staticMethodID)
+				->static(true);
+				
+								
 			foreach( $staticMethod['arguments'] as $argumentID => $argument ) {
-				$class_definition .= '$' . $argumentID;
-
-				if ( $i < count($staticMethod['arguments']) ) {
-					$class_definition .= ', ';
-				} else {
-					$class_definition .= ' ';
-				}
-
-				$i++;
+				$rmethod->argument($argumentID);
 			}
 
-			$class_definition .= ') {' . "\n\t\t";
-
-			$class_definition .= '$retVal = null;' . "\n\n\t\t";
 
 			foreach( $staticMethod['executionStatements'] as $statementOrder => $statement ) {
 
 				if ( isset($statement['dpStatements']) ) {
 					foreach( $statement['dpStatements'] as $dpStatement ) {
+						
+						// why is this here?
 						$statement_definition = $eglooDPDirector->getDPStatementDefinition( $dpStatement['class'], $dpStatement['statementID'] );
 
-						$class_definition .= '$statement = new \eGlooDPStatement( \'' . $dpStatement['class'] . '\' );' . "\n\t\t";
+						$rmethod->statement(
+							'$statement = new \eGlooDPStatement( \'' . $dpStatement['class'] . '\' )'
+						);
 
 						foreach( $dpStatement['argumentMaps'] as $argumentMap ) {
-							$class_definition .= '$statement->bind( \'' . $argumentMap['to'] . '\', $' . $argumentMap['from'] . ' );' . "\n\t\t";
+							$rmethod->statement(
+								'$statement->bind( \'' . $argumentMap['to'] . '\', $' . $argumentMap['from'] . ' )'
+							);
 						}
+						
+							
 
 						// Caching?  In the future
 						// if ( $result = $statement->execute( 'getByProductID', $id ) ) {
@@ -498,47 +500,45 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 									$returnTo = 'retVal';
 								}
 
-								$class_definition .= '$' . $returnTo . ' = $statement->execute( \'' . $dpStatement['statementID'] . '\' );' . "\n\t\t";
+								//$class_definition .= '$' . $returnTo . ' = $statement->execute( \'' . $dpStatement['statementID'] . '\' );' . "\n\t\t";
+								$rmethod->statement(
+									'$' . $returnTo . ' = $statement->execute( \'' . $dpStatement['statementID'] . '\' )'
+								);
 							}
 						} else {
-							$class_definition .= '$statement->execute( \'' . $dpStatement['statementID'] . '\' );' . "\n\t\t";
+							$rmethod->statement(
+								'$' . $returnTo . ' = $statement->execute( \'' . $dpStatement['statementID'] . '\' )'
+							);
 						}
 
 
-						// echo_r($dynamic_object_definition);
-						// die_r($statement_definition);
+			
 					}
 				}
 			}
 
-			$class_definition .= "\n\t\t" . 'return $retVal;';
-
-			$class_definition .= "\n\t" . '}' . "\n\n";
+	
+			$rmethod->statement('return $retVal');
 		}
+		
 
 		foreach( $dynamic_object_definition['methods'] as $methodID => $method ) {
-			$class_definition .= "\t" . 'public function ' . $methodID . '( ';
-
-			$i = 1;
+			$rmethod = $rclass
+				->method($methodID)
+				->visibility($rclass::V_PUBLIC);
+				
 
 			foreach( $method['arguments'] as $argumentID => $argument ) {
-				$class_definition .= '$' . $argumentID;
+				$rmethod->argument($argumentID);
+				
 
-				if ( $i < count($method['arguments']) ) {
-					$class_definition .= ', ';
-				} else {
-					$class_definition .= ' ';
-				}
-
-				$i++;
 			}
 
-			$class_definition .= ') {' . "\n\t\t\n\t" . '}' . "\n\n";
+		
 		}
 
-		$class_definition .= '}' . "\n\n";
-
-		file_put_contents( $dpClassFilePath, $class_definition );
+		// write class definition to path specified in parameter
+		$rclass->write($dpClassFilePath);	
 
 		// Do stuff
 		$retVal = $dpClassFilePath;

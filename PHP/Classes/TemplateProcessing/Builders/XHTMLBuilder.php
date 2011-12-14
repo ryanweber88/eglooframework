@@ -52,7 +52,11 @@ class XHTMLBuilder extends TemplateBuilder {
 
 	public function setTemplateVariables( $templateVariables ) {
 		$this->templateVariables = $templateVariables;
-		foreach( $templateVariables as $key => $value) $this->templateEngine->assign( $key, $value );		 
+
+		foreach( $templateVariables as $key => $value) {
+			$this->templateEngine->assign( $key, $value );
+		}	
+
 	}
 
 	public function setContentProcessors( $contentProcessors ) {
@@ -60,7 +64,7 @@ class XHTMLBuilder extends TemplateBuilder {
 		
 		foreach( $this->contentProcessors as $contentProcessor ) {
 			$contentProcessor->setTemplateEngine( $this->templateEngine );
-			$contentProcessor->prepareContent();
+			$contentProcessor->prepareConZtent();
 		}
 	}
 
@@ -108,18 +112,69 @@ class XHTMLBuilder extends TemplateBuilder {
 	}
 	
 	public function setDispatchPath() {
-		$templateDispatcher =
-			XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
+		// cache dispatch path set based upon request bean signature + 20 t/s improvement
+		$application = &\eGloo\System\Server\Application::instance();
+		$requestInfoBean = &$this->requestInfoBean;
+		$userRequestID = &$this->userRequestID;
+		$userRequestClass = &$this->userRequestClass;
 
-		$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
+		$this->dispatchPath = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean, $userRequestID, $userRequestClass) { 
+
+			return XHTMLXML2ArrayDispatcher::getInstance( 
+				$requestInfoBean->getApplication(), $requestInfoBean->getInterfaceBundle() 
+			)
+			->dispatch($requestInfoBean, $userRequestID, $userRequestClass);
+
+		});
+
+		//$templateDispatcher =
+		//	XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
+
+
+		//$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
 	}
 
 	public function setTemplateEngine() {
-		$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );	   
+		// huge -100 t/s hit with invocation of smarty engine
+		// TODO shallow copy/clone of instance; beware of reference issues
+		// TODO replace with dependency injection concept
+
+		$application = &\eGloo\System\Server\Application::instance();
+
+		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		
+		// TODO replace with DI framework
+		//$this->templateEngine = &$application->component(
+		//	'XHTMLDefaultTemplateEngine', $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' 
+		//);
+
+		
+		//$requestInfoBean = &$this->requestInfoBean;
+				
+		//new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Smarty(); exit;
+		
+		$implementor = $application->context()->run(function() { 
+			return new XHTMLDefaultTemplateEngine( 
+				$this->requestInfoBean->getInterfaceBundle(), 'US', 'en'
+			);
+		});
+				
+		$this->templateEngine = new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Native(
+			$implementor
+		);
+		
+		return ;
+
+		// TODO base context cache upon requestInfoBean signature - done, but make implicit
+		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which
+		// profiling has determined to be far more cpu efficient
+		//$this->templateEngine = //clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
+			//echo 'closure';
+			//return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		//});    
 	}
 
 	public function run() {
-		$retVal = null;
 
 		if (isset($this->hardCacheID) && $this->isHardCached) {
 			$retVal = $this->output;
@@ -137,8 +192,14 @@ class XHTMLBuilder extends TemplateBuilder {
 	protected function __fetch($dispatchPath, $cacheID) {
 		$retVal = null;
 
+
 		try {
+			// this fetch call is sent directly to Smarty recieve 
 			$retVal = $this->templateEngine->fetch( $dispatchPath, $cacheID );
+
+			//return file_get_contents('/tmp/static');
+			//echo $GLOBALS['payload'];
+
 		} catch (Exception $e) {
 			$retVal = $this->processEngineFetchException( $e, $dispatchPath, $cacheID );
 		}
