@@ -112,11 +112,13 @@ class XHTMLBuilder extends TemplateBuilder {
 	}
 	
 	public function setDispatchPath() {
+		/*
 		// cache dispatch path set based upon request bean signature + 20 t/s improvement
 		$application = &\eGloo\System\Server\Application::instance();
 		$requestInfoBean = &$this->requestInfoBean;
 		$userRequestID = &$this->userRequestID;
 		$userRequestClass = &$this->userRequestClass;
+		
 
 		$this->dispatchPath = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean, $userRequestID, $userRequestClass) { 
 
@@ -126,12 +128,13 @@ class XHTMLBuilder extends TemplateBuilder {
 			->dispatch($requestInfoBean, $userRequestID, $userRequestClass);
 
 		});
+		*/
 
-		//$templateDispatcher =
-		//	XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
+		$templateDispatcher =
+			XHTMLXML2ArrayDispatcher::getInstance( $this->requestInfoBean->getApplication(), $this->requestInfoBean->getInterfaceBundle() );
 
 
-		//$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
+		$this->dispatchPath = $templateDispatcher->dispatch( $this->requestInfoBean, $this->userRequestID, $this->userRequestClass );
 	}
 
 	public function setTemplateEngine() {
@@ -139,9 +142,11 @@ class XHTMLBuilder extends TemplateBuilder {
 		// TODO shallow copy/clone of instance; beware of reference issues
 		// TODO replace with dependency injection concept
 
-		$application = &\eGloo\System\Server\Application::instance();
+		//$application = &\eGloo\System\Server\Application::instance();
 
-		//$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		$this->templateEngine = new XHTMLDefaultTemplateEngine( $this->requestInfoBean->getInterfaceBundle(), 'US', 'en' );
+		
+		return ;
 		
 		// TODO replace with DI framework
 		//$this->templateEngine = &$application->component(
@@ -153,17 +158,17 @@ class XHTMLBuilder extends TemplateBuilder {
 				
 		//new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Smarty(); exit;
 		
-		$implementor = $application->context()->run(function() { 
-			return new XHTMLDefaultTemplateEngine( 
-				$this->requestInfoBean->getInterfaceBundle(), 'US', 'en'
-			);
-		});
+		//$implementor = $application->context()->run(function() { 
+		//	return new XHTMLDefaultTemplateEngine( 
+		//		$this->requestInfoBean->getInterfaceBundle(), 'US', 'en'
+		//	);
+		//});
 				
-		$this->templateEngine = new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Native(
-			$implementor
-		);
+		//$this->templateEngine = new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Native(
+		//	$implementor
+		//);
 		
-		return ;
+		//return ;
 
 		// TODO base context cache upon requestInfoBean signature - done, but make implicit
 		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which

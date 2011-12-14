@@ -66,11 +66,11 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$this->setCustomDispatch();
 		// end
 
-		$application = &\eGloo\System\Server\Application::instance();
-		$requestInfoBean = &$this->requestInfoBean;
+		//$application = &\eGloo\System\Server\Application::instance();
+		//$requestInfoBean = &$this->requestInfoBean;
 		
 		// save an instance of templateDirector per requestInfoBean 'type'
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	 
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );	 
 		//$templateDirector = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) { 
 		//	return TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	
 		//});
