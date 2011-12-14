@@ -7,7 +7,7 @@
  * 
  * @author Christian Calloway
 */
-class SmartyTest extends eGloo\Test\Utilities\HPHP\Target\HTTPTest {
+class SmartyTest extends \eGloo\Test\Utilities\HPHP\Target\HTTPTest {
 
 	// this will break 5.3 installs
 	//use \eGloo\Utilities\Test\InstanceTrait;
