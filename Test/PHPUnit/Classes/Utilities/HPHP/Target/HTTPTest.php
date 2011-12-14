@@ -7,7 +7,7 @@
  * 
  * @author Christian Calloway
 */
-class HTTPTest extends \eGloo\Test\Utilities\HPHP\TargetTest {
+class HTTPTest extends \eGloo\Dialect\Object { //\eGloo\Test\Utilities\HPHP\TargetTest {
 
 	// this will break 5.3 installs
 	//use \eGloo\Utilities\Test\InstanceTrait;
