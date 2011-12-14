@@ -8,13 +8,11 @@ use \Zend\EVentManager\EventCollection;
 
 /**
  * 
- * Responsible for observing the amount of memory being consumed by
- * a context, performing appropriate action when bounds have been
- * met
+ * Provides base functionality for entity listening classes
  * @author Christian Calloway
  *
  */
-class Limit extends \eGloo\Dialect\Object implements ListenerAggregate { 
+class Callback extends \eGloo\Utilities\EventManager\Listener\Listener {
 	
 
 	

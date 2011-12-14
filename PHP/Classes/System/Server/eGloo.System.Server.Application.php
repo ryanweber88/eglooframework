@@ -24,28 +24,31 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 	 * @TODO remove them entirely and get values from environment?
 	 */
 	function __construct($pathHandler, $pathTarget) { 
+		parent::__construct();
+		
 		// loads bootstrap and configuration - this is by convention,
 		// so must follow ./config.php and ./bootstrap.php
 		
 		// setup boostrap 
 		require_once "$pathHandler/bootstrap.php";
-		$this->bootstrap(new \Bootstrap());
+		$this->bootstrap   = new \Bootstrap();
+		
+		// setup environment
+		require_once "$pathHandler/environment.php";
+		$this->environment = new \Environment();
 		
 		// setup config - this following photon model, which i don't
 		// really like (requires shouldn't return values, but place
 		// them into context
 		// TODO : replace return config file
-		$this->config((object)require_once "$pathHandler/config.php");
-		
-		// set instance to self/this
-		static::$instance = &$this;
+		$this->config = (object)require_once "$pathHandler/config.php";
 		
 		// set target, which is the target egloo application
 		// TODO : Remove this concept, find something more fluid
 		$this->target($pathTarget);
 		
 		// set self as owner of context
-		$this->initializeContext();
+		$this->initializeContext($this);
 		
 		// bind components into context
 		// TODO change to full DI framework, instead of half-assed approached right now
@@ -53,14 +56,6 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 	}
 	
 	
-	/**
-	 * 
-	 * Provides singleton access to application instance
-	 * @return Application
-	 */
-	final public static function &instance() { 
-		return static::$instance;
-	}
 	
 	/**
 	 * 
@@ -91,6 +86,9 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 	
 	/** @var \eGloo\Utilities\Bootstrap\BootstrapAbstract */
 	protected $bootstrap;
+	
+	/** var \eGloo\System\Server\Environment\Environment */
+	protected $environment;
 	
 	/**
 	 * 

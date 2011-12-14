@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\DDL\Manager;
+namespace eGloo\DataProcessing\DDL\Entity\Manager;
 
 use \eGloo\Dialect\Object;
 use \eGloo\DataProcessing\DDL;
@@ -26,13 +26,16 @@ class Pool extends \eGloo\Dialect\Object implements
 		
 		// stores entities in linked list, so as to allow for efficient unsetting
 		// of values 
-		$this->entities = new \SplDoublyLinkedList();
+		$this->entities = new \SplDoublyLinkedList;
 		
 		// TODO pool limit should be configurable
-		$this->events = new EventMananger();
+		$this->events = new EventManager;
+		new \eGloo\DataProcessing\DDL\Entity\Manager\Listener\Pool\Limit(1);
 		$this->events->attachAggregate(new Listener\Pool\Limit(
 			self::LIMIT
 		));
+		//$this->events->attachAggregate()
+		
 	}
 	
 	// Concrete Interface -------------------------------------------------- //
@@ -47,8 +50,9 @@ class Pool extends \eGloo\Dialect\Object implements
 		unset($this->entities);
 		
 		// re-insantiate structure
-		$this->entities = new \SplDoublyLinkedList();
+		$this->entities = new \SplDoublyLinkedList;
 	}
+	
 	
 	// Bridge Entities ----------------------------------------------------- //
 	// Can't do this?
@@ -74,7 +78,7 @@ class Pool extends \eGloo\Dialect\Object implements
 		// if offset is not set, then a value has been added and we
 		// trigger an increment
 		if (!isset($this->entities[$offset])) { 
-			$this->events->trigger('increment', $this, null);
+			$this->events->trigger('increment', $this, [ ]);
 		}
 				
 		return $this->entities->offsetSet($offset, $value);
@@ -116,7 +120,6 @@ class Pool extends \eGloo\Dialect\Object implements
 	// Properties ---------------------------------------------------------- //
 	
 	protected $entities;
-	protected $map = [ ];
 	protected $events;
 	protected $manager;
 }

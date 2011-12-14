@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\Utilities\EventManager\Listener;
+namespace eGloo\Utilities\EventManager\Listener\Limit;
 
 use \Zend\EventManager\ListenerAggregate;
 use \Zend\EventManager\Event;
@@ -11,18 +11,21 @@ use \Zend\EVentManager\EventCollection;
  * @author Christian Calloway
  *
  */
-class Collection extends \eGloo\Utilities\EventManager\Limit {
-	
-	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
-	
+abstract class Collection extends \eGloo\Utilities\EventManager\Listener\Limit {
+		
 	
     /**
      * 
-     * Enter description here ...
+     * Responds to 'checklimit' event - fires reachedLimit method if limit has
+     * indeed been reached
      * @param  Event $event
      * @return void
      */
-    public function eventCheckLimit(Event $event) { }
+    public function eventCheckLimit(Event $event) { 
+    	if ($this->current >= $this->limit) {
+    		$this->reachedLimit();
+    	}
+    }
     
     
     /**
@@ -44,6 +47,10 @@ class Collection extends \eGloo\Utilities\EventManager\Limit {
     	
     }
     
+    public function eventIncrement(Event $event) {
+    	return $this->eventIncrease($event);
+    }
+    
     /**
      * 
      * A 'decrease' event signals a net decrease in current
@@ -61,14 +68,10 @@ class Collection extends \eGloo\Utilities\EventManager\Limit {
     		$this->current--;
     	}	
 	}
-    
-	/**
-	 * 
-	 * Determines if our limit has been reached
-	 * @return boolean
-	 */
-	public function reachedLimit() { 
-		return $this->limit >= $this->current;
+	
+	public function eventDecrement(Event $event) {
+		return $this->eventDecrease($event);
 	}
+    
     
 }

@@ -63,7 +63,7 @@ class ClassBuilder {
 			if (!is_null($builder = static::create($name, $arguments[0]))) { 
 				
 				// call creation method and double-link
-				$this->aspect->$name(&$builder->aspect);
+				$this->aspect->$name($builder->aspect);
 				
 				// uncomment later - cannot var export as it creates infinite references
 				//$builder->aspect->owner(&$this->aspect);

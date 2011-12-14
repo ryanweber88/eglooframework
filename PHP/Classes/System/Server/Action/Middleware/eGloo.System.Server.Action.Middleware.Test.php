@@ -17,9 +17,21 @@ class Test extends Middleware {
 	 * (non-PHPdoc)
 	 * @see eGloo\System\Server\Action\Middleware.MiddlewareInterface::processRequest()
 	 */
-	public function processRequest(Request &$request) { 		
-		$product = \eGloo\DataProcessing\DDL\Entity\Test\Product::find(11479);
+	public function processRequest(Request &$request) { 
+
+		$start = time();
+		$counter = 0;
+		$logger  = Server\Application::instance()->context()->retrieve('logger.test');
 		
+		$user = \eGloo\DataProcessing\DDL\Entity\Test\User::find(12427);
+		//echo $user->name . "\n"; exit;
+		echo $user->Products->count() . "\n";
+		
+		echo "\ntime elapsed : " . (time() - $start) . "\n";
+		
+		$logger->log(ob_get_clean());
+		
+		//exit ('Middleware\\Test::processRequest');
 		// return empty response, which will be basis for post processing
 		// of middleware components will begin
 		return new Response();

@@ -26,8 +26,6 @@ set_include_path(
 
 // AUTOLOAD ///////////////////////////////////////////////////////////////////
 
-
-
 // These autoloaders are required to load initial server environment; they
 // will be popped off the stack after environment has fully loaded
 // TODO remove and place into cli tool

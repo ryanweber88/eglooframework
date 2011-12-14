@@ -13,7 +13,7 @@ namespace eGloo\Dialect;
 abstract class Object { 
 	
 
-	function __construct(array $dynamicParams = [ ]) { 
+	function __construct() { 
 		
 		// TODO perform static initialization using reflection
 		// - the problem though is that reflection is overhead
@@ -30,9 +30,25 @@ abstract class Object {
 		
 		// lets avoid infinite loops shall we
 		if (!($this instanceof _Class)) { 
-			static::$_class = new _Class($this);
+			$this->_class = new _Class($this);
+			
+			// this doesn't work polymorphically
+			//static::$_class = new _Class($this);
 		}
 		
+	}
+	
+	/**
+	 * 
+	 * Determines if methodName is callable on object
+	 * @param string $methodName
+	 */
+	public function respondsTo($methodName) { 
+		return method_exists($this, $methodName);
+	}
+	
+	public static function isInstanceOf($object) { 
+		return $object instanceof static;
 	}
 	
 	/**
@@ -73,11 +89,18 @@ abstract class Object {
 		
 		// @todo replace after references to instance members have
 		// been replaced
-		if ($name == '_class') {
-			return static::$_class;	
-		}
+		//if ($name == '_class') {
+			//return static::$_class;	
+		//}
 		
 		try { 
+			$tryMethod = "get" . ucfirst($name);
+			
+			if (method_exists($this, $tryMethod)) { 
+				return $this->$tryMethod();	
+			}
+			
+			// @ deprecated
 			return $this->$name();
 		}
 		catch (Exception $pass) { 
@@ -97,6 +120,13 @@ abstract class Object {
 	 */
 	public function __set($name, $value) { 
 		try { 
+			$tryMethod = "set" . ucfirst($name);
+			
+			if (method_exists($this, $tryMethod)) { 
+				$this->$tryMethod($value);
+				return $this;	
+			}			
+			
 			$this->$name($value);
 		}
 		catch (Exception $pass) { 
@@ -115,7 +145,7 @@ abstract class Object {
 	 * @param string $name
 	 * @param mixed* $arguments
 	 */
-	public function &__call($name, $arguments) { 
+	public function __call($name, $arguments) { 
 		
 		// determine if setter/getter - since we are setting single
 		// property values, $arguments should have an value a single
@@ -128,6 +158,24 @@ abstract class Object {
 			// an attempt to access a property that does not exist is made
 			if ($this->propertyExists($name)) {
 				$this->$name = $arguments[0];
+			}
+			
+			// @todo refactor dynamic methods, since continual preg processing
+			// will add overhead
+			// magic call to determine if property is "in" passed array argument
+			else if (is_array($arguments[0]) && preg_match('/(.+?)_in/', $name, $match)) {
+				$name = $match[1];
+				
+				if ($this->propertyExists($match[1])) { 
+					return in_array($this->$name, $arguments[0]);	
+				}
+			}
+			
+			// magic call to use run regexp against value
+			else if (is_string($arguments[0]) && preg_match('/(.+?)_like/', $name, $match)) {
+				$name = $match[1];
+				
+				return preg_match($arguments[0], $this->$name);
 			}
 			
 			else { 
@@ -146,8 +194,11 @@ abstract class Object {
 		else { 
 			return $this->$name;
 		}
+		
+		
 	}
 	
+	/** @deprecated */
 	protected function setOrGet($propertyName, $value = null, \Closure $lambda = null) { 
 		// convenience method when overriding property() methods, so that we don't
 		// have to check for whether a get or set has been request - in the case
@@ -178,5 +229,5 @@ abstract class Object {
 		return property_exists($this, $propertyName);	
 	}
 	
-	public static $_class;
+	protected $_class;
 }

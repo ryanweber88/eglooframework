@@ -1,6 +1,9 @@
 <?php
 namespace eGloo\DataProcessing\DDL\Entity;
+
 use \eGloo\DataProcessing\DDL;
+use \Zend\EventManager\EventManager;
+use \Zend\EventManager\Event;
   
 /**
  * 
@@ -11,23 +14,27 @@ use \eGloo\DataProcessing\DDL;
  *
  */
 class QuerySet extends \eGloo\Dialect\Object implements
-	EvaluationInterface, Retieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
+	Retrieve\AggregationInterface, Retrieve\PaginationInterface, Retrieve\WindowingInterface, \Iterator, \ArrayAccess, \Countable  {
 
- 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack) { 
+ 	function __construct(Entity $entity, DDL\Utility\CallbackStack $stack = null) { 
  		parent::__construct();
  		
  		// set entity - each query set represents a collection of a singular
  		// type of entity, so entity represents the "type" of this queryset
  		$this->entity = $entity;
- 		
+ 	
  		
  		// instantiate event manager and attach listeners
+ 		// $this->querySetEvents();
+ 		
 		$this->events = new EventManager;		
-		$this->events->attachAggregate(new Listener\Generic([
+		$this->events->attachAggregate(new Listener\Callback([
 			// listens for evaluate trigger
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
 				// a fake entity or what not eh)
+				//echo "calling evaluate\n";		
+		
 				$this->evaluate();
 				
 				// false return indicates that listener will only respond once
@@ -38,8 +45,26 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			// listens for call trigger
 			'call'     => function(Event $event) {
 				
+				// just shortcutting to params and results handler
+				$params  = $event->getParams();
+							
 				$this->callbacks->push(new DDL\Utility\Callback(
-					$event->getParams()['name'], $event->getParams()['definition'], $event->getParams()['arguments']
+					$event->getParams()['name'], function(array $middleware = [ ]) use ($params) {
+						
+						$arguments = $params['arguments'];
+
+						
+						//var_export($params['arguments']); exit;
+						if (is_callable($params['arguments_handler'])) {
+							$arguments = $params['arguments_hanlder']($arguments);
+						}
+						
+						// invoke entity method and retrieve results	
+						// this idea doesn't exist here, there are no methods, only methods that
+						// belong to entities
+						return $this->methods[$params['name']]($params['arguments']); 
+		
+					}
 				));
 				
 				// short-circuit listens on this aggregate
@@ -49,14 +74,32 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		
 		
 		// instantiate callback stack
+		if (is_null($stack)) { 
+			$stack = new DDL\Utility\CallbackStack;
+		}
+		
 		$this->callbacks = $stack;
  	}
  	
- 	public function valid() { 
- 		$this->events->trigger('evaluate');
+ 	/**
+ 	 * Provides bulk update for delete on querysets
+ 	 * @return boolean
+ 	 */
+ 	public function delete() { 
  		
- 		return ($this->count() > 0);
  	}
+ 	
+ 	/**
+ 	 * 
+ 	 * Provides bulk updates for querysets
+ 	 * @param  string[] $fields
+ 	 * @return boolean
+ 	 */
+ 	public function update(array $fields = [ ]) { 
+ 		
+ 	}
+ 	
+
  	
  	/**
  	 * 
@@ -66,51 +109,76 @@ class QuerySet extends \eGloo\Dialect\Object implements
  	 * @return QuerySet 
  	 */
  	public function query(\Closure $lambda) { 
+ 		$this->events->trigger('evaluate', $this);
  		
- 		$set = new QuerySet;
- 		
- 		foreach ($this->entities as $entity) { 
- 			if ($entity->valid() && $lambda($entity)) { 
- 				$set[] = $entity;
- 			}
+ 		if (!$this->isEmpty()) { 
+	 		$set = new QuerySet;
+	 		
+	 		foreach ($this->entities as $entity) { 
+	 			if ($lambda($entity)) { 
+	 				$set[] = $entity;
+	 			}
+	 		}
+	 		
+	 		return $set;
  		}
  		
- 		return $set;
+ 		return false;
  	}
  	
  	public function isEmpty() { 
- 		$this->trigger('evaluate', $this, null);
- 		
+ 		$this->events->trigger('evaluate');
+ 			
  		return $this->count() === 0;
  	}
  	
  	protected function evaluate() { 
- 		
+ 		// @todo we need to scrub ids from query if some are not needed
+ 		// since they already exist in persistence context
 
+ 		$middleware =[
+ 			new Middleware\EntityManager($this->entity)
+ 		];
+ 		
+ 		while 
+ 		
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
- 		if (($data = $this->callbacks->batch()) !== false) { 
-			$manager = &DDL\Manager\ManagerFactory::factory();
+ 		if (($results = $this->callbacks->batch()) !== false) { 
+			$manager = Manager\Factory::factory();
  			
  			// TODO write some measure of intelligence in the number
  			// of entities built on an evaluation
- 			$this->entities = new \SplFixedArray(count($data));
- 			
- 			foreach ($data as $record) {
- 				
- 				return $manager->find(
+ 			$this->entities = new \SplFixedArray(count($results));
+ 			$counter = 0;
+ 			 			 			
+ 			foreach ($results as $record) {
+ 				 				 				
+ 				$this->entities[$counter++] = $manager->find(
  					$this->entity->_class, 
- 					$record[$this->entity->definition->primaryKeyName], function() use ($record) { 
- 						$entity = clone $this->entity;
- 						$entity->data = new Data(
- 							$this->entity, $record
- 						);
+ 					$record[$this->entity->definition->primary_key], function() use ($record) { 
  						
+ 						// instantiate entity
+ 						$entity              = clone $this->entity;
+ 						$entity->attributes  = $record;
+ 						
+ 						// returning entity to manager to handle persistence
  						return $entity;
+ 						
  					}
  				); 				
  			}
 		}
+		
+		else { 
+			// initialize entities to empty fixed array
+			// so that it can honor iterator, arrayaccess
+			// countable implementations without having
+			// to ask if entities exists for each method
+			$this->entities = new \SplFixedArray(0);
+		}
+		
+		
  	}
  	
 
@@ -135,7 +203,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		return $set;
 	}
 	
-	public function offset($amount) { 
+	public function offset($start, $end = 0) { 
 		$set = new QuerySet($this->callbacks);
 		$set->events->trigger('call', $entity, [
 			'name'       => __FUNCTION__,
@@ -189,12 +257,12 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	
 	public function offsetExists($offset) { 
 		$this->events->trigger('evaluate', $this, null);
-		
+				
 		return $this->entities->offsetExists($offset);
 	}
 	
 	public function offsetGet($offset) { 
-		$this->events->trigger('evaluate', $this, null);
+		$this->events->trigger('evaluate', $this);
 				
 		return $this->entities->offsetGet($offset);
 	}
@@ -214,7 +282,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 		return $this->entities->offsetUnset($offset);
 	}	
 	
-	// IteratorAccess Interface -------------------------------------------- //
+	// Iterator Interface -------------------------------------------- //
 	
 	public function current() { 
 		return $this->entities->current();
@@ -230,12 +298,16 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	public function rewind() { 
 		return $this->entities->rewind();
 	}
+	
+	public function valid() {
+		return $this->entities->valid();
+	}
 
 	
 	// Countable Interface ------------------------------------------------- //
 	
 	public function count() { 
-		$this->events->trigger('evaluate', $this, null);
+		$this->events->trigger('evaluate', $this);
 		
 		return $this->entities->count();
 	} 	
@@ -247,6 +319,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	protected $callbacks;
 	protected $entities;
 	protected $events;
+	protected $evaluated = false;
 	private   $entity;
 	
 }

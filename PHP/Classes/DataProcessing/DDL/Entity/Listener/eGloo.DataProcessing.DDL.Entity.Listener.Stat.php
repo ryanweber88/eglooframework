@@ -13,14 +13,12 @@ use \Zend\EVentManager\EventCollection;
  */
 class Stat extends \eGloo\Utilities\EventManager\Listener\Listener {
 	
-	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
-
 	public function eventAccessed(Event $event) { 
-		$event->getTarget()->accessed = time();	
+		$event->getTarget()->updateAccessed();	
 	}
 	
 	public function eventModified(Event $event) { 
-		$event->getTarget()->modified = time();
+		$event->getTarget()->updateModified();
 	}
 	
 }

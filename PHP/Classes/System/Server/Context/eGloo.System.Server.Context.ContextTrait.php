@@ -11,8 +11,8 @@ use \eGloo\System\Server;
  */
 trait ContextTrait { 
 	
-	protected function initializeContext() { 
-		$this->context(new Server\Context($this));
+	protected function initializeContext($instance) { 
+		$this->context(new Server\Context($instance));
 	}
 	
 	public function &context(Server\Context $context = null) { 
