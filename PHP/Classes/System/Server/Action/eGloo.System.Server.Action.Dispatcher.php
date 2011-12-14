@@ -22,7 +22,8 @@ class Dispatcher extends \photon\core\Dispatcher {
 	 */
 	static public function dispatch($request) { 
 		
-		$response = null;
+		$response    = null;
+		$application = Server\Application::instance();
 		
 		if (empty($request->GET)) { 
 			\eGloo\System\Server\Application::instance()->context()->retrieve('logger.test')->log(
@@ -44,7 +45,7 @@ class Dispatcher extends \photon\core\Dispatcher {
 			new Middleware\Session(), 
 			new Middleware\Header(),
 			new Middleware\Test(),
-			new Middleware\Adapter()
+			new Middleware\Adapter($application->environment)
 		];
 				
 		

@@ -172,7 +172,7 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 			die(1);
 		}
 	}
-	
+
 	final private function resetClassVariables() {
 		return ;
 		// resets class variables, for all declared classes
@@ -187,11 +187,11 @@ class Server extends \photon\server\Server implements \eGloo\System\Server\Serva
 			// make sure classes are not stateful
 			if (strpos($name, "eGloo\System\Server") === false) { 
 				$reflection = new \ReflectionClass($name);
-				echo "class is $name\n"; 
+				echo "class is $name\n";
 				
 				// access static properties and reset value
-				foreach($reflection->getStaticProperties() as $property)  {
-					echo $property; exit;
+				foreach($reflection->getStaticProperties() as $key => $property)  {
+					echo "property is $key";
 				
 				}
 			}

@@ -118,7 +118,10 @@ require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimpl
  *
  * @param string $class_name class or interface to load
  */
+<<<<<<< HEAD
+=======
 
+>>>>>>> feature/ddl
 function eglooAutoload( $class_name ) {
 	/* Hack for https://bugs.php.net/bug.php?id=50731 */
 	if ( strpos($class_name, '\\') === 0 ) {
