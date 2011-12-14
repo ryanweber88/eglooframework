@@ -18,8 +18,8 @@ require 'net/http'
 Host          = '0.0.0.0'
 Port          = 6767
 PortRedirect  = 6767
-PortAccept    = 80
-PortHttp      = 80
+PortAccept    = 443
+PortHttp      = 443
 ServiceApache = 'apache2'
 ControlApache = 'apache2ctl'
 BinaryApache  = '/usr/sbin/apache2'
