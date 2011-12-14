@@ -53,12 +53,9 @@ use \Exception as Exception;
 class Response {
 
 	public static function getXHTML( $templateVariables = null, $dispatchClass = null, $dispatchID = null ) {
-<<<<<<< HEAD:PHP/Classes/System/IOStream/eGlooResponse.php
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "eGlooResponse: Entered getXHTML()" );
-		$application = &\eGloo\System\Server\Application::instance();
-=======
+
 		Logger::writeLog( Logger::DEBUG, "eGloo\IOStream\Response: Entered getXHTML()" );
->>>>>>> origin/develop:PHP/Classes/System/IOStream/eGloo.IOStream.Response.php
+
 
 		$retVal = null;
 

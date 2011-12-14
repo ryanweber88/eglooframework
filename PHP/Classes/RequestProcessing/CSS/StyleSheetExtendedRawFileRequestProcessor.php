@@ -55,12 +55,12 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 	public function processRequest() {
 	   eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetExtendedRawFileRequestProcessor: Entered processRequest()" );
 
-		$application = &\eGloo\System\Server\Application::instance();
+		//$application = &\eGloo\System\Server\Application::instance();
 		$cache_to_webroot = false;
 
 		// TODO this may be need to be removed, especially if stylesheet and javascript files
 		// dynamically pull content outside of what is explicitly passed	
-		$output = $application->context()->retrieve($this->requestInfoBean->getGET('css_name'), function(&$context) { 
+		//$output = $application->context()->retrieve($this->requestInfoBean->getGET('css_name'), function(&$context) { 
 
 			$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
 			$templateBuilder = new CSSBuilder();
@@ -142,8 +142,8 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 
 			$templateDirector->setTemplateVariables($templateVariables, true);
 
-			return $templateDirector->processTemplate();
-		});
+			//return $templateDirector->processTemplate();
+		//});
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetExtendedRawFileRequestProcessor: Echoing Response" );
 
