@@ -3,6 +3,9 @@ namespace eGloo;
 
 use \eGloo\Utility\Logger as Logger;
 
+use \Exception as Exception;
+use \ErrorException as ErrorException;
+
 /**
  * eGloo\Configuration Class File
  *
