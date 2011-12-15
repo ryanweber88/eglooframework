@@ -1,5 +1,5 @@
 <?php
-namespace \eGloo\System\Server\Environment;
+namespace eGloo\System\Server\Environment;
 
 interface EnvironmentInterface {
 
