@@ -18,8 +18,8 @@ require 'net/http'
 Host          = '0.0.0.0'
 Port          = 6767
 PortRedirect  = 6767
-PortAccept    = 443
-PortHttp      = 443
+PortAccept    = 80
+PortHttp      = 80
 ServiceApache = 'apache2'
 ControlApache = 'apache2ctl'
 BinaryApache  = '/usr/sbin/apache2'
@@ -49,9 +49,7 @@ class RequestStore < EM::Connection
 end
 
 class Firewall
-  
-  IpTablesChain    = 'ufw-user-input'
-   
+     
   def self.deny(port)
     try_exec "Denying traffic to port #{port}" do
       system "ufw deny #{port}"
@@ -67,15 +65,14 @@ class Firewall
   def self.redirect_to(port)        
     # read in rules file, and write new new rules
     try_exec "Using iptables to redirect to #{port}" do
-      system "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport #{PortAccept} -j REDIRECT --to-port #{port}"
+      system "iptables -t nat -A PREROUTING -i eth0 -p tcp --dport #{PortHttp} -j REDIRECT --to-port #{port}"
     end
     
   end
   
   def self.remove_redirect(port)
-    puts "remove_redirect"
     try_exec "Removing redirect rule using iptables" do
-      system "sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport #{PortAccept} -j REDIRECT --to-port #{port}"
+      system "sudo iptables -t nat -D PREROUTING -i eth0 -p tcp --dport #{PortHttp} -j REDIRECT --to-port #{port}"
     end
   end
   
@@ -90,7 +87,7 @@ def dispatch_request_to_apache(request)
  
 
   apache   = Net::Telnet.new(
-    "Port"       => 80,
+    "Port"       => PortHttp,
     "Telnetmode" => false
   )
 
@@ -113,8 +110,7 @@ def run_commands(commands)
   commands.each do |hash|   
     
     if (hash[:block])
-      puts "here"
-      puts  hash[:message]
+      puts hash[:message]
       hash[:block].call  
     
     else 
@@ -137,6 +133,7 @@ end
 
 ###  TEST
 
+
 ###  PRODUCTION
 
 # start eventmachine to capture forwarded requests
@@ -144,7 +141,7 @@ end
 EM.run do
     
   # start request queue server
-  EM.start_server Host, Port, RequestStore
+  EM.start_server Host, PortRedirect, RequestStore
   
   # handle apache graceful restart on separate thread
   EM.defer do    
@@ -156,11 +153,11 @@ EM.run do
    
     # block http port, forward to new port and graceful stop apache
     run_commands [
-      #{ message: "Blocking traffic on http port #{PortAccept}",   command: "ufw deny #{PortAccept}" },
-      { message: "Forwarding http traffic to port #{Port}",       block:   lambda { Firewall.redirect_to PortRedirect }},
-      { message: "Gracefully stopping apache",                    command: "#{ControlApache} graceful-stop" },
+      { message: "Opening redirect port #{PortRedirect}",           command: "ufw allow #{PortRedirect}" },
+      { message: "Forwarding http traffic to port #{PortRedirect}", block:   lambda { Firewall.redirect_to PortRedirect }},
+      { message: "Gracefully stopping apache",                      command: "#{ControlApache} graceful-stop" },
     ]
-    
+        
  
     # wait for apache processes to stop
     sleep 5 while apache_running?
@@ -169,8 +166,9 @@ EM.run do
     # start apache and reopen blocked http port and remove forward
     run_commands [
         { message: 'Starting apache',                                     command: "#{ControlApache} start"  },
-        #{ message: "Allowing traffic on http port #{PortAccept}",         command: "ufw allow #{PortAccept}" },
-        { message: "Removing forwarding rule on http port #{PortAccept}", block:   lambda { Firewall.remove_redirect(PortRedirect) } }
+        { message: "Removing forwarding rule on http port #{PortHttp}",   block:   lambda { Firewall.remove_redirect(PortRedirect) } },
+        { message: "Denying traffic on redirect port #{PortRedirect}",    command: "ufw deny #{PortRedirect}" }
+        
     ] 
     
     puts "Forwarding #{RequestStore.callbacks.length} requests to apache"
@@ -189,6 +187,6 @@ EM.run do
   end
   
    
-  puts "Started EchoServer on #{Host}:#{Port}"
+  puts "Started EchoServer on #{Host}:#{PortRedirect}"
 end
 
