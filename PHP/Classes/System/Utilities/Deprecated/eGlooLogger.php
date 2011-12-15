@@ -474,6 +474,6 @@ final class eGlooLogger {
 
 }
 
-if ( class_exists('\eGloo\Utility\Logger', false) )  {
+if ( !defined('STDIN') && class_exists('\eGloo\Utility\Logger', false) )  {
 	deprecate( __FILE__, '\eGloo\Utility\Logger' );
 }
