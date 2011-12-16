@@ -237,7 +237,7 @@ class PGSQLImageDAO extends ImageDAO {
     }
 
     /**
-     * @return  
+     * @return void
      */
     public function removeImage( $userID, $imageDTO ) {
     	//ProfileID needed? needs discussion as to who can remove Images.
@@ -255,7 +255,7 @@ class PGSQLImageDAO extends ImageDAO {
     }
 
     /**
-     * @return  
+     * @return void
      */
     public function removeProfileImageElement( $requesterProfileID, $requestedProfileID ) {
     	//Gets rid of an element so profile_ID is required
