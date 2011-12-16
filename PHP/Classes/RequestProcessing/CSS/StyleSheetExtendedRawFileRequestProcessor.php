@@ -142,7 +142,7 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 
 			$templateDirector->setTemplateVariables($templateVariables, true);
 
-			//return $templateDirector->processTemplate();
+			$output = $templateDirector->processTemplate();
 		//});
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetExtendedRawFileRequestProcessor: Echoing Response" );
