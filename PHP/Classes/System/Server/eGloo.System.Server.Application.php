@@ -49,6 +49,7 @@ class Application extends \eGloo\Dialect\Object implements Context\ContextInterf
 		
 		// set self as owner of context
 		$this->initializeContext($this);
+		$this->initializeSingletonTrait($this);
 		
 		// bind components into context
 		// TODO change to full DI framework, instead of half-assed approached right now
