@@ -53,12 +53,15 @@ use \Exception as Exception;
 class Response {
 
 	public static function getXHTML( $templateVariables = null, $dispatchClass = null, $dispatchID = null ) {
+
 		Logger::writeLog( Logger::DEBUG, "eGloo\IOStream\Response: Entered getXHTML()" );
+
 
 		$retVal = null;
 
 		$requestInfoBean = RequestInfoBean::getInstance();
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );
+
 
 		if ( !$dispatchClass ) {
 			$dispatchClass = $requestInfoBean->getRequestClass();
