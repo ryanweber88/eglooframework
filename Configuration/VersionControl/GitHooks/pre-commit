@@ -1,0 +1,103 @@
+#! /usr/bin/env bash
+#
+# All eGloo Framework developers should have this pre-commit installed or some variant thereof 
+#
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# If you want to allow non-ascii filenames set this variable to true.
+allownonascii=$(git config hooks.allownonascii)
+
+# Cross platform projects tend to avoid non-ascii filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+if [[ "$allownonascii" != "true" ]] &&
+	# Note that the use of brackets around a tr range is ok here, (it's
+	# even required, for portability to Solaris 10's /usr/bin/tr), since
+	# the square bracket bytes happen to fall in the designated range.
+	test "$(git diff --cached --name-only --diff-filter=A -z $against |
+	  LC_ALL=C tr -d '[ -~]\0')"
+then
+	echo "Error: Attempt to add a non-ascii file name."
+	echo
+	echo "This can cause problems if you want to work"
+	echo "with people on other platforms."
+	echo
+	echo "To be portable it is advisable to rename the file ..."
+	echo
+	echo "If you know what you are doing you can disable this"
+	echo "check using:"
+	echo
+	echo "  git config hooks.allownonascii true"
+	echo
+	exit 1
+fi
+
+PHP_BIN=php
+
+if ! which $PHP_BIN >/dev/null 2>&1
+then
+	echo "PHP Syntax check failed: No PHP binary found"
+	exit 1
+fi
+
+# Dash does not support $'\n':
+# http://forum.soft32.com/linux2/Bug-409179-DASH-Settings-IFS-work-properly-ftopict70039.html
+IFS='
+'
+
+# Get a list of staged files
+for line in $(git diff-index --cached --full-index $against)
+do
+	# Split needed values
+	sha=$(echo $line | cut -d' ' -f4)
+	temp=$(echo $line | cut -d' ' -f5)
+	status=$(echo $temp | cut -d' ' -f1)
+	filename=$(echo $temp | cut -d' ' -f2)
+
+	# File extension
+	ext=$(echo $filename | sed 's/^.*\.//')
+
+	# Only check files with php extension
+	if [[ $ext != "php" ]]
+	then
+		continue
+	fi
+
+	# Do not check deleted files
+	if [[ $status = "D" ]]
+	then
+		continue
+	fi
+
+	error=0
+
+	# Check the staged file content for syntax errors
+	# Using php -l (lint)
+	result=$(git cat-file -p $sha | /usr/bin/env $PHP_BIN -l 2>/dev/null)
+
+	if [[ $? -ne 0 ]]
+	then
+		error=1
+		# Swap back in correct filenames
+		errors=$(echo "$errors"; echo "$result" |sed -e "s@in - on@in $filename on@g")
+	else
+		error=0
+	fi
+done
+
+unset IFS
+
+if [[ $error -eq 1 ]]
+then
+	echo -e "PHP Syntax check failed:";
+	echo -e "$errors" | grep "^Parse error:"
+	exit 1
+fi
+
+exec git diff-index --check --cached $against --
