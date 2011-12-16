@@ -644,4 +644,8 @@ class CacheGateway {
 
 }
 
-deprecate( __FILE__, '\eGloo\Performance\Caching\Gateway' );
+if ( function_exists('\\eGloo\\deprecate') ) {
+	\eGloo\deprecate( __FILE__, '\eGloo\Performance\Caching\Gateway' );
+} else if ( function_exists('\deprecate') ) {
+	\deprecate( __FILE__, '\eGloo\Performance\Caching\Gateway' );
+}
