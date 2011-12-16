@@ -43,6 +43,7 @@ class Smarty3TemplateEngine extends Smarty implements TemplateEngineInterface {
 
     public function __construct( $interfacebundle, $local = 'US', $language = 'en' ) {
 		parent::__construct( $interfacebundle, $local = 'US', $language = 'en' );
+						
 		// $this->left_delimiter = '<!--{'; 
 		// $this->right_delimiter = '}-->'; 
 

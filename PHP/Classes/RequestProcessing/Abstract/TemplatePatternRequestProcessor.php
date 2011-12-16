@@ -60,12 +60,24 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 	public function processRequest() {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Entered processRequest()" );
 
+		// begin - 10 t/ts  @ 600 t/s
 		$this->preProcessing();
 		$this->setTemplateBuilder();
 		$this->setCustomDispatch();
+		// end
 
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+		//$application = &\eGloo\System\Server\Application::instance();
+		//$requestInfoBean = &$this->requestInfoBean;
+		
+		// save an instance of templateDirector per requestInfoBean 'type'
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );	 
+		//$templateDirector = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) { 
+		//	return TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	
+		//});
+				
+		// -40 t/s after refactor (from -100)
 		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
+				
 
 		try {
 			$templateDirector->preProcessTemplate();
@@ -102,11 +114,20 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			}
 		}
 
+		// begin -200 t/s
 		$this->populateTemplateVariables();
+		// end
+		
+		//echo $GLOBALS['payload']; return;
 
+		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
-
 		$output = $templateDirector->processTemplate();
+		
+		//echo $output;
+		//echo 'here'; exit;
+		//echo $GLOBALS['payload'];
+		//return ;
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
 
@@ -114,6 +135,8 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
 			$this->setOutputHeaders();
+			
+
 			echo $output;
 		}
 
@@ -176,6 +199,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 
 	// Defaults to XHTMLBuilder - override as needed
 	protected function setTemplateBuilder() {
+		// TODO use di framework to retrieve preinstantiated classes
 		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
 			$format = $this->decoratorInfoBean->getValue('Format', 'ManagedOutput');
 
@@ -202,6 +226,17 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 					break;
 			}
 		} else {
+			// TODO replace test case with dynamic di load from app context
+			//$application = &\eGloo\System\Server\Application::instance(); 
+			//echo get_class($application); return;
+			
+			// preinstatiation proves useless in this instance and a memory succubus
+			// TODO profile with larger seige
+			//$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
+			//	echo 'templatebuilder';
+			//	return new \XHTMLBuilder();
+			//});
+			
 			$this->_templateBuilder = new XHTMLBuilder();
 		}
 

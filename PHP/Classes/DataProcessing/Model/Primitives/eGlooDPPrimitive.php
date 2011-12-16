@@ -64,6 +64,8 @@ abstract class eGlooDPPrimitive extends eGlooDPObject {
 	protected $_bound_parameters = array();
 
 	public function __construct( $class = null, $id = null, $connection_name = 'egPrimary', $engine_mode = null ) {
+		// parent::__construct();
+		
 		$this->_class = $class;
 		$this->_id = $id;
 

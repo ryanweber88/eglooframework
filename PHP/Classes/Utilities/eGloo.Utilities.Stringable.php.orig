@@ -1,0 +1,15 @@
+<?php
+namespace eGloo\Utilities;
+
+<<<<<<< HEAD
+/**
+ * 
+ * Provides protocol agreement that object is stringable
+ * @author Christian Calloway
+ *
+ */
+=======
+>>>>>>> feature/ddo_decouplefromautoloader
+interface Stringable {
+	public function __toString();
+}
