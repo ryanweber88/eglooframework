@@ -48,7 +48,7 @@ use \Exception as Exception;
  * @package $package
  * @subpackage $subpackage
  */
-class OutputFormatter extends OutputFormatter {
+class OutputFormatter {
 
 }
 

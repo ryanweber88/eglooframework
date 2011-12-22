@@ -48,7 +48,7 @@ use \Exception as Exception;
  * @package $package
  * @subpackage $subpackage
  */
-class JSONOutputFormatter {
+class JSONOutputFormatter extends OutputFormatter {
 
 }
 
