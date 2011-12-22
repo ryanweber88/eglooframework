@@ -7,7 +7,7 @@
  * 
  * @author Christian Calloway
 */
-class SmartyTest extends \eGloo\Dialect\Object {
+class SmartyTest {
 
 	// this will break 5.3 installs
 	//use \eGloo\Utilities\Test\InstanceTrait;
