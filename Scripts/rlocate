@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+# Runs locate command and returns numbered list from which to launch gedit on
+# located files
+
+# REQUIRE
+
+# CONSTANTS
+
+Space   = ' '
+Newline = "\n"
+
+
+# CLASSES
+
+# add instance method to fixnum to determine
+# if value is positive
+class Fixnum
+  def positive?
+    self >= 0
+  end
+end
+
+# add instance method to array to determine
+# if index is in correct range
+class Array
+  def in_bounds?(index)
+    index.positive? && index <= (self.size - 1)
+  end
+end
+
+
+
+# FUNCTIONS
+
+
+# TESTING
+
+# PRODUCTION
+
+# make sure something.. anything has been passed
+raise 'You forgot to pass a value cunt' if ARGV.empty?
+
+# we are simply passing parameter values to locate command
+parameters = ARGV.join(Space)
+results    = `locate #{parameters}`.split(Newline)
+
+unless results.empty?
+  # iterate through result set and display as choosable options
+  # user
+  results.each_with_index do | result, index |
+    puts "#{index} ==> #{result}"
+  end
+  
+  print "\nchoose from above index: "
+  
+  # recieve user input from command line and launch gedit
+  # with filepath
+  answer = $stdin.gets.chomp.to_i
+
+  `gedit #{results[answer]} &` if results.in_bounds? answer 
+  
+end
