@@ -126,6 +126,56 @@ class RequestInfoBean {
 
 		$this->invalidForms = array();
 	}
+	
+	/**
+	 * 
+	 * Provides method missing functionality to requestinfobean in order
+	 * access (php GLOBALS) properties 
+	 * @param string  $name
+	 * @param mixed[] $arguments
+	 */
+	public function __call($name, $arguments) {
+		
+		// match against xxx(Xxx) method name patterns, where it is assumed
+		// that our submatch is the name of property - in reality we are
+		// matching against GET/POST/DELETE/PUT 
+		if (preg_match('/([a-z]+)([A-Z].+)/', $name, $match)) {
+			$action = $match[1];
+			
+			// ensure that property exists on self
+			if (property_exists($this, $match[2])) {
+				$property = &$this->{$match[2]};
+				
+				// an isset action asks if value(s) are set within
+				// array property - if all items match, then absolute
+				// true will be returned, if only some are set, then
+				// number of matched items will be returned; otherwise,
+				// absolute false is returned if no items are matched
+				if ($action == 'isset' && is_array($property)) {
+					
+					$matched = 0;
+					
+					// itereate through arguments 
+					foreach ($arguments as $argument) {	
+						if (in_array($argument, $property)) {
+							$matched += 1;
+						}
+					}
+					
+					// if number matched is equal to count of array property
+					// then we have matched all items
+					if ($matched == count($property)) {
+						return true;
+					}
+					
+					return ($matched > 0) 
+						 ? $matched 
+						 : false;
+					
+				}
+			}
+		}
+	}
 
 	public function issetCOOKIE( $key ) {
 		$retVal = false;
@@ -273,6 +323,7 @@ class RequestInfoBean {
 
 		return $retVal;
 	}
+	
 
 	public function issetInvalidPOST( $key ) {
 		$retVal = false;
@@ -448,6 +499,10 @@ class RequestInfoBean {
 	
 	public function getWildCardRequestID() {
 		return $this->_wildCardRequestID;
+	}
+
+	public function hasWildCardRequestID() {
+		return !is_null($this->_wildCardRequestID);
 	}	
 
 	public function setRequestProcessorID( $requestProcessorID ) {
@@ -491,8 +546,8 @@ class RequestInfoBean {
 	public function getSlug() {
 		$retVal = null;
 
-		if ( $this->requestInfoBean->issetGET('eg_slug') ) {
-			$retVal = $this->requestInfoBean->getGET('eg_slug');
+		if ( $this->issetGET('eg_slug') ) {
+			$retVal = $this->getGET('eg_slug');
 		}
 
 		return $retVal;
