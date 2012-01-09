@@ -2,6 +2,10 @@
 namespace eGloo\Utilities;
 
 trait SingletonTrait {
+	
+	public function initializeSingletonTrait($instance) {
+		static::$instance = $instance;
+	}
 
 	final public static function &instance() { 
 		if (!isset(static::$instance)) {
