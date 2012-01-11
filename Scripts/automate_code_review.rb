@@ -336,10 +336,15 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       end
       
       # add phpunit stub
+      if review_class.is_request_processor?
+        
+      else
+        unit_test_directory = "#{DirectoryTierz}/Common/PHP/Testing"  
+      end
       
       path = "#{unit_test_directory}/#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/#{review_class.name}Test.php"
-      
-      IO.write path, ERB.new(IO.read('./unit_test.rb')).render      
+      IO.write path, ERB.new(IO.read('./unit_test.rb')).render    
+        
       # now start modification on file
       
       # rewrite file with new_file_content
