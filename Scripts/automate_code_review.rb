@@ -20,24 +20,34 @@
 
 require 'csv'
 require 'find'
+require 'erb'
+require 'fileutils'
+require 'fastercsv'
 
 # CONSTANTS
 
 DirectorySupport        = __FILE__.sub /\.rb/i, ''
-#DirectoryTierz          = '/home/petflowdeveloper/www/tierzwei'
-DirectoryTierz          = '/home/christian/Develop/tierzwei'
+DirectoryTierz          = '/home/petflowdeveloper/www/tierzwei'
+#DirectoryTierz          = '/home/christian/Develop/tierzwei'
 DirectoryAdministration = "#{DirectoryTierz}/Administration.gloo/"
 DirectoryClient         = "#{DirectoryTierz}/Client.gloo/"
 DirectoryPHP            = "#{DirectoryTierz}/Common/PHP"
 
-FileRequestsClient      = "/home/christian/Develop/tierzwei/Client.gloo/XML/Requests.xml"
-FileRequestsAdmin       = "/home/christian/Develop/tierzwei/Administration.gloo/XML/Requests.xml"
+FileRequestsClient      = "#{DirectoryTierz}/Client.gloo/XML/Requests.xml"
+FileRequestsAdmin       = "#{DirectoryTierz}/Administration.gloo/XML/Requests.xml"
+
+
 # CLASSES
 
 class String
   def ucfirst
     to_s.sub(/^(\w)/) {|s| s.capitalize}
   end
+  
+  def space
+    to_s.scan(/^\s+/).join
+  end
+  
 end
 
 class Meta 
@@ -65,41 +75,46 @@ class ReviewMeta < Meta
     # finally add note if meta instance requires docblock
     unless @has_doc
       add_note :message => 'Requires DocBloc',
-               :at      => @line_start
+               :at      => @line_start.to_i
     end
   end
   
   def method_missing(name, arguments, &block)
+    
     if match = /add_(.+)/.match(name)
       item = Object.const_get(match[1].ucfirst).new arguments
       
       @dependencies << item if match[1] == 'dependency'
       @notes        << item if match[1] == 'note'
       
+    else
+      super
     end
+    
   end
 end
 
 class ReviewFile < ReviewMeta
   attr_accessor :path, :classes
+  
+  def review_path
+    "#{path}.review!"
+  end  
 end
 
 
 class ReviewClass < ReviewMeta
-  attr_accessor :path, :owner, :methods
+  attr_accessor :path, :owner, :review_methods
   
 
   
   def initialize(args)
     super args
     
-    @methods = [ ]      
+    @review_methods = [ ]      
   end
   
   # lists non dependency related notes
-  def notes
-    notes = [ ]
-  end
   
   def is_request_processor?
     @path =~ /RequestProcessing/
@@ -107,6 +122,15 @@ class ReviewClass < ReviewMeta
   
   def is_admin?
     @path =~ /Administration\.gloo/
+  end
+  
+  def base_dir
+    return "#{DirectoryTierz}/Common" unless is_request_processor?
+    return "#{DirectoryTierz}/" + (is_admin? && "Administration.gloo" || "Client.gloo")
+  end
+  
+  def review_path
+    "#{path}.review!"
   end
 end
 
@@ -132,10 +156,18 @@ end
 
 class Dependency < Meta
   attr_accessor :name, :at, :line, :file
+  
+  def to_s
+    "Dependency >> #{@name} @ #{@file.sub(/^.+?tierzwei\//, '')}"
+  end
 end
 
 class Note < Meta
   attr_accessor :message, :at
+  
+  def to_s
+    @message
+  end
 end
 
 class Reflection
@@ -144,12 +176,10 @@ class Reflection
   ReflectionScript = "./reflection.php"
   
   class << self
-    def command(reflection_on, name)
+    def command(reflection_on, name, reduce)
       # get command interface
       fragment = File.absolute_path "#{DirectorySupport}/reflection_fragment_#{name}.php"
-      
-      puts `#{ReflectionScript} #{reflection_on} "#{fragment}"`
-      exit
+     
       
       # iterate through result set - using csv as "adapter" language      
       csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} "#{fragment}"`)
@@ -168,11 +198,13 @@ class Reflection
         
         data << record  
       end 
+     
       
       # if returning one record, return single dimension array - 
       # plays nicer
-      data = data[0] if data.length == 1
-
+      data = data.shift if data.length == 1 && reduce.nil?
+      
+      
       data
     end
   end
@@ -182,20 +214,48 @@ class Reflection
   end
   
   def method_missing(name, *args, &block)  
-    self.class.command @file, name
+    self.class.command @file, name, args[0]
   end
 end
 
-def todo(line, message)
+class Template 
   
-  # get the number of tabs on line
-  /(\t)+./.match(line) do | match |
-    tabs = match.to_s
-  end
-  
-  "#{tabs}/** @TODO #{message} */"
-end
+  class << self
+    def render(template_name = nil, render) 
 
+      if render[:a]
+        reciever = render[:a][:reciever]
+        meta     = render[:a][:meta]
+        
+        
+        if meta.to_s =~ /DocBloc/
+          template_name = reciever.instance_of?(ReviewClass) && 'docbloc_class' || 'docbloc_method'
+          space = render[:a][:space]
+        else
+          template_name = 'todo'
+          message       = meta
+        end
+        
+        
+                
+        # local binding
+        render[:with] = binding
+      end
+      
+      erb = ERB.new(IO.read(
+        "#{DirectorySupport}/#{template_name}.erb" 
+      ))
+      
+      result = erb.result(render[:with])
+     
+      return result unless render[:to]
+      
+      IO.write render[:to], result
+
+       
+    end
+  end
+end
 
 
 
@@ -226,12 +286,17 @@ end
 # Now iterate across 
 Dir["#{DirectorySupport}/*.csv"].each do | file |
   
+  csv_file = file
+  rows     = [ ]
+  
   # iterate through individual support file rows
   csv = CSV.read(file)
   csv.shift
   csv.each do | row |
 
-    classes = [ ]
+    classes  = [ ]
+    row_size = row.length 
+    row[row_size] = ""
         
     # determine support type, based on file name, if request_processor
     # we will have to look for file 
@@ -259,31 +324,26 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       # get file information from reflection and instantiate ReviewFile
       review_file = ReviewFile.new(reflection.file_info)
       
-      puts "review_file.path"; exit;
-      
-      # get class information from reflection and instantiate ReviewClass
-      class_info = reflection.class_info
-
       # create new review class instance from correct file path
-      review_class = ReviewClass.new(class_info.merge({ 
+      review_class = ReviewClass.new(reflection.class_info.merge({ 
           :path  => file,
           :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
       }))
       
       # check if review class can be found in 
-      if review_class.is_request_procesor?
+      if review_class.is_request_processor?
         check_against = review_class.is_admin? && @content_request_admin || @content_request_client
-        
+
         unless check_against =~ /processorID=.#{review_class.name}./
           review_class.add_note :message => 'RequestProcessor Not Used'
         end
         
       end
- 
       
+       
       # now check for dependencies in each method of class
-      reflection.class_methods.each do | method |
-        
+      reflection.class_methods(:do_not_reduce).each do | method |
+                
         review_method = ReviewMethod.new (method)
         
         # get method body as array of lines/statements
@@ -321,52 +381,93 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
           end
         end
         
-        # now check against items that do not require line number
-        method_body = method_lines.join
-        
+
         # check against multiple returns - join our lines into a single body,
         # strip comments
         if method_lines.join.gsub(/\/\/.+$/, '').gsub(/\/\*\*.+?\*\//im, '').scan('return').length >= 2
           review_method.add_note :message => '2+ returns'
         end  
         
-        
+        review_class.review_methods << review_method
         
       
       end
       
       # add phpunit stub
-      if review_class.is_request_processor?
+     
+      path = "#{review_class.base_dir}/Test/Common/" +
+             "#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/" +
+             "#{review_class.name}Test.php"
+       
+      # if unit test does not exist, then draw it bitch      
+      unless File.file? path
         
-      else
-        unit_test_directory = "#{DirectoryTierz}/Common/PHP/Testing"  
+        # create directory if it does not exist
+        FileUtils.mkdir_p File.dirname(path) unless File.directory? File.dirname(path)
+        
+        # render template to directory/path
+        Template.render 'unit_test', :to => path, :with => binding
       end
       
-      path = "#{unit_test_directory}/#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/#{review_class.name}Test.php"
-      IO.write path, ERB.new(IO.read('./unit_test.rb')).render    
+      # now we throw edits back into file
+      file_as_array_of_lines = File.readlines(file)
+      
+      # now add todo's to this bitch
+      todos     = [ ]
+      recievers = [ review_class ] + review_class.review_methods
+      
         
-      # now start modification on file
-      
-      # rewrite file with new_file_content
-      # FileUtils.copy(file, "#{file}.original")
-      # IO.write(file, new_file_content)
-      
+      # first figure out which have line numbers, which is all we are
+      # interested in
+      # this is fucking sloppy
+      recievers.each do | reciever |
+        [reciever.dependencies, reciever.notes].each do | container |
+          container.each do | meta |
+            unless meta.at.nil?
+              todos << { :meta => meta, :reciever => reciever }
+            end
+            
+            # add rows to row
+            row[row_size] += "* #{meta.to_s} IN #{reciever.name}"
+            
+            unless meta.at.nil?
+              row[row_size] += " @ \##{meta.at}"
+            end
+            
+            row[row_size] += "\n";
+            
+          end
+        end
+      end
+  
+                
+      # second sort by :at iterate through to make changes
+      todos.sort { | a, b | b[:meta].at <=> a[:meta].at }.each do | todo |
+        
+        if todo[:meta].to_s =~ /DocBloc/
+          todo[:space] = file_as_array_of_lines[todo[:meta].at - 1].space 
+        end
 
-      
-      # check for multiple returns in method body
-      
-      # check 
-      
-     
-      
-      exit
-      
+        file_as_array_of_lines.insert(
+          todo[:meta].at-1, 
+          # -1 because file starts at index 1, while array at index 0
+          "\n" + file_as_array_of_lines[todo[:meta].at - 1].space + Template.render(:a => todo) 
+        )
+     end
+            
+     # write file to filePath.review
+     IO.write review_file.review_path, file_as_array_of_lines.join
+     rows << row 
     end
     
-    
-    
-    classes << review_class
+    # append dependency information to row for csv
+    CSV.open("#{csv_file}.review!", "w") do |csv|
+      csv << rows
+    end
+        
   end
+  
+  exit
 end
 
 puts SupportDirectory

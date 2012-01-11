@@ -1,0 +1,1 @@
+"[""1/9/2012"", ""clearcache"", "" index"", "" ClearCacheRequestProcessor"", ""Christian"", ""0%"", ""0%"", nil, ""* RequestProcessor Not Used IN ClearCacheRequestProcessor\n* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN processRequest @ #64\n* Hardcoded SQL IN processRequest @ #63\n""]"
