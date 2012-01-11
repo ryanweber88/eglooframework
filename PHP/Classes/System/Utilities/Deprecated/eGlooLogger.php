@@ -95,7 +95,7 @@ final class eGlooLogger {
 		self::setLoggingType( $format );
 
 		set_error_handler( array('eGlooLogger', 'global_error_handler') );
-		//set_exception_handler( array('eGlooLogger', 'global_exception_handler') );
+		set_exception_handler( array('eGlooLogger', 'global_exception_handler') );
 
 		if ( !defined('STDIN') ) {
 			// TODO fix this so it actually says the actual level
