@@ -1702,6 +1702,18 @@ final class eGlooConfiguration {
 		return $retVal;
 	}
 
+	public static function getConfigurationOption( $key ) {
+		return isset(self::$configuration_options[$key]) ? self::$configuration_options[$key] : null;
+	}
+
+	public static function setConfigurationOption( $key, $value ) {
+		self::$configuration_options[$key] = $value;
+	}
+
+	public static function getConfigurationOptions() {
+		return self::$configuration_options;
+	}
+
 	public static function getConfigurationPath() {
 		return self::$configuration_options['ConfigurationPath'];
 	}
