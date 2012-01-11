@@ -24,11 +24,14 @@ require 'find'
 # CONSTANTS
 
 DirectorySupport        = __FILE__.sub /\.rb/i, ''
-DirectoryTierz          = '/home/petflowdeveloper/www/tierzwei'
+#DirectoryTierz          = '/home/petflowdeveloper/www/tierzwei'
+DirectoryTierz          = '/home/christian/Develop/tierzwei'
 DirectoryAdministration = "#{DirectoryTierz}/Administration.gloo/"
 DirectoryClient         = "#{DirectoryTierz}/Client.gloo/"
 DirectoryPHP            = "#{DirectoryTierz}/Common/PHP"
 
+FileRequestsClient      = "/home/christian/Develop/tierzwei/Client.gloo/XML/Requests.xml"
+FileRequestsAdmin       = "/home/christian/Develop/tierzwei/Administration.gloo/XML/Requests.xml"
 # CLASSES
 
 class String
@@ -85,10 +88,12 @@ end
 class ReviewClass < ReviewMeta
   attr_accessor :path, :owner, :methods
   
+
+  
   def initialize(args)
     super args
     
-    @methods = [ ]
+    @methods = [ ]      
   end
   
   # lists non dependency related notes
@@ -98,6 +103,10 @@ class ReviewClass < ReviewMeta
   
   def is_request_processor?
     @path =~ /RequestProcessing/
+  end
+  
+  def is_admin?
+    @path =~ /Administration\.gloo/
   end
 end
 
@@ -138,6 +147,9 @@ class Reflection
     def command(reflection_on, name)
       # get command interface
       fragment = File.absolute_path "#{DirectorySupport}/reflection_fragment_#{name}.php"
+      
+      puts `#{ReflectionScript} #{reflection_on} "#{fragment}"`
+      exit
       
       # iterate through result set - using csv as "adapter" language      
       csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} "#{fragment}"`)
@@ -191,6 +203,10 @@ end
 
 # PRODUCTION
 
+# Get requests contents
+@content_requests_client = IO.read FileRequestsClient
+@content_requests_admin  = IO.read FileRequestsAdmin
+
 # Get list of all dependencies
 
 model_dependencies = [ ]
@@ -242,7 +258,8 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       
       # get file information from reflection and instantiate ReviewFile
       review_file = ReviewFile.new(reflection.file_info)
-      p review_file;exit
+      
+      puts "review_file.path"; exit;
       
       # get class information from reflection and instantiate ReviewClass
       class_info = reflection.class_info
@@ -253,6 +270,15 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
           :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
       }))
       
+      # check if review class can be found in 
+      if review_class.is_request_procesor?
+        check_against = review_class.is_admin? && @content_request_admin || @content_request_client
+        
+        unless check_against =~ /processorID=.#{review_class.name}./
+          review_class.add_note :message => 'RequestProcessor Not Used'
+        end
+        
+      end
  
       
       # now check for dependencies in each method of class
@@ -308,6 +334,13 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
         
       
       end
+      
+      # add phpunit stub
+      
+      path = "#{unit_test_directory}/#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/#{review_class.name}Test.php"
+      
+      IO.write path, ERB.new(IO.read('./unit_test.rb')).render      
+      # now start modification on file
       
       # rewrite file with new_file_content
       # FileUtils.copy(file, "#{file}.original")
