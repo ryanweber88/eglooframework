@@ -24,56 +24,109 @@ require 'find'
 # CONSTANTS
 
 DirectorySupport        = __FILE__.sub /\.rb/i, ''
-DirectoryTierz          = '/home/christian/Develop/tierzwei'
+DirectoryTierz          = '/home/petflowdeveloper/www/tierzwei'
 DirectoryAdministration = "#{DirectoryTierz}/Administration.gloo/"
 DirectoryClient         = "#{DirectoryTierz}/Client.gloo/"
 DirectoryPHP            = "#{DirectoryTierz}/Common/PHP"
 
 # CLASSES
 
-class ReviewClass
+class String
+  def ucfirst
+    to_s.sub(/^(\w)/) {|s| s.capitalize}
+  end
+end
+
+class Meta 
+  def initialize(args)
+    args.each do |k,v|
+      instance_variable_set("@#{k}", v) unless v.nil?
+    end 
+  end
+  
+end
+
+
+class ReviewMeta < Meta
+  
+  attr_accessor :has_doc, :dependencies, :notes, :name, :line_start, :line_end
+  
+  
+  def initialize(args)
+    super(args)
+    
+    # initialize dependencies and notes
+    @dependencies = [ ]
+    @notes        = [ ]
+    
+    # finally add note if meta instance requires docblock
+    unless @has_doc
+      add_note :message => 'Requires DocBloc',
+               :at      => @line_start
+    end
+  end
+  
+  def method_missing(name, arguments, &block)
+    if match = /add_(.+)/.match(name)
+      item = Object.const_get(match[1].ucfirst).new arguments
+      
+      @dependencies << item if match[1] == 'dependency'
+      @notes        << item if match[1] == 'note'
+      
+    end
+  end
+end
+
+class ReviewFile < ReviewMeta
+  attr_accessor :path, :classes
+end
+
+
+class ReviewClass < ReviewMeta
   attr_accessor :path, :owner, :methods
   
-  def initialize(path)
-    raise "Cannot find file @ #{path}" unless File.file? path
+  def initialize(args)
+    super args
     
-    self.path    = path
-    self.methods = [ ] 
+    @methods = [ ]
   end
   
-  def name
-    File.basename(self.path)
-  end
-  
-  
-  def dependencies
-    
-  end
-  
-  def process_class
-    # do work
-    
-    yield(self) if block_given?
+  # lists non dependency related notes
+  def notes
+    notes = [ ]
   end
   
   def is_request_processor?
-    self.path =~ /RequestProcessing/
+    @path =~ /RequestProcessing/
   end
 end
 
-class ReviewMethod
-  attr_accessor :dependencies, :name, :line_number
+class ReviewMethod < ReviewMeta
+  
+  def has_doc=(value)
+    @has_doc = value == 'true'
+  end
+  
+  def line_start
+    @line_start.to_i
+  end
+  
+  def line_end
+    @line_end.to_i
+  end
+  
+  def line_range
+    @line_start.to_i - 1..@line_end.to_i
+  end
  
 end
 
-class Dependency
-  attr_accessor :name, :line, :line_number
-  
-  def initialize(path)
-    self.path = path  
-  end 
-  
-  
+class Dependency < Meta
+  attr_accessor :name, :at, :line, :file
+end
+
+class Note < Meta
+  attr_accessor :message, :at
 end
 
 class Reflection
@@ -82,8 +135,33 @@ class Reflection
   ReflectionScript = "./reflection.php"
   
   class << self
-    def command(reflection_on, command)
-      `#{ReflectionScript} #{reflection_on} #{command}`.gsub(%r{</?[^>]+?>}, '')    
+    def command(reflection_on, name)
+      # get command interface
+      fragment = File.absolute_path "#{DirectorySupport}/reflection_fragment_#{name}.php"
+      
+      # iterate through result set - using csv as "adapter" language      
+      csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} "#{fragment}"`)
+      headers = csv.shift
+      data    = [ ]
+      
+      csv.each do | row |
+        record = { }
+        
+        headers.each_with_index do | header, index |
+          row[index] = true  if row[index] == 'true'
+          row[index] = false if row[index] == 'false'
+           
+          record[header] = row[index]        
+        end
+        
+        data << record  
+      end 
+      
+      # if returning one record, return single dimension array - 
+      # plays nicer
+      data = data[0] if data.length == 1
+
+      data
     end
   end
   
@@ -91,10 +169,9 @@ class Reflection
     @file = file
   end
   
-  def doc_class 
-    results = self.class.command(@file, '\$reflection_class->getDocComment')
+  def method_missing(name, *args, &block)  
+    self.class.command @file, name
   end
-  
 end
 
 def todo(line, message)
@@ -107,14 +184,7 @@ def todo(line, message)
   "#{tabs}/** @TODO #{message} */"
 end
 
-def dependency(name, line, line_number)
-  dependency = Dependency.new
-  dependency.name = name
-  dependency.line = line
-  dependency.line_number = line_number
-  
-  dependency
-end
+
 
 
 # TESTING
@@ -131,9 +201,10 @@ dirs               = [
 
 dirs.each do | directory |
   Dir.glob("#{directory}/**/*.php").each do | file |
-    model_dependencies << File.basename(file)
+    model_dependencies << file
   end
 end
+
 
 
 # Now iterate across 
@@ -161,69 +232,88 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
         file = "#{DirectoryTierz}/#{row[2].strip}"
       end
       
+      
       # raise exception if file cannot be found
       raise "Cannot find file @ #{file}" unless File.file? file
+      #next unless File.file? file
       
-      # create new review class instance from correct file path
-      review_class = ReviewClass.new(file)
+      # create reflection interface to ease access to class/method definitions
+      reflection = Reflection.new(file)
       
-      # set review class properties
-      review_class.owner = review_class.is_request_processor? && row[3] || row[4]
+      # get file information from reflection and instantiate ReviewFile
+      review_file = ReviewFile.new(reflection.file_info)
+      p review_file;exit
       
-      
-      # parse methods for each class
-      #file_content = IO.read(file)
-      new_file_content = [ ]
-      
-      File.readlines(file).each_with_index do | line, number |      
-      #file_content.scan /function\s+([a-zA-Z_]+)/ do | match |
-        
-        /function\s+(a-zA-Z_)+/.match(line) do | match |
-        
-          method = ReviewMethod.new
-          method.name        = match[0]
-          method.line_number = number 
-          
-          # get line number of match
-          method.line_number = asdf
-          
-          # get dependencies attached to matchdx
-          
-          review_class.methods << method
-          
-        end
-        
-        # check line against hardcoded sql
-        if line =~ /MysqlConnector/ 
-          new_file_content << todo line, "Hardcoded Dependency >> MysqlConnector"
-          review_class.dependencies << dependency "Hardcoded", line, number  
-          
-        elsif
-             
+      # get class information from reflection and instantiate ReviewClass
+      class_info = reflection.class_info
 
-        else       
-          model_dependencies.each do | class_name |
-            if line.include? class_name
-              # add content 
-              new_file_content << todo line, "Model Dependency >> #{dependency.name}"
+      # create new review class instance from correct file path
+      review_class = ReviewClass.new(class_info.merge({ 
+          :path  => file,
+          :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
+      }))
+      
+ 
+      
+      # now check for dependencies in each method of class
+      reflection.class_methods.each do | method |
+        
+        review_method = ReviewMethod.new (method)
+        
+        # get method body as array of lines/statements
+        method_lines = File.readlines(file)[review_method.line_range]
+        
+        
+        # iterate through method lines - we need to iterate across method
+        # lines since we need a line number
+        method_lines.each_with_index do | line, index |
+          
+          absolute_line_number = review_method.line_start + index
+          
+          # check if we have hardcoded sql, which can be identified by the use of MysqlConnector 
+          if line =~ /MysqlConnector/ 
+            review_method.add_note :message => "Hardcoded SQL", 
+                                   :at      => absolute_line_number
+            
+          # check body against dependency list
+          else      
+
+            model_dependencies.each do | file |
               
-              review_class.dependencies << dependency "Model", line, number
+              class_name = File.basename(file, '.php')
+                        
+              if line.include? class_name
+                
+                # add content 
+                review_method.add_dependency :name => class_name, 
+                                             :at   => absolute_line_number, 
+                                             :line => line,
+                                             :file => file
+                
+              end
             end
           end
         end
         
-   
-        # add existing line
-        new_file_content << line
-                
+        # now check against items that do not require line number
+        method_body = method_lines.join
         
+        # check against multiple returns - join our lines into a single body,
+        # strip comments
+        if method_lines.join.gsub(/\/\/.+$/, '').gsub(/\/\*\*.+?\*\//im, '').scan('return').length >= 2
+          review_method.add_note :message => '2+ returns'
+        end  
+        
+        
+        
+      
       end
       
       # rewrite file with new_file_content
-      FileUtils.copy(file, "#{file}.original")
+      # FileUtils.copy(file, "#{file}.original")
+      # IO.write(file, new_file_content)
       
-      # check for doc comments on class/methods
-      Reflection.
+
       
       # check for multiple returns in method body
       

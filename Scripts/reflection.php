@@ -1,3 +1,4 @@
+#! /usr/bin/php
 <?php
 /**
  * Prints class hierarchy information
@@ -76,13 +77,14 @@ function putsReflectionClass(ReflectionClass $class) {
 }
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
-$file    = $argv[count($argv)-2];
-$command = $argv[count($argv)-1];
+$file     = $argv[count($argv)-2];
+$fragment = $argv[count($argv)-1];
 
 
 // EXECUTION //////////////////////////////////////////////////////////////////
 
 // TESTING
+
 
 // PROGRAM
 
@@ -108,8 +110,8 @@ if (is_file($file)) {
 	$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
 	$reflection_class = $reflection_file->getClasses()[0];
 
-	
-	eval("die_r($command);");
+	require_once $fragment;
+	exit;
 	
 }
 
