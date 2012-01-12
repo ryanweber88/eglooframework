@@ -295,14 +295,14 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
   csv.each do | row |
 
     classes  = [ ]
-    row_size = row.length 
+    row_size = row.length-1 
     row[row_size] = ""
         
     # determine support type, based on file name, if request_processor
     # we will have to look for file 
     unless row.empty?
-      
-      if file =~ /request_processor/      
+          
+      if csv_file =~ /request_processor/      
         # get path to file 
         directory = file =~ /Administration.gloo/ && DirectoryAdministration || DirectoryClient + 
                     "/PHP/RequestProcessing"
@@ -315,158 +315,171 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       
       
       # raise exception if file cannot be found
-      raise "Cannot find file @ #{file}" unless File.file? file
-      #next unless File.file? file
+      if File.file? file      
       
-      # create reflection interface to ease access to class/method definitions
-      reflection = Reflection.new(file)
       
-      # get file information from reflection and instantiate ReviewFile
-      review_file = ReviewFile.new(reflection.file_info)
-      
-      # create new review class instance from correct file path
-      review_class = ReviewClass.new(reflection.class_info.merge({ 
-          :path  => file,
-          :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
-      }))
-      
-      # check if review class can be found in 
-      if review_class.is_request_processor?
-        check_against = review_class.is_admin? && @content_request_admin || @content_request_client
-
-        unless check_against =~ /processorID=.#{review_class.name}./
-          review_class.add_note :message => 'RequestProcessor Not Used'
+        raise "Cannot find file @ #{file}" unless File.file? file
+        #next unless File.file? file
+        
+        # create reflection interface to ease access to class/method definitions
+        reflection = Reflection.new(file)
+        
+        # get file information from reflection and instantiate ReviewFile
+        review_file = ReviewFile.new(reflection.file_info)
+        
+        # create new review class instance from correct file path
+        review_class = ReviewClass.new(reflection.class_info.merge({ 
+            :path  => file,
+            :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
+        }))
+        
+        # check if review class can be found in 
+        if review_class.is_request_processor?
+          check_against = review_class.is_admin? && @content_requests_admin || @content_requests_client
+          
+          unless check_against =~ /processorID=.#{review_class.name}./
+            #puts "can't find #{review_class.name} in #{check_against}\n"; exit
+            review_class.add_note :message => "RequestProcessor #{review_class.name} Not Used in Requests.xml"
+          end
+          
         end
         
-      end
-      
-       
-      # now check for dependencies in each method of class
-      reflection.class_methods(:do_not_reduce).each do | method |
-                
-        review_method = ReviewMethod.new (method)
-        
-        # get method body as array of lines/statements
-        method_lines = File.readlines(file)[review_method.line_range]
-        
-        
-        # iterate through method lines - we need to iterate across method
-        # lines since we need a line number
-        method_lines.each_with_index do | line, index |
+         
+        # now check for dependencies in each method of class
+        reflection.class_methods(:do_not_reduce).each do | method |
+                  
+          review_method = ReviewMethod.new (method)
           
-          absolute_line_number = review_method.line_start + index
+          # get method body as array of lines/statements
+          method_lines = File.readlines(file)[review_method.line_range]
           
-          # check if we have hardcoded sql, which can be identified by the use of MysqlConnector 
-          if line =~ /MysqlConnector/ 
-            review_method.add_note :message => "Hardcoded SQL", 
-                                   :at      => absolute_line_number
+          
+          # iterate through method lines - we need to iterate across method
+          # lines since we need a line number
+          method_lines.each_with_index do | line, index |
             
-          # check body against dependency list
-          else      
-
-            model_dependencies.each do | file |
+            absolute_line_number = review_method.line_start + index
+            
+            # check if we have hardcoded sql, which can be identified by the use of MysqlConnector 
+            if line =~ /MysqlConnector/ 
+              review_method.add_note :message => "Hardcoded SQL", 
+                                     :at      => absolute_line_number
               
-              class_name = File.basename(file, '.php')
-                        
-              if line.include? class_name
+            # check body against dependency list
+            else      
+  
+              model_dependencies.each do | file |
                 
-                # add content 
-                review_method.add_dependency :name => class_name, 
-                                             :at   => absolute_line_number, 
-                                             :line => line,
-                                             :file => file
-                
+                class_name = File.basename(file, '.php')
+                          
+                if line.include? class_name
+                  
+                  # add content 
+                  review_method.add_dependency :name => class_name, 
+                                               :at   => absolute_line_number, 
+                                               :line => line,
+                                               :file => file
+                  
+                end
               end
             end
           end
+          
+  
+          # check against multiple returns - join our lines into a single body,
+          # strip comments
+          if (length = method_lines.join.gsub(/\/\/.+$/, '').gsub(/\/\*\*.+?\*\//im, '').scan('return').length) >= 2
+            review_method.add_note :message => "#{length} Returns"
+          end  
+          
+          review_class.review_methods << review_method
+          
+        
         end
         
-
-        # check against multiple returns - join our lines into a single body,
-        # strip comments
-        if method_lines.join.gsub(/\/\/.+$/, '').gsub(/\/\*\*.+?\*\//im, '').scan('return').length >= 2
-          review_method.add_note :message => '2+ returns'
-        end  
-        
-        review_class.review_methods << review_method
-        
-      
-      end
-      
-      # add phpunit stub
-     
-      path = "#{review_class.base_dir}/Test/Common/" +
-             "#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/" +
-             "#{review_class.name}Test.php"
+        # add phpunit stub
        
-      # if unit test does not exist, then draw it bitch      
-      unless File.file? path
+        path = "#{review_class.base_dir}/Test/Common/" +
+               "#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/" +
+               "#{review_class.name}Test.php.review!"
+         
+        # if unit test does not exist, then draw it bitch      
+        unless File.file? path
+          
+          # create directory if it does not exist
+          FileUtils.mkdir_p File.dirname(path) unless File.directory? File.dirname(path)
+          
+          # render template to directory/path
+          Template.render 'unit_test', :to => path, :with => binding
+        end
         
-        # create directory if it does not exist
-        FileUtils.mkdir_p File.dirname(path) unless File.directory? File.dirname(path)
+        # now we throw edits back into file
+        file_as_array_of_lines = File.readlines(file)
         
-        # render template to directory/path
-        Template.render 'unit_test', :to => path, :with => binding
-      end
-      
-      # now we throw edits back into file
-      file_as_array_of_lines = File.readlines(file)
-      
-      # now add todo's to this bitch
-      todos     = [ ]
-      recievers = [ review_class ] + review_class.review_methods
-      
+        # now add todo's to this bitch
+        todos     = [ ]
+        recievers = [ review_class ] + review_class.review_methods
         
-      # first figure out which have line numbers, which is all we are
-      # interested in
-      # this is fucking sloppy
-      recievers.each do | reciever |
-        [reciever.dependencies, reciever.notes].each do | container |
-          container.each do | meta |
-            unless meta.at.nil?
-              todos << { :meta => meta, :reciever => reciever }
+          
+        # first figure out which have line numbers, which is all we are
+        # interested in
+        # this is fucking sloppy
+        recievers.each do | reciever |
+          [reciever.dependencies, reciever.notes].each do | container |
+            container.each do | meta |
+              unless meta.at.nil?
+                todos << { :meta => meta, :reciever => reciever }
+              end
+              
+              # add rows to row
+              row[row_size] += "* #{meta.to_s} IN #{reciever.name}"
+              
+              unless meta.at.nil?
+                row[row_size] += " @ \##{meta.at}"
+              end
+              
+              row[row_size] += "\n";
+              
             end
-            
-            # add rows to row
-            row[row_size] += "* #{meta.to_s} IN #{reciever.name}"
-            
-            unless meta.at.nil?
-              row[row_size] += " @ \##{meta.at}"
-            end
-            
-            row[row_size] += "\n";
-            
           end
         end
-      end
-  
-                
-      # second sort by :at iterate through to make changes
-      todos.sort { | a, b | b[:meta].at <=> a[:meta].at }.each do | todo |
-        
-        if todo[:meta].to_s =~ /DocBloc/
-          todo[:space] = file_as_array_of_lines[todo[:meta].at - 1].space 
-        end
-
-        file_as_array_of_lines.insert(
-          todo[:meta].at-1, 
-          # -1 because file starts at index 1, while array at index 0
-          "\n" + file_as_array_of_lines[todo[:meta].at - 1].space + Template.render(:a => todo) 
-        )
-     end
-            
-     # write file to filePath.review
-     IO.write review_file.review_path, file_as_array_of_lines.join
-     rows << row 
-    end
     
-    # append dependency information to row for csv
-    CSV.open("#{csv_file}.review!", "w") do |csv|
-      csv << rows
-    end
-        
-  end
+                  
+        # second sort by :at iterate through to make changes
+        todos.sort { | a, b | b[:meta].at <=> a[:meta].at }.each do | todo |
+          
+          if todo[:meta].to_s =~ /DocBloc/
+            todo[:space] = file_as_array_of_lines[todo[:meta].at - 1].space 
+          end
   
+          file_as_array_of_lines.insert(
+            todo[:meta].at-1, 
+            # -1 because file starts at index 1, while array at index 0
+            "\n" + file_as_array_of_lines[todo[:meta].at - 1].space + Template.render(:a => todo) 
+          )
+        end
+              
+        # write file to filePath.review
+        IO.write review_file.review_path, file_as_array_of_lines.join
+     
+      else
+        row[row_size] = "Not Found!"
+        
+      end # end if valid review file
+      
+      rows << row
+    end # end unless row empty
+               
+  end # end csv.each row
+  
+  
+  # append dependency information to row for csv
+  CSV.open("#{csv_file}.review!", "w") do | csv |
+    rows.each do | row |
+      csv << row
+    end
+  end
+    
   exit
 end
 
