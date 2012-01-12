@@ -156,137 +156,1255 @@
 * 2 Returns IN _sha256
 "
 1/9/2012,importwords, Common/PHP/Libraries/CoolPHPCaptcha/resources/tools/dictionary-import/importwords.php,George,0%,0%,Invalid File!
-1/9/2012,InstallApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/InstallApplicationCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/9/2012,InstallFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/InstallFrameworkCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/10/2012,InstallSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/InstallSystemPackageCoreeGlooRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/10/2012,LineItemController, Common/PHP/Controllers/LineItemController.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,LoadApplicationConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/LoadApplicationConfigCoreeGlooRequestProcessor.php,George,0%,0%,Invalid File!
-1/10/2012,LoadFrameworkConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/LoadFrameworkConfigCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/10/2012,LoadSystemConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/LoadSystemConfigCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/10/2012,LoginNewFormValidator, Common/PHP/Security/Validators/LoginNewFormValidator.php,Christian,0%,0%,Invalid File!
-1/10/2012,LogisticsController, Common/PHP/Controllers/LogisticsController.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,MailController, Common/PHP/Controllers/MailController.php,George,0%,0%,Invalid File!
+1/9/2012,InstallApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/InstallApplicationCoreeGlooRequestProcessor.php,Matt,0%,0%,""
+1/9/2012,InstallFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/InstallFrameworkCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/10/2012,InstallSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/InstallSystemPackageCoreeGlooRequestProcessor.php,Christian,0%,0%,""
+1/10/2012,LineItemController, Common/PHP/Controllers/LineItemController.php,Gilbert,0%,0%,"* Requires DocBloc IN getOriginIdList @ #60
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN __construct @ #136
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN __construct @ #136
+* Dependency >> PetflowProgramLineItem @ Common/PHP/Models/PetflowProgramLineItem.php IN __construct @ #137
+* Dependency >> PetflowLineItem @ Common/PHP/Models/PetflowLineItem.php IN __construct @ #137
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN __construct @ #137
+* 3 Returns IN getDiscountAmount
+"
+1/10/2012,LoadApplicationConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/LoadApplicationConfigCoreeGlooRequestProcessor.php,George,0%,0%,""
+1/10/2012,LoadFrameworkConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/LoadFrameworkConfigCoreeGlooRequestProcessor.php,Matt,0%,0%,""
+1/10/2012,LoadSystemConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/LoadSystemConfigCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/10/2012,LoginNewFormValidator, Common/PHP/Security/Validators/LoginNewFormValidator.php,Christian,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN validate @ #23
+"
+1/10/2012,LogisticsController, Common/PHP/Controllers/LogisticsController.php,Gilbert,0%,0%,"* Hardcoded SQL IN staticInit @ #50
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN associateSizeSupplier @ #65
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN associateSizeSupplier @ #66
+* Dependency >> PetflowSupplierProduct @ Common/PHP/Models/PetflowSupplierProduct.php IN associateSizeSupplier @ #68
+* Dependency >> PetflowSupplierProduct @ Common/PHP/Models/PetflowSupplierProduct.php IN associateSizeSupplier @ #70
+* 3 Returns IN getOrderedProductsCount
+* 3 Returns IN getOrderedProductsCountByWarehouse
+* Dependency >> PetflowShipment @ Common/PHP/Models/PetflowShipment.php IN generateCapacityCSV @ #123
+* Hardcoded SQL IN fillOrderedProductCount @ #174
+* Hardcoded SQL IN fillOrderedProductCountByWarehouse @ #210
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrderList @ #226
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrderList @ #233
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrderList @ #233
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrderListToWarehouse @ #320
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrderListToWarehouse @ #321
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrderListToWarehouse @ #332
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrderListToWarehouse @ #332
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrderListToWarehouse @ #341
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrderListToWarehouse @ #341
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrderListToWarehouse @ #352
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrderListToWarehouse @ #352
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrder @ #369
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrder @ #370
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrder @ #373
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrder @ #373
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkCapStatus @ #403
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN completeOrderCap @ #429
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushPending @ #456
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushPending @ #463
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushPending @ #463
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushProcessing @ #470
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushProcessing @ #486
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushProcessing @ #486
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushScheduled @ #499
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkDuplicateOrders @ #514
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkInvalidProducts @ #538
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkOrderDate @ #546
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkNoCharge @ #557
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkPaymentExpiration @ #569
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkOrderInventory @ #584
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN checkOrderInventory @ #594
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN chargeCard @ #615
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN chargeCard @ #661
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN chargeCard @ #661
+* 2 Returns IN chargeCard
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN pushOrderCapacity @ #784
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN pushOrderCapacity @ #815
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN pushOrderCapacity @ #815
+"
+1/10/2012,MailController, Common/PHP/Controllers/MailController.php,George,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN sendProgramStart @ #20
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN sendCCExpiration @ #74
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN sendCCExpiration @ #75
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN sendCCFailure @ #98
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN sendBackorderEmail @ #113
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN sendTrackingEmail @ #136
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN sendIdleUsersEmail @ #186
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN sendUpsellEmail @ #203
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN sendUpsellEmail @ #209
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN sendUpsellEmail @ #223
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN sendUpsellEmail @ #295
+* Hardcoded SQL IN sendUpsellEmail @ #256
+* Hardcoded SQL IN sendUpsellEmail @ #312
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN sendUpcomingShipmentEmail @ #378
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN sendUpcomingShipmentEmail @ #384
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN sendUpcomingShipmentEmail @ #399
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN sendUpcomingShipmentEmail @ #471
+* Hardcoded SQL IN sendUpcomingShipmentEmail @ #432
+* Hardcoded SQL IN sendUpcomingShipmentEmail @ #488
+"
 1/10/2012,MailProcessor, Common/PHP/Libraries/Misc/MailProcessor.php,Matt,0%,0%,Invalid File!
-1/10/2012,MysqlConnector, Common/PHP/Libraries/Database/MysqlConnector.php,Weber,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPAmbassadorFormDAO, Common/PHP/Persistence/DataAccessObjects/MySQLiOOPAmbassadorFormDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPImageContentDAO, Common/PHP/Persistence/DataAccessObjects/MySQLiOOPImageContentDAO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/MySQLiOOPPetflowAddressDAO.php,George,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowBrandImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/MySQLiOOPPetflowBrandImagesDAO.php,Matt,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/MySQLiOOPPetflowCouponDAO.php,Weber,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowImageContentDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImageFileUploadDAO/MySQLiOOPPetflowImageContentDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowOrderLineItemDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/MySQLiOOPPetflowOrderLineItemDAO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/MySQLiOOPPetflowOrderProductDAO.php,George,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/MySQLiOOPPetflowPaymentOptionDAO.php,Matt,0%,0%,Invalid File!
+1/10/2012,MysqlConnector, Common/PHP/Libraries/Database/MysqlConnector.php,Weber,0%,0%,"* Hardcoded SQL IN _init @ #28
+* Hardcoded SQL IN executeSelect @ #93
+* Hardcoded SQL IN executeSelect @ #111
+* Hardcoded SQL IN executeSelect @ #140
+* Hardcoded SQL IN executeSelect @ #141
+* Hardcoded SQL IN executeSelect @ #146
+* Hardcoded SQL IN executeUpdate @ #164
+* Hardcoded SQL IN executeUpdate @ #183
+* Hardcoded SQL IN executeUpdate @ #187
+* Hardcoded SQL IN executeUpdate @ #188
+* Hardcoded SQL IN executeUpdate @ #193
+* Hardcoded SQL IN executeInsert @ #211
+* Hardcoded SQL IN executeInsert @ #231
+* Hardcoded SQL IN executeInsert @ #235
+* Hardcoded SQL IN executeInsert @ #239
+* Hardcoded SQL IN executeInsert @ #240
+* Hardcoded SQL IN executeInsert @ #245
+* Hardcoded SQL IN executeDelete @ #260
+* Hardcoded SQL IN executeDelete @ #314
+* Hardcoded SQL IN executeDelete @ #315
+* Hardcoded SQL IN executeDelete @ #320
+* Hardcoded SQL IN executeDelete @ #324
+* 2 Returns IN executeDelete
+* Hardcoded SQL IN executeArbitrary @ #340
+* Hardcoded SQL IN executeArbitrary @ #357
+* Hardcoded SQL IN executeArbitrary @ #361
+* Hardcoded SQL IN executeArbitrary @ #362
+* Hardcoded SQL IN executeArbitrary @ #367
+"
+1/10/2012,MySQLiOOPAmbassadorFormDAO, Common/PHP/Persistence/DataAccessObjects/MySQLiOOPAmbassadorFormDAO.php,Christian,0%,0%,""
+1/10/2012,MySQLiOOPImageContentDAO, Common/PHP/Persistence/DataAccessObjects/MySQLiOOPImageContentDAO.php,Gilbert,0%,0%,"* Hardcoded SQL IN getImageDistributionURL @ #88
+* Hardcoded SQL IN setImageDistributionURL @ #121
+* Hardcoded SQL IN setImageDistributionURL @ #130
+* Hardcoded SQL IN deleteImage @ #169
+* Hardcoded SQL IN deleteImage @ #172
+* 2 Returns IN deleteImage
+* Hardcoded SQL IN getImageStorePath @ #256
+* Hardcoded SQL IN storeUploadedImage @ #358
+* Hardcoded SQL IN storeUploadedImage @ #362
+"
+1/10/2012,MySQLiOOPPetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/MySQLiOOPPetflowAddressDAO.php,George,0%,0%,"* Hardcoded SQL IN getListForUser @ #61
+"
+1/10/2012,MySQLiOOPPetflowBrandImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/MySQLiOOPPetflowBrandImagesDAO.php,Matt,0%,0%,"* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN CRUDCreate @ #120
+* Hardcoded SQL IN CRUDCreate @ #65
+"
+1/10/2012,MySQLiOOPPetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/MySQLiOOPPetflowCouponDAO.php,Weber,0%,0%,"* Hardcoded SQL IN getForCode @ #65
+* 3 Returns IN getForCode
+* Hardcoded SQL IN getForPogram @ #79
+* Hardcoded SQL IN attachToProgram @ #98
+"
+1/10/2012,MySQLiOOPPetflowImageContentDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImageFileUploadDAO/MySQLiOOPPetflowImageContentDAO.php,Christian,0%,0%,"* Requires DocBloc IN CRUDCreate @ #41
+* Requires DocBloc IN CRUDRead @ #45
+* Requires DocBloc IN CRUDUpdate @ #49
+* Requires DocBloc IN CRUDDestroy @ #53
+"
+1/10/2012,MySQLiOOPPetflowOrderLineItemDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/MySQLiOOPPetflowOrderLineItemDAO.php,Gilbert,0%,0%,"* Hardcoded SQL IN getListForOrder @ #56
+* Hardcoded SQL IN deleteForOrderCoupons @ #69
+* Hardcoded SQL IN createBigThreeForOrder @ #82
+* Hardcoded SQL IN createBigThreeForOrder @ #85
+* Hardcoded SQL IN createBigThreeForOrder @ #88
+* Hardcoded SQL IN createForOrderCoupon @ #108
+* Hardcoded SQL IN createForOrderCoupon @ #114
+* Hardcoded SQL IN updateForOrderProducts @ #128
+* Hardcoded SQL IN updateForOrderShipping @ #140
+* Hardcoded SQL IN updateForOrderTax @ #152
+* Hardcoded SQL IN changeAmount @ #164
+"
+1/10/2012,MySQLiOOPPetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/MySQLiOOPPetflowOrderProductDAO.php,George,0%,0%,"* Hardcoded SQL IN getListForOrder @ #56
+* Dependency >> PetflowAbstractDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php IN create @ #65
+* Hardcoded SQL IN create @ #69
+* Hardcoded SQL IN changeQuantity @ #82
+* Hardcoded SQL IN delete @ #91
+"
+1/10/2012,MySQLiOOPPetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/MySQLiOOPPetflowPaymentOptionDAO.php,Matt,0%,0%,"* Hardcoded SQL IN getListForUser @ #59
+* Hardcoded SQL IN getListForActivePrograms @ #72
+"
 1/10/2012,MySQLiOOPPetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/MySQLiOOPPetflowProductDAO.php,Weber,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
-1/10/2012,MySQLiOOPPetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/MySQLiOOPPetflowProductImagesDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowProductSizeDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/MySQLiOOPPetflowProductSizeDAO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/MySQLiOOPPetflowProgramDAO.php,George,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowProgramOrderDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramOrderDAO/MySQLiOOPPetflowProgramOrderDAO.php,Matt,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowProgramProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramProductDAO/MySQLiOOPPetflowProgramProductDAO.php,Weber,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/MySQLiOOPPetflowUserDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,Nextopia, Common/PHP/Libraries/Plugins/Nextopia/Nextopia.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,Pagination, Common/PHP/Libraries/Misc/Pagination.php,George,0%,0%,Invalid File!
-1/10/2012,Petflow, Common/PHP/Classes/Petflow.php,Matt,0%,0%,Invalid File!
-1/10/2012,PetflowAbstractDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAbstractDAO.php,Weber,0%,0%,Invalid File!
-1/10/2012,PetflowAbstractDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php,Christian,0%,0%,Invalid File!
-1/10/2012,PetflowAbstractDTO, Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,PetflowAddress, Common/PHP/Models/PetflowAddress.php,George,0%,0%,Invalid File!
-1/10/2012,PetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PetflowAddressDAO.php,Matt,0%,0%,Invalid File!
-1/10/2012,PetflowAddressDTO, Common/PHP/Persistence/DataTransferObjects/PetflowAddressDTO.php,Weber,0%,0%,Invalid File!
-1/10/2012,PetflowAddressValidator, Common/PHP/Security/Validators/PetflowAddressValidator.php,Christian,0%,0%,Invalid File!
-1/10/2012,PetflowAlert, Common/PHP/Classes/PetflowAlert.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,PetflowAmbassador, Common/PHP/Classes/PetflowAmbassador.php,George,0%,0%,Invalid File!
-1/10/2012,PetflowAmbassadorEmailValidator, Common/PHP/Security/Validators/PetflowAmbassadorEmailValidator.php,Matt,0%,0%,Invalid File!
-1/10/2012,PetflowBrand, Common/PHP/Models/PetflowBrand.php,Weber,0%,0%,Invalid File!
-1/10/2012,PetflowBrandImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/PetflowBrandImagesDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,PetflowBrandImagesDTO, Common/PHP/Persistence/DataTransferObjects/PetflowBrandImagesDTO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,PetflowBrandValidator, Common/PHP/Security/Validators/PetflowBrandValidator.php,George,0%,0%,Invalid File!
-1/10/2012,PetflowCart, Common/PHP/Classes/PetflowCart.php,Matt,0%,0%,Invalid File!
-1/10/2012,PetflowCoupon, Common/PHP/Models/PetflowCoupon.php,Weber,0%,0%,Invalid File!
-1/10/2012,PetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/PetflowCouponDAO.php,Christian,0%,0%,Invalid File!
-1/10/2012,PetflowCouponDTO, Common/PHP/Persistence/DataTransferObjects/PetflowCouponDTO.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,PetflowCouponValidator, Common/PHP/Security/Validators/PetflowCouponValidator.php,George,0%,0%,Invalid File!
-1/10/2012,PetflowImageContentDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImageFileUploadDAO/PetflowImageContentDAO.php,Matt,0%,0%,Invalid File!
-1/10/2012,PetflowImageContentDTO, Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowLineItem, Common/PHP/Models/PetflowLineItem.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowMySQLiOOPDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowMySQLiOOPDAOFactory.php,Gilbert,0%,0%,Invalid File!
+1/10/2012,MySQLiOOPPetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/MySQLiOOPPetflowProductImagesDAO.php,Christian,0%,0%,"* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN CRUDCreate @ #123
+* Hardcoded SQL IN CRUDCreate @ #69
+"
+1/10/2012,MySQLiOOPPetflowProductSizeDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/MySQLiOOPPetflowProductSizeDAO.php,Gilbert,0%,0%,"* Hardcoded SQL IN getListForProduct @ #60
+* Hardcoded SQL IN getListForAttributesWeightsStatus @ #95
+* Hardcoded SQL IN discontinueProduct @ #109
+"
+1/10/2012,MySQLiOOPPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/MySQLiOOPPetflowProgramDAO.php,George,0%,0%,"* Hardcoded SQL IN getListForUser @ #69
+* Hardcoded SQL IN getProgramListByDateRange @ #88
+"
+1/10/2012,MySQLiOOPPetflowProgramOrderDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramOrderDAO/MySQLiOOPPetflowProgramOrderDAO.php,Matt,0%,0%,"* Hardcoded SQL IN getListForUser @ #59
+* Hardcoded SQL IN getListForProgram @ #75
+* Hardcoded SQL IN loadById @ #98
+* Dependency >> PetflowAbstractDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php IN create @ #110
+* Hardcoded SQL IN create @ #114
+* Hardcoded SQL IN create @ #121
+* Hardcoded SQL IN changeTrackingNumber @ #146
+* Hardcoded SQL IN changeState @ #156
+* Hardcoded SQL IN changeShippingMethod @ #165
+* Hardcoded SQL IN changeDate @ #175
+* Hardcoded SQL IN changeOrderTotal @ #185
+* Hardcoded SQL IN changeProductCount @ #195
+* Hardcoded SQL IN changeExternalOrderStatus @ #205
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN nextState @ #213
+* Hardcoded SQL IN nextState @ #216
+"
+1/10/2012,MySQLiOOPPetflowProgramProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramProductDAO/MySQLiOOPPetflowProgramProductDAO.php,Weber,0%,0%,"* Hardcoded SQL IN getListForProgram @ #38
+* Hardcoded SQL IN loadByProgramSize @ #53
+* 2 Returns IN loadByProgramSize
+* Hardcoded SQL IN changeQuantity @ #69
+* Hardcoded SQL IN deleteAndDestroy @ #77
+"
+1/10/2012,MySQLiOOPPetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/MySQLiOOPPetflowUserDAO.php,Christian,0%,0%,""
+1/10/2012,Nextopia, Common/PHP/Libraries/Plugins/Nextopia/Nextopia.php,Gilbert,0%,0%,"* 2 Returns IN parseRefines
+"
+1/10/2012,Pagination, Common/PHP/Libraries/Misc/Pagination.php,George,0%,0%,""
+1/10/2012,Petflow, Common/PHP/Classes/Petflow.php,Matt,0%,0%,"* Dependency >> PetflowOrder @ Common/PHP/Models/PetflowOrder.php IN reformatProgramOrderInfo @ #185
+* 2 Returns IN reformatProgramOrderInfo
+* 2 Returns IN reformatPixelInfo
+* 2 Returns IN reformatSitePagesInfo
+* Hardcoded SQL IN getAttributeData @ #251
+* Hardcoded SQL IN productsCustomersView @ #294
+* Hardcoded SQL IN urlShorten @ #330
+* Hardcoded SQL IN urlShorten @ #336
+* Hardcoded SQL IN urlShorten @ #345
+* 3 Returns IN urlShorten
+* Hardcoded SQL IN urlGenerateCode @ #364
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getChatLink @ #423
+* Hardcoded SQL IN petflow_write_record @ #449
+* Hardcoded SQL IN petflow_write_record @ #525
+* Hardcoded SQL IN petflow_write_record @ #527
+* 6 Returns IN petflow_write_record
+"
+1/10/2012,PetflowAbstractDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAbstractDAO.php,Weber,0%,0%,"* Dependency >> PetflowAbstractDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php IN saveState @ #22
+* Hardcoded SQL IN saveState @ #42
+* Dependency >> PetflowAbstractDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php IN create @ #49
+* Hardcoded SQL IN create @ #69
+* Hardcoded SQL IN loadById @ #136
+* Hardcoded SQL IN getListForId @ #168
+* 2 Returns IN getListForId
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #184
+* Hardcoded SQL IN getListForInterval @ #202
+"
+1/10/2012,PetflowAbstractDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php,Christian,0%,0%,"* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN getAppropriateFactory @ #36
+* Dependency >> PetflowPostgreSQLDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowPostgreSQLDAOFactory.php IN getAppropriateFactory @ #43
+* Dependency >> PetflowMySQLiOOPDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowMySQLiOOPDAOFactory.php IN getAppropriateFactory @ #45
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN getAppropriateFactory @ #50
+"
+1/10/2012,PetflowAbstractDTO, Common/PHP/Persistence/DataTransferObjects/PetflowAbstractDTO.php,Gilbert,0%,0%,"* Requires DocBloc IN PetflowAbstractDTO @ #3
+"
+1/10/2012,PetflowAddress, Common/PHP/Models/PetflowAddress.php,George,0%,0%,"* Hardcoded SQL IN getUserAddress @ #91
+* 2 Returns IN getUserAddress
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForUser @ #107
+* Hardcoded SQL IN getListForUser @ #113
+* Hardcoded SQL IN getListForPhonePartial @ #131
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getUser @ #146
+* Hardcoded SQL IN saveUpdate @ #189
+* Hardcoded SQL IN saveUpdate @ #191
+* Hardcoded SQL IN deleteAddress @ #206
+* Hardcoded SQL IN deleteAddress @ #208
+* Hardcoded SQL IN deleteAddress @ #211
+* Hardcoded SQL IN reassignPayments @ #231
+* 2 Returns IN reassignPayments
+"
+1/10/2012,PetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PetflowAddressDAO.php,Matt,0%,0%,"* Requires DocBloc IN getListForUser @ #28
+"
+1/10/2012,PetflowAddressDTO, Common/PHP/Persistence/DataTransferObjects/PetflowAddressDTO.php,Weber,0%,0%,""
+1/10/2012,PetflowAddressValidator, Common/PHP/Security/Validators/PetflowAddressValidator.php,Christian,0%,0%,"* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN validate @ #54
+* 2 Returns IN validate
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN validatePostedValues @ #139
+* 2 Returns IN validatePhone
+"
+1/10/2012,PetflowAlert, Common/PHP/Classes/PetflowAlert.php,Gilbert,0%,0%,""
+1/10/2012,PetflowAmbassador, Common/PHP/Classes/PetflowAmbassador.php,George,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN __construct @ #37
+* Hardcoded SQL IN getReferrals @ #64
+* 2 Returns IN getReferralLink
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getUserFromLink @ #123
+"
+1/10/2012,PetflowAmbassadorEmailValidator, Common/PHP/Security/Validators/PetflowAmbassadorEmailValidator.php,Matt,0%,0%,""
+1/10/2012,PetflowBrand, Common/PHP/Models/PetflowBrand.php,Weber,0%,0%,"* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN loadById @ #52
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN loadById @ #62
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN loadById @ #68
+* Hardcoded SQL IN loadById @ #79
+* 4 Returns IN loadById
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN getAll @ #104
+* Hardcoded SQL IN getAll @ #120
+* 2 Returns IN getAll
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN clearGetAll @ #154
+* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN loadImages @ #180
+* Hardcoded SQL IN loadImages @ #178
+* Hardcoded SQL IN getImageUrl @ #291
+* 5 Returns IN getImageUrl
+* Hardcoded SQL IN setPrimaryImage @ #321
+* Hardcoded SQL IN setPrimaryImage @ #325
+* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN deleteImage @ #344
+* Hardcoded SQL IN deleteImage @ #341
+* Hardcoded SQL IN deleteImage @ #352
+* Hardcoded SQL IN deleteImage @ #353
+* Hardcoded SQL IN deleteImage @ #354
+* Hardcoded SQL IN getPublishedBrands @ #370
+* Hardcoded SQL IN getListWithProducts @ #384
+* Hardcoded SQL IN getListPublished @ #399
+* Hardcoded SQL IN getBrandByTitle @ #416
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #431
+* Hardcoded SQL IN getListForInterval @ #447
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForId @ #463
+* 2 Returns IN getListForId
+* Hardcoded SQL IN loadBySlug @ #487
+* 2 Returns IN loadBySlug
+* Hardcoded SQL IN createWithTitle @ #503
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN deleteRow @ #510
+* Hardcoded SQL IN deleteRow @ #511
+* Hardcoded SQL IN changeSlug @ #539
+* Hardcoded SQL IN changeSlug @ #545
+* Hardcoded SQL IN changeSlug @ #548
+* Hardcoded SQL IN changeSlug @ #550
+* Hardcoded SQL IN changeTitle @ #563
+* Hardcoded SQL IN changeStatus @ #576
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getProductList @ #592
+* Hardcoded SQL IN getProductCount @ #608
+"
+1/10/2012,PetflowBrandImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/PetflowBrandImagesDAO.php,Christian,0%,0%,""
+1/10/2012,PetflowBrandImagesDTO, Common/PHP/Persistence/DataTransferObjects/PetflowBrandImagesDTO.php,Gilbert,0%,0%,"* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN initWithForm @ #115
+"
+1/10/2012,PetflowBrandValidator, Common/PHP/Security/Validators/PetflowBrandValidator.php,George,0%,0%,""
+1/10/2012,PetflowCart, Common/PHP/Classes/PetflowCart.php,Matt,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN __construct @ #211
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN __construct @ #215
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN __construct @ #230
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN __construct @ #234
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN __construct @ #250
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN isAnonymous @ #342
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN retrieveItem @ #410
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN retrieveItem @ #412
+* 3 Returns IN retrieveItem
+* 3 Returns IN removeItem
+* 3 Returns IN addUpdateItem
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getSelectedPayment @ #827
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getSelectedPayment @ #839
+* 2 Returns IN getSelectedPayment
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getSelectedAddress @ #950
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getSelectedAddress @ #963
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getSelectedAddress @ #972
+* 2 Returns IN getSelectedAddress
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getTreats @ #1094
+* Hardcoded SQL IN getTreats @ #1092
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getTreatsStatic @ #1203
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getTreatsStatic @ #1273
+* Hardcoded SQL IN getTreatsStatic @ #1161
+* Hardcoded SQL IN getTreatsStatic @ #1201
+* Hardcoded SQL IN getTreatsStatic @ #1271
+* 3 Returns IN getTreatsStatic
+* 2 Returns IN getUpsellData
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getYearsOptions @ #1417
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getMonthOptions @ #1435
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getStateOptions @ #1454
+"
+1/10/2012,PetflowCoupon, Common/PHP/Models/PetflowCoupon.php,Weber,0%,0%,"* Hardcoded SQL IN loadByCode @ #284
+* Hardcoded SQL IN getRecurringProgramCount @ #299
+* Hardcoded SQL IN getTotalProgramCount @ #309
+* Hardcoded SQL IN getNonRecurringProgramCount @ #321
+* Hardcoded SQL IN getTotalUseCount @ #331
+* Hardcoded SQL IN getAssociationCount @ #341
+* Hardcoded SQL IN getAverageOrderPrice @ #353
+* Hardcoded SQL IN getTotalUserCount @ #362
+* 2 Returns IN getDiscount
+* Hardcoded SQL IN getUseCount @ #411
+* 2 Returns IN getUseCount
+* Hardcoded SQL IN getDistinctUsers @ #425
+* 2 Returns IN getDistinctUsers
+* Hardcoded SQL IN getProgramUseCountForUser @ #440
+* 2 Returns IN getProgramUseCountForUser
+* Hardcoded SQL IN getOrderUseCountForProgram @ #458
+* 2 Returns IN getOrderUseCountForProgram
+* Hardcoded SQL IN getCheckedOutProgramCount @ #475
+* Hardcoded SQL IN recordUse @ #493
+* Hardcoded SQL IN associateCoupon @ #521
+* Hardcoded SQL IN isAttachedToOrder @ #531
+* Hardcoded SQL IN isAttachedToProgram @ #548
+* Hardcoded SQL IN isAttachedToUser @ #560
+* Hardcoded SQL IN getAllCouponList @ #581
+* Hardcoded SQL IN getCouponCodedList @ #597
+* Hardcoded SQL IN getCouponAutoList @ #611
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN removeAttachmentRow @ #624
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN removeAttachmentRow @ #624
+* Hardcoded SQL IN removeAttachmentRow @ #627
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN createAttachmentRow @ #635
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN createAttachmentRow @ #635
+* Hardcoded SQL IN createAttachmentRow @ #639
+* Hardcoded SQL IN getAttachedCouponsForUser @ #649
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getListForProgram @ #663
+* Hardcoded SQL IN getListForProgram @ #665
+* Hardcoded SQL IN getListForOrders @ #757
+* Hardcoded SQL IN getAttachedCouponsForUserProgram @ #778
+* Hardcoded SQL IN updateFields @ #811
+* Hardcoded SQL IN searchCoupons @ #890
+* Hardcoded SQL IN createCoupon @ #937
+* Hardcoded SQL IN getAllCouponCount @ #946
+"
+1/10/2012,PetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/PetflowCouponDAO.php,Christian,0%,0%,""
+1/10/2012,PetflowCouponDTO, Common/PHP/Persistence/DataTransferObjects/PetflowCouponDTO.php,Gilbert,0%,0%,""
+1/10/2012,PetflowCouponValidator, Common/PHP/Security/Validators/PetflowCouponValidator.php,George,0%,0%,"* Hardcoded SQL IN validate @ #29
+"
+1/10/2012,PetflowImageContentDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImageFileUploadDAO/PetflowImageContentDAO.php,Matt,0%,0%,"* Requires DocBloc IN CRUDCreate @ #41
+* Requires DocBloc IN CRUDRead @ #45
+* Requires DocBloc IN CRUDUpdate @ #49
+* Requires DocBloc IN CRUDDestroy @ #53
+"
+1/10/2012,PetflowImageContentDTO, Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php,Weber,0%,0%,"* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN initFromHTTPFile @ #112
+"
+1/11/2012,PetflowLineItem, Common/PHP/Models/PetflowLineItem.php,Christian,0%,0%,"* Hardcoded SQL IN createRow @ #55
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getCouponList @ #117
+"
+1/11/2012,PetflowMySQLiOOPDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowMySQLiOOPDAOFactory.php,Gilbert,0%,0%,"* Dependency >> MySQLiOOPPetflowAddressDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/MySQLiOOPPetflowAddressDAO.php IN getPetflowAddressDAO @ #34
+* Dependency >> MySQLiOOPPetflowCouponDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/MySQLiOOPPetflowCouponDAO.php IN getPetflowCouponDAO @ #42
+* Dependency >> MySQLiOOPPetflowPaymentOptionDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/MySQLiOOPPetflowPaymentOptionDAO.php IN getPetflowPaymentOptionDAO @ #50
+* Dependency >> MySQLiOOPPetflowProgramDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/MySQLiOOPPetflowProgramDAO.php IN getPetflowProgramDAO @ #58
+* Dependency >> MySQLiOOPPetflowOrderLineItemDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/MySQLiOOPPetflowOrderLineItemDAO.php IN getPetflowOrderLineItemDAO @ #66
+* Dependency >> MySQLiOOPPetflowOrderProductDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/MySQLiOOPPetflowOrderProductDAO.php IN getPetflowOrderProductDAO @ #74
+* Dependency >> MySQLiOOPPetflowProgramOrderDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProgramOrderDAO/MySQLiOOPPetflowProgramOrderDAO.php IN getPetflowProgramOrderDAO @ #82
+* Dependency >> MySQLiOOPPetflowProgramProductDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProgramProductDAO/MySQLiOOPPetflowProgramProductDAO.php IN getPetflowProgramProductDAO @ #90
+* Dependency >> MySQLiOOPPetflowProductDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/MySQLiOOPPetflowProductDAO.php IN getPetflowProductDAO @ #98
+* Dependency >> MySQLiOOPPetflowProductSizeDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/MySQLiOOPPetflowProductSizeDAO.php IN getPetflowProductSizeDAO @ #106
+* Dependency >> MySQLiOOPPetflowUserDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/MySQLiOOPPetflowUserDAO.php IN getPetflowUserDAO @ #114
+"
 1/11/2012,PetflowOrder, Common/PHP/Models/PetflowOrder.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowOrderLineItem, Common/PHP/Models/PetflowOrderLineItem.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowOrderLineItemDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/PetflowOrderLineItemDAO.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowOrderLineItemDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderLineItemDTO.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowOrderLog, Common/PHP/Models/PetflowOrderLog.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowOrderProduct, Common/PHP/Models/PetflowOrderProduct.php,George,0%,0%,Invalid File!
+1/11/2012,PetflowOrderLineItem, Common/PHP/Models/PetflowOrderLineItem.php,Matt,0%,0%,"* Hardcoded SQL IN getListForOrderIdList @ #66
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getListForOrder @ #78
+* Hardcoded SQL IN getListForOrder @ #82
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createRowForOrder @ #99
+* Hardcoded SQL IN createRowForOrder @ #106
+* Dependency >> PetflowProgramLineItem @ Common/PHP/Models/PetflowProgramLineItem.php IN createRowForOrderFromTemplate @ #115
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createRowForOrderFromTemplate @ #115
+* Hardcoded SQL IN createRowForOrderFromTemplate @ #124
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createBigThreeForOrder @ #132
+* Hardcoded SQL IN createBigThreeForOrder @ #137
+* Hardcoded SQL IN createBigThreeForOrder @ #140
+* Hardcoded SQL IN createBigThreeForOrder @ #143
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN deleteRow @ #152
+* Hardcoded SQL IN deleteRow @ #153
+* Hardcoded SQL IN changeAmount @ #168
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getOrder @ #182
+"
+1/11/2012,PetflowOrderLineItemDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/PetflowOrderLineItemDAO.php,Weber,0%,0%,"* Requires DocBloc IN getListForOrder @ #27
+* Requires DocBloc IN createBigThreeForOrder @ #28
+* Requires DocBloc IN createForOrderCoupon @ #29
+* Requires DocBloc IN deleteForOrderCoupons @ #30
+* Requires DocBloc IN changeAmount @ #31
+* Requires DocBloc IN updateForOrderProducts @ #32
+* Requires DocBloc IN updateForOrderShipping @ #33
+"
+1/11/2012,PetflowOrderLineItemDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderLineItemDTO.php,Christian,0%,0%,""
+1/11/2012,PetflowOrderLog, Common/PHP/Models/PetflowOrderLog.php,Gilbert,0%,0%,"* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getListForOrder @ #49
+* Hardcoded SQL IN getListForOrder @ #53
+* Hardcoded SQL IN createRow @ #71
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getOrder @ #83
+* 3 Returns IN getTrackingList
+"
+1/11/2012,PetflowOrderProduct, Common/PHP/Models/PetflowOrderProduct.php,George,0%,0%,"* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getListForOrder @ #60
+* Hardcoded SQL IN getListForOrder @ #64
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createRowForOrderFromTemplate @ #78
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN createRowForOrderFromTemplate @ #78
+* Hardcoded SQL IN createRowForOrderFromTemplate @ #83
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN deleteRow @ #90
+* Hardcoded SQL IN deleteRow @ #91
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getOrder @ #105
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getProduct @ #118
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #132
+* Hardcoded SQL IN changeQuantity @ #184
+* Hardcoded SQL IN updatePriceToCurrent @ #197
+* 2 Returns IN __get
+"
 1/11/2012,PetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/PetflowOrderProductDAO.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
-1/11/2012,PetflowOrderProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderProductDTO.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowPageCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageCacheDecorator.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowPageNoCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageNoCacheDecorator.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowPayment, Common/PHP/Controllers/PetflowPayment.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowPaymentOption, Common/PHP/Models/PetflowPaymentOption.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/PetflowPaymentOptionDAO.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowPaymentOptionDTO, Common/PHP/Persistence/DataTransferObjects/PetflowPaymentOptionDTO.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowPaymentValidator, Common/PHP/Security/Validators/PetflowPaymentValidator.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowPixels, Common/PHP/Models/PetflowPixels.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowPostgreSQLDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowPostgreSQLDAOFactory.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowProduct, Common/PHP/Models/PetflowProduct.php,Weber,0%,0%,Invalid File!
+1/11/2012,PetflowOrderProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderProductDTO.php,Weber,0%,0%,""
+1/11/2012,PetflowPageCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageCacheDecorator.php,Christian,0%,0%,""
+1/11/2012,PetflowPageNoCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageNoCacheDecorator.php,Gilbert,0%,0%,""
+1/11/2012,PetflowPayment, Common/PHP/Controllers/PetflowPayment.php,George,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getMoneyFromCard @ #61
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN getMoneyFromCard @ #61
+"
+1/11/2012,PetflowPaymentOption, Common/PHP/Models/PetflowPaymentOption.php,Matt,0%,0%,"* Requires DocBloc IN getClassName @ #36
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN __get @ #69
+* 3 Returns IN __get
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForUser @ #197
+* Requires DocBloc IN getListForUser @ #197
+* Hardcoded SQL IN getListForUser @ #203
+* Hardcoded SQL IN getListForIntervalActive @ #227
+* Hardcoded SQL IN getListForNumberPartial @ #244
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN createFromCheckoutData @ #256
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN createFromCheckoutData @ #257
+* Hardcoded SQL IN createFromCheckoutData @ #262
+* Hardcoded SQL IN createFromCheckoutData @ #268
+* Hardcoded SQL IN createFromCheckoutData @ #274
+* 2 Returns IN createFromCheckoutData
+* 2 Returns IN isPaymentExpired
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getUser @ #312
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getBillingAddress @ #335
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getBillingAddress @ #337
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN save @ #392
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN save @ #393
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN create @ #411
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN create @ #412
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN create @ #417
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN create @ #418
+* Hardcoded SQL IN create @ #416
+* Hardcoded SQL IN create @ #429
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN saveUpdate @ #477
+* Hardcoded SQL IN saveUpdate @ #456
+* Hardcoded SQL IN saveUpdate @ #458
+* Hardcoded SQL IN saveUpdate @ #470
+* Hardcoded SQL IN saveUpdate @ #475
+* Hardcoded SQL IN saveUpdate @ #485
+* Hardcoded SQL IN saveUpdate @ #486
+* Hardcoded SQL IN deletePaymentMethod @ #506
+* Hardcoded SQL IN deletePaymentMethod @ #508
+* Hardcoded SQL IN deletePaymentMethod @ #511
+* 5 Returns IN cardType
+* 2 Returns IN uc_credit_encryption_key
+* Hardcoded SQL IN changeBillingAddress @ #627
+* Hardcoded SQL IN reassignProgams @ #643
+* 2 Returns IN reassignProgams
+"
+1/11/2012,PetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/PetflowPaymentOptionDAO.php,Weber,0%,0%,"* Requires DocBloc IN getListForUser @ #28
+* Requires DocBloc IN getListForActivePrograms @ #29
+"
+1/11/2012,PetflowPaymentOptionDTO, Common/PHP/Persistence/DataTransferObjects/PetflowPaymentOptionDTO.php,Christian,0%,0%,""
+1/11/2012,PetflowPaymentValidator, Common/PHP/Security/Validators/PetflowPaymentValidator.php,Gilbert,0%,0%,"* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN validate @ #40
+* 3 Returns IN validCardExpiration
+* 3 Returns IN validCardNumber
+"
+1/11/2012,PetflowPixels, Common/PHP/Models/PetflowPixels.php,George,0%,0%,"* Hardcoded SQL IN createRowForPixels @ #54
+* Hardcoded SQL IN updatePixels @ #85
+* Hardcoded SQL IN removePixelById @ #94
+* Dependency >> PetflowSitePages @ Common/PHP/Models/PetflowSitePages.php IN getSitePageText @ #103
+"
+1/11/2012,PetflowPostgreSQLDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowPostgreSQLDAOFactory.php,Matt,0%,0%,"* Dependency >> PGSQLPetflowAddressDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PGSQLPetflowAddressDAO.php IN getPetflowAddressDAO @ #34
+* Dependency >> PGSQLPetflowCouponDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/PGSQLPetflowCouponDAO.php IN getPetflowCouponDAO @ #42
+* Dependency >> PGSQLPetflowPaymentOptionDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/PGSQLPetflowPaymentOptionDAO.php IN getPetflowPaymentOptionDAO @ #50
+* Dependency >> PGSQLPetflowProgramDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PGSQLPetflowProgramDAO.php IN getPetflowProgramDAO @ #58
+* Dependency >> PGSQLPetflowProductDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PGSQLPetflowProductDAO.php IN getPetflowProductDAO @ #66
+* Dependency >> PGSQLPetflowUserDAO @ Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PGSQLPetflowUserDAO.php IN getPetflowUserDAO @ #74
+"
+1/11/2012,PetflowProduct, Common/PHP/Models/PetflowProduct.php,Weber,0%,0%,"* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN loadById @ #90
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN loadById @ #100
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN loadById @ #106
+* 4 Returns IN loadById
+* Hardcoded SQL IN getSlugByProductID @ #142
+* Hardcoded SQL IN getProductListByBrandID @ #165
+* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN loadImages @ #192
+* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN loalProductImagesByID @ #270
+* 3 Returns IN getImageUrl
+* Hardcoded SQL IN setPrimaryImage @ #368
+* Hardcoded SQL IN setPrimaryImage @ #372
+* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN deleteImage @ #394
+* Hardcoded SQL IN deleteImage @ #404
+* Hardcoded SQL IN loadAttributes @ #444
+* Hardcoded SQL IN loadAttributes @ #451
+* Requires DocBloc IN loadProductAttributes @ #461
+* Hardcoded SQL IN loadProductAttributes @ #463
+* Hardcoded SQL IN createProduct @ #490
+* Hardcoded SQL IN createProduct @ #497
+* Hardcoded SQL IN createProduct @ #505
+* Hardcoded SQL IN createProduct @ #508
+* Hardcoded SQL IN createProduct @ #511
+* Hardcoded SQL IN createProduct @ #513
+* Hardcoded SQL IN createProduct @ #517
+* Hardcoded SQL IN create @ #537
+* Hardcoded SQL IN create @ #546
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForId @ #558
+* 2 Returns IN getListForId
+* Hardcoded SQL IN loadBySlug @ #585
+* 2 Returns IN loadBySlug
+* Hardcoded SQL IN getListForBrand @ #613
+* 2 Returns IN getListForBrands
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #650
+* Hardcoded SQL IN getListForInterval @ #665
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN deleteRow @ #680
+* Hardcoded SQL IN deleteRow @ #681
+* Hardcoded SQL IN deleteRow @ #682
+* Hardcoded SQL IN deleteRow @ #683
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN getBrand @ #697
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSizeList @ #708
+* Hardcoded SQL IN changeSlug @ #752
+* Hardcoded SQL IN changeSlug @ #760
+* Hardcoded SQL IN changeSlug @ #766
+* Hardcoded SQL IN changeSlug @ #769
+* Hardcoded SQL IN changeSlug @ #771
+* Hardcoded SQL IN changeField @ #892
+* Hardcoded SQL IN changeField @ #898
+* 2 Returns IN __get
+"
 1/11/2012,PetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PetflowProductDAO.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
-1/11/2012,PetflowProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductDTO.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/PetflowProductImagesDAO.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowProductImagesDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductImagesDTO.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowProductSize, Common/PHP/Models/PetflowProductSize.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowProductSizeDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/PetflowProductSizeDAO.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowProductSizeDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductSizeDTO.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowProductSizeValidator, Common/PHP/Security/Validators/PetflowProductSizeValidator.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowProductValidator, Common/PHP/Security/Validators/PetflowProductValidator.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowProgram, Common/PHP/Models/PetflowProgram.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowProgramController, Common/PHP/Controllers/PetflowProgramController.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PetflowProgramDAO.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowProgramDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramDTO.php,George,0%,0%,Invalid File!
+1/11/2012,PetflowProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductDTO.php,Gilbert,0%,0%,""
+1/11/2012,PetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/PetflowProductImagesDAO.php,George,0%,0%,""
+1/11/2012,PetflowProductImagesDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductImagesDTO.php,Matt,0%,0%,"* Dependency >> PetflowImageContentDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowImageContentDTO.php IN initWithForm @ #115
+"
+1/11/2012,PetflowProductSize, Common/PHP/Models/PetflowProductSize.php,Weber,0%,0%,"* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getListForProduct @ #77
+* Hardcoded SQL IN getListForProduct @ #81
+* Hardcoded SQL IN getSizesByProductID @ #100
+* Requires DocBloc IN getWeightMatrix @ #104
+* Requires DocBloc IN getMeasureMatrix @ #108
+* Hardcoded SQL IN getSizesByProductIDAndTitle @ #124
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getListForIntervalPublished @ #151
+* Hardcoded SQL IN getListForIntervalPublished @ #150
+* Hardcoded SQL IN create @ #167
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getListForAttributesWeightsStatus @ #215
+* Hardcoded SQL IN getListForAttributesWeightsStatus @ #214
+* Hardcoded SQL IN loadBySKUPublished @ #229
+* 2 Returns IN loadBySKUPublished
+* Requires DocBloc IN getUniquePublishedSKU @ #239
+* Hardcoded SQL IN getUniquePublishedSKU @ #246
+* 2 Returns IN getUniquePublishedSKU
+* Requires DocBloc IN getProductBySizeID @ #256
+* Hardcoded SQL IN getProductBySizeID @ #265
+* Hardcoded SQL IN loadBySKUWeightOrPrice @ #288
+* 2 Returns IN loadBySKUWeightOrPrice
+* Hardcoded SQL IN loadBySKU @ #307
+* 2 Returns IN loadBySKU
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN deleteRow @ #321
+* Hardcoded SQL IN deleteRow @ #322
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getProduct @ #335
+* Dependency >> PetflowSupplierProduct @ Common/PHP/Models/PetflowSupplierProduct.php IN getSupplierList @ #365
+* 2 Returns IN getSizeId
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadAvailableQty @ #503
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadAvailableQty @ #508
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadAvailableQty @ #509
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadAvailableQty @ #514
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadAvailableQty @ #515
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadSinglePushAvailableQty @ #527
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadSinglePushAvailableQty @ #528
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadSinglePushAvailableQty @ #533
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN loadSinglePushAvailableQty @ #534
+* 6 Returns IN createSizeDescription
+* 5 Returns IN __get
+"
+1/11/2012,PetflowProductSizeDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/PetflowProductSizeDAO.php,Christian,0%,0%,"* Requires DocBloc IN getListForProduct @ #28
+* Requires DocBloc IN getListForAttributesWeightsStatus @ #29
+* Requires DocBloc IN discontinueProduct @ #30
+"
+1/11/2012,PetflowProductSizeDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductSizeDTO.php,Gilbert,0%,0%,""
+1/11/2012,PetflowProductSizeValidator, Common/PHP/Security/Validators/PetflowProductSizeValidator.php,George,0%,0%,"* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN validate @ #41
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN checkSKU @ #105
+"
+1/11/2012,PetflowProductValidator, Common/PHP/Security/Validators/PetflowProductValidator.php,Matt,0%,0%,""
+1/11/2012,PetflowProgram, Common/PHP/Models/PetflowProgram.php,Weber,0%,0%,"* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN __get @ #87
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN __get @ #105
+* 7 Returns IN __get
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getAttachedCouponList @ #131
+* 2 Returns IN saveProgram
+* Hardcoded SQL IN changeDeliveryAddress @ #190
+* Hardcoded SQL IN delete @ #200
+* Hardcoded SQL IN setIsDeleted @ #211
+* Hardcoded SQL IN setIsActive @ #219
+* Hardcoded SQL IN isUsersFirstTime @ #263
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN hasPrescriptionProducts @ #303
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN hasPrescriptionRoyalProducts @ #345
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN hasPrescriptionRoyalProducts @ #353
+* Hardcoded SQL IN setCheckedPrescription @ #376
+* 2 Returns IN hasNonlimitedProducts
+* 3 Returns IN calculateShippingTotal
+* 2 Returns IN calculateDiscountProducts
+* 2 Returns IN calculateDiscountShipping
+* 2 Returns IN calculateDiscountTotal
+* Hardcoded SQL IN getProgramListInactive @ #594
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN loadPaymentRecord @ #606
+* Hardcoded SQL IN reloadOrderList @ #636
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN addLogEntry @ #648
+* Hardcoded SQL IN addLogEntry @ #650
+* 3 Returns IN getNextOrderDate
+* Hardcoded SQL IN changePaymentMethod @ #706
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN checkFunds @ #774
+* 3 Returns IN checkFunds
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN authorizeFunds @ #801
+* Hardcoded SQL IN authorizeFunds @ #810
+* 3 Returns IN authorizeFunds
+* Hardcoded SQL IN releasePreauthNumber @ #820
+* 2 Returns IN isPaymentExpired
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForUser @ #862
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForUser @ #863
+* Hardcoded SQL IN getProgramListByDateRange @ #884
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getIdListForSize @ #895
+* Hardcoded SQL IN getIdListForSize @ #900
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN createUserProgram @ #925
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN createUserProgram @ #931
+* Hardcoded SQL IN createUserProgram @ #921
+* Hardcoded SQL IN updateProgramUserId @ #967
+* Hardcoded SQL IN getCouponListString @ #982
+* Hardcoded SQL IN setInterval @ #999
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN calculateProductTotal @ #1021
+* 2 Returns IN calculateProductTotal
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN calculateProductTotalWholesale @ #1036
+* Dependency >> PetflowProgramLineItem @ Common/PHP/Models/PetflowProgramLineItem.php IN getLineItemList @ #1051
+* 2 Returns IN getShippingQuote
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getUser @ #1075
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPayment @ #1087
+* 2 Returns IN getFirstOrder
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN appendOrderToList @ #1114
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getOrderList @ #1125
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN getProductList @ #1136
+* Hardcoded SQL IN setProductList @ #1148
+* Hardcoded SQL IN setProductList @ #1165
+* Hardcoded SQL IN setProductList @ #1183
+* Hardcoded SQL IN setProductList @ #1188
+* Hardcoded SQL IN setProductList @ #1195
+* 2 Returns IN setProductList
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN getCartProductList @ #1211
+* Hardcoded SQL IN getCartProductList @ #1210
+* 2 Returns IN getProductBySid
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getDeliveryAddress @ #1238
+* Dependency >> PetflowProgramLog @ Common/PHP/Models/PetflowProgramLog.php IN getLogList @ #1261
+* Requires DocBloc IN changeInterval @ #1276
+* Hardcoded SQL IN changeInterval @ #1282
+* Hardcoded SQL IN changePayment @ #1294
+* Hardcoded SQL IN changeShippingAddress @ #1305
+* Hardcoded SQL IN changeShippingMethod @ #1316
+* Hardcoded SQL IN setActiveFlags @ #1325
+* Hardcoded SQL IN setIntervalValues @ #1340
+* Hardcoded SQL IN changePrescriptionInfo @ #1356
+* Hardcoded SQL IN setPrescriptionReceivedDate @ #1371
+* Hardcoded SQL IN setPrescriptionConfirmDate @ #1384
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN uc_order_new @ #1401
+* Hardcoded SQL IN uc_order_new @ #1410
+* Hardcoded SQL IN uc_order_save @ #1434
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN uc_order_user_load @ #1470
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN uc_order_user_load @ #1472
+* 2 Returns IN uc_order_product_save
+* 2 Returns IN uc_order_state_default
+* Hardcoded SQL IN uc_order_status_list @ #1610
+* Hardcoded SQL IN uc_order_status_list @ #1614
+* Hardcoded SQL IN uc_order_status_list @ #1618
+* 2 Returns IN uc_order_status_list
+* Hardcoded SQL IN uc_order_state_list @ #1653
+* 2 Returns IN uc_order_state_list
+"
+1/11/2012,PetflowProgramController, Common/PHP/Controllers/PetflowProgramController.php,Christian,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN __construct @ #36
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN removeProduct @ #60
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN addProduct @ #88
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN addProduct @ #89
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN addLogEntry @ #139
+* Dependency >> PetflowProgramLog @ Common/PHP/Models/PetflowProgramLog.php IN addLogEntry @ #142
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN removeCoupon @ #150
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN removeCoupon @ #152
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN attachCoupon @ #162
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN attachCoupon @ #163
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN attachCoupon @ #165
+* Requires DocBloc IN changeInterval @ #171
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN createNextOrder @ #296
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createNextOrder @ #359
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createNextOrder @ #360
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN createNextOrder @ #376
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN createNextOrder @ #377
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN createNextOrder @ #383
+* 3 Returns IN createNextOrder
+* Hardcoded SQL IN updateProductPrice @ #443
+* Hardcoded SQL IN updateProductPrice @ #449
+* 3 Returns IN calculateNextOrderDate
+"
+1/11/2012,PetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PetflowProgramDAO.php,Gilbert,0%,0%,"* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN addProduct @ #46
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN removeProduct @ #62
+* Dependency >> PetflowProgramDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramDTO.php IN createNextOrder @ #73
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN createNextOrder @ #74
+* Dependency >> PetflowProgramDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramDTO.php IN calculateNextOrderDate @ #106
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN calculateNextOrderDate @ #109
+* 4 Returns IN calculateNextOrderDate
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN createNewOrder @ #156
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN createNewOrder @ #164
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN createNewProgramProduct @ #179
+* Dependency >> PetflowProgramProductDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramProductDTO.php IN createNewProgramProduct @ #182
+* Dependency >> PetflowProgramProductDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramProductDTO.php IN createNewOrderProduct @ #203
+* Dependency >> PetflowOrderProductDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowOrderProductDTO.php IN createNewOrderProduct @ #204
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN createNewOrderProduct @ #213
+"
+1/11/2012,PetflowProgramDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramDTO.php,George,0%,0%,""
 1/11/2012,PetflowProgramLineItem, Common/PHP/Models/PetflowProgramLineItem.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowProgramLog, Common/PHP/Models/PetflowProgramLog.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowProgramOrder, Common/PHP/Models/PetflowProgramOrder.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowProgramOrderController, Common/PHP/Controllers/PetflowProgramOrderController.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowProgramOrderDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramOrderDAO/PetflowProgramOrderDAO.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowProgramOrderDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowProgramProduct, Common/PHP/Models/PetflowProgramProduct.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowProgramProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramProductDAO/PetflowProgramProductDAO.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowProgramProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramProductDTO.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowProgramValidator, Common/PHP/Security/Validators/PetflowProgramValidator.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowPurchaseOrder, Common/PHP/Models/PetflowPurchaseOrder.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowPurchaseOrderProduct, Common/PHP/Models/PetflowPurchaseOrderProduct.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowRegistrationManager, Common/PHP/Libraries/Registration/PetflowRegistrationManager.php,Christian,0%,0%,Invalid File!
-1/11/2012,PetflowRequestProcessor, Common/PHP/RequestProcessors/PetflowRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/11/2012,PetflowScheduledTask, Common/PHP/Models/PetflowScheduledTask.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowSearch, Common/PHP/Classes/PetflowSearch.php,Matt,0%,0%,Invalid File!
-1/11/2012,PetflowSearchIndexer, Common/PHP/Classes/PetflowSearchIndexer.php,Weber,0%,0%,Invalid File!
-1/12/2012,PetflowShipment, Common/PHP/Models/PetflowShipment.php,Christian,0%,0%,Invalid File!
-1/12/2012,PetflowShipmentProduct, Common/PHP/Models/PetflowShipmentProduct.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PetflowShipmentValidator, Common/PHP/Security/Validators/PetflowShipmentValidator.php,George,0%,0%,Invalid File!
-1/12/2012,PetflowShippingZone, Common/PHP/Models/PetflowShippingZone.php,Matt,0%,0%,Invalid File!
-1/12/2012,PetflowSitePages, Common/PHP/Models/PetflowSitePages.php,Weber,0%,0%,Invalid File!
-1/12/2012,PetflowSupplier, Common/PHP/Models/PetflowSupplier.php,Christian,0%,0%,Invalid File!
-1/12/2012,PetflowSupplierInvoice, Common/PHP/Models/PetflowSupplierInvoice.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PetflowSupplierInvoiceLines, Common/PHP/Models/PetflowSupplierInvoiceLines.php,George,0%,0%,Invalid File!
-1/12/2012,PetflowSupplierInvoiceProduct, Common/PHP/Models/PetflowSupplierInvoiceProduct.php,Matt,0%,0%,Invalid File!
-1/12/2012,PetflowSupplierProduct, Common/PHP/Models/PetflowSupplierProduct.php,Weber,0%,0%,Invalid File!
-1/12/2012,PetflowTax, Common/PHP/Libraries/Tax/PetflowTax.php,Christian,0%,0%,Invalid File!
-1/12/2012,PetflowTestimonial, Common/PHP/Models/PetflowTestimonial.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PetflowUser, Common/PHP/Models/PetflowUser.php,George,0%,0%,Invalid File!
-1/12/2012,PetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PetflowUserDAO.php,Matt,0%,0%,Invalid File!
-1/12/2012,PetflowUserDTO, Common/PHP/Persistence/DataTransferObjects/PetflowUserDTO.php,Weber,0%,0%,Invalid File!
-1/12/2012,PetflowUserProfile, Common/PHP/Models/PetflowUserProfile.php,Christian,0%,0%,Invalid File!
-1/12/2012,PetflowUserValidator, Common/PHP/Security/Validators/PetflowUserValidator.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PetflowUTMValidator, Common/PHP/Security/Validators/PetflowUTMValidator.php,George,0%,0%,Invalid File!
-1/12/2012,PetflowWarehouse, Common/PHP/Models/PetflowWarehouse.php,Matt,0%,0%,Invalid File!
-1/12/2012,PetflowWarehouseOrderReceive, Common/PHP/Models/PetflowWarehouseOrderReceive.php,Weber,0%,0%,Invalid File!
-1/12/2012,PetflowWarehouseProduct, Common/PHP/Models/PetflowWarehouseProduct.php,Christian,0%,0%,Invalid File!
-1/12/2012,PetflowXHTMLBuilder, Common/PHP/TemplateProcessing/PetflowXHTMLBuilder.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PFWarehouseReceiveProduct, Common/PHP/Models/PFWarehouseReceiveProduct.php,George,0%,0%,Invalid File!
+1/11/2012,PetflowProgramLog, Common/PHP/Models/PetflowProgramLog.php,Weber,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getListForProgram @ #49
+* Hardcoded SQL IN getListForProgram @ #53
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN createRowForProgram @ #66
+* Hardcoded SQL IN createRowForProgram @ #70
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getProgram @ #82
+"
+1/11/2012,PetflowProgramOrder, Common/PHP/Models/PetflowProgramOrder.php,Christian,0%,0%,"* 2 Returns IN getOrderStatusTitle
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN loadById @ #127
+* Hardcoded SQL IN loadById @ #122
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForUser @ #139
+* Hardcoded SQL IN getListForUser @ #143
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getListForProgram @ #157
+* Hardcoded SQL IN getListForProgram @ #168
+* Hardcoded SQL IN getIdListForStateWarehouse @ #189
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN searchOrders @ #278
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN searchOrders @ #279
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN searchOrders @ #280
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN searchOrders @ #281
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN searchOrders @ #288
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN searchOrders @ #289
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN searchOrders @ #293
+* Hardcoded SQL IN searchOrders @ #274
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN createRowForProgram @ #311
+* Hardcoded SQL IN createRowForProgram @ #353
+* Hardcoded SQL IN createRowForProgram @ #357
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN updateRowForOrderPush @ #374
+* Hardcoded SQL IN updateRowForOrderPush @ #412
+* Hardcoded SQL IN getListForDateCityZip @ #430
+* Hardcoded SQL IN getExternalStatuses @ #453
+* Hardcoded SQL IN getInternalStatuses @ #468
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getUser @ #486
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getProgram @ #497
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN getLineItemList @ #508
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN getProductList @ #583
+* 2 Returns IN getProductBySid
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN getLogList @ #611
+* 2 Returns IN getTrackingLinkList
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getIdListForProduct @ #651
+* Hardcoded SQL IN getIdListForProduct @ #656
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getForProduct @ #667
+* Hardcoded SQL IN getForProduct @ #672
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getCountForProduct @ #683
+* Hardcoded SQL IN getCountForProduct @ #687
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getIdListForSize @ #698
+* Hardcoded SQL IN getIdListForSize @ #703
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getCountForSize @ #714
+* Hardcoded SQL IN getCountForSize @ #722
+* Hardcoded SQL IN changeReplacementFor @ #752
+* Hardcoded SQL IN changeTransactionNumber @ #761
+* Hardcoded SQL IN changeExternalOrderStatus @ #770
+* Hardcoded SQL IN changeTrackingNumber @ #781
+* Hardcoded SQL IN changeExternalData @ #799
+* Hardcoded SQL IN changeState @ #810
+* Hardcoded SQL IN changeShippingMethod @ #821
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN changeProcessedDate @ #858
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN changeProcessedDate @ #858
+* 3 Returns IN changeProcessedDate
+* Hardcoded SQL IN changeOrderTotal @ #871
+* Hardcoded SQL IN changeWarehouse @ #882
+* Hardcoded SQL IN changeProductCount @ #893
+* Hardcoded SQL IN getZoneId @ #909
+* Hardcoded SQL IN getZoneId @ #914
+* 3 Returns IN getZoneId
+* Hardcoded SQL IN getUTMSource @ #1014
+* 2 Returns IN getUTMSource
+* Hardcoded SQL IN getAllUTMSources @ #1038
+* 2 Returns IN getAllUTMSources
+* 5 Returns IN __get
+* 11 Returns IN getAddressField
+"
+1/11/2012,PetflowProgramOrderController, Common/PHP/Controllers/PetflowProgramOrderController.php,Gilbert,0%,0%,"* Hardcoded SQL IN getShippingMethodListFreight @ #19
+* Hardcoded SQL IN getShippingMethodList @ #31
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN __construct @ #63
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN addProduct @ #166
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN addProduct @ #167
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN removeProduct @ #197
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN addLogEntry @ #244
+* Dependency >> PetflowOrderLog @ Common/PHP/Models/PetflowOrderLog.php IN addLogEntry @ #247
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN addLineItem @ #278
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN removeLineItem @ #297
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN recalculateAllTotals @ #359
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createDuplicateOrder @ #374
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN createDuplicateOrder @ #375
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN createDuplicateOrder @ #383
+* Dependency >> PetflowOrderProduct @ Common/PHP/Models/PetflowOrderProduct.php IN createDuplicateOrder @ #384
+* Dependency >> PetflowOrderLineItem @ Common/PHP/Models/PetflowOrderLineItem.php IN createDuplicateOrder @ #390
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN setReplacement @ #405
+"
+1/11/2012,PetflowProgramOrderDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramOrderDAO/PetflowProgramOrderDAO.php,George,0%,0%,"* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN addProduct @ #70
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN removeProduct @ #90
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN correctShippedOrder @ #112
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN advanceOrderState @ #120
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN chargeOrder @ #144
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN processOrder @ #154
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN processOrder @ #155
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN trackOrder @ #173
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN trackingEmail @ #182
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN trackingEmail @ #190
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN trackingEmail @ #204
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN assembleOrder @ #222
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN nextState @ #229
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN recalculateOrderTotals @ #239
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN recalculateOrderTotals @ #240
+* 2 Returns IN calculateProductTotal
+* 2 Returns IN calculateItemCount
+* Dependency >> PetflowOrderLineItemDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowOrderLineItemDTO.php IN setDiscount @ #361
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN setDiscount @ #404
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getTaxRate @ #418
+* 2 Returns IN getTaxRate
+* Dependency >> PetflowProgramOrderDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php IN getAppliedCouponList @ #437
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN createNewOrderProduct @ #481
+* Dependency >> PetflowOrderProductDTO @ Common/PHP/Persistence/DataTransferObjects/PetflowOrderProductDTO.php IN createNewOrderProduct @ #485
+"
+1/11/2012,PetflowProgramOrderDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramOrderDTO.php,Matt,0%,0%,""
+1/11/2012,PetflowProgramProduct, Common/PHP/Models/PetflowProgramProduct.php,Weber,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getListForProgram @ #60
+* Hardcoded SQL IN getListForProgram @ #64
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN createRowForProgramFromTemplate @ #77
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN createRowForProgramFromTemplate @ #77
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN createRowForProgramFromTemplate @ #83
+* Hardcoded SQL IN createRowForProgramFromTemplate @ #81
+* Dependency >> PetflowProgramProduct @ Common/PHP/Models/PetflowProgramProduct.php IN deleteRow @ #90
+* Hardcoded SQL IN deleteRow @ #91
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getProgram @ #103
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getProduct @ #114
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #126
+* Hardcoded SQL IN getBrand @ #181
+* Hardcoded SQL IN incrementOrderCount @ #197
+* Requires DocBloc IN setOrderCount @ #200
+* Hardcoded SQL IN setOrderCount @ #205
+* Hardcoded SQL IN changeQuantity @ #219
+* 2 Returns IN __get
+"
+1/11/2012,PetflowProgramProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramProductDAO/PetflowProgramProductDAO.php,Christian,0%,0%,"* Requires DocBloc IN getListForProgram @ #28
+* Requires DocBloc IN changeQuantity @ #29
+"
+1/11/2012,PetflowProgramProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProgramProductDTO.php,Gilbert,0%,0%,""
+1/11/2012,PetflowProgramValidator, Common/PHP/Security/Validators/PetflowProgramValidator.php,George,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN validate @ #43
+"
+1/11/2012,PetflowPurchaseOrder, Common/PHP/Models/PetflowPurchaseOrder.php,Matt,0%,0%,"* Requires DocBloc IN getClassName @ #17
+* Requires DocBloc IN createPurchaseOrder @ #21
+* Hardcoded SQL IN createPurchaseOrder @ #27
+* Requires DocBloc IN getPurchaseOrderByID @ #30
+* Hardcoded SQL IN getPurchaseOrderByID @ #37
+* Requires DocBloc IN addPurchaseOrderNote @ #41
+* Hardcoded SQL IN addPurchaseOrderNote @ #45
+* Requires DocBloc IN getOpenPurchaseOrderBySupplierID @ #48
+* Hardcoded SQL IN getOpenPurchaseOrderBySupplierID @ #55
+* Requires DocBloc IN updatePurchaseOrderActionByID @ #58
+* Hardcoded SQL IN updatePurchaseOrderActionByID @ #62
+* Requires DocBloc IN updatePurchaseOrderStatusByID @ #65
+* Hardcoded SQL IN updatePurchaseOrderStatusByID @ #69
+* Requires DocBloc IN insertPurchaseOrderActionByID @ #72
+* Hardcoded SQL IN insertPurchaseOrderActionByID @ #79
+* Requires DocBloc IN insertPurchaseOrderStatusByID @ #82
+* Hardcoded SQL IN insertPurchaseOrderStatusByID @ #89
+* Requires DocBloc IN updatePurchaseOrderExpectedDate @ #92
+* Hardcoded SQL IN updatePurchaseOrderExpectedDate @ #96
+"
+1/11/2012,PetflowPurchaseOrderProduct, Common/PHP/Models/PetflowPurchaseOrderProduct.php,Weber,0%,0%,"* Requires DocBloc IN getClassName @ #17
+* Requires DocBloc IN insertOrderProduct @ #21
+* Hardcoded SQL IN insertOrderProduct @ #27
+* Requires DocBloc IN getPurchaseOrderProductByID @ #30
+* Hardcoded SQL IN getPurchaseOrderProductByID @ #107
+* Requires DocBloc IN updatePurchaseOrderProduct @ #110
+* Hardcoded SQL IN updatePurchaseOrderProduct @ #114
+* Requires DocBloc IN deletePurchaseOrderProduct @ #117
+* Hardcoded SQL IN deletePurchaseOrderProduct @ #120
+"
+1/11/2012,PetflowRegistrationManager, Common/PHP/Libraries/Registration/PetflowRegistrationManager.php,Christian,0%,0%,""
+1/11/2012,PetflowRequestProcessor, Common/PHP/RequestProcessors/PetflowRequestProcessor.php,Gilbert,0%,0%,"* 2 Returns IN getTemplateBuilder
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #61
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #63
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #66
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #120
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #128
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #135
+* 2 Returns IN getArrayToTemplate
+* 2 Returns IN postArrayToTemplate
+* 2 Returns IN getIntToTemplate
+* 2 Returns IN postIntToTemplate
+* 2 Returns IN getStrToTemplate
+* 2 Returns IN postStrToTemplate
+"
+1/11/2012,PetflowScheduledTask, Common/PHP/Models/PetflowScheduledTask.php,George,0%,0%,"* Dependency >> PetflowScheduledTask @ Common/PHP/Models/PetflowScheduledTask.php IN createRunRow @ #34
+* Hardcoded SQL IN createRunRow @ #38
+* Hardcoded SQL IN createRow @ #51
+* Hardcoded SQL IN getRunList @ #68
+"
+1/11/2012,PetflowSearch, Common/PHP/Classes/PetflowSearch.php,Matt,0%,0%,"* 2 Returns IN performSearch
+* Hardcoded SQL IN performAttributeSearch @ #179
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getProducts @ #206
+* 2 Returns IN getProducts
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getFeaturedProducts @ #312
+* Hardcoded SQL IN getFeaturedProducts @ #303
+"
+1/11/2012,PetflowSearchIndexer, Common/PHP/Classes/PetflowSearchIndexer.php,Weber,0%,0%,"* Hardcoded SQL IN logSearch @ #36
+* Hardcoded SQL IN recreateTermNodeRecord @ #77
+* Hardcoded SQL IN getOrCreateTermGroupIdByString @ #87
+* Hardcoded SQL IN getOrCreateTermGroupIdByString @ #93
+* Hardcoded SQL IN getOrCreateTermGroupIdByString @ #94
+* 2 Returns IN getOrCreateTermGroupIdByString
+* Hardcoded SQL IN getTermGroupIdByString @ #106
+* Hardcoded SQL IN findNodeListForTermGroupId @ #124
+* Hardcoded SQL IN findNodeListForTermGroupId @ #128
+* 2 Returns IN findNodeListForTermGroupId
+* Hardcoded SQL IN removeGroup @ #213
+* Hardcoded SQL IN removeGroup @ #214
+* Hardcoded SQL IN addGroupTerm @ #223
+* Hardcoded SQL IN addGroupTerm @ #229
+* Hardcoded SQL IN indexProductTitle @ #237
+* Hardcoded SQL IN indexProductTitle @ #248
+* Hardcoded SQL IN indexAllBrandTitles @ #257
+* Hardcoded SQL IN indexAllBrandTitles @ #261
+* Hardcoded SQL IN indexAllProductTitles @ #274
+* Hardcoded SQL IN addNodeToGroup @ #287
+* Hardcoded SQL IN addNodeToGroup @ #293
+* Hardcoded SQL IN getTermGroup @ #318
+* Hardcoded SQL IN getTermGroup @ #319
+* Hardcoded SQL IN getAllTerms @ #329
+* Hardcoded SQL IN purgeData @ #348
+* Hardcoded SQL IN purgeData @ #351
+* Hardcoded SQL IN purgeData @ #354
+"
+1/12/2012,PetflowShipment, Common/PHP/Models/PetflowShipment.php,Christian,0%,0%,"* Hardcoded SQL IN createRowForSupplierWarehouse @ #50
+* Dependency >> PurchaseOrder @ Common/PHP/Models/PurchaseOrder.php IN loadSupplierInvoice @ #78
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN loadSupplierInvoice @ #79
+* Hardcoded SQL IN loadSupplierInvoice @ #66
+* Hardcoded SQL IN loadSupplierInvoice @ #81
+* Hardcoded SQL IN loadSupplierInvoice @ #105
+* 4 Returns IN loadSupplierInvoice
+* Dependency >> PetflowShipmentProduct @ Common/PHP/Models/PetflowShipmentProduct.php IN getProductList @ #151
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN getSupplier @ #164
+* Dependency >> PetflowWarehouse @ Common/PHP/Models/PetflowWarehouse.php IN getWarehouse @ #177
+"
+1/12/2012,PetflowShipmentProduct, Common/PHP/Models/PetflowShipmentProduct.php,Gilbert,0%,0%,"* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getListForSize @ #39
+* Hardcoded SQL IN getListForSize @ #49
+* Dependency >> PetflowShipment @ Common/PHP/Models/PetflowShipment.php IN getListForShipment @ #65
+* Hardcoded SQL IN getListForShipment @ #75
+* Dependency >> PetflowShipment @ Common/PHP/Models/PetflowShipment.php IN createRowForSizeShipment @ #91
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN createRowForSizeShipment @ #91
+* Hardcoded SQL IN createRowForSizeShipment @ #95
+* Dependency >> PetflowShipmentProduct @ Common/PHP/Models/PetflowShipmentProduct.php IN deleteRow @ #107
+* Hardcoded SQL IN deleteRow @ #108
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #150
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #152
+* 2 Returns IN __get
+"
+1/12/2012,PetflowShipmentValidator, Common/PHP/Security/Validators/PetflowShipmentValidator.php,George,0%,0%,"* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN validate @ #54
+"
+1/12/2012,PetflowShippingZone, Common/PHP/Models/PetflowShippingZone.php,Matt,0%,0%,""
+1/12/2012,PetflowSitePages, Common/PHP/Models/PetflowSitePages.php,Weber,0%,0%,"* Hardcoded SQL IN createRowForSitePages @ #48
+* Hardcoded SQL IN updateSitePages @ #75
+* Hardcoded SQL IN getSitePageByTitle @ #85
+"
+1/12/2012,PetflowSupplier, Common/PHP/Models/PetflowSupplier.php,Christian,0%,0%,"* Hardcoded SQL IN createRow @ #41
+* Requires DocBloc IN getSupplierByID @ #58
+* Hardcoded SQL IN getSupplierByID @ #60
+* Dependency >> PetflowShipment @ Common/PHP/Models/PetflowShipment.php IN getShipmentList @ #73
+* Dependency >> PetflowSupplierProduct @ Common/PHP/Models/PetflowSupplierProduct.php IN getProductList @ #86
+"
+1/12/2012,PetflowSupplierInvoice, Common/PHP/Models/PetflowSupplierInvoice.php,Gilbert,0%,0%,"* Requires DocBloc IN createSupplierInvoice @ #104
+* Hardcoded SQL IN createSupplierInvoice @ #110
+* Requires DocBloc IN getPurchaseOrderAssociatedToInvoiceByID @ #114
+* Hardcoded SQL IN getPurchaseOrderAssociatedToInvoiceByID @ #116
+* Requires DocBloc IN getInvoiceByPurchaseOrderID @ #120
+* Hardcoded SQL IN getInvoiceByPurchaseOrderID @ #134
+* Requires DocBloc IN getSupplierInvoiceByID @ #139
+* Hardcoded SQL IN getSupplierInvoiceByID @ #144
+* Requires DocBloc IN updateSupplierInvoiceDate @ #148
+* Hardcoded SQL IN updateSupplierInvoiceDate @ #152
+* Requires DocBloc IN updateSupplierInvoiceStatus @ #156
+* Hardcoded SQL IN updateSupplierInvoiceStatus @ #160
+* Requires DocBloc IN insertSupplierInvoiceStatus @ #164
+* Hardcoded SQL IN insertSupplierInvoiceStatus @ #171
+* Requires DocBloc IN updateSupplierInvoiceNote @ #175
+* Hardcoded SQL IN updateSupplierInvoiceNote @ #179
+* Requires DocBloc IN saveSupplierInvoiceAndPurchaseID @ #182
+* Hardcoded SQL IN saveSupplierInvoiceAndPurchaseID @ #189
+* Requires DocBloc IN getInvoiceStatusHistoryByID @ #192
+* Hardcoded SQL IN getInvoiceStatusHistoryByID @ #206
+* Requires DocBloc IN getInvoiceAdditionalLineHistory @ #209
+* Hardcoded SQL IN getInvoiceAdditionalLineHistory @ #263
+* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN getSupplierInvoiceHistory @ #268
+* Requires DocBloc IN getSupplierInvoiceHistory @ #266
+* Hardcoded SQL IN getSupplierInvoiceHistory @ #287
+"
+1/12/2012,PetflowSupplierInvoiceLines, Common/PHP/Models/PetflowSupplierInvoiceLines.php,George,0%,0%,"* Requires DocBloc IN insertInvoiceLineItems @ #75
+* Hardcoded SQL IN insertInvoiceLineItems @ #84
+* Requires DocBloc IN addAdditionalInvoiceLines @ #87
+* Hardcoded SQL IN addAdditionalInvoiceLines @ #91
+* Requires DocBloc IN getInvoiceLineByID @ #95
+* Hardcoded SQL IN getInvoiceLineByID @ #108
+* Requires DocBloc IN updateInvoiceLineByID @ #112
+* Hardcoded SQL IN updateInvoiceLineByID @ #117
+* Requires DocBloc IN updateInvoiceLineNoteByID @ #120
+* Hardcoded SQL IN updateInvoiceLineNoteByID @ #124
+* Requires DocBloc IN getAdditionLineItemsByID @ #128
+* Hardcoded SQL IN getAdditionLineItemsByID @ #147
+* Requires DocBloc IN deleteLineItemByID @ #150
+* Hardcoded SQL IN deleteLineItemByID @ #152
+"
+1/12/2012,PetflowSupplierInvoiceProduct, Common/PHP/Models/PetflowSupplierInvoiceProduct.php,Matt,0%,0%,"* Requires DocBloc IN getInvoiceProductsByInvoiceID @ #35
+* Hardcoded SQL IN getInvoiceProductsByInvoiceID @ #52
+* Requires DocBloc IN insertInvoiceProductLines @ #55
+* Hardcoded SQL IN insertInvoiceProductLines @ #63
+* Requires DocBloc IN removeProductByLineID @ #66
+* Hardcoded SQL IN removeProductByLineID @ #68
+* Requires DocBloc IN updateProductByLineID @ #71
+* Hardcoded SQL IN updateProductByLineID @ #75
+"
+1/12/2012,PetflowSupplierProduct, Common/PHP/Models/PetflowSupplierProduct.php,Weber,0%,0%,"* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getListForSize @ #34
+* Hardcoded SQL IN getListForSize @ #41
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN getListForSupplier @ #54
+* Hardcoded SQL IN getListForSupplier @ #61
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN createRowForSizeSupplier @ #76
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN createRowForSizeSupplier @ #76
+* Hardcoded SQL IN createRowForSizeSupplier @ #80
+"
+1/12/2012,PetflowTax, Common/PHP/Libraries/Tax/PetflowTax.php,Christian,0%,0%,"* Hardcoded SQL IN getTaxRate @ #23
+* Hardcoded SQL IN getTaxRate @ #35
+"
+1/12/2012,PetflowTestimonial, Common/PHP/Models/PetflowTestimonial.php,Gilbert,0%,0%,"* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #30
+* Hardcoded SQL IN getListForInterval @ #49
+"
+1/12/2012,PetflowUser, Common/PHP/Models/PetflowUser.php,George,0%,0%,"* Hardcoded SQL IN __construct @ #111
+* Hardcoded SQL IN loadByEmail @ #135
+* 2 Returns IN loadByEmail
+* Hardcoded SQL IN loadByEmailPass @ #152
+* 2 Returns IN loadByEmailPass
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN loadById @ #173
+* Hardcoded SQL IN loadById @ #213
+* 4 Returns IN loadById
+* Hardcoded SQL IN convertAndReturnNonAnonymous @ #249
+* Hardcoded SQL IN convertAndReturnNonAnonymous @ #260
+* Hardcoded SQL IN convertAndReturnNonAnonymous @ #263
+* Hardcoded SQL IN convertAndReturnNonAnonymous @ #266
+* 2 Returns IN convertAndReturnNonAnonymous
+* 2 Returns IN getActiveUserId
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getActiveUser @ #338
+* 4 Returns IN getActiveUser
+* Hardcoded SQL IN getProfile @ #433
+* 3 Returns IN getProfile
+* Hardcoded SQL IN isEmailAvailable @ #528
+* 2 Returns IN isEmailAvailable
+* Hardcoded SQL IN create @ #596
+* Hardcoded SQL IN create @ #601
+* 3 Returns IN create
+* Hardcoded SQL IN save @ #647
+* Hardcoded SQL IN save @ #656
+* 2 Returns IN save
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getActiveProgram @ #694
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getActiveProgram @ #695
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getActiveProgram @ #699
+* Hardcoded SQL IN getActiveProgram @ #690
+* 2 Returns IN getActiveProgram
+* Hardcoded SQL IN canAccessProgram @ #727
+* 2 Returns IN canAccessProgram
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getAllPrograms @ #749
+* Hardcoded SQL IN getAllPrograms @ #746
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getActivePrograms @ #781
+* Hardcoded SQL IN getActivePrograms @ #770
+* Hardcoded SQL IN getEmailById @ #796
+* 2 Returns IN getEmailById
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getPrimaryAddress @ #814
+* Hardcoded SQL IN getPrimaryAddress @ #812
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getAddresses @ #832
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getAddresses @ #835
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getAddresses @ #838
+* Hardcoded SQL IN getAddresses @ #837
+* 2 Returns IN getAddresses
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getAddressList @ #853
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPaymentList @ #867
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPrimaryPaymentOption @ #882
+* Hardcoded SQL IN getPrimaryPaymentOption @ #880
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPaymentOptions @ #900
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPaymentOptions @ #903
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getPaymentOptions @ #906
+* Hardcoded SQL IN getPaymentOptions @ #905
+* 2 Returns IN getPaymentOptions
+* Hardcoded SQL IN resetPassword @ #927
+* 2 Returns IN resetPassword
+* Hardcoded SQL IN getUsersByEmail @ #948
+* Hardcoded SQL IN getUsersByName @ #967
+* Hardcoded SQL IN getListForFirstLast @ #989
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN getListForNameStateAddressMailPhone @ #1040
+* Hardcoded SQL IN getListForNameStateAddressMailPhone @ #1039
+* Hardcoded SQL IN changeTaxExempt @ #1058
+* Hardcoded SQL IN updateUserName @ #1072
+* Hardcoded SQL IN updateUserName @ #1076
+* Hardcoded SQL IN updateUserInfo @ #1115
+* Hardcoded SQL IN addUTMSource @ #1190
+* Hardcoded SQL IN addUTMSource @ #1201
+* Hardcoded SQL IN addUTMSource @ #1203
+"
+1/12/2012,PetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PetflowUserDAO.php,Matt,0%,0%,""
+1/12/2012,PetflowUserDTO, Common/PHP/Persistence/DataTransferObjects/PetflowUserDTO.php,Weber,0%,0%,""
+1/12/2012,PetflowUserProfile, Common/PHP/Models/PetflowUserProfile.php,Christian,0%,0%,"* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN __construct @ #30
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN __construct @ #35
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getProfileByUsername @ #44
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getProfileByUsername @ #46
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getProfileByUserID @ #54
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getProfileByUserID @ #57
+* Hardcoded SQL IN getProfileByUserID @ #56
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN saveProfile @ #65
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN saveProfile @ #67
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN updateProfile @ #76
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN updateProfile @ #84
+* Hardcoded SQL IN updateProfile @ #79
+* Hardcoded SQL IN updateProfile @ #80
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN createProfile @ #93
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN createProfile @ #102
+* Hardcoded SQL IN createProfile @ #96
+* Hardcoded SQL IN createProfile @ #97
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getUserProfile @ #110
+* Dependency >> PetflowUserProfile @ Common/PHP/Models/PetflowUserProfile.php IN getUserProfile @ #112
+"
+1/12/2012,PetflowUserValidator, Common/PHP/Security/Validators/PetflowUserValidator.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN validate @ #30
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN userLogin @ #93
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN userLogin @ #96
+* Hardcoded SQL IN userLogin @ #81
+* 2 Returns IN userLogin
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN userRegister @ #156
+* 5 Returns IN userRegister
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN userResetPassword @ #185
+* 2 Returns IN userResetPassword
+* Requires DocBloc IN validateEditAccountDetails @ #199
+"
+1/12/2012,PetflowUTMValidator, Common/PHP/Security/Validators/PetflowUTMValidator.php,George,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN validate @ #51
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN recordUTMCampaign @ #73
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN recordUTMMedium @ #86
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN recordUTMSource @ #99
+"
+1/12/2012,PetflowWarehouse, Common/PHP/Models/PetflowWarehouse.php,Matt,0%,0%,"* Dependency >> PetflowShipment @ Common/PHP/Models/PetflowShipment.php IN getShipmentList @ #86
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN getProductList @ #101
+* Hardcoded SQL IN getTitleList @ #113
+* Hardcoded SQL IN getTitle @ #125
+* 2 Returns IN getTitle
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #165
+"
+1/12/2012,PetflowWarehouseOrderReceive, Common/PHP/Models/PetflowWarehouseOrderReceive.php,Weber,0%,0%,"* Requires DocBloc IN getClassName @ #18
+* Requires DocBloc IN getPurchaseOrderReceiveByID @ #21
+* Hardcoded SQL IN getPurchaseOrderReceiveByID @ #34
+* Requires DocBloc IN getWarehouseReceivedByID @ #39
+* Hardcoded SQL IN getWarehouseReceivedByID @ #44
+* Requires DocBloc IN createOrderReceive @ #49
+* Hardcoded SQL IN createOrderReceive @ #54
+* Requires DocBloc IN updateWarehouseReceivedate @ #58
+* Hardcoded SQL IN updateWarehouseReceivedate @ #63
+* Requires DocBloc IN updateWarehouseBillOfLading @ #66
+* Hardcoded SQL IN updateWarehouseBillOfLading @ #71
+"
+1/12/2012,PetflowWarehouseProduct, Common/PHP/Models/PetflowWarehouseProduct.php,Christian,0%,0%,"* Hardcoded SQL IN getListForWarehouseLeastUpdated @ #68
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getListForSize @ #81
+* Hardcoded SQL IN getListForSize @ #92
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN getListForSupplier @ #107
+* Hardcoded SQL IN getListForSupplier @ #118
+* Dependency >> PetflowWarehouse @ Common/PHP/Models/PetflowWarehouse.php IN getListForWarehouse @ #133
+* Hardcoded SQL IN getListForWarehouse @ #139
+* Hardcoded SQL IN getAssignedStockCounts @ #200
+* Hardcoded SQL IN loadBySizeWarehouse @ #224
+* Hardcoded SQL IN loadBySizeWarehouse @ #232
+* 2 Returns IN loadBySizeWarehouse
+* Hardcoded SQL IN createForSizeWarehouse @ #248
+* Requires DocBloc IN changeProductQty @ #251
+* Hardcoded SQL IN changeProductQty @ #254
+* Hardcoded SQL IN changeQty @ #275
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #293
+* 2 Returns IN __get
+"
+1/12/2012,PetflowXHTMLBuilder, Common/PHP/TemplateProcessing/PetflowXHTMLBuilder.php,Gilbert,0%,0%,""
+1/12/2012,PFWarehouseReceiveProduct, Common/PHP/Models/PFWarehouseReceiveProduct.php,George,0%,0%,"* Requires DocBloc IN getClassName @ #18
+* Requires DocBloc IN insertWarehouseReceiveProduct @ #22
+* Hardcoded SQL IN insertWarehouseReceiveProduct @ #29
+* Requires DocBloc IN updateWarehouseReceiveProductQty @ #32
+* Hardcoded SQL IN updateWarehouseReceiveProductQty @ #36
+* Requires DocBloc IN getProductReceivedByID @ #39
+* Hardcoded SQL IN getProductReceivedByID @ #56
+* Requires DocBloc IN getWarehouseReceiveHistoryByID @ #59
+* Hardcoded SQL IN getWarehouseReceiveHistoryByID @ #77
+* Requires DocBloc IN getWarehouseProductHistoryByID @ #80
+* Hardcoded SQL IN getWarehouseProductHistoryByID @ #128
+* Requires DocBloc IN removeProductReceived @ #136
+* Hardcoded SQL IN removeProductReceived @ #138
+* Requires DocBloc IN getSupplierInvoiceProductHistoryArray @ #141
+* Hardcoded SQL IN getSupplierInvoiceProductHistoryArray @ #211
+* Requires DocBloc IN getSupplierInvoiceAdditionalProductHistoryArray @ #221
+* Hardcoded SQL IN getSupplierInvoiceAdditionalProductHistoryArray @ #280
+"
 1/12/2012,PGSQLPetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PGSQLPetflowAddressDAO.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
@@ -302,83 +1420,384 @@
 1/12/2012,PGSQLPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PGSQLPetflowProgramDAO.php,George,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
-1/12/2012,PGSQLPetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PGSQLPetflowUserDAO.php,Matt,0%,0%,Invalid File!
-1/12/2012,ProductController, Common/PHP/Controllers/ProductController.php,Weber,0%,0%,Invalid File!
-1/12/2012,ProductFeed, Common/PHP/Feed/ProductFeed.php,Christian,0%,0%,Invalid File!
-1/12/2012,ProductFeedManager, Common/PHP/Feed/ProductFeedManager.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PurchaseOrder, Common/PHP/Models/PurchaseOrder.php,George,0%,0%,Invalid File!
-1/12/2012,PurchaseOrderActionLog, Common/PHP/Models/PurchaseOrderActionLog.php,Matt,0%,0%,Invalid File!
-1/12/2012,PurchaseOrderController, Common/PHP/Controllers/PurchaseOrderController.php,Weber,0%,0%,Invalid File!
-1/12/2012,PurchaseOrderLog, Common/PHP/Models/PurchaseOrderLog.php,Christian,0%,0%,Invalid File!
-1/12/2012,PurchaseOrderProduct, Common/PHP/Models/PurchaseOrderProduct.php,Gilbert,0%,0%,Invalid File!
+1/12/2012,PGSQLPetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PGSQLPetflowUserDAO.php,Matt,0%,0%,""
+1/12/2012,ProductController, Common/PHP/Controllers/ProductController.php,Weber,0%,0%,"* 2 Returns IN getAttributeSet
+* Hardcoded SQL IN addAttribute @ #54
+* Hardcoded SQL IN addAttribute @ #57
+* Hardcoded SQL IN addAttribute @ #59
+* Hardcoded SQL IN staticInit @ #69
+* Hardcoded SQL IN staticInit @ #72
+"
+1/12/2012,ProductFeed, Common/PHP/Feed/ProductFeed.php,Christian,0%,0%,"* Hardcoded SQL IN getProductCategories @ #21
+* Hardcoded SQL IN getLifestyles @ #31
+* Hardcoded SQL IN getSpecialConditions @ #41
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN getProductList @ #144
+* Requires DocBloc IN getProductList @ #143
+"
+1/12/2012,ProductFeedManager, Common/PHP/Feed/ProductFeedManager.php,Gilbert,0%,0%,"* Requires DocBloc IN ProductFeedManager @ #3
+* Requires DocBloc IN renderGoogleFeed @ #10
+* Requires DocBloc IN renderSafeString @ #14
+* Requires DocBloc IN validateImages @ #22
+* Requires DocBloc IN truncateString @ #43
+* 2 Returns IN truncateString
+* Requires DocBloc IN validateProductUPC @ #53
+* Requires DocBloc IN calculateProductOriginalCost @ #70
+* 2 Returns IN calculateProductOriginalCost
+* Requires DocBloc IN write @ #78
+"
+1/12/2012,PurchaseOrder, Common/PHP/Models/PurchaseOrder.php,George,0%,0%,"* Dependency >> PurchaseOrderProduct @ Common/PHP/Models/PurchaseOrderProduct.php IN findUnusedID @ #99
+* Hardcoded SQL IN findUnusedID @ #90
+* 2 Returns IN findUnusedID
+* Hardcoded SQL IN getExpectedReceivedDate @ #114
+* 2 Returns IN getExpectedReceivedDate
+* Dependency >> SupplierInvoice @ Common/PHP/Models/SupplierInvoice.php IN getInvoice @ #137
+* Hardcoded SQL IN getListForDateRangeSupplierWarehouseStatus @ #177
+* Hardcoded SQL IN getNote @ #192
+* 2 Returns IN getNote
+* Dependency >> PurchaseOrderProduct @ Common/PHP/Models/PurchaseOrderProduct.php IN getProductList @ #213
+* Dependency >> PetflowSupplier @ Common/PHP/Models/PetflowSupplier.php IN getSupplier @ #225
+* Hardcoded SQL IN getSupplierId @ #237
+* Hardcoded SQL IN getSupplierWarehouse @ #254
+* 2 Returns IN getSupplierWarehouse
+* Dependency >> PetflowWarehouse @ Common/PHP/Models/PetflowWarehouse.php IN getWarehouse @ #277
+* Hardcoded SQL IN getWarehouseId @ #289
+* Hardcoded SQL IN getWarehouseNameById @ #306
+* 2 Returns IN getWarehouseNameById
+* Hardcoded SQL IN listByWarehouse @ #331
+* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN report @ #390
+* Hardcoded SQL IN report @ #387
+* Hardcoded SQL IN setNote @ #447
+* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN tableHistory @ #470
+* Hardcoded SQL IN tableHistory @ #467
+"
+1/12/2012,PurchaseOrderActionLog, Common/PHP/Models/PurchaseOrderActionLog.php,Matt,0%,0%,"* Hardcoded SQL IN latestAction @ #31
+* Hardcoded SQL IN latestStatus @ #53
+* Hardcoded SQL IN listActions @ #73
+* Hardcoded SQL IN listStatus @ #91
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN setAction @ #123
+* Hardcoded SQL IN setAction @ #113
+* Hardcoded SQL IN setAction @ #124
+* 2 Returns IN setAction
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN setStatus @ #168
+* Hardcoded SQL IN setStatus @ #158
+* Hardcoded SQL IN setStatus @ #169
+* 2 Returns IN setStatus
+* Hardcoded SQL IN tableHistory @ #204
+"
+1/12/2012,PurchaseOrderController, Common/PHP/Controllers/PurchaseOrderController.php,Weber,0%,0%,"* Requires DocBloc IN getStatusList @ #12
+* Requires DocBloc IN getInvoiceStatusList @ #16
+* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN getActionsList @ #21
+* Requires DocBloc IN getActionsList @ #20
+* Requires DocBloc IN getPurchaseOrderAndSupplierDetailsByID @ #24
+* Hardcoded SQL IN getPurchaseOrderAndSupplierDetailsByID @ #45
+* Requires DocBloc IN getPurchaseOrderProductDetailsByID @ #49
+* Hardcoded SQL IN getPurchaseOrderProductDetailsByID @ #86
+* Requires DocBloc IN getPurchaseOrderProductDetailsByPOID @ #90
+* Hardcoded SQL IN getPurchaseOrderProductDetailsByPOID @ #127
+* Requires DocBloc IN getPurchaseOrderHistory @ #130
+* Hardcoded SQL IN getPurchaseOrderHistory @ #157
+* Requires DocBloc IN getPurchaseOrderActionHistory @ #160
+* Hardcoded SQL IN getPurchaseOrderActionHistory @ #175
+* Requires DocBloc IN getPurchaseOrderStatusHistory @ #178
+* Hardcoded SQL IN getPurchaseOrderStatusHistory @ #193
+* Requires DocBloc IN getPurchaseOrderProductHistory @ #196
+* Hardcoded SQL IN getPurchaseOrderProductHistory @ #218
+* Requires DocBloc IN getPurchaseOrderProductHistoryArray @ #221
+* Hardcoded SQL IN getPurchaseOrderProductHistoryArray @ #275
+"
+1/12/2012,PurchaseOrderLog, Common/PHP/Models/PurchaseOrderLog.php,Christian,0%,0%,"* Hardcoded SQL IN poProductHistoryList @ #33
+* Hardcoded SQL IN tableHistory @ #61
+"
+1/12/2012,PurchaseOrderProduct, Common/PHP/Models/PurchaseOrderProduct.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN addPurchaseOrder @ #36
+* Hardcoded SQL IN addPurchaseOrder @ #41
+* Hardcoded SQL IN addPurchaseOrder @ #58
+* Hardcoded SQL IN delPurchaseOrder @ #114
+* Hardcoded SQL IN delPurchaseOrder @ #120
+* 2 Returns IN delPurchaseOrder
+* Hardcoded SQL IN findId @ #139
+* 2 Returns IN findId
+* Hardcoded SQL IN getListForOrder @ #164
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #191
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getSize @ #193
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertPurchaseOrder @ #239
+* Hardcoded SQL IN insertPurchaseOrder @ #219
+* Hardcoded SQL IN insertPurchaseOrder @ #231
+* Hardcoded SQL IN insertPurchaseOrder @ #241
+* Hardcoded SQL IN listByPO @ #268
+* Hardcoded SQL IN setNote @ #320
+* Hardcoded SQL IN tableHistory @ #343
+* Hardcoded SQL IN toCSV @ #395
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN updatePurchaseOrder @ #428
+* Hardcoded SQL IN updatePurchaseOrder @ #455
+"
 1/12/2012,Random, Common/PHP/Libraries/Crypto/Crypt/Random.php,George,0%,0%,Invalid File!
-1/12/2012,RC4, Common/PHP/Libraries/Crypto/Crypt/RC4.php,Matt,0%,0%,Invalid File!
-1/12/2012,recaptchalib, Common/PHP/Libraries/ReCaptcha/recaptchalib.php,Weber,0%,0%,Invalid File!
-1/12/2012,RegistrationNewFormValidator, Common/PHP/Security/Validators/RegistrationNewFormValidator.php,Christian,0%,0%,Invalid File!
-1/12/2012,RequireAdminRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireAdminRoleLoggedInDecorator.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,RequireCustomerServiceRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireCustomerServiceRoleLoggedInDecorator.php,George,0%,0%,Invalid File!
-1/12/2012,RequireExecutiveRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireExecutiveRoleLoggedInDecorator.php,Matt,0%,0%,Invalid File!
-1/12/2012,RequireFinanceControlRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireFinanceControlRoleLoggedInDecorator.php,Weber,0%,0%,Invalid File!
-1/12/2012,RequireFinanceRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireFinanceRoleLoggedInDecorator.php,Christian,0%,0%,Invalid File!
-1/12/2012,RequireLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireLoggedInDecorator.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,RequireMarketingRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireMarketingRoleLoggedInDecorator.php,George,0%,0%,Invalid File!
-1/12/2012,RequireOperationsRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireOperationsRoleLoggedInDecorator.php,Matt,0%,0%,Invalid File!
-1/12/2012,RequireSuperAdminRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireSuperAdminRoleLoggedInDecorator.php,Weber,0%,0%,Invalid File!
-1/13/2012,ResizeImageContentManipulationRoutine, Common/PHP/CMS/Routines/ImageContent/ResizeImageContentManipulationRoutine.php,Christian,0%,0%,Invalid File!
-1/13/2012,RFCEmailValidator, Common/PHP/Security/Validators/RFCEmailValidator.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,Rijndael, Common/PHP/Libraries/Crypto/Crypt/Rijndael.php,George,0%,0%,Invalid File!
-1/13/2012,RSA, Common/PHP/Libraries/Crypto/Crypt/RSA.php,Matt,0%,0%,Invalid File!
-1/13/2012,SaveApplicationConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/SaveApplicationConfigCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/13/2012,SaveFrameworkConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/SaveFrameworkConfigCoreeGlooRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/13/2012,SaveSystemConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/SaveSystemConfigCoreeGlooRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,SearchFactory, Common/PHP/Classes/SearchFactory.php,George,0%,0%,Invalid File!
-1/13/2012,SecureExecutionPath, Common/PHP/Security/SecureExecutionPath.php,Matt,0%,0%,Invalid File!
-1/13/2012,SecurityRoutine, Common/PHP/Security/SecurityRoutine.php,Weber,0%,0%,Invalid File!
+1/12/2012,RC4, Common/PHP/Libraries/Crypto/Crypt/RC4.php,Matt,0%,0%,"* 2 Returns IN _crypt
+"
+1/12/2012,recaptchalib, Common/PHP/Libraries/ReCaptcha/recaptchalib.php,Weber,0%,0%,""
+1/12/2012,RegistrationNewFormValidator, Common/PHP/Security/Validators/RegistrationNewFormValidator.php,Christian,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN validate @ #30
+* 4 Returns IN validate
+"
+1/12/2012,RequireAdminRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireAdminRoleLoggedInDecorator.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN __checkPermittedRoles @ #51
+"
+1/12/2012,RequireCustomerServiceRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireCustomerServiceRoleLoggedInDecorator.php,George,0%,0%,""
+1/12/2012,RequireExecutiveRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireExecutiveRoleLoggedInDecorator.php,Matt,0%,0%,""
+1/12/2012,RequireFinanceControlRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireFinanceControlRoleLoggedInDecorator.php,Weber,0%,0%,""
+1/12/2012,RequireFinanceRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireFinanceRoleLoggedInDecorator.php,Christian,0%,0%,""
+1/12/2012,RequireLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireLoggedInDecorator.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN requestPreProcessing @ #27
+"
+1/12/2012,RequireMarketingRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireMarketingRoleLoggedInDecorator.php,George,0%,0%,""
+1/12/2012,RequireOperationsRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireOperationsRoleLoggedInDecorator.php,Matt,0%,0%,""
+1/12/2012,RequireSuperAdminRoleLoggedInDecorator, Common/PHP/RequestProcessors/Decorators/RequireSuperAdminRoleLoggedInDecorator.php,Weber,0%,0%,""
+1/13/2012,ResizeImageContentManipulationRoutine, Common/PHP/CMS/Routines/ImageContent/ResizeImageContentManipulationRoutine.php,Christian,0%,0%,"* 3 Returns IN resizeImage
+* 2 Returns IN imageOverlay
+"
+1/13/2012,RFCEmailValidator, Common/PHP/Security/Validators/RFCEmailValidator.php,Gilbert,0%,0%,"* Requires DocBloc IN RFCEmailValidator @ #16
+* 23 Returns IN is_valid_email_address
+"
+1/13/2012,Rijndael, Common/PHP/Libraries/Crypto/Crypt/Rijndael.php,George,0%,0%,"* 2 Returns IN _pad
+* 3 Returns IN _unpad
+"
+1/13/2012,RSA, Common/PHP/Libraries/Crypto/Crypt/RSA.php,Matt,0%,0%,"* 4 Returns IN createKey
+* 3 Returns IN _convertPublicKey
+* 17 Returns IN _parseKey
+* 2 Returns IN loadKey
+* 2 Returns IN getPublicKey
+* 2 Returns IN _encodeLength
+* 2 Returns IN _i2osp
+* 2 Returns IN _exponentiate
+* 2 Returns IN _rsaep
+* 2 Returns IN _rsadp
+* 2 Returns IN _rsasp1
+* 2 Returns IN _rsavp1
+* 2 Returns IN _rsaes_oaep_encrypt
+* 5 Returns IN _rsaes_oaep_decrypt
+* 2 Returns IN _rsaes_pkcs1_v1_5_encrypt
+* 5 Returns IN _rsaes_pkcs1_v1_5_decrypt
+* 2 Returns IN _emsa_pss_encode
+* 5 Returns IN _emsa_pss_verify
+* 4 Returns IN _rsassa_pss_verify
+* 3 Returns IN _emsa_pkcs1_v1_5_encode
+* 2 Returns IN _rsassa_pkcs1_v1_5_sign
+* 5 Returns IN _rsassa_pkcs1_v1_5_verify
+* 4 Returns IN encrypt
+* 3 Returns IN decrypt
+* 3 Returns IN sign
+* 3 Returns IN verify
+"
+1/13/2012,SaveApplicationConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/SaveApplicationConfigCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/13/2012,SaveFrameworkConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/SaveFrameworkConfigCoreeGlooRequestProcessor.php,Christian,0%,0%,""
+1/13/2012,SaveSystemConfigCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/SaveSystemConfigCoreeGlooRequestProcessor.php,Gilbert,0%,0%,""
+1/13/2012,SearchFactory, Common/PHP/Classes/SearchFactory.php,George,0%,0%,"* Requires DocBloc IN search @ #15
+"
+1/13/2012,SecureExecutionPath, Common/PHP/Security/SecureExecutionPath.php,Matt,0%,0%,"* Requires DocBloc IN __invoke @ #43
+"
+1/13/2012,SecurityRoutine, Common/PHP/Security/SecurityRoutine.php,Weber,0%,0%,"* Requires DocBloc IN checkRole @ #43
+* 2 Returns IN checkRole
+"
 1/13/2012,Session, Common/PHP/Models/Session.php,Christian,0%,0%,Invalid File!
-1/13/2012,SessionDecorator, Common/PHP/RequestProcessors/Decorators/SessionDecorator.php,Gilbert,0%,0%,Invalid File!
+1/13/2012,SessionDecorator, Common/PHP/RequestProcessors/Decorators/SessionDecorator.php,Gilbert,0%,0%,""
 1/13/2012,SessionHandler, Common/PHP/Controllers/SessionHandler.php,George,0%,0%,"* Requires DocBloc IN  @ #0
 * Requires DocBloc IN  @ #0
 "
-1/13/2012,SFTP, Common/PHP/Libraries/Crypto/Net/SFTP.php,Matt,0%,0%,Invalid File!
-1/13/2012,SFTPController, Common/PHP/Controllers/SFTPController.php,Weber,0%,0%,Invalid File!
-1/13/2012,ShippingCalculator, Common/PHP/Libraries/Shipping/ShippingCalculator.php,Christian,0%,0%,Invalid File!
-1/13/2012,SimpleCaptcha, Common/PHP/Libraries/CoolPHPCaptcha/SimpleCaptcha.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,Snapfulfil, Common/PHP/Libraries/Warehouse/Snapfulfil.php,George,0%,0%,Invalid File!
+1/13/2012,SFTP, Common/PHP/Libraries/Crypto/Net/SFTP.php,Matt,0%,0%,"* 9 Returns IN login
+* 7 Returns IN _realpath
+* 8 Returns IN chdir
+* Requires DocBloc IN _list @ #581
+* 12 Returns IN _list
+* 6 Returns IN size
+* 9 Returns IN chmod
+* 6 Returns IN mkdir
+* 6 Returns IN rmdir
+* 12 Returns IN put
+* 2 Returns IN _read_put_responses
+* 16 Returns IN get
+* 6 Returns IN delete
+* 6 Returns IN rename
+* 3 Returns IN _get_sftp_packet
+* 3 Returns IN getSFTPLog
+"
+1/13/2012,SFTPController, Common/PHP/Controllers/SFTPController.php,Weber,0%,0%,""
+1/13/2012,ShippingCalculator, Common/PHP/Libraries/Shipping/ShippingCalculator.php,Christian,0%,0%,""
+1/13/2012,SimpleCaptcha, Common/PHP/Libraries/CoolPHPCaptcha/SimpleCaptcha.php,Gilbert,0%,0%,"* Requires DocBloc IN __construct @ #115
+* Requires DocBloc IN CreateImage @ #118
+* 4 Returns IN GetDictionaryCaptchaText
+"
+1/13/2012,Snapfulfil, Common/PHP/Libraries/Warehouse/Snapfulfil.php,George,0%,0%,"* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN refreshInventory @ #37
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN refreshInventory @ #39
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN refreshInventory @ #43
+* Dependency >> PetflowWarehouseProduct @ Common/PHP/Models/PetflowWarehouseProduct.php IN refreshInventory @ #45
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN generatePurchaseOrderList @ #442
+"
 1/13/2012,sock, Common/PHP/Libraries/Plugins/Nextopia/sock.php,Matt,0%,0%,Invalid File!
-1/13/2012,SSH1, Common/PHP/Libraries/Crypto/Net/SSH1.php,Weber,0%,0%,Invalid File!
-1/13/2012,SSH2, Common/PHP/Libraries/Crypto/Net/SSH2.php,Christian,0%,0%,Invalid File!
-1/13/2012,StoreContentController, Common/PHP/Controllers/StoreContentController.php,Gilbert,0%,0%,Invalid File!
+1/13/2012,SSH1, Common/PHP/Libraries/Crypto/Net/SSH1.php,Weber,0%,0%,"* 6 Returns IN Net_SSH1
+* 8 Returns IN login
+* 5 Returns IN exec
+* 4 Returns IN _initShell
+* 4 Returns IN interactiveWrite
+* 4 Returns IN interactiveRead
+* 2 Returns IN _get_binary_packet
+* 2 Returns IN _send_binary_packet
+* 2 Returns IN _rsa_crypt
+"
+1/13/2012,SSH2, Common/PHP/Libraries/Crypto/Net/SSH2.php,Christian,0%,0%,"* 5 Returns IN Net_SSH2
+* 17 Returns IN _key_exchange
+* 11 Returns IN login
+* 9 Returns IN _privatekey_login
+* 7 Returns IN exec
+* 3 Returns IN _get_binary_packet
+* 6 Returns IN _filter
+* 10 Returns IN _get_channel_packet
+* 2 Returns IN _send_binary_packet
+* 4 Returns IN _send_channel_packet
+* 4 Returns IN getLog
+* 7 Returns IN getServerPublicHostKey
+"
+1/13/2012,StoreContentController, Common/PHP/Controllers/StoreContentController.php,Gilbert,0%,0%,"* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN publishBrand @ #38
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN publishProduct @ #53
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN publishSize @ #68
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN unpublishBrand @ #85
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN unpublishProduct @ #97
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN unpublishSize @ #120
+* Hardcoded SQL IN unpublishSize @ #166
+* Hardcoded SQL IN unpublishSize @ #183
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN discontinueBrand @ #218
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN discontinueProduct @ #231
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN discontinueSize @ #245
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN deleteBrand @ #262
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN deleteBrand @ #266
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN deleteProduct @ #273
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN deleteProduct @ #276
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN deleteProduct @ #282
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN deleteSize @ #289
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN deleteSize @ #292
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN deleteSize @ #296
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN deleteSize @ #300
+"
 1/13/2012,str_split, Common/PHP/Libraries/Crypto/PHP/Compat/Function/str_split.php,George,0%,0%,Invalid File!
-1/13/2012,Supplier, Common/PHP/Models/Supplier.php,Matt,0%,0%,Invalid File!
-1/13/2012,SupplierInvoice, Common/PHP/Models/SupplierInvoice.php,Weber,0%,0%,Invalid File!
-1/13/2012,SupplierInvoiceHistory, Common/PHP/Models/SupplierInvoiceHistory.php,Christian,0%,0%,Invalid File!
-1/13/2012,SupplierInvoiceLineItems, Common/PHP/Models/SupplierInvoiceLineItems.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,SupplierInvoiceLineTypes, Common/PHP/Models/SupplierInvoiceLineTypes.php,George,0%,0%,Invalid File!
-1/13/2012,SupplierInvoiceProducts, Common/PHP/Models/SupplierInvoiceProducts.php,Matt,0%,0%,Invalid File!
-1/13/2012,SupplierInvoicePurchaseOrders, Common/PHP/Models/SupplierInvoicePurchaseOrders.php,Weber,0%,0%,Invalid File!
-1/13/2012,Tax, Common/PHP/Libraries/Deprecated/Tax/Tax.php,Christian,0%,0%,Invalid File!
+1/13/2012,Supplier, Common/PHP/Models/Supplier.php,Matt,0%,0%,"* Hardcoded SQL IN getTitle @ #43
+* 2 Returns IN getTitle
+"
+1/13/2012,SupplierInvoice, Common/PHP/Models/SupplierInvoice.php,Weber,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insert @ #105
+* Hardcoded SQL IN insert @ #106
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN setInvoice @ #158
+* Hardcoded SQL IN setInvoice @ #146
+* Hardcoded SQL IN getInvoiceByID @ #177
+"
+1/13/2012,SupplierInvoiceHistory, Common/PHP/Models/SupplierInvoiceHistory.php,Christian,0%,0%,"* Hardcoded SQL IN additionalLines @ #35
+* Hardcoded SQL IN additionalLinesHistory @ #59
+* Hardcoded SQL IN invoiceHistorySelect @ #129
+* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN invoiceHistory @ #167
+* Hardcoded SQL IN invoiceHistory @ #165
+* Dependency >> PurchaseOrder @ Common/PHP/Models/PurchaseOrder.php IN invoiceProductHistory @ #207
+* Hardcoded SQL IN invoiceProductHistory @ #205
+* Hardcoded SQL IN latestStatus @ #275
+* Hardcoded SQL IN listProductHistoryLines @ #302
+* Hardcoded SQL IN listStatus @ #348
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN setStatus @ #380
+* Hardcoded SQL IN setStatus @ #370
+* Hardcoded SQL IN setStatus @ #381
+* 2 Returns IN setStatus
+* Hardcoded SQL IN supplierInvoiceStatus @ #416
+"
+1/13/2012,SupplierInvoiceLineItems, Common/PHP/Models/SupplierInvoiceLineItems.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceLineItems @ #67
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceLineItems @ #68
+* Hardcoded SQL IN insertInvoiceLineItems @ #70
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceLineAdditionalItems @ #95
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceLineAdditionalItems @ #96
+* Hardcoded SQL IN insertInvoiceLineAdditionalItems @ #98
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertNonProductLines @ #115
+* Hardcoded SQL IN insertNonProductLines @ #116
+* Hardcoded SQL IN listNonProducts @ #146
+"
+1/13/2012,SupplierInvoiceLineTypes, Common/PHP/Models/SupplierInvoiceLineTypes.php,George,0%,0%,"* Hardcoded SQL IN getSupplierInvoiceLineTypes @ #97
+"
+1/13/2012,SupplierInvoiceProducts, Common/PHP/Models/SupplierInvoiceProducts.php,Matt,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceProductLines @ #124
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insertInvoiceProductLines @ #125
+* Hardcoded SQL IN insertInvoiceProductLines @ #98
+* Hardcoded SQL IN insertInvoiceProductLines @ #127
+* Hardcoded SQL IN listLines @ #147
+* Dependency >> PurchaseOrder @ Common/PHP/Models/PurchaseOrder.php IN loadSupplierInvoice @ #211
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN loadSupplierInvoice @ #212
+* Hardcoded SQL IN loadSupplierInvoice @ #198
+* Hardcoded SQL IN loadSupplierInvoice @ #214
+* Hardcoded SQL IN loadSupplierInvoice @ #239
+* 3 Returns IN loadSupplierInvoice
+"
+1/13/2012,SupplierInvoicePurchaseOrders, Common/PHP/Models/SupplierInvoicePurchaseOrders.php,Weber,0%,0%,"* Dependency >> Supplier @ Common/PHP/Models/Supplier.php IN findByPoID @ #46
+* Hardcoded SQL IN findByPoID @ #43
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insert @ #70
+* Hardcoded SQL IN insert @ #71
+* Hardcoded SQL IN listPOByID @ #96
+"
+1/13/2012,Tax, Common/PHP/Libraries/Deprecated/Tax/Tax.php,Christian,0%,0%,"* 4 Returns IN getTaxRate
+"
 1/13/2012,TheBigMigration, Common/Database/NewSchemaWorkingFiles/TheBigMigration.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,TripleDES, Common/PHP/Libraries/Crypto/Crypt/TripleDES.php,George,0%,0%,Invalid File!
-1/13/2012,UC_Encryption_Class, Common/PHP/Libraries/Payment/UC_Encryption_Class.php,Matt,0%,0%,Invalid File!
-1/13/2012,UninstallApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/UninstallApplicationCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/13/2012,UninstallFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/UninstallFrameworkCoreeGlooRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/13/2012,UninstallSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/UninstallSystemPackageCoreeGlooRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,UpgradeApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/UpgradeApplicationCoreeGlooRequestProcessor.php,George,0%,0%,Invalid File!
-1/13/2012,UpgradeFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/UpgradeFrameworkCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/13/2012,UpgradeSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/UpgradeSystemPackageCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/13/2012,UPSShippingCalculator, Common/PHP/Libraries/Shipping/UPSShippingCalculator.php,Christian,0%,0%,Invalid File!
-1/13/2012,UserLoginRequestProcessor, Common/PHP/RequestProcessors/User/UserLoginRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,UserLogoutRequestProcessor, Common/PHP/RequestProcessors/User/UserLogoutRequestProcessor.php,George,0%,0%,Invalid File!
-1/13/2012,UTMTriggerMigrationSeeder, Common/PHP/Forms/Seeders/UTMTriggerMigrationSeeder.php,Matt,0%,0%,Invalid File!
-1/13/2012,UTMTriggerSeeder, Common/PHP/Forms/Seeders/UTMTriggerSeeder.php,Weber,0%,0%,Invalid File!
-1/13/2012,Warehouse, Common/PHP/Libraries/Warehouse/Warehouse.php,Christian,0%,0%,Invalid File!
-1/13/2012,WarehouseReceived, Common/PHP/Models/WarehouseReceived.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,WarehouseReceivedHistory, Common/PHP/Models/WarehouseReceivedHistory.php,George,0%,0%,Invalid File!
-1/13/2012,WarehouseReceivedProducts, Common/PHP/Models/WarehouseReceivedProducts.php,Matt,0%,0%,Invalid File!
-1/13/2012,WholesaleInvoiceValidator, Common/PHP/Security/Validators/WholesaleInvoiceValidator.php,Weber,0%,0%,Invalid File!
-1/13/2012,WholesalePriceValidator, Common/PHP/Security/Validators/WholesalePriceValidator.php,Christian,0%,0%,Invalid File!
-1/13/2012,WholesaleQtyValidator, Common/PHP/Security/Validators/WholesaleQtyValidator.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,WholesaleSkuValidator, Common/PHP/Security/Validators/WholesaleSkuValidator.php,George,0%,0%,Invalid File!
-1/13/2012,WholesaleTitleValidator, Common/PHP/Security/Validators/WholesaleTitleValidator.php,Matt,0%,0%,Invalid File!
-1/13/2012,WLV, Common/PHP/Libraries/Warehouse/WLV.php,Weber,0%,0%,Invalid File!
-1/13/2012,XMLSerialize, Common/PHP/Libraries/Misc/XMLSerialize.php,Christian,0%,0%,Invalid File!
+1/13/2012,TripleDES, Common/PHP/Libraries/Crypto/Crypt/TripleDES.php,George,0%,0%,"* 4 Returns IN encrypt
+* 4 Returns IN decrypt
+* 2 Returns IN _pad
+* 3 Returns IN _unpad
+"
+1/13/2012,UC_Encryption_Class, Common/PHP/Libraries/Payment/UC_Encryption_Class.php,Matt,0%,0%,"* 4 Returns IN decrypt
+* 4 Returns IN encrypt
+* 3 Returns IN _convertKey
+"
+1/13/2012,UninstallApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/UninstallApplicationCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/13/2012,UninstallFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/UninstallFrameworkCoreeGlooRequestProcessor.php,Christian,0%,0%,""
+1/13/2012,UninstallSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/UninstallSystemPackageCoreeGlooRequestProcessor.php,Gilbert,0%,0%,""
+1/13/2012,UpgradeApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/UpgradeApplicationCoreeGlooRequestProcessor.php,George,0%,0%,""
+1/13/2012,UpgradeFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/UpgradeFrameworkCoreeGlooRequestProcessor.php,Matt,0%,0%,""
+1/13/2012,UpgradeSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/UpgradeSystemPackageCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/13/2012,UPSShippingCalculator, Common/PHP/Libraries/Shipping/UPSShippingCalculator.php,Christian,0%,0%,"* 9 Returns IN getRate
+"
+1/13/2012,UserLoginRequestProcessor, Common/PHP/RequestProcessors/User/UserLoginRequestProcessor.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN processRequest @ #60
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN processRequest @ #64
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN processRequest @ #65
+"
+1/13/2012,UserLogoutRequestProcessor, Common/PHP/RequestProcessors/User/UserLogoutRequestProcessor.php,George,0%,0%,""
+1/13/2012,UTMTriggerMigrationSeeder, Common/PHP/Forms/Seeders/UTMTriggerMigrationSeeder.php,Matt,0%,0%,""
+1/13/2012,UTMTriggerSeeder, Common/PHP/Forms/Seeders/UTMTriggerSeeder.php,Weber,0%,0%,"* Hardcoded SQL IN __construct @ #63
+"
+1/13/2012,Warehouse, Common/PHP/Libraries/Warehouse/Warehouse.php,Christian,0%,0%,"* 2 Returns IN getInstanceByTitle
+* Dependency >> PetflowWarehouse @ Common/PHP/Models/PetflowWarehouse.php IN _staticInit @ #74
+"
+1/13/2012,WarehouseReceived, Common/PHP/Models/WarehouseReceived.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN insert @ #36
+* Hardcoded SQL IN insert @ #38
+* 2 Returns IN insert
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN loadByPoId @ #89
+* Hardcoded SQL IN loadByPoId @ #79
+* Hardcoded SQL IN loadByPoId @ #91
+* 2 Returns IN loadByPoId
+* Hardcoded SQL IN findByPoID @ #127
+* Hardcoded SQL IN getProductList @ #153
+* Hardcoded SQL IN set @ #183
+* Hardcoded SQL IN tableHistory @ #200
+"
+1/13/2012,WarehouseReceivedHistory, Common/PHP/Models/WarehouseReceivedHistory.php,George,0%,0%,"* Dependency >> PurchaseOrder @ Common/PHP/Models/PurchaseOrder.php IN log @ #36
+* Hardcoded SQL IN log @ #34
+* Hardcoded SQL IN listProducts @ #68
+* Dependency >> PurchaseOrderProduct @ Common/PHP/Models/PurchaseOrderProduct.php IN productsLog @ #108
+* Hardcoded SQL IN productsLog @ #104
+"
+1/13/2012,WarehouseReceivedProducts, Common/PHP/Models/WarehouseReceivedProducts.php,Matt,0%,0%,"* Hardcoded SQL IN delProduct @ #38
+* Hardcoded SQL IN getList @ #55
+* Dependency >> PurchaseOrderProduct @ Common/PHP/Models/PurchaseOrderProduct.php IN setProduct @ #95
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN setProduct @ #105
+* Hardcoded SQL IN setProduct @ #107
+* Hardcoded SQL IN setProduct @ #121
+* Hardcoded SQL IN setProduct @ #162
+* 4 Returns IN setProduct
+* Hardcoded SQL IN tableHistory @ #197
+"
+1/13/2012,WholesaleInvoiceValidator, Common/PHP/Security/Validators/WholesaleInvoiceValidator.php,Weber,0%,0%,"* Requires DocBloc IN validate @ #13
+"
+1/13/2012,WholesalePriceValidator, Common/PHP/Security/Validators/WholesalePriceValidator.php,Christian,0%,0%,"* Requires DocBloc IN validate @ #12
+"
+1/13/2012,WholesaleQtyValidator, Common/PHP/Security/Validators/WholesaleQtyValidator.php,Gilbert,0%,0%,"* Requires DocBloc IN validate @ #15
+"
+1/13/2012,WholesaleSkuValidator, Common/PHP/Security/Validators/WholesaleSkuValidator.php,George,0%,0%,"* Requires DocBloc IN validate @ #13
+"
+1/13/2012,WholesaleTitleValidator, Common/PHP/Security/Validators/WholesaleTitleValidator.php,Matt,0%,0%,"* Requires DocBloc IN validate @ #13
+"
+1/13/2012,WLV, Common/PHP/Libraries/Warehouse/WLV.php,Weber,0%,0%,""
+1/13/2012,XMLSerialize, Common/PHP/Libraries/Misc/XMLSerialize.php,Christian,0%,0%,"* 13 Returns IN simpleXMLToArray
+"

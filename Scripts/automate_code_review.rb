@@ -183,7 +183,7 @@ class Reflection
       begin    
         
         # iterate through result set - using csv as "adapter" language
-        csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} "#{fragment}"`)
+        csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} #{fragment}`)
         headers = csv.shift
         data    = [ ]
         
@@ -298,17 +298,25 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
   rows     = [ ]
   
   # iterate through individual support file rows
+    unless file =~ /classes_common/
+      next
+    end
+  
   csv = CSV.read(file)
   csv.shift
   csv.each do | row |
 
-    classes  = [ ]
-    row_size = row.length-1 
+    classes       = [ ]
+    row_size      = row.length-1 
     row[row_size] = ""
+    
+
         
     # determine support type, based on file name, if request_processor
     # we will have to look for file 
     unless row.empty?
+      
+      
           
       if csv_file =~ /request_processor/      
         # get path to file 
@@ -324,6 +332,8 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       
       # raise exception if file cannot be found
       if File.file? file      
+        
+        
       
       
         #next unless File.file? file
@@ -335,15 +345,20 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
         
         if (file_info = reflection.file_info).respond_to? :merge
           
+          
+        
+          
           # get file information from reflection and instantiate ReviewFile
           review_file = ReviewFile.new(reflection.file_info)
+          
+
           
           if (class_info = reflection.class_info).respond_to? :merge
             
             # create new review class instance from correct file path
             review_class = ReviewClass.new(class_info.merge({ 
                 :path  => file,
-                :owner => file =~ /RequestProcessing/ && row[3] || row[4] 
+                :owner => file =~ /RequestProcessing/ && row[4] || row[3] 
             }))
             
             # check if review class can be found in 
@@ -411,21 +426,23 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
             end
             
             # add phpunit stub
+            
            
             path = "#{review_class.base_dir}/Test/Common/" +
                    "#{File.dirname(review_class.path.sub(/^.+?PHP\//, ''))}/" +
                    "#{review_class.name}Test.php.review!"
-             
+                                
             # if unit test does not exist, then draw it bitch      
             unless File.file? path
               
+      
               # create directory if it does not exist
               FileUtils.mkdir_p File.dirname(path) unless File.directory? File.dirname(path)
               
               # render template to directory/path
               Template.render 'unit_test', :to => path, :with => binding
             end
-            
+                        
             # now we throw edits back into file
             file_as_array_of_lines = File.readlines(file)
             
@@ -486,11 +503,11 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       end # end if valid review file
       
       rows << row
+      
     end # end unless row empty
 
   end # end csv.each row
-  
-  
+    
   # append dependency information to row for csv
   CSV.open("#{csv_file}.review!", "w") do | csv |
     rows.each do | row |

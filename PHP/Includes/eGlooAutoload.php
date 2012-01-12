@@ -189,7 +189,7 @@ function eglooAutoload( $class_name ) {
 	}
 
 	// var_export($possible_path); exit;
-	//$possible_path[] = "/usr/lib/egloo/applications/Administration.gloo/PHP";
+	$possible_path[] = "/usr/lib/egloo/applications/Administration.gloo/PHP";
 	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {

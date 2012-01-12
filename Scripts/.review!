@@ -1,59 +1,310 @@
 <?php
 
 /**
+ * SessionHandler Class File
  *
- *
- * @author    Bruce Ingalls <bruce@petflow.com>
- * @copyright 2011 Petflow.com
- * @todo Does not sniff as valid eGloo
+ * Contains the class definition for the session handler.
+ * 
+ * Copyright 2010 eGloo, LLC
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *  
+ * @author Keith Buel
+ * @copyright 2010 eGloo, LLC
+ * @license http://www.apache.org/licenses/LICENSE-2.0
+ * @package Sessions
+ * @version 1.0
  */
-class TestOfRocking extends UnitTestCase {
+
+/**
+ * SessionHandler
+ * 
+ * This class contains session management callback functions.
+ * 
+ * These functions will be called by PHP at different points during the life
+ * cycle of a session.  This class must be registered with php before the session
+ * start function is called.  An instance of this object is intended to be created
+ * at the start of a request.  This probably should be one of the first things
+ * that is done in index.php.
+ * 
+ * A SessionDAO should be used for interaction with persisting to a database.
+ * 
+ * DO NOT ECHO ANYTHING IN THIS CLASS.  ECHOING INFORMATION HERE WILL VOID PHP'S
+ * ABILITY TO CREATE A SESSION COOKIE
+ * 
+ * 
+ * This current version is simply stubbed out to prove that this model will work. 
+ *
+ * @package Sessions
+ */
+class SessionHandler {
+
+	//Session life time in minutes
+	private static $SESSION_LIFETIME = 2592000;
+	protected static $sessionStarted = false;
 
 	/**
+	 * SessionHandler Constructor
+	 * 
+	 * passing it references to this objects' methods.
+	 * on creation of this object, the Session set save handler function is called
+	 * 
+	 */
+	function SessionHandler() {
+		session_set_save_handler(
+			array($this, 'open'), array($this, 'close'), array($this, 'read'), array($this, 'write'), array($this, 'destroy'), array($this, 'gc'));
+	}
+
+	/**
+	 * Start a session here. This allows us to start a session in Validators, for example.
+	 */
+	public static function startSession() {
+		if (self::$sessionStarted) {
+			return true;
+		}
+
+		// Initialize the session object
+		$sessionHandler = new self();
+
+		if (eGlooRequest::getHTTPHost() == 'www.petflow.com' || eGlooRequest::getHTTPHost() == 'petflow.com') {
+			// if ( eGlooRequest::isSSL() ) {
+			// 	session_name('pf-mascotas-secure');
+			// } else {
+			session_name('pf-mascotas');
+			// }
+		} else {
+			list($host) = explode('.', eGlooRequest::getHTTPHost());
+			session_name('pf-mascotas-' . $host);
+		}
+
+		// Start the session
+		session_start();
+
+		//This is to get IE to accept cookies with its new security model
+		header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
+
+		self::$sessionStarted = true;
+
+		return true;
+	}
+
+	/**
+	 * Even though session_write_close() is registered as a shutdown function, we
+	 * need all session data written to the database before redirecting.
+	 */
+	public static function closeSession() {
+		session_write_close();
+	}
+
+	/**
+	 * Function that is not needed but required by session_set_save_handler
+	 */
+	function open($path, $name) {
+		return true;
+	}
+
+	/**
+	 * Function to perform basic garbage collection
+	 * @return boolean
+	 */
+	function close() {
+		return true;
+	}
+
+	/**
+	 * Session verification should be done here. This session id is then used
+	 * to go to the database to access persisted session state.  The session 
+	 * information is then returned in the form of a serialized array.  
+	 * This method MUST return a string.... or bad things will happen.
+	 * 
+	 * @param string $session_id session_id
+	 * @return string serialized array of session data
+	 */
+	function read($session_id) {
+		// Write and Close handlers are called after destructing objects since PHP 5.0.5
+		// Thus destructors can use sessions but session handler can't use objects.
+		// So we are moving session closure before destructing objects.
+		register_shutdown_function('session_write_close');
+		// Handle the case of first time visitors and clients that don't store cookies (eg. web crawlers).
+		if (!isset($_COOKIE[session_name()])) {
+			$user = PetflowUser::loadById($session_id);
+			return '';
+		}
+
+		// Otherwise, if the session is still active, we have a record of the client's session in the database.
+		$user = null;
+		$session = '';
+		if ($result = MysqlConnector::executeSelect("SELECT u.*, s.* FROM dr_users u INNER JOIN dr_sessions s ON u.uid = s.uid WHERE s.sid = ?", array('s', $session_id))) {
+			$user = PetflowUser::loadById($result[0]['uid']);
+			$session = $result[0]['session'];
+			$user->setSessionData($result[0]['session']);
+		}
+
+		// We found the client's session record and they are an authenticated,
+		// active user.
+		if ($user && !$user->isAnonymous() && $user->status == 1) {
+			// Add roles element to $user
+			// 2 == authenticated user role id.
+			$user->addRole(2, 'authenticated user');
+			PetflowUser::setActiveUserID($user->id);
+		}
+
+		return $session;
+	}
+
+	/**
+	 * This function is called at the end of a request to persist session data.
+	 * This function will take the sessionData and write it to the database.
+	 * 
+	 * @param string $session_id
+	 * @param string $session_data
+	 * @return boolean
+	 */
+	function write($session_id, $session_data) {
+		$user = PetflowUser::getActiveUser(false, false);
+
+		// If saving of session data is disabled or if the client doesn't have a session,
+		// and one isn't being created ($value), do nothing. This keeps crawlers out of
+		// the session table. This reduces memory and server load, and gives more useful
+		// statistics. We can't eliminate anonymous session table rows without breaking
+		// the throttle module and the "Who's Online" block.
+		if ($user->isAnonymous() && empty($_COOKIE[session_name()]) && empty($session_data)) {
+			return true;
+		}
+
+		$affected_rows = MysqlConnector::executeUpdate(
+				"UPDATE dr_sessions SET uid = ?, cache = ?, hostname = ?, session = ?, timestamp = ? WHERE sid = ?", array('isssis', $user->uid, (!empty($user->cache) ? $user->cache : ''), Petflow::getIPAddress(), $session_data, time(), $session_id));
+		if ($affected_rows) {
+			// Last access time is updated no more frequently than once every 180 seconds.
+			// This reduces contention in the users table.
+			if (!$user->isAnonymous() && time() - $user->access > 180) {
+				MysqlConnector::executeUpdate("UPDATE dr_users SET access = ? WHERE uid = ?", array('ii', time(), $user->uid));
+			}
+		} else {
+			// If this query fails, another parallel request probably got here first.
+			// In that case, any session data generated in this request is discarded.
+			try {
+				MysqlConnector::executeInsert(
+					"INSERT INTO dr_sessions (sid, uid, cache, hostname, session, timestamp) VALUES (?, ?, ?, ?, ?, ?)", array('siissi', $session_id, $user->uid, isset($user->cache) ? $user->cache : '', Petflow::getIPAddress(), $session_data, time()));
+			} catch (Exception $e) {
+				// ignore
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Called when an anonymous user becomes authenticated or vice-versa.
+	 */
+	public static function sess_regenerate() {
+		$old_session_id = session_id();
+
+		// Set the expiration date to one hour ago
+		setcookie(session_name(), $old_session_id, time() - 42000);
+
+		if (isset($_COOKIE[session_name()])) {
+			unset($_COOKIE[session_name()]);
+		}
+
+		session_write_close();
+		session_start();
+
+		// Create new session without destroying the old one
+		session_regenerate_id(true);
+
+		// Grab current session ID and close both sessions to allow other scripts to use them
+		$newSession = session_id();
+
+		MysqlConnector::executeUpdate("UPDATE dr_sessions SET sid = ? WHERE sid = ?", array('ss', $newSession, $old_session_id));
+		session_write_close();
+
+		// Set session ID to the new one, and start it back up again
+		session_id($newSession);
+		session_start();
+
+		//This is to get IE to accept cookies with its new security model
+		header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"');
+
+		//TODO this is to get IE to accept cookies with its stricter security model
+		setcookie(session_name(), session_id(), time() + 60 * 60 * 24 * 30, '/');
+	}
+
+	/**
+	 * This function is called if it is determined that this session needs 
+	 * to be destroyed.  This method will destroy persisted data associated 
+	 * with this session id.
+	 * 
+	 * @param string $session_id
+	 * @return boolean
+	 */
+	function destroy($session_id) {
+		MysqlConnector::executeArbitrary("DELETE FROM dr_sessions WHERE sid = ?", array('s', $session_id));
+		return true;
+	}
+
+	/**
+	 * Clean up old sessions.
 	 *
+	 * @param int $lifetime
+	 * @return boolean
 	 */
-	function testLogCreatesNewFileOnFirstMessage() {
-		// @unlink('/temp/test.log');
-		// $log = new Log('/temp/test.log');
-		$this->assertFalse(0);
-		// $log->message('Should write this to a file');
-		$this->assertTrue(1);
-	}
+	function gc($lifetime) {
+		// NOTE -- The below comment is for stock eGloo.  We're overriding session.gc_maxlifetime with a class variable.
+		//
+		// Be sure to adjust 'php_value session.gc_maxlifetime' to a large enough
+		// value. For example, if you want user sessions to stay in your database
+		// for three weeks before deleting them, you need to set gc_maxlifetime
+		// to '1814400'. At that value, only after a user doesn't log in after
+		// three weeks (1814400 seconds) will his/her session be removed.
+		MysqlConnector::executeArbitrary("DELETE FROM dr_sessions WHERE timestamp < ?", array('i', time() - self::$SESSION_LIFETIME));
 
-	/**
-	 * 
-	 */
-	function testJunk() {
-		// @unlink('/temp/test.log');
-		// $log = new Log('/temp/test.log');
-		$this->assertFalse(0);
-		// $log->message('Should write this to a file');
-		$this->assertTrue(1);
-	}
-
-	/**
-	 * 
-	 */
-	function testFoo() {
-		// @unlink('/temp/test.log');
-		// $log = new Log('/temp/test.log');
-		$this->assertFalse(0);
-		// $log->message('Should write this to a file');
-		$this->assertTrue(1);
+		return true;
 	}
 
 }
 
+
+
 /**
+
  * Add class description 
+
  * @author Reviewer reviewer@petflow.com
+
  */
 
 
-   /**
 
-    * Add method description 
 
-    * @return 
+ 
+ 
+ /**
 
-   */
+
+
+ 
+ 
+  * Add method description 
+
+
+
+ 
+ 
+  * @return 
+
+
+
+ 
+ 
+ */

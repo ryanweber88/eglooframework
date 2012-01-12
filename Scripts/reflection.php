@@ -76,8 +76,8 @@ function putsReflectionClass(ReflectionClass $class) {
 }
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
-$file     = $argv[count($argv)-2];
-$fragment = $argv[count($argv)-1];
+$file     = $argv[1];
+$fragment = $argv[2];
 
 
 // EXECUTION //////////////////////////////////////////////////////////////////
@@ -111,15 +111,21 @@ $bootstrap = &$application->bootstrap()
 if (is_file($file)) {
 	
 	try {
-		//$file = "test.php"; 
-		require $file;
 		
-		$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
-		
-		if (count($reflection_file->getClasses())) {
-			$reflection_class = $reflection_file->getClasses()[0];
-
-			require $fragment;
+		// check that file has at least a class definition - of course
+		// this isn't very thorough, but will at least provide a little
+		if (preg_match('/class\s+?[a-zA-Z_]/i', file_get_contents($file))) { 
+			
+			//$file = "test.php"; 
+			require $file;
+			
+			$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
+			
+			if ($reflection_file && count($reflection_file->getClasses())) {
+				$reflection_class = $reflection_file->getClasses()[0];
+	
+				require $fragment;
+			}
 		}
 
 	}
