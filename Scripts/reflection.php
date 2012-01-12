@@ -87,9 +87,6 @@ $fragment = $argv[count($argv)-1];
 
 // PROGRAM
 
-set_error_handler(function() { 
-	echo 'error';
-});
 
 // bootstrap egloo environment
 // @todo remove this as egloo environment shouldn't be required
@@ -106,13 +103,25 @@ $bootstrap = &$application->bootstrap()
 	->bootstrap('egloo');
 
 	
+//xdebug_disable();
+
+error_reporting(E_ALL ^ E_NOTICE);
+
+set_error_handler(function() { 
+	echo 'error';
+});
+
+set_exception_handler(function() {
+	echo 'a fucking exception';
+});
+	
+
 // check if file is valid
 if (is_file($file)) {
 	
 	try {
 		$file = "test.php"; 
-		@include $file;
-		exit("asdf");
+		require_once $file;
 		
 		$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
 		
