@@ -298,9 +298,7 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
   rows     = [ ]
   
   # iterate through individual support file rows
-    unless file =~ /classes_common/
-      next
-    end
+
   
   csv = CSV.read(file)
   csv.shift
