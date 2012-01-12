@@ -1,7 +1,10 @@
 <?php
 
-function testArray() {
-	return [1,2,3];
+abstract class test {
+	abstract public function asdf();
 }
 
-echo testArray()[0];
+class test2 extends test {
+
+}
+

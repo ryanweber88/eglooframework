@@ -25,7 +25,6 @@ set_include_path(
 
 
 // AUTOLOAD ///////////////////////////////////////////////////////////////////
-//include '/home/petflowdeveloper/Develop/eglooframework/PHP/Includes/eGlooAutoload.php';
 
 // TODO : remove when migrating to cli tool
 spl_autoload_register(function($className) { 
@@ -88,6 +87,10 @@ $fragment = $argv[count($argv)-1];
 
 // PROGRAM
 
+set_error_handler(function() { 
+	echo 'error';
+});
+
 // bootstrap egloo environment
 // @todo remove this as egloo environment shouldn't be required
 // for generalized program
@@ -102,16 +105,28 @@ $bootstrap = &$application->bootstrap()
 	// bootstrap egloo environment 
 	->bootstrap('egloo');
 
+	
 // check if file is valid
 if (is_file($file)) {
 	
-	require_once $file;
+	try {
+		$file = "test.php"; 
+		@include $file;
+		exit("asdf");
+		
+		$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
+		
+		if (count($reflection_file->getClasses())) {
+			$reflection_class = $reflection_file->getClasses()[0];
+			
+			require_once $fragment;
+			exit;
+		}
+	}
 	
-	$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
-	$reflection_class = $reflection_file->getClasses()[0];
+	catch(\Exception $ignore) { }
 
-	require_once $fragment;
-	exit;
+
 	
 }
 
