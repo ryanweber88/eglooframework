@@ -18,7 +18,9 @@
 1/9/2012,CanceledOrdersPercentageBySpecificBrandReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/Orders/CanceledOrdersPercentageBySpecificBrandReportingRequestProcessor.php,George,0%,0%,Invalid File!
 1/9/2012,ChurnRetentionRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/Users/ChurnRetentionRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/9/2012,ContentEditRequestProcessor, Administration.gloo/PHP/RequestProcessing/SupplyChain/ContentEditRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/9/2012,CorrectAddressesRequestProcessor, Administration.gloo/PHP/RequestProcessing/Maint/CorrectAddressesRequestProcessor.php,Christian,0%,0%,Invalid File!
+1/9/2012,CorrectAddressesRequestProcessor, Administration.gloo/PHP/RequestProcessing/Maint/CorrectAddressesRequestProcessor.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/9/2012,CouponCodeGenerationRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustServ/CouponCodeGenerationRequestProcessor.php,Gilbert,0%,0%,Invalid File!
 1/9/2012,CouponEditRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustServ/CouponEditRequestProcessor.php,George,0%,0%,Invalid File!
 1/9/2012,CouponProcessingRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustomerService/CouponProcessingRequestProcessor.php,Matt,0%,0%,Invalid File!
@@ -40,8 +42,12 @@
 1/9/2012,eGloo.Reporting.ReportingRoutine.MultiQueryTableReportingRoutine, Administration.gloo/PHP/Plugins/Reporting/ReportingRoutine/eGloo.Reporting.ReportingRoutine.MultiQueryTableReportingRoutine.php,Weber,0%,0%,Invalid File!
 1/10/2012,eGlooCoreTestSuite, Administration.gloo/PHP/Testing/TestSuites/eGlooCoreTestSuite.php,Christian,0%,0%,Invalid File!
 1/10/2012,eGlooPHPUnitBootstrap, Administration.gloo/Test/eGlooPHPUnitBootstrap.php,Gilbert,0%,0%,Invalid File!
-1/10/2012,ExampleCommonTest, Administration.gloo/Test/PHPUnit/Common/ExampleCommonTest.php,George,0%,0%,Invalid File!
-1/10/2012,ExampleLocalTest, Administration.gloo/Test/PHPUnit/Local/ExampleLocalTest.php,Matt,0%,0%,Invalid File!
+1/10/2012,ExampleCommonTest, Administration.gloo/Test/PHPUnit/Common/ExampleCommonTest.php,George,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/10/2012,ExampleLocalTest, Administration.gloo/Test/PHPUnit/Local/ExampleLocalTest.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/10/2012,ExternalMainPageBaseRequestProcessor, Administration.gloo/PHP/RequestProcessing/ExternalMainPageBaseRequestProcessor.php,Weber,0%,0%,Invalid File!
 1/10/2012,GoogleProductFeedTask, Administration.gloo/PHP/ScheduledTasks/GoogleProductFeedTask.php,Christian,0%,0%,Invalid File!
 1/10/2012,GrouponCodesUploadFormValidator, Administration.gloo/PHP/Forms/Validators/GrouponCodesUploadFormValidator.php,Gilbert,0%,0%,Invalid File!
@@ -49,7 +55,9 @@
 1/10/2012,GrouponCustomersBaseReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/GrouponCustomersBaseReportingRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/10/2012,IndexEditRequestProcessor, Administration.gloo/PHP/RequestProcessing/Maint/IndexEditRequestProcessor.php,Weber,0%,0%,Invalid File!
 1/10/2012,InventoryDemandDeviationRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/InventoryDemandDeviationRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/10/2012,JavascriptTemplateEngine, Administration.gloo/PHP/TemplateProcessing/TemplateEngines/JavascriptTemplateEngine.php,Gilbert,0%,0%,Invalid File!
+1/10/2012,JavascriptTemplateEngine, Administration.gloo/PHP/TemplateProcessing/TemplateEngines/JavascriptTemplateEngine.php,Gilbert,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/10/2012,JobExecutable, Administration.gloo/PHP/ScheduledTasks/JobExecutable.php,George,0%,0%,Invalid File!
 1/10/2012,LineItemEditRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustServ/LineItemEditRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/10/2012,LineItemFormRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustServ/LineItemFormRequestProcessor.php,Weber,0%,0%,Invalid File!
@@ -66,7 +74,9 @@
 1/10/2012,OrderQueueFormRequestProcessor, Administration.gloo/PHP/RequestProcessing/SupplyChain/OrderQueueFormRequestProcessor.php,Christian,0%,0%,Invalid File!
 1/10/2012,OrderQueuePushRequestProcessor, Administration.gloo/PHP/RequestProcessing/SupplyChain/OrderQueuePushRequestProcessor.php,Gilbert,0%,0%,Invalid File!
 1/10/2012,OrdersBaseReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/Orders/OrdersBaseReportingRequestProcessor.php,George,0%,0%,Invalid File!
-1/10/2012,OrdersByBrandIDReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/Orders/OrdersByBrandIDReportingRequestProcessor.php,Matt,0%,0%,Invalid File!
+1/10/2012,OrdersByBrandIDReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/Orders/OrdersByBrandIDReportingRequestProcessor.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/10/2012,OrderSearchRequestProcessor, Administration.gloo/PHP/RequestProcessing/CustServ/OrderSearchRequestProcessor.php,Weber,0%,0%,Invalid File!
 1/10/2012,PetflowAdminMenu, Administration.gloo/PHP/Classes/PetflowAdminMenu.php,Christian,0%,0%,Invalid File!
 1/10/2012,PetflowBaseReportingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/PetflowBaseReportingRequestProcessor.php,Gilbert,0%,0%,Invalid File!
@@ -137,8 +147,12 @@
 1/12/2012,TermSearchRequestProcessor, Administration.gloo/PHP/RequestProcessing/Maint/TermSearchRequestProcessor.php,Gilbert,0%,0%,Invalid File!
 1/12/2012,TestDataProcessingRequestProcessor, Administration.gloo/PHP/RequestProcessing/Testing/TestDataProcessingRequestProcessor.php,George,0%,0%,Invalid File!
 1/12/2012,TestFormRequestProcessor, Administration.gloo/PHP/RequestProcessing/Reporting/TestFormRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/12/2012,TestOfLogging, Administration.gloo/PHP/Testing/UnitTestCases/TestOfLogging.php,Weber,0%,0%,Invalid File!
-1/12/2012,TestOfRocking, Administration.gloo/PHP/Testing/UnitTestCases/TestOfRocking.php,Christian,0%,0%,Invalid File!
+1/12/2012,TestOfLogging, Administration.gloo/PHP/Testing/UnitTestCases/TestOfLogging.php,Weber,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,TestOfRocking, Administration.gloo/PHP/Testing/UnitTestCases/TestOfRocking.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/12/2012,TrackerFedex, Administration.gloo/PHP/ScheduledTasks/TrackerFedex.php,Gilbert,0%,0%,Invalid File!
 1/12/2012,TrackingEmailRequestProcessor, Administration.gloo/PHP/RequestProcessing/Email/TrackingEmailRequestProcessor.php,George,0%,0%,Invalid File!
 1/12/2012,UpdateAmbassadorRequestProcessor, Administration.gloo/PHP/RequestProcessing/Misc/UpdateAmbassadorRequestProcessor.php,Matt,0%,0%,Invalid File!

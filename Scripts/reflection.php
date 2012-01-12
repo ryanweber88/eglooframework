@@ -105,32 +105,23 @@ $bootstrap = &$application->bootstrap()
 	
 //xdebug_disable();
 
-error_reporting(E_ALL ^ E_NOTICE);
-
-set_error_handler(function() { 
-	echo 'error';
-});
-
-set_exception_handler(function() {
-	echo 'a fucking exception';
-});
-	
+//error_reporting(E_ALL ^ E_NOTICE);
 
 // check if file is valid
 if (is_file($file)) {
 	
 	try {
-		$file = "test.php"; 
-		require_once $file;
+		//$file = "test.php"; 
+		require $file;
 		
 		$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
 		
 		if (count($reflection_file->getClasses())) {
 			$reflection_class = $reflection_file->getClasses()[0];
-			
-			require_once $fragment;
-			exit;
+
+			require $fragment;
 		}
+
 	}
 	
 	catch(\Exception $ignore) { }

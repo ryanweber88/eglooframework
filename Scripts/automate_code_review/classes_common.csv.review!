@@ -1,50 +1,160 @@
-1/9/2012,AbstractPetflowModel, Common/PHP/Models/AbstractPetflowModel.php,Christian,0%,0%,Invalid File!
-1/9/2012,AbstractRefactorModel, Common/PHP/Models/AbstractRefactorModel.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,AccountDetailsFormDTO, Common/PHP/Persistence/DataTransferObjects/AccountDetailsFormDTO.php,George,0%,0%,Invalid File!
-1/9/2012,AddressValidationWebServiceClient, Common/PHP/Libraries/Shipping/AddressValidationWebServiceClient.php,Matt,0%,0%,Invalid File!
-1/9/2012,AdminRequestProcessor, Common/PHP/RequestProcessors/AdminRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/9/2012,AES, Common/PHP/Libraries/Crypto/Crypt/AES.php,Christian,0%,0%,Invalid File!
-1/9/2012,AmbassadorFormDAO, Common/PHP/Persistence/DataAccessObjects/AmbassadorFormDAO.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,AmbassadorFormDTO, Common/PHP/Persistence/DataTransferObjects/AmbassadorFormDTO.php,George,0%,0%,Invalid File!
+1/9/2012,AbstractPetflowModel, Common/PHP/Models/AbstractPetflowModel.php,Christian,0%,0%,"* Hardcoded SQL IN loadById @ #171
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN clearCache @ #203
+* 2 Returns IN clearCache
+* 3 Returns IN create
+* Hardcoded SQL IN saveUpdate @ #308
+* Hardcoded SQL IN saveUpdate @ #339
+* Hardcoded SQL IN saveUpdate @ #340
+* Hardcoded SQL IN saveUpdate @ #345
+* 2 Returns IN saveUpdate
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForId @ #357
+* Hardcoded SQL IN getListForId @ #377
+* 2 Returns IN getListForId
+* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getListForInterval @ #398
+* Hardcoded SQL IN getListForInterval @ #418
+* Hardcoded SQL IN changeField @ #459
+* 2 Returns IN __get
+* 2 Returns IN setArbitrary
+"
+1/9/2012,AbstractRefactorModel, Common/PHP/Models/AbstractRefactorModel.php,Gilbert,0%,0%,"* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN saveUpdate @ #31
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN saveUpdate @ #40
+* Dependency >> PurchaseOrder @ Common/PHP/Models/PurchaseOrder.php IN saveUpdate @ #69
+* Hardcoded SQL IN saveUpdate @ #34
+* Hardcoded SQL IN saveUpdate @ #67
+* Hardcoded SQL IN saveUpdate @ #70
+* 2 Returns IN saveUpdate
+"
+1/9/2012,AccountDetailsFormDTO, Common/PHP/Persistence/DataTransferObjects/AccountDetailsFormDTO.php,George,0%,0%,""
+1/9/2012,AddressValidationWebServiceClient, Common/PHP/Libraries/Shipping/AddressValidationWebServiceClient.php,Matt,0%,0%,"* 4 Returns IN validate
+"
+1/9/2012,AdminRequestProcessor, Common/PHP/RequestProcessors/AdminRequestProcessor.php,Weber,0%,0%,"* 2 Returns IN getTemplateBuilder
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #45
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN populateTemplateVariables @ #46
+* Dependency >> PetflowAbstractDAOFactory @ Common/PHP/Persistence/DAOFactories/PetflowAbstractDAOFactory.php IN getFactory @ #100
+"
+1/9/2012,AES, Common/PHP/Libraries/Crypto/Crypt/AES.php,Christian,0%,0%,"* 3 Returns IN encrypt
+* 3 Returns IN decrypt
+"
+1/9/2012,AmbassadorFormDAO, Common/PHP/Persistence/DataAccessObjects/AmbassadorFormDAO.php,Gilbert,0%,0%,""
+1/9/2012,AmbassadorFormDTO, Common/PHP/Persistence/DataTransferObjects/AmbassadorFormDTO.php,George,0%,0%,""
 1/9/2012,array_fill, Common/PHP/Libraries/Crypto/PHP/Compat/Function/array_fill.php,Matt,0%,0%,Invalid File!
-1/9/2012,AuthorizeNet, Common/PHP/Libraries/Payment/AuthorizeNet.php,Weber,0%,0%,Invalid File!
-1/9/2012,AuthorizeNetGateway, Common/PHP/Libraries/Deprecated/Payment/AuthorizeNetGateway.php,Christian,0%,0%,Invalid File!
+1/9/2012,AuthorizeNet, Common/PHP/Libraries/Payment/AuthorizeNet.php,Weber,0%,0%,"* 2 Returns IN isTestMode
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN chargeCardWithoutCapture @ #46
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN chargeCardWithoutCapture @ #46
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN chargeCardWithoutCapture @ #46
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN chargeCard @ #60
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN chargeCard @ #60
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN chargeCard @ #60
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN chargeCardWithMode @ #75
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN chargeCardWithMode @ #75
+* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN chargeCardWithMode @ #75
+"
+1/9/2012,AuthorizeNetGateway, Common/PHP/Libraries/Deprecated/Payment/AuthorizeNetGateway.php,Christian,0%,0%,""
 1/9/2012,bcpowmod, Common/PHP/Libraries/Crypto/PHP/Compat/Function/bcpowmod.php,Gilbert,0%,0%,Invalid File!
 1/9/2012,BigInteger, Common/PHP/Libraries/Crypto/Math/BigInteger.php,George,0%,0%,Invalid File!
-1/9/2012,BrandSearch, Common/PHP/Classes/BrandSearch.php,Matt,0%,0%,Invalid File!
-1/9/2012,BrokenModelController, Common/PHP/Controllers/BrokenModelController.php,Weber,0%,0%,Invalid File!
-1/9/2012,Capacity, Common/PHP/Libraries/Warehouse/Capacity.php,Christian,0%,0%,Invalid File!
-1/9/2012,ClearCacheAllCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheAllCoreeGlooRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,ClearCacheApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ClearCacheApplicationCoreeGlooRequestProcessor.php,George,0%,0%,Invalid File!
-1/9/2012,ClearCacheFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/ClearCacheFrameworkCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/9/2012,ClearCacheGatewayCacheCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheGatewayCacheCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/9/2012,ClearCacheRuntimeCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheRuntimeCoreeGlooRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/9/2012,ClearCacheSystemCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/ClearCacheSystemCoreeGlooRequestProcessor.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,ConfigureApplicationCacheCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ConfigureApplicationCacheCoreeGlooRequestProcessor.php,George,0%,0%,Invalid File!
-1/9/2012,ConfigureApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ConfigureApplicationCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/9/2012,ConfigureFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/ConfigureFrameworkCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/9/2012,ConfigureSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/ConfigureSystemPackageCoreeGlooRequestProcessor.php,Christian,0%,0%,Invalid File!
-1/9/2012,CouponController, Common/PHP/Controllers/CouponController.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,CurlUtility, Common/PHP/Libraries/Misc/CurlUtility.php,George,0%,0%,Invalid File!
-1/9/2012,CurlUtils, Common/PHP/Libraries/Misc/CurlUtils.php,Matt,0%,0%,Invalid File!
-1/9/2012,DateUtility, Common/PHP/Libraries/Misc/DateUtility.php,Weber,0%,0%,Invalid File!
-1/9/2012,DES, Common/PHP/Libraries/Crypto/Crypt/DES.php,Christian,0%,0%,Invalid File!
-1/9/2012,DownloadFactory, Common/PHP/Downloads/DownloadFactory.php,Gilbert,0%,0%,Invalid File!
+1/9/2012,BrandSearch, Common/PHP/Classes/BrandSearch.php,Matt,0%,0%,"* Requires DocBloc IN __construct @ #40
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN search @ #53
+* Dependency >> PetflowBrand @ Common/PHP/Models/PetflowBrand.php IN search @ #56
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN search @ #57
+* Requires DocBloc IN search @ #49
+* Requires DocBloc IN getResultCount @ #67
+* Requires DocBloc IN getSearchPageUrl @ #72
+* Requires DocBloc IN getResult @ #88
+* Requires DocBloc IN start @ #93
+* Requires DocBloc IN parseResult @ #97
+"
+1/9/2012,BrokenModelController, Common/PHP/Controllers/BrokenModelController.php,Weber,0%,0%,"* Dependency >> PetflowAddress @ Common/PHP/Models/PetflowAddress.php IN getDummyAddress @ #20
+* Dependency >> PetflowPaymentOption @ Common/PHP/Models/PetflowPaymentOption.php IN getDummyPaymentOption @ #31
+* Dependency >> PetflowProgramOrder @ Common/PHP/Models/PetflowProgramOrder.php IN getDummyProgramOrder @ #40
+* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN getDummySize @ #51
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN getDummyProduct @ #107
+"
+1/9/2012,Capacity, Common/PHP/Libraries/Warehouse/Capacity.php,Christian,0%,0%,"* 2 Returns IN isTestMode
+* 2 Returns IN getInventory
+* Hardcoded SQL IN loadInventory @ #84
+* Hardcoded SQL IN loadInventory @ #95
+* Hardcoded SQL IN saveInventory @ #108
+* Hardcoded SQL IN saveInventory @ #118
+* 2 Returns IN getItem
+"
+1/9/2012,ClearCacheAllCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheAllCoreeGlooRequestProcessor.php,Gilbert,0%,0%,""
+1/9/2012,ClearCacheApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ClearCacheApplicationCoreeGlooRequestProcessor.php,George,0%,0%,""
+1/9/2012,ClearCacheFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/ClearCacheFrameworkCoreeGlooRequestProcessor.php,Matt,0%,0%,""
+1/9/2012,ClearCacheGatewayCacheCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheGatewayCacheCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/9/2012,ClearCacheRuntimeCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Cache/ClearCacheRuntimeCoreeGlooRequestProcessor.php,Christian,0%,0%,""
+1/9/2012,ClearCacheSystemCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/ClearCacheSystemCoreeGlooRequestProcessor.php,Gilbert,0%,0%,""
+1/9/2012,ConfigureApplicationCacheCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ConfigureApplicationCacheCoreeGlooRequestProcessor.php,George,0%,0%,"* 2 Returns IN processRequest
+"
+1/9/2012,ConfigureApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/ConfigureApplicationCoreeGlooRequestProcessor.php,Matt,0%,0%,""
+1/9/2012,ConfigureFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/ConfigureFrameworkCoreeGlooRequestProcessor.php,Weber,0%,0%,""
+1/9/2012,ConfigureSystemPackageCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/System/ConfigureSystemPackageCoreeGlooRequestProcessor.php,Christian,0%,0%,""
+1/9/2012,CouponController, Common/PHP/Controllers/CouponController.php,Gilbert,0%,0%,"* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getShippingNextFlatRateThreshold @ #52
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getShippingNextFlatRateThreshold @ #53
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getCouponListAuto @ #86
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN loadCouponList @ #96
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN validateCouponForAttachment @ #108
+* 6 Returns IN validateCouponForAttachment
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN attachAutomaticCouponsToProgram @ #142
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN clearCouponAssociations @ #156
+* Hardcoded SQL IN clearCouponAssociations @ #171
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN attachCoupon @ #182
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getCouponsForProgram @ #193
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN getCouponsForProgram @ #194
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getCouponsForProgram @ #197
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN getCouponsForProgram @ #198
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN validateCouponForUse @ #243
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN validateCouponForUse @ #243
+* Dependency >> PetflowUser @ Common/PHP/Models/PetflowUser.php IN validateCouponForUse @ #247
+* Dependency >> PetflowCoupon @ Common/PHP/Models/PetflowCoupon.php IN validateMinimumThreshold @ #274
+* Dependency >> PetflowProgram @ Common/PHP/Models/PetflowProgram.php IN validateMinimumThreshold @ #274
+* 2 Returns IN validateMinimumThreshold
+"
+1/9/2012,CurlUtility, Common/PHP/Libraries/Misc/CurlUtility.php,George,0%,0%,""
+1/9/2012,CurlUtils, Common/PHP/Libraries/Misc/CurlUtils.php,Matt,0%,0%,""
+1/9/2012,DateUtility, Common/PHP/Libraries/Misc/DateUtility.php,Weber,0%,0%,"* 3 Returns IN nextBusinessDay
+* 3 Returns IN prevBusinessDay
+* 3 Returns IN isThisWeekAvailable
+* 2 Returns IN sqlDate2usa
+* 2 Returns IN usaDate2sql
+"
+1/9/2012,DES, Common/PHP/Libraries/Crypto/Crypt/DES.php,Christian,0%,0%,"* 2 Returns IN encrypt
+* 2 Returns IN decrypt
+* 2 Returns IN _pad
+* 3 Returns IN _unpad
+"
+1/9/2012,DownloadFactory, Common/PHP/Downloads/DownloadFactory.php,Gilbert,0%,0%,"* Dependency >> PetflowProductSize @ Common/PHP/Models/PetflowProductSize.php IN generateSizeDescription @ #123
+* 4 Returns IN generateSizeDescription
+"
 1/9/2012,eGlooPHPUnitBootstrap, Common/Test/eGlooPHPUnitBootstrap.php,George,0%,0%,Invalid File!
 1/9/2012,en, Common/PHP/Libraries/CoolPHPCaptcha/resources/words/en.php,Matt,0%,0%,Invalid File!
 1/9/2012,es, Common/PHP/Libraries/CoolPHPCaptcha/resources/words/es.php,Weber,0%,0%,Invalid File!
 1/9/2012,example-form, Common/PHP/Libraries/CoolPHPCaptcha/example-form.php,Christian,0%,0%,Invalid File!
-1/9/2012,ExampleCommonTest, Common/Test/PHPUnit/Common/ExampleCommonTest.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,ExampleLocalTest, Common/Test/PHPUnit/Local/ExampleLocalTest.php,George,0%,0%,Invalid File!
-1/9/2012,fedex-common, Common/PHP/Libraries/Shipping/fedex-common.php,Matt,0%,0%,Invalid File!
-1/9/2012,FedexCommon, Common/PHP/Libraries/Shipping/FedexCommon.php,Weber,0%,0%,Invalid File!
-1/9/2012,FedExShippingCalculator, Common/PHP/Libraries/Shipping/FedExShippingCalculator.php,Christian,0%,0%,Invalid File!
-1/9/2012,FileUtility, Common/PHP/Libraries/File/FileUtility.php,Gilbert,0%,0%,Invalid File!
-1/9/2012,ForceAdminRedirectOnLiveDecorator, Common/PHP/RequestProcessors/Decorators/ForceAdminRedirectOnLiveDecorator.php,George,0%,0%,Invalid File!
-1/9/2012,ForceSSLOnLiveDecorator, Common/PHP/RequestProcessors/Decorators/ForceSSLOnLiveDecorator.php,Matt,0%,0%,Invalid File!
-1/9/2012,GenericFormController, Common/PHP/Controllers/GenericFormController.php,Weber,0%,0%,Invalid File!
-1/9/2012,GoogleFeedGenerator, Common/PHP/Feed/GoogleFeedGenerator.php,Christian,0%,0%,Invalid File!
-1/9/2012,Hash, Common/PHP/Libraries/Crypto/Crypt/Hash.php,Gilbert,0%,0%,Invalid File!
+1/9/2012,ExampleCommonTest, Common/Test/PHPUnit/Common/ExampleCommonTest.php,Gilbert,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/9/2012,ExampleLocalTest, Common/Test/PHPUnit/Local/ExampleLocalTest.php,George,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/9/2012,fedex-common, Common/PHP/Libraries/Shipping/fedex-common.php,Matt,0%,0%,"* 40 Returns IN getProperty
+"
+1/9/2012,FedexCommon, Common/PHP/Libraries/Shipping/FedexCommon.php,Weber,0%,0%,"* 40 Returns IN getProperty
+"
+1/9/2012,FedExShippingCalculator, Common/PHP/Libraries/Shipping/FedExShippingCalculator.php,Christian,0%,0%,"* 3 Returns IN getQuote
+"
+1/9/2012,FileUtility, Common/PHP/Libraries/File/FileUtility.php,Gilbert,0%,0%,""
+1/9/2012,ForceAdminRedirectOnLiveDecorator, Common/PHP/RequestProcessors/Decorators/ForceAdminRedirectOnLiveDecorator.php,George,0%,0%,"* 3 Returns IN requestPreProcessing
+"
+1/9/2012,ForceSSLOnLiveDecorator, Common/PHP/RequestProcessors/Decorators/ForceSSLOnLiveDecorator.php,Matt,0%,0%,"* 3 Returns IN requestPreProcessing
+"
+1/9/2012,GenericFormController, Common/PHP/Controllers/GenericFormController.php,Weber,0%,0%,"* Dependency >> AbstractPetflowModel @ Common/PHP/Models/AbstractPetflowModel.php IN getExistingFormValues @ #66
+"
+1/9/2012,GoogleFeedGenerator, Common/PHP/Feed/GoogleFeedGenerator.php,Christian,0%,0%,"* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN write @ #29
+* Dependency >> PetflowProduct @ Common/PHP/Models/PetflowProduct.php IN write @ #34
+* Requires DocBloc IN write @ #24
+"
+1/9/2012,Hash, Common/PHP/Libraries/Crypto/Crypt/Hash.php,Gilbert,0%,0%,"* 4 Returns IN setHash
+* 2 Returns IN _sha256
+"
 1/9/2012,importwords, Common/PHP/Libraries/CoolPHPCaptcha/resources/tools/dictionary-import/importwords.php,George,0%,0%,Invalid File!
 1/9/2012,InstallApplicationCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Application/InstallApplicationCoreeGlooRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/9/2012,InstallFrameworkCoreeGlooRequestProcessor, Common/PHP/RequestProcessors/Administration/Framework/InstallFrameworkCoreeGlooRequestProcessor.php,Weber,0%,0%,Invalid File!
@@ -67,7 +177,9 @@
 1/10/2012,MySQLiOOPPetflowOrderLineItemDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderLineItemDAO/MySQLiOOPPetflowOrderLineItemDAO.php,Gilbert,0%,0%,Invalid File!
 1/10/2012,MySQLiOOPPetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/MySQLiOOPPetflowOrderProductDAO.php,George,0%,0%,Invalid File!
 1/10/2012,MySQLiOOPPetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/MySQLiOOPPetflowPaymentOptionDAO.php,Matt,0%,0%,Invalid File!
-1/10/2012,MySQLiOOPPetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/MySQLiOOPPetflowProductDAO.php,Weber,0%,0%,Invalid File!
+1/10/2012,MySQLiOOPPetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/MySQLiOOPPetflowProductDAO.php,Weber,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/10/2012,MySQLiOOPPetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/MySQLiOOPPetflowProductImagesDAO.php,Christian,0%,0%,Invalid File!
 1/10/2012,MySQLiOOPPetflowProductSizeDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductSizeDAO/MySQLiOOPPetflowProductSizeDAO.php,Gilbert,0%,0%,Invalid File!
 1/10/2012,MySQLiOOPPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/MySQLiOOPPetflowProgramDAO.php,George,0%,0%,Invalid File!
@@ -106,7 +218,9 @@
 1/11/2012,PetflowOrderLineItemDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderLineItemDTO.php,Christian,0%,0%,Invalid File!
 1/11/2012,PetflowOrderLog, Common/PHP/Models/PetflowOrderLog.php,Gilbert,0%,0%,Invalid File!
 1/11/2012,PetflowOrderProduct, Common/PHP/Models/PetflowOrderProduct.php,George,0%,0%,Invalid File!
-1/11/2012,PetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/PetflowOrderProductDAO.php,Matt,0%,0%,Invalid File!
+1/11/2012,PetflowOrderProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowOrderProductDAO/PetflowOrderProductDAO.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/11/2012,PetflowOrderProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowOrderProductDTO.php,Weber,0%,0%,Invalid File!
 1/11/2012,PetflowPageCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageCacheDecorator.php,Christian,0%,0%,Invalid File!
 1/11/2012,PetflowPageNoCacheDecorator, Common/PHP/RequestProcessors/Decorators/PetflowPageNoCacheDecorator.php,Gilbert,0%,0%,Invalid File!
@@ -118,7 +232,9 @@
 1/11/2012,PetflowPixels, Common/PHP/Models/PetflowPixels.php,George,0%,0%,Invalid File!
 1/11/2012,PetflowPostgreSQLDAOFactory, Common/PHP/Persistence/DAOFactories/PetflowPostgreSQLDAOFactory.php,Matt,0%,0%,Invalid File!
 1/11/2012,PetflowProduct, Common/PHP/Models/PetflowProduct.php,Weber,0%,0%,Invalid File!
-1/11/2012,PetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PetflowProductDAO.php,Christian,0%,0%,Invalid File!
+1/11/2012,PetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PetflowProductDAO.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/11/2012,PetflowProductDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductDTO.php,Gilbert,0%,0%,Invalid File!
 1/11/2012,PetflowProductImagesDAO, Common/PHP/Persistence/DataAccessObjects/PetflowImagesDAO/PetflowProductImagesDAO.php,George,0%,0%,Invalid File!
 1/11/2012,PetflowProductImagesDTO, Common/PHP/Persistence/DataTransferObjects/PetflowProductImagesDTO.php,Matt,0%,0%,Invalid File!
@@ -171,11 +287,21 @@
 1/12/2012,PetflowWarehouseProduct, Common/PHP/Models/PetflowWarehouseProduct.php,Christian,0%,0%,Invalid File!
 1/12/2012,PetflowXHTMLBuilder, Common/PHP/TemplateProcessing/PetflowXHTMLBuilder.php,Gilbert,0%,0%,Invalid File!
 1/12/2012,PFWarehouseReceiveProduct, Common/PHP/Models/PFWarehouseReceiveProduct.php,George,0%,0%,Invalid File!
-1/12/2012,PGSQLPetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PGSQLPetflowAddressDAO.php,Matt,0%,0%,Invalid File!
-1/12/2012,PGSQLPetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/PGSQLPetflowCouponDAO.php,Weber,0%,0%,Invalid File!
-1/12/2012,PGSQLPetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/PGSQLPetflowPaymentOptionDAO.php,Christian,0%,0%,Invalid File!
-1/12/2012,PGSQLPetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PGSQLPetflowProductDAO.php,Gilbert,0%,0%,Invalid File!
-1/12/2012,PGSQLPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PGSQLPetflowProgramDAO.php,George,0%,0%,Invalid File!
+1/12/2012,PGSQLPetflowAddressDAO, Common/PHP/Persistence/DataAccessObjects/PetflowAddressDAO/PGSQLPetflowAddressDAO.php,Matt,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,PGSQLPetflowCouponDAO, Common/PHP/Persistence/DataAccessObjects/PetflowCouponDAO/PGSQLPetflowCouponDAO.php,Weber,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,PGSQLPetflowPaymentOptionDAO, Common/PHP/Persistence/DataAccessObjects/PetflowPaymentOptionDAO/PGSQLPetflowPaymentOptionDAO.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,PGSQLPetflowProductDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProductDAO/PGSQLPetflowProductDAO.php,Gilbert,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,PGSQLPetflowProgramDAO, Common/PHP/Persistence/DataAccessObjects/PetflowProgramDAO/PGSQLPetflowProgramDAO.php,George,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/12/2012,PGSQLPetflowUserDAO, Common/PHP/Persistence/DataAccessObjects/PetflowUserDAO/PGSQLPetflowUserDAO.php,Matt,0%,0%,Invalid File!
 1/12/2012,ProductController, Common/PHP/Controllers/ProductController.php,Weber,0%,0%,Invalid File!
 1/12/2012,ProductFeed, Common/PHP/Feed/ProductFeed.php,Christian,0%,0%,Invalid File!
@@ -210,7 +336,9 @@
 1/13/2012,SecurityRoutine, Common/PHP/Security/SecurityRoutine.php,Weber,0%,0%,Invalid File!
 1/13/2012,Session, Common/PHP/Models/Session.php,Christian,0%,0%,Invalid File!
 1/13/2012,SessionDecorator, Common/PHP/RequestProcessors/Decorators/SessionDecorator.php,Gilbert,0%,0%,Invalid File!
-1/13/2012,SessionHandler, Common/PHP/Controllers/SessionHandler.php,George,0%,0%,Invalid File!
+1/13/2012,SessionHandler, Common/PHP/Controllers/SessionHandler.php,George,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/13/2012,SFTP, Common/PHP/Libraries/Crypto/Net/SFTP.php,Matt,0%,0%,Invalid File!
 1/13/2012,SFTPController, Common/PHP/Controllers/SFTPController.php,Weber,0%,0%,Invalid File!
 1/13/2012,ShippingCalculator, Common/PHP/Libraries/Shipping/ShippingCalculator.php,Christian,0%,0%,Invalid File!

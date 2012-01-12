@@ -179,10 +179,10 @@ class Reflection
     def command(reflection_on, name, reduce)
       # get command interface
       fragment = File.absolute_path "#{DirectorySupport}/reflection_fragment_#{name}.php"
-     
       
-      # iterate through result set - using csv as "adapter" language
-      begin      
+      begin    
+        
+        # iterate through result set - using csv as "adapter" language
         csv     = CSV.parse(`#{ReflectionScript} #{reflection_on} "#{fragment}"`)
         headers = csv.shift
         data    = [ ]
@@ -204,8 +204,13 @@ class Reflection
         # if returning one record, return single dimension array - 
         # plays nicer
         data = data.shift if data.length == 1 && reduce.nil?
-      ensure
-        return data  
+        
+      rescue 
+        return false
+      
+      else
+        data
+    
       end  
     end
     
@@ -322,11 +327,11 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       
       
         #next unless File.file? file
+        puts "looking @ #{file}"
         
         # create reflection interface to ease access to class/method definitions
         reflection = Reflection.new(file)
         
-        puts "looking @ #{file}"
         
         if (file_info = reflection.file_info).respond_to? :merge
           
@@ -374,14 +379,14 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
                                          :at      => absolute_line_number
                   
                 # check body against dependency list
-                else      
-      
+                else    
                   model_dependencies.each do | file |
                     
                     class_name = File.basename(file, '.php')
-                              
-                    if line.include? class_name
-                      
+                    
+                    #if line.include? class_name         
+                    if line =~ /[^a-zA-Z_]#{class_name}[^a-zA-Z_]/
+ 
                       # add content 
                       review_method.add_dependency :name => class_name, 
                                                    :at   => absolute_line_number, 
@@ -482,7 +487,7 @@ Dir["#{DirectorySupport}/*.csv"].each do | file |
       
       rows << row
     end # end unless row empty
-               
+
   end # end csv.each row
   
   

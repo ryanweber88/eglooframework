@@ -28,8 +28,12 @@
 1/10/2012,EmailOrderTrackingRequestProcessor, Client.gloo/PHP/RequestProcessing/Email/EmailOrderTrackingRequestProcessor.php,George,0%,0%,Not Found!
 1/10/2012,EmailOutOfStockRequestProcessor, Client.gloo/PHP/RequestProcessing/Email/EmailOutOfStockRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/10/2012,EmailReminderRequestProcessor, Client.gloo/PHP/RequestProcessing/Email/EmailReminderRequestProcessor.php,Weber,0%,0%,Invalid File!
-1/10/2012,ExampleCommonTest, Client.gloo/Test/PHPUnit/Common/ExampleCommonTest.php,Christian,0%,0%,Invalid File!
-1/10/2012,ExampleLocalTest, Client.gloo/Test/PHPUnit/Local/ExampleLocalTest.php,Gilbert,0%,0%,Invalid File!
+1/10/2012,ExampleCommonTest, Client.gloo/Test/PHPUnit/Common/ExampleCommonTest.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/10/2012,ExampleLocalTest, Client.gloo/Test/PHPUnit/Local/ExampleLocalTest.php,Gilbert,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/10/2012,ExplorerAjaxRequestProcessor, Client.gloo/PHP/RequestProcessing/ExplorerAjaxRequestProcessor.php,George,0%,0%,Invalid File!
 1/10/2012,ExplorerIndexRequestProcessor, Client.gloo/PHP/RequestProcessing/ExplorerIndexRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/10/2012,ExternalMainPageBaseRequestProcessor, Client.gloo/PHP/RequestProcessing/ExternalMainPageBaseRequestProcessor.php,Weber,0%,0%,Invalid File!
@@ -37,7 +41,9 @@
 1/10/2012,FedExTrackRequestProcessor, Client.gloo/PHP/RequestProcessing/FedExTrackRequestProcessor.php,Gilbert,0%,0%,Invalid File!
 1/10/2012,HomeIndexRequestProcessor, Client.gloo/PHP/RequestProcessing/HomeIndexRequestProcessor.php,George,0%,0%,Invalid File!
 1/10/2012,HowItWorksIndexRequestProcessor, Client.gloo/PHP/RequestProcessing/HowItWorksIndexRequestProcessor.php,Matt,0%,0%,Invalid File!
-1/10/2012,JavascriptTemplateEngine, Client.gloo/PHP/TemplateProcessing/TemplateEngines/JavascriptTemplateEngine.php,Weber,0%,0%,Invalid File!
+1/10/2012,JavascriptTemplateEngine, Client.gloo/PHP/TemplateProcessing/TemplateEngines/JavascriptTemplateEngine.php,Weber,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/11/2012,JobsIndexRequestProcessor, Client.gloo/PHP/RequestProcessing/JobsIndexRequestProcessor.php,Christian,0%,0%,Invalid File!
 1/11/2012,LandingPageFreeShippingRequestProcessor, Client.gloo/PHP/RequestProcessing/LandingPage/LandingPageFreeShippingRequestProcessor.php,Gilbert,0%,0%,Invalid File!
 1/11/2012,LandingPageInviteRequestProcessor, Client.gloo/PHP/RequestProcessing/LandingPage/LandingPageInviteRequestProcessor.php,George,0%,0%,Invalid File!
@@ -68,8 +74,12 @@
 1/12/2012,test, Client.gloo/PHP/RequestProcessing/test.php,George,0%,0%,Invalid File!
 1/12/2012,TestimonialsIndexRequestProcessor, Client.gloo/PHP/RequestProcessing/TestimonialsIndexRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/12/2012,TestOfAbstractPetflowModel, Client.gloo/PHP/Testing/UnitTestCases/TestOfAbstractPetflowModel.php,Weber,0%,0%,Invalid File!
-1/12/2012,TestOfLogging, Client.gloo/PHP/Testing/UnitTestCases/TestOfLogging.php,Christian,0%,0%,Invalid File!
-1/12/2012,TestOfRocking, Client.gloo/PHP/Testing/UnitTestCases/TestOfRocking.php,Gilbert,0%,0%,Invalid File!
+1/12/2012,TestOfLogging, Client.gloo/PHP/Testing/UnitTestCases/TestOfLogging.php,Christian,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
+1/12/2012,TestOfRocking, Client.gloo/PHP/Testing/UnitTestCases/TestOfRocking.php,Gilbert,0%,0%,"* Requires DocBloc IN  @ #0
+* Requires DocBloc IN  @ #0
+"
 1/12/2012,UpsellActivateRequestProcessor, Client.gloo/PHP/RequestProcessing/Upsell/UpsellActivateRequestProcessor.php,George,0%,0%,Invalid File!
 1/12/2012,UpsellGetProductListRequestProcessor, Client.gloo/PHP/RequestProcessing/Upsell/UpsellGetProductListRequestProcessor.php,Matt,0%,0%,Invalid File!
 1/12/2012,UpsellSuppressionRequestProcessor, Client.gloo/PHP/RequestProcessing/Upsell/UpsellSuppressionRequestProcessor.php,Weber,0%,0%,Invalid File!
