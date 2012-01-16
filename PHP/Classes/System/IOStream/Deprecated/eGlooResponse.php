@@ -150,4 +150,8 @@ class eGlooResponse {
 
 }
 
-deprecate( __FILE__, '\eGloo\IOStream\Response' );
+if ( function_exists('\\eGloo\\deprecate') ) {
+	\eGloo\deprecate( __FILE__, '\eGloo\IOStream\Response' );
+} else if ( function_exists('\deprecate') ) {
+	\deprecate( __FILE__, '\eGloo\IOStream\Response' );
+}

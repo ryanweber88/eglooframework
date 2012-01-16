@@ -1,4 +1,11 @@
 <?php
+
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
+use \ErrorException as ErrorException;
+use \Exception as Exception;
+
 /**
  * eGlooConfiguration Class File
  *
@@ -1740,6 +1747,18 @@ final class eGlooConfiguration {
 		return $retVal;
 	}
 
+	public static function getConfigurationOption( $key ) {
+		return isset(self::$configuration_options[$key]) ? self::$configuration_options[$key] : null;
+	}
+
+	public static function setConfigurationOption( $key, $value ) {
+		self::$configuration_options[$key] = $value;
+	}
+
+	public static function getConfigurationOptions() {
+		return self::$configuration_options;
+	}
+
 	public static function getConfigurationPath() {
 		return self::$configuration_options['ConfigurationPath'];
 	}
@@ -2347,6 +2366,20 @@ final class eGlooConfiguration {
 		}
 
 		return $retVal;
+	}
+
+	public static function initFromNamespace() {
+		self::$rewriteBase = Configuration::getRewriteBase();
+		self::$web_root = Configuration::getWebRoot();
+
+		// Configuration Attributes
+		self::$configuration_options = Configuration::getConfigurationOptions();
+		self::$system_configuration = Configuration::getSystemConfiguration();
+		self::$configuration_possible_options = Configuration::getPossibleConfigurationOptions();
+		self::$uniqueInstanceID = Configuration::getUniqueInstanceIdentifier();
+
+		// Runtime Initialization / Configuration
+		self::$_runtimeConfigurationCacheFilename = Configuration::getRuntimeConfigurationCacheFilename();
 	}
 
 }
