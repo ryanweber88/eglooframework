@@ -3,9 +3,8 @@
  * 
  */
 
-namespace \eGloo\Utilities;
+namespace eGloo\Utilities;
 
-use \eGloo\Utilities;
 
 /**
  * Provides utility methods, mostly static, for array manipulation

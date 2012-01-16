@@ -161,7 +161,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 					$block($this);
 				}
 				
-				else if (is_array($hash = $mixed)) {
+				else if (is_array($hash = $mixed) && \eGloo\Utilities\Collection::isHash($hash)) {
 					
 					foreach($hash as $field => $value) {
 						$this->$field = $value;
