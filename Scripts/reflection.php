@@ -66,14 +66,11 @@ spl_autoload_register(function($className) {
 
 // FUNCTIONS //////////////////////////////////////////////////////////////////
 
-function putsReflectionClass(ReflectionClass $class) {
-	echo ">>> {$class->getName()} @\n{$class->getFileName()}\n\n";
-	
-	if ($class->getParentClass()) {
-		putsReflectionClass($class->getParentClass());
-	}
-	
+function fragment($name) {
+	return './' . basename(__FILE__, '.php') . "/fragments/$name";	
 }
+
+
 // PROPERTIES /////////////////////////////////////////////////////////////////
 
 $file     = $argv[1];
@@ -84,6 +81,7 @@ $fragment = $argv[2];
 
 // TESTING
 
+echo fragment('asdf'); exit;
 
 // PROGRAM
 
@@ -103,35 +101,40 @@ $bootstrap = &$application->bootstrap()
 	->bootstrap('egloo');
 
 	
-//xdebug_disable();
-
-//error_reporting(E_ALL ^ E_NOTICE);
 
 // check if file is valid
 if (is_file($file)) {
 	
-	try {
+	if (is_file(fragment($fragment))) {
+	
+		try {
+			
+			// check that file has at least a class definition - of course
+			// this isn't very thorough, but will at least provide a little
+			if (preg_match('/class\s+?[a-zA-Z_]/i', file_get_contents($file))) { 
+				
+				//$file = "test.php"; 
+				require $file;
+				
+				$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
+				
+				if ($reflection_file && count($reflection_file->getClasses())) {
+					$reflection_class = $reflection_file->getClasses()[0];
 		
-		// check that file has at least a class definition - of course
-		// this isn't very thorough, but will at least provide a little
-		if (preg_match('/class\s+?[a-zA-Z_]/i', file_get_contents($file))) { 
-			
-			//$file = "test.php"; 
-			require $file;
-			
-			$reflection_file  = new \Zend\Code\Reflection\FileReflection($file);
-			
-			if ($reflection_file && count($reflection_file->getClasses())) {
-				$reflection_class = $reflection_file->getClasses()[0];
-	
-				require $fragment;
+					require $fragment;
+				}
 			}
-		}
-
-	}
 	
-	catch(\Exception $ignore) { }
+		}
+		
+		catch(\Exception $ignore) { }
+	}
 
+	else {
+		throw new \Exception(
+			"Fragment $fragment not found"
+		);
+	}
 
 	
 }
