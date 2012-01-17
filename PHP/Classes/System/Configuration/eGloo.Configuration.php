@@ -3,6 +3,9 @@ namespace eGloo;
 
 use \eGloo\Utility\Logger as Logger;
 
+use \Exception as Exception;
+use \ErrorException as ErrorException;
+
 /**
  * eGloo\Configuration Class File
  *
@@ -1698,6 +1701,18 @@ final class Configuration {
 		return $retVal;
 	}
 
+	public static function getConfigurationOption( $key ) {
+		return isset(self::$configuration_options[$key]) ? self::$configuration_options[$key] : null;
+	}
+
+	public static function setConfigurationOption( $key, $value ) {
+		self::$configuration_options[$key] = $value;
+	}
+
+	public static function getConfigurationOptions() {
+		return self::$configuration_options;
+	}
+
 	public static function getConfigurationPath() {
 		return self::$configuration_options['ConfigurationPath'];
 	}
@@ -2116,6 +2131,10 @@ final class Configuration {
 		return isset(self::$configuration_options['egSanityCheckClassLoading']) ? self::$configuration_options['egSanityCheckClassLoading'] : true;
 	}
 
+	public static function getPossibleConfigurationOptions() {
+		return self::$configuration_possible_options;
+	}
+
 	public static function getRewriteBase() {
 		return self::$rewriteBase;
 	}
@@ -2141,6 +2160,10 @@ final class Configuration {
 		// TODO make this customizable
 		// return self::$configuration_options['SwiftPath'];
 		return self::$configuration_options['FrameworkRootPath'] . '/Library/Swift4/lib/swift_required.php';
+	}
+
+	public static function getSystemConfiguration() {
+		return self::$system_configuration;
 	}
 
 	public static function getTwigIncludePath() {

@@ -163,4 +163,8 @@ class eGlooRequest {
 	*/
 }
 
-deprecate( __FILE__, '\eGloo\HTTP\Request' );
+if ( function_exists('\\eGloo\\deprecate') ) {
+	\eGloo\deprecate( __FILE__, '\eGloo\HTTP\Request' );
+} else if ( function_exists('\deprecate') ) {
+	\deprecate( __FILE__, '\eGloo\HTTP\Request' );
+}

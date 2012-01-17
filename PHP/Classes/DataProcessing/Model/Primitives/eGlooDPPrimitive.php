@@ -65,7 +65,18 @@ abstract class eGlooDPPrimitive extends eGlooDPObject {
 
 	public function __construct( $class = null, $id = null, $connection_name = 'egPrimary', $engine_mode = null ) {
 		// parent::__construct();
-		
+
+		if ( strpos($class, '::') !== false ) {
+			$matches = array();
+
+			if ( preg_match('~([^:]+)::([^:]+)~', $class, $matches) ) {
+				if ( isset($matches[1]) && isset($matches[2]) ) {
+					$class = $matches[1];
+					$id = $matches[2];
+				}
+			}
+		}
+
 		$this->_class = $class;
 		$this->_id = $id;
 

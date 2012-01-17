@@ -38,8 +38,16 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	// INITIALIZTAION  ----------------------------------------------------- //
 	
 	
-	function __construct($evaluate = true) { 
+	function __construct($mixed) { 
 		parent::__construct();
+		
+		// determine constructor argument - from the constructor
+		// @TODO use a strack trace to determine if calling entity
+		// construct from within an entity, in which case, we need
+		// a short circuit on evaluation
+		$evaluate = is_bool($mixed) && $mixed === true;
+		
+		
 		
 		//echo "entity::construct on " . get_class($this) . "\n";
 		
@@ -137,6 +145,37 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 
 		// fire 'created' event
 		$this->events->trigger('created', $this);
+		
+		// if passed argument is a hash or lambda/block
+		// then constructor argument is meant to initialize
+		// entity and create instance on database - our __set
+		// magic method will ensure that improper fields (fields that do not
+		// belong to entity), CANNOT be set
+		
+		if (!is_null($mixed = func_get_arg(0))) {
+			try {  
+				if (is_callable($block = $mixed)) {
+					
+					// presumambly, our block will provide initializers
+					// for entity values
+					$block($this);
+				}
+				
+				else if (is_array($hash = $mixed) && \eGloo\Utilities\Collection::isHash($hash)) {
+					
+					foreach($hash as $field => $value) {
+						$this->$field = $value;
+					}
+					
+				}
+			}
+			
+			// here we catch and rethrow so we know exception
+			// was caused during entity initialization
+			catch(DDL\Exception\Exception $e) {
+				throw $e;
+			}
+		}
 		
 	}
 	
@@ -596,15 +635,18 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * Place entity into persistence context and flags record insertion
 	 * on underlying data layer
 	 */
-	protected function create() { 
+	public static function create() {
+		
+		$entity  = new static(false);
 		$manager = Manager\Factory::factory();
+				
 		$this->events->trigger('call', $this, [
 			'name'                 => 'create',
 		
 			// defines the calling method, and parameter values
-			'arguments'            => [ 'fields' => [ 
+			'arguments'            => [ 'fields' => array_merge([ 
 				$pk => [ 'values' => $key ]
-			]], 
+			]),
 			
 		]);	
 		
@@ -612,6 +654,8 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		return $manager->persist($this);
 	
 	}
+	
+	protected function 
 	
 	/**
 	 * Updates entity within manager context, and flags underlying data layer update;

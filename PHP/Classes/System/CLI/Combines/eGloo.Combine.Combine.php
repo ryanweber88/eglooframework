@@ -144,7 +144,7 @@ abstract class Combine {
 
 		foreach($arguments as $argument) {
 			$matches = array();
-			preg_match('/^([a-zA-Z0-9]+)$/', $argument, $matches);
+			preg_match('/^([a-zA-Z0-9\/_.:\\\ -]+)$/', $argument, $matches);
 
 			if ( !empty($matches) && isset($matches[1]) ) {
 				$command_arguments[] = $matches[1];
