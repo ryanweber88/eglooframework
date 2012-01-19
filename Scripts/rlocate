@@ -45,18 +45,24 @@ parameters = ARGV.join(Space)
 results    = `locate #{parameters}`.split(Newline)
 
 unless results.empty?
-  # iterate through result set and display as choosable options
-  # user
-  results.each_with_index do | result, index |
-    puts "#{index} ==> #{result}"
-  end
-  
-  print "\nchoose from above index: "
-  
-  # recieve user input from command line and launch gedit
-  # with filepath
-  answer = $stdin.gets.chomp.to_i
 
-  `gedit #{results[answer]} &` if results.in_bounds? answer 
+  if results.length == 1
+    `gedit #{results.pop} &`
+    
+  else
+
+    # iterate through result set and display as choosable options
+    # user
+    results.each_with_index do | result, index |
+      puts "#{index} ==> #{result}"
+    end
   
+    print "\nchoose from above index: "
+  
+    # recieve user input from command line and launch gedit
+    # with filepath
+    answer = $stdin.gets.chomp.to_i
+
+    `gedit #{results[answer]} &` if results.in_bounds? answer 
+  end
 end
