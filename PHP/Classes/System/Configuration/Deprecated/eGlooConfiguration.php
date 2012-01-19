@@ -1557,6 +1557,51 @@ final class eGlooConfiguration {
 		unset($_SERVER['REDIRECT_EG_SECURE_ENVIRONMENT']);
 	}
 
+	/**
+	 * 
+	 * Provides meta-lookup for configuration options not explicitly
+	 * provided by accessor methods
+	 * @param string   $name
+	 * @param string[] $arguments
+	 */
+	public function __call($name, $arguments) {
+		
+		// determine action and variable argument
+		$allowedActions = array(
+			'get'
+		);
+		
+		if (preg_match('/([a-z])+([A-Z][a-zA-Z]+)/', $name, $match)) {
+			$action = $match[1];
+			$on     = lcfirst($match[2]);
+			
+			// if action falls in range of allowed actions, we then check
+			// on what we acting on - explicitly, is it available in config
+			// options  
+			if (in_array($action, $allowedActions)) {
+				
+				// since configuration names can start with either lower
+				// or upper case, we have to check both - this leaves
+				// the possibility of selecting the wrong config option,
+				// but that should a fringe case (great tv show)
+				if ($action == 'get') {
+					
+					// we don't explicitly check whether configuration option
+					// exists - we just check against case and default/guess
+					// opposite case is correct value
+					if (is_null(self::$configuration_options[$on])) {
+						$on = lcfirst($on);
+					}
+					
+					return self::$configuration_options[$on];
+
+				}
+			}
+		};
+		
+		
+	}
+
 	// Accessors
 	public static function getAlerts() {
 		$retVal = array();
