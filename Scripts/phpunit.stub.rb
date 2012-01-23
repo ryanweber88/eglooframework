@@ -10,7 +10,6 @@ require 'fileutils'
 
 # CONSTANTS
 
-DirectoryTierz = '/home/petflowdeveloper/tierzwei'
 
 # PATCHES
 
@@ -27,17 +26,6 @@ raise 'Specify file' if ARGV.empty?
 
 # test file's validity
 raise 'Invalid file' unless File.file?(file = ARGV[0])
-
-# get tierzwei path if not current directory
-unless directory_of_tierz = File.directory?(DirectoryTierz) && File.absolute_path(DirectoryTierz)
-  # query locate for tierzwei directory
-  #puts `find . -type d -name tierzwei`; exit
-  
-  #`find . -type d -name tierzwei`.each do | directory |
-    #puts directory
-  #end
-  
-end
 
 
 # create file instance in block context
