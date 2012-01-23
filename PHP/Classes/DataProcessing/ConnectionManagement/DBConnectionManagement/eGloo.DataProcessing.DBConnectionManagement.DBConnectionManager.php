@@ -1,4 +1,6 @@
 <?php
+namespace eGloo\DataProcessing\DBConnectionManagement;
+use eGloo\DataProcessing\Connection;
 /**
  * DBConnectionManager Class File
  *
@@ -415,7 +417,7 @@ final class DBConnectionManager extends ConnectionManager {
 		}
 
 		// return $db_handle;
-		$retVal = new PostgreSQLDBConnection( $db_handle );
+		$retVal = new Connection\PostgreSQLDBConnection( $db_handle );
 
 		return $retVal;
 	}

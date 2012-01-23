@@ -1,8 +1,8 @@
 <?php
+namespace eGloo\Commerce\Program;
+
 /**
- * PostgreSQLDBConnection Class File
- *
- * $file_block_description
+ * Program Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -18,30 +18,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- * @author George Cooper
+ * @author Gilbert Sewovoe-Ekoue
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @package $package
- * @subpackage $subpackage
+ * @package package
+ * @subpackage subpackage
  * @version 1.0
  */
 
 /**
- * PostgreSQLDBConnection
+ * Description of Program
+ * 
+ * Representation of Program Entity
+ * Hold CRUD functionalities and Program related method
  *
- * $short_description
- *
- * $long_description
- *
- * @package $package
- * @subpackage $subpackage
+ * @package Plugins
+ * @subpackage Commerce
  */
-class PostgreSQLDBConnection extends DBConnection {
+class Program {
+	
+	public		$program_id;
+	
+	public		$program_title;
+	
+	public		$user_id;
+	
+	public		$interval;
+	
+	public		$interval_type;
+	
+	public		$start_date;
+	
+	public		$end_date;
+	
 
-	public function __construct( $rawConnectionResource ) {
-		$this->setConnectionDialect( DialectLibrary::POSTGRESQL );
-		$this->setRawConnectionResource( $rawConnectionResource );
+	function __construct() {
+		
+	}
+	
+	public function updateProgram() {
+		
+	}
+
+
+	public static function createProgram() {
+		
+	}
+	
+	public static function deleteProgram($program_id) {
+		
 	}
 
 }
-

@@ -1,6 +1,7 @@
 <?php
+namespace eGloo\DataProcessing\Connection;
 /**
- * DoctrineDBConnection Class File
+ * DBConnection Class File
  *
  * $file_block_description
  * 
@@ -27,7 +28,7 @@
  */
 
 /**
- * DoctrineDBConnection
+ * DBConnection
  *
  * $short_description
  *
@@ -36,12 +37,25 @@
  * @package $package
  * @subpackage $subpackage
  */
-class DoctrineDBConnection extends DBConnection {
+class DBConnection extends \eGlooConnection {
 
-	public function __construct( $rawConnectionResource ) {
-		$this->setConnectionDialect( DialectLibrary::DOCTRINE );
-		$this->setRawConnectionResource( $rawConnectionResource );
+	protected $_connectionDialect = null;
+	protected $_rawConnectionResource = null;
+
+	public function getConnectionDialect() {
+		return $this->_connectionDialect;
+	}
+
+	public function setConnectionDialect( $connectionDialect ) {
+		$this->_connectionDialect = $connectionDialect;
+	}
+
+	public function getRawConnectionResource() {
+		return $this->_rawConnectionResource;
+	}
+
+	public function setRawConnectionResource( $rawConnectionResource ) {
+		$this->_rawConnectionResource = $rawConnectionResource;
 	}
 
 }
-

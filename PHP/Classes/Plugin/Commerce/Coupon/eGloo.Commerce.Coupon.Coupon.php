@@ -1,8 +1,9 @@
 <?php
+namespace eGloo\Commerce\Coupon;
+use \eGloo\Commerce;
+
 /**
- * MySQLiDBConnection Class File
- *
- * $file_block_description
+ * Coupon Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -18,30 +19,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- * @author George Cooper
+ * @author Gilbert Sewovoe-Ekoue
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @package $package
- * @subpackage $subpackage
+ * @package package
+ * @subpackage subpackage
  * @version 1.0
  */
 
 /**
- * MySQLiDBConnection
+ * Description of Coupon
+ * 
+ * Representation of Coupon Entity
+ * Hold CRUD functionalities and Coupon related method
  *
- * $short_description
- *
- * $long_description
- *
- * @package $package
- * @subpackage $subpackage
+ * @package Plugins
+ * @subpackage Commerce
  */
-class MySQLiDBConnection extends DBConnection {
-
-	public function __construct( $rawConnectionResource ) {
-		$this->setConnectionDialect( DialectLibrary::MYSQLI );
-		$this->setRawConnectionResource( $rawConnectionResource );
-	}
-
+class Coupon {
+	
 }
-
