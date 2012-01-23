@@ -76,6 +76,8 @@ class User {
 
 	/** @var string is user logged in */
 	public $logged_in				= false;
+	
+	protected static $loggedIn = false;
 
 	const PRIVILEGES_REGULAR_USER	= 0;
 	const PRIVILEGES_ADMIN_USER		= 1;
@@ -96,10 +98,6 @@ class User {
 	}
 
 
-	public function logout () {
-		$this->logged_in = false;
-	}
-
 	public function __toString () {
 		$user_data = '';
 		foreach ($this as $field => $value) {
@@ -110,6 +108,47 @@ class User {
 		}
 		return $user_data;
 	}
+	
+	public function __call($name, $arguments) {
+		
+		if ($name == 'logout') {
+			return $this->logout();
+		}
+		
+		// @TODO delegate to EPA
+	}
+	
+	public function __callstatic($name, $arguments) {
+		
+		if ($name == 'logout' && isset($arguments[0])) {
+			// @TODO perform needed actions for a static user logout
+			// this should be possible if the user has logged in
+			// since we should be statically storing our user login
+			// information
+			
+		
+		} 
+		
+		// @TODO delegate to EPA
+	}
+	
+	/**
+	 * 
+	 * Returns user logged in status
+	 */
+	public static function loggedIn() {
+		return static::$loggedIn;
+	}
+	
+	/**
+	 * 
+	 * Determines user login destination
+	 */
+	public static function loginDestination() {
+		// @TODO pass
+	}
+	
+
 
 	public static function createUser($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
 		if ($uname == '' || $pwd == '') {
