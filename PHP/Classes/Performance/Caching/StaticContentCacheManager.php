@@ -51,6 +51,7 @@ class StaticContentCacheManager {
 			}
 		}
 
+		//echo eGlooConfiguration::getWebRoot() . $package . '/' . $uniquePath . '/' . $filename; exit;
 		if ( !file_put_contents( eGlooConfiguration::getWebRoot() . $package . '/' . $uniquePath . '/' . $filename, $output ) ) {
 			throw new Exception( 'File write failed for ' . eGlooConfiguration::getWebRoot() . $package . '/' . $uniquePath . '/' . $filename );
 		}

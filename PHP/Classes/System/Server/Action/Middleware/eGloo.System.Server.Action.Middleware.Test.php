@@ -31,7 +31,7 @@ class Test extends Middleware {
 		$user->name = 'Christian';
 		$user->mail = 'callowaylc@gmail.com';
 		
-		// create a user with following initilization fields
+		// create a user with following initilization fields as hash
 		$user = new \eGloo\DataProcessing\DDL\Entity\Test\User([
 			'name' => 'Christian',
 			'mail' => 'callowaylc@gmail.com'
@@ -88,7 +88,7 @@ class Test extends Middleware {
 		\eGloo\DataProcessing\DDL\Entity\Test\User::find(1);
 		
 		// returns QuerySet object
-		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find('1..20');
+		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find('1..20')['10..15'];
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find(1,2,3);
 		$set = \eGloo\DataProcessing\DDL\Entity\Test\User::find_by_name('christian', 'gilbert') // all dynamic finders return sets
 				
@@ -106,7 +106,7 @@ class Test extends Middleware {
 		$users->limit(20)->offset(10) || $users['10..20'];
 		
 		// database hit
-		$users->count() || $users[0]->title || $users[0]->Products[0];
+		$users->count() || $users[0]->title || $users[0]->Products[0]->title;
 		
 		
 		

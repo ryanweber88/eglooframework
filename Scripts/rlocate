@@ -61,8 +61,9 @@ unless results.empty?
   
     # recieve user input from command line and launch gedit
     # with filepath
-    answer = $stdin.gets.chomp.to_i
-
-    `gedit #{results[answer]} &` if results.in_bounds? answer 
+    if (answer = $stdin.gets.chomp).length > 0
+      answer = answer.to_i
+      `gedit #{results[answer]} &` if results.in_bounds?(answer)
+    end 
   end
 end
