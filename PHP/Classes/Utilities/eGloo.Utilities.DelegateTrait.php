@@ -18,6 +18,8 @@ trait DelegateTrait {
 	 */
 	public function __call($name, $arguments) {
 		
+		$function = null;
+		
 		// iterate through our delegates and see if they will
 		// respond to the message; either explicitly (a respond_to
 		// has been specified) or implicitly (no respond_to's defined
@@ -26,15 +28,65 @@ trait DelegateTrait {
 		// available delegate that passes above condition
 		foreach ($this->receivers as $receiver) {
 			
-			// if no respond_to have been defined for receiver, this
-			// is a catchall receiver
-			if (count($receiver['respond_to']) == 0) {
-				
+			// look for specific receiver - this works on a first come, first
+			// serve basis
+			if (in_array($name, $receiver['respond_to'])) {
+				$function = function($arguments) use ($receiver) {
+					return call_user_func_array(
+						[ $receiver['is'], $name ],  $arguments
+					);
+				};	
 			}
+			
+		}
+		
+		// if we have not returned, look for a catch-all receiver - 
+		// again, the first catchall receiver we find will be 
+		// called, so it is up to the developer to not screw up
+		// what receivers are specified
+		foreach ($this->receivers as $receiver) {
+			// we have found a catch all receiver, pass message to 
+			// receiver - it is not gaurenteed that receiver will be 
+			// able to respond to message, in which case an exception
+			// must be thrown 
+			try {   
+				if (count($receiver['respond_to']) === 0) {
+					$function = function($arguments) use ($receiver) {
+						return call_user_func_array(
+							[ $receiver['is'], $name ],  $arguments
+						);
+					};		
+				}
+			}
+			
+			// we ignore our exception, to allow for passing __call method
+			// up to parent, should it exist
+			catch (\Exception $ignore) { }
+		}
+		
+		
+		// if function is callable, it has been defined
+		if (is_callable($function)) {
+			
+			// add instance/singleton definition if user of
+			// this trait responds to defineMethod - the purpose
+			// of this is to add method definition either statically
+			// (redefining class) or within quick lookup table (if
+			// we are out side of stateful environment)
+			if (method_exists($this, 'defineMethod')) {
+				$function = $this->defineMethod(
+					$name, $function
+				);
+			}
+			
+			// finally, execute block and return to caller
+			return $function($arguments);
 		}
 		
 		// check if parent responds to __call, in which case we
-		// forward parenter handler
+		// forward parenter handler; if this cannot respond to
+		// message, an exception will be thrown further up
+		// stack
 		if (method_exists(parent, '__call')) {
 			parent::__call($name, $arguments);
 		}	

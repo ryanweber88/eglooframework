@@ -86,9 +86,25 @@ class User {
 	public function __contruct ($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
 		if ($uname == '' || $pwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
-		}
 		
+			static::$loggedIn = true;
+		}
 	}
+
+	/*public function __construct($mixed = null) {
+	
+		if (is_callable($mixed)) {
+			$mixed($this);
+
+			new User(function($entiy) {
+				$this->entity->id = valuePassedFromJsonOrScope;
+			});
+		}
+
+		foreach($mixed as $name => $value) {
+
+		}
+	}*/
 
 	public function checkPassword ($password) {
 		return MD5($password) == $this->password ?: false;
@@ -140,6 +156,8 @@ class User {
 	public static function loggedIn() {
 		return static::$loggedIn;
 	}
+
+	
 	
 	/**
 	 * 
