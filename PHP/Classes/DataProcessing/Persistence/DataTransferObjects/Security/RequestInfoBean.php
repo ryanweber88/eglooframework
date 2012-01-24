@@ -36,7 +36,7 @@
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-class RequestInfoBean {
+class RequestInfoBean implements ArrayAccess {
 
 	private $arguments = null;
 	private $requestProcessorID = null;
@@ -176,6 +176,42 @@ class RequestInfoBean {
 			}
 		}
 	}
+	
+	// ArrayAccess Interface //////////////////////////////////////////////////
+	
+	public function offsetExists($offset) {
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			if (property_exists($this, $method) && isset($this->$method[$offset])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public function offsetGet($offset) {
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			if (property_exists($this, $method) && isset($this->$method[$offset])) {
+				return $this->$method[$offset];
+			}
+		}
+		
+		return false;
+	}
+	
+	public function offsetSet($offset, $value) {
+		throw new \Exception(
+			'Do not set bean values via array notation'
+		);
+	}
+	
+	public function offsetUnset($offset) {
+		throw new \Exception(
+			'Do not unset bean values via array notation'
+		);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
 
 	public function issetCOOKIE( $key ) {
 		$retVal = false;
