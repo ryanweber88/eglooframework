@@ -26,6 +26,15 @@ trait DelegateTrait {
 		// available delegate that passes above condition
 		foreach ($this->receivers as $receiver) {
 			
+			// look for specific receiver - this works on a first come, first
+			// serve basis
+			if (in_array($name, $receiver['respond_to'])) {
+				$function = function($arguments) use ($receiver) {
+					return $receiver->$name
+				};	
+			}
+			
+		
 			// if no respond_to have been defined for receiver, this
 			// is a catchall receiver
 			if (count($receiver['respond_to']) == 0) {
