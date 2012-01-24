@@ -1,7 +1,5 @@
 <?php
-namespace eGloo\DataProcessing\Connection;
-use \eGloo\DataProcessing\ConnectionManagement\DBConnectionManager;
-use \eGloo\DataProcessing\Connection\DatabaseErrorException;
+
 /**
  * PostgreSQLDBConnection Class File
  *
@@ -51,11 +49,11 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param resource $rawConnectionResource 
 	 */
 	public function __construct( $rawConnectionResource = null ) {
-		$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
+		$this->setConnectionDialect( DialectLibrary::POSTGRESQL );
 
 		if (is_null ($rawConnectionResource)) {
-			\DBConnectionManager::resetConnections();
-			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+			DBConnectionManager::resetConnections();
+			$this->link = DBConnectionManager::getConnection()->getRawConnectionResource();
 		} else {
 			$this->setRawConnectionResource( $rawConnectionResource );
 		}
@@ -69,7 +67,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 */
 	public function getConnection () {
 		if ($this->link === null) {
-			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+			$this->link = DBConnectionManager::getConnection()->getRawConnectionResource();
 		}
 		return $this->link;
 	}
@@ -122,7 +120,7 @@ class PostgreSQLDBConnection extends DBConnection {
 			}
 		}
 		if (!$pg_result) {
-			throw new \Connection\DatabaseErrorException($this->link->pg_last_error, $sql);
+			throw new DatabaseErrorException($this->link->pg_last_error, $sql);
 		}
 		return $result;
 	}
@@ -172,7 +170,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		}
 		$this->link->pg_query('START TRANSACTION');
 		if ($conn->errno != 0) {
-			throw  new \DatabaseErrorException();
+			throw  new DatabaseErrorException();
 		}
 	}
 
@@ -185,7 +183,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		}
 		$this->link->pg_query('COMMIT');
 		if ($conn->errno != 0) {
-			throw  new \DatabaseErrorException();
+			throw  new DatabaseErrorException();
 		}
 	}
 
