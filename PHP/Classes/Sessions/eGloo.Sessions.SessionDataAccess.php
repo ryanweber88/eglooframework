@@ -11,7 +11,7 @@ use \eGloo\DataProcessing\Connection;
  *
  * @author gilbert
  */
-class SessionDAO extends Connection\PostgreSQLDBConnection {
+class SessionDataAccess extends Connection\PostgreSQLDBConnection {
 	
 	/** @var resource Object */
 	protected static $instance = null;
