@@ -87,10 +87,29 @@ class User {
 		if ($uname == '' || $pwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
-		$this->username		= $uname;
-		$this->password		= $pwd;
-		$this->privileges	= $priv;
 
+
+
+		static::$loggedIn = true;
+
+	}
+
+	public function __construct($mixed = null) {
+	
+		if (is_callable($mixed)) {
+			$mixed($this);
+
+			new User(function($entiy) {
+				$this->entity->id = valuePassedFromJsonOrScope;
+			});
+		}
+
+		foreach($mixed as $name => $value) {
+
+		}
+
+			
+		
 	}
 
 	public function checkPassword ($password) {
@@ -139,6 +158,8 @@ class User {
 	public static function loggedIn() {
 		return static::$loggedIn;
 	}
+
+	
 	
 	/**
 	 * 
