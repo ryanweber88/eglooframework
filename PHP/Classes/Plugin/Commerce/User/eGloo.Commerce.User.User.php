@@ -83,9 +83,9 @@ class User {
 		  PRIVILEGES_ADMIN_USER		= 4;
 
 
-	public function __contruct ($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
-		if ($uname == '' || $pwd == '') {
-			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+	public function __contruct ($args) {
+		if (sizeof($args) == 0) {
+			throw new \InvalidArgumentException("User does not exist in the System");
 		
 			static::$loggedIn = true;
 		}
@@ -106,7 +106,7 @@ class User {
 		}
 	}*/
 
-	public function checkPassword ($password) {
+	public function validatePassword ($password) {
 		return MD5($password) == $this->password ?: false;
 	}
 	
@@ -168,8 +168,17 @@ class User {
 	}
 	
 
+	public static function register($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
+		if ($uname == '' || $pwd == '') {
+			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+		}
+		
+		$id = Commerce\User\UserDataAccess::fetch()->createUser($uname, $pwd, $priv);
+	
+		return self::loadByID($id);
+	}
 
-	public static function create($uname, Skype$pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
+	public static function create($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
 		if ($uname == '' || $pwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
@@ -181,7 +190,7 @@ class User {
 		return new User(self::createUserFromArray($row));
 	}
 	
-	public static function load($user_id) {
+	public static function loadByID($user_id) {
 		if ((int)$user_id <= 0) {
 			throw new \InvalidArgumentException();
 		}

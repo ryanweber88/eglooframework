@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Commerce\User;
-use eGloo\DataProcessing\Connection;
+use \eGloo\DataProcessing\Connection,
+	\eGloo\Utility;
 
 /**
  * UserDataAccess Class File
