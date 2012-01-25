@@ -430,6 +430,10 @@ final class DBConnectionManager extends ConnectionManager {
 		
 	}
 
+	public static function getActiveConnections() {
+		return self::$connections;
+	}
+
     public static function resetConnections() {
 		self::$connections = array( 'egCustomConnections' => array() );
 	}
