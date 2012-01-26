@@ -36,7 +36,7 @@
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-class RequestInfoBean {
+class RequestInfoBean implements \ArrayAccess {
 
 	private $arguments = null;
 	private $requestProcessorID = null;
@@ -135,7 +135,8 @@ class RequestInfoBean {
 	 * @param mixed[] $arguments
 	 */
 	public function __call($name, $arguments) {
-		
+		// @TODO test and implement this
+				
 		// match against xxx(Xxx) method name patterns, where it is assumed
 		// that our submatch is the name of property - in reality we are
 		// matching against GET/POST/DELETE/PUT 
@@ -176,6 +177,68 @@ class RequestInfoBean {
 			}
 		}
 	}
+	
+	// ArrayAccess Interface //////////////////////////////////////////////////
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetExists()
+	 */
+	public function offsetExists($offset) {
+		
+
+
+
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			// have to assign into holder prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetGet()
+	 */
+	public function offsetGet($offset) {
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			// have to do this prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
+				return $property[$offset];
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetSet()
+	 */
+	public function offsetSet($offset, $value) {
+		throw new \Exception(
+			'Do not set bean values via array notation'
+		);
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetUnset()
+	 */
+	public function offsetUnset($offset) {
+		throw new \Exception(
+			'Do not unset bean values via array notation'
+		);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
 
 	public function issetCOOKIE( $key ) {
 		$retVal = false;
