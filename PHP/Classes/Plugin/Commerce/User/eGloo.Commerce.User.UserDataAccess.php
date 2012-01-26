@@ -46,7 +46,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	 * if needed
 	 * @return void
 	 */
-	protected function __construct() { }
+	public function __construct() { }
 
 	/**
 	 * Generate an instance of this class
@@ -54,7 +54,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	 */
 	public static function fetch () {
 		if (static::$instance === null) {
-			static::$instance = new User\UserDataAccess();
+			static::$instance = new self();
 		}
 		return static::$instance;
 	}
@@ -75,22 +75,30 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		if ($user_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
 		}
+		return $this->loadUserByField('user_id', $user_id);
 	}
 
 	public function loadUserByName($user_name) {
+		echo 'Trace:: From ' . __CLASS__ . ':::' . __METHOD__ . PHP_EOL . PHP_EOL;
 		if ($user_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
 		}
+		return $this->loadUserByField('user_name', $user_id);	
+	}
+	
+	public function loadUserByEmail($email) {
+		if ($email == '') {
+			throw new \InvalidArgumentException(__CLASS__ .'::Missing argument: user_name is required!', __METHOD__);
+		}		
+		return $this->loadUserByField('email_address', $email);	
 	}
 
-	public function loadUser($field_name, $field_value) {
+	public function loadUserByField($field_name, $field_value) {
 		if ($field_name == '' || $field_value == '') {
 			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
 		}
-		$sql = '';
-		return parent::getUnique($sql, array($field_value, 1), function ($row) {
-							return $row;
-		});
+		$sql = "SELECT * FROM site_user WHERE {$field_name} = ? AND user_status_id = ?";
+		return parent::getUnique($sql, array($field_value, 1));
 	}
 
 	public function deleteUserById($user_id) {

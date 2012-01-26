@@ -109,7 +109,7 @@ class Brand {
 		return $this;
 	}
 
-		/**
+	/**
 	 * Populate data int the brand object
 	 * 
 	 * @param type $key
