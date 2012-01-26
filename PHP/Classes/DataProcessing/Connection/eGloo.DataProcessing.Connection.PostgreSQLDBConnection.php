@@ -56,10 +56,12 @@ class PostgreSQLDBConnection extends DBConnection {
 		if (is_null ($rawConnectionResource)) {
 			\DBConnectionManager::resetConnections();
 			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+			if (null == $this->link) {
+				throw new DatabaseErrorException('Can\'t connect to database server.');
+			}
 		} else {
 			$this->setRawConnectionResource( $rawConnectionResource );
 		}
-		
 	}
 	
 	/**
@@ -98,7 +100,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	}
 
 	/**
-	 * Postgres execution routine
+	 * Postgres execution routine.
+	 * Prepare execution path and return closure object of pg_result object
+	 * Used in combination with getUnique to query single row
+	 * or getAll to query set of data
 	 * 
 	 * @param string $sql
 	 * @param array $params
@@ -106,25 +111,18 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return string postgres result
 	 * @exception throw \Connection\DatabaseErrorException
 	 */
-	public function executeQuery ($sql, array $params = null, $callback = null ) {
-		$result = '';
+	public function executeQuery ($sql, array $params = null, $callback = null) {
 		$this->prepareStatment($sql, $params);
 
-		if ($this->link === null) {
-			$this->getConnection();
-		}
+		isset($this->link) ?: $this->getConnection();
 		
-		if (false !== ($pg_result = pg_query_params($this->link, $sql, $params))) {
-			if ( $callback !== null ) {
-				$result = $callback($pg_result, $this->link);
-			} else {
-				return $result = pg_fetch_all($pg_result);
-			}
+		if (false !== ($result = pg_query_params($this->link, $sql, $params))) {
+
+			return is_callable($callback)
+				? $callback($result, $this->link)
+				: $result;
 		}
-		if (!$pg_result) {
-			throw new \Connection\DatabaseErrorException($this->link->pg_last_error, $sql);
-		}
-		return $result;
+		throw new DatabaseErrorException(pg_last_error($this->link), $sql);
 	}
 	
 	/**
@@ -141,6 +139,8 @@ class PostgreSQLDBConnection extends DBConnection {
 			while ($row = pg_fetch_assoc( $result )){
 				if ($callback !== null ) {
 					$list[$index] = $callback($index++, $row );
+				} else {
+					$list[$index] = $row;
 				}
 			}
 			return $list;
@@ -155,12 +155,16 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return type 
 	 */
 	public function getUnique( $sql, array $params = null, $callback = null ) {
-		return $this->executeQuery($sql, $params, function ($result, $link) use ($callback) {
-			if($row = pg_fetch_assoc( $result )) {
-				$object = $callback( $row );
-			}
-			return $object;
-		});
+		if ($callback !== null) {
+			return $this->executeQuery($sql, $params, function ($result, $link) use ($callback) {
+				if($row = pg_fetch_assoc($result)) {
+					$object = $callback( $row );
+				}
+				return $object;
+			});
+		}
+		$pg_result = $this->executeQuery($sql, $params);
+		return pg_fetch_assoc($pg_result);
 	}
 	
 	/**
