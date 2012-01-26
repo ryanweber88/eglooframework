@@ -119,7 +119,8 @@ class AbstractDAOFactory {
 	}
 
 	public function __call( $method, $args ) {
-		return $this->getAppropriateFactory( $args[0] )->$method();
+		$connection_name = isset($args[0]) ? $args[0] : 'egPrimary';
+		return $this->getAppropriateFactory( $connection_name )->$method();
 	}
 
 }
