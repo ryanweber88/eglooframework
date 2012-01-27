@@ -105,7 +105,7 @@ class User {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
-		isset($this->user_id) ? static::$logged_in == true : false;
+		($this->user_status_id === 1) ? static::$logged_in == true : false;
 	}
 
 	/**
@@ -115,7 +115,7 @@ class User {
 	 * @return boolean true/false 
 	 */
 	public function validatePassword ($password) {
-		return MD5($password) == $this->password ?: false;
+		return md5($password) == $this->password_hash ?: false;
 	}
 	
 	/**
