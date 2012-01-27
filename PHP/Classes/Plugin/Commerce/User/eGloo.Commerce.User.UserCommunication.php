@@ -44,12 +44,13 @@ class UserCommunication {
 	 *
 	 * @param Commerce\User $user 
 	 */
-	public function __construct(Commerce\User\User $user) {
+	public function __construct(User $user) {
 		$this->user = $user;
 	}
 	
-	public function sentCommunication() {
-		return UserDataAccess::fetch()->sendCommunication($this->user->user_id);
+	public function sentCommunication($comm_type_id, $end_time) {
+		return UserDataAccess::fetch()->sendCommunication($this->user->user_id, $comm_type_id, 
+				$end_time, md5($this->user->user_id), $this->user->user_id);
 	}
 	
 	public function updateCommunicationStatus() {
