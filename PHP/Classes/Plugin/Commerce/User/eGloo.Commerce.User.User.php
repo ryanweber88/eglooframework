@@ -89,8 +89,9 @@ class User {
 	/** @var array/Mix properties of Brands */
 	public		$properties;
 
-	const PRIVILEGES_REGULAR_USER	= 1,
-		  PRIVILEGES_ADMIN_USER		= 4;
+	const USER_TYPE_NORMAL			= 1,
+			USER_TYPE_EMPLOYEE		= 2,
+			USER_TYPE_AFFILIATE		= 3;
 
 	/**
 	 * Construct User Object
@@ -210,6 +211,15 @@ class User {
 		return static::$loggedIn;
 	}
 	
+	public static function login ($email, $passwd) {
+		if ($email == '' || $passwd == '') {
+			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+		}
+		
+		$user = UserDataAccess::fetch()->login($email, $passwd);
+		return isset($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+	}
+
 	/**
 	 * Create User Object
 	 * 
@@ -219,36 +229,15 @@ class User {
 	 * @return type
 	 * @throws \InvalidArgumentException 
 	 */
-	public static function register($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
-		if ($uname == '' || $pwd == '') {
+	public static function register($email, $passwd, $user_type = self::USER_TYPE_NORMAL) {
+		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
-		
-		$id = UserDataAccess::fetch()->createUser($uname, $pwd, $priv);
-	
-		return self::loadByID($id);
+		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
+
+		return ($id > 0) ? self::loadByID($id) : 'Account creation failed';
 	}
 
-	/**
-	 *
-	 * @param type $uname
-	 * @param type $pwd
-	 * @param type $priv
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
-	 */
-	public static function create($uname, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
-		if ($uname == '' || $pwd == '') {
-			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
-		}
-		$this->username		= $uname;
-		$this->password		= $pwd;
-		$this->privileges	= $priv;
-
-		$row = UserDataAccess::fetch()->createUser();
-		return new User(self::createUserFromArray($row));
-	}
-	
 	/**
 	 *
 	 * @param type $user_id
@@ -259,8 +248,8 @@ class User {
 		if ((int)$user_id <= 0) {
 			throw new \InvalidArgumentException();
 		}
-		$user = UserDataAccess::fetch()->loadUserByUserID($user_id);
-		return new User($user);
+		$user = UserDataAccess::fetch()->loadUserByID($user_id);
+		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
 	}
 
 	/**
@@ -292,7 +281,7 @@ class User {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByEmail($email);
-		return new User($user);
+		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $email;
 	}
 
 	/**

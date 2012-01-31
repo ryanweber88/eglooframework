@@ -40,6 +40,6 @@
  */
 class DatabaseErrorException extends \Exception {
 	public function __construct ($msg, $query) {
-		parent::__construct ("Database error $msg occured when executing $query!");
+		parent::__construct ("Database error:: $msg occured when executing $query!");
 	}
 }

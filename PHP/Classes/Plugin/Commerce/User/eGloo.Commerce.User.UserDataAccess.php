@@ -59,16 +59,38 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		return static::$instance;
 	}
 
-	public function createUser ($uname, $pwd, $priv) {
-		if ($uname == '' || $password == '' || $priv == '') {
+	public function createUserAccount ($email, $passwd, $user_type) {
+		$user_id = null;
+		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException();
 		}
 		$this->beginTransaction();
+		$date = date('Y-m-d H:i:s', time());
 		try {
+			$email_insert_sql = 'INSERT INTO email_address (email_address, last_action,'
+							  . 'last_action_taken) VALUES(?,?,?);';
+			parent::executeInsert($email_insert_sql, array($email, 'I', $date));
+			
+			$user_insert_sql = 'INSERT INTO site_user (email_address, password_old,'
+							 . 'password_hash, user_status_id, user_type_id, registration_date,'
+							 . 'last_action, last_action_taken) VALUES(?,?,?,?,?,?,?,?)'
+							 . ' RETURNING user_id'; 
+			$params = array($email, 0, $passwd, 1, $user_type, $date, 'I', $date);
+			$user_id = parent::executeInsert($user_insert_sql, $params);
+			$this->commitTransaction();
 
 		} catch (\Exception $e) {
 			throw  $e;
 		}
+		return $user_id;
+	}
+	
+	public function login ($email, $passwd) {
+		if ($email == '' || $passwd == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = 'SELECT * FROM site_user WHERE email_address = ? AND password_hash = ?';
+		return parent::getUnique($sql, array($email, $passwd));
 	}
 
 	public function loadUserById($user_id) {
@@ -79,7 +101,6 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	}
 
 	public function loadUserByName($user_name) {
-		echo 'Trace:: From ' . __CLASS__ . ':::' . __METHOD__ . PHP_EOL . PHP_EOL;
 		if ($user_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
 		}
@@ -113,5 +134,17 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 			throw new \InvalidArgumentException('::Missing argument error: user_name is required!', __METHOD__);
 		}
 
+	}
+	
+	public function sendCommunication($user_id, $comm_type_id, $end_time, $code, $user_id, $start_time = null) {
+		$sql = 'INSERT INTO user_communication (user_id, user_communication_type_id,'
+			 . 'initiation_timestamp, hashcode, valid_through, used, last_action,'
+			 . 'last_action_taken, action_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+		
+		$start_time = isset($start_time) ? $start_time : date('Y-m-d H:i:s',time());
+		
+		$params = array($user_id, $comm_type_id, $start_time, $code, $end_time, 0, 'I', 
+			date('Y-m-d H:i:s',time()), $user_id);
+		return parent::executeInsert($sql, $params);
 	}
 }

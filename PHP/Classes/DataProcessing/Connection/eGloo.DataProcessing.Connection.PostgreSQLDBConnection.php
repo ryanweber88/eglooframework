@@ -111,13 +111,11 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return string postgres result
 	 * @exception throw \Connection\DatabaseErrorException
 	 */
-	public function executeQuery ($sql, array $params = null, $callback = null) {
+	private function execute ($sql, array $params = array(), $callback = null) {
 		$this->prepareStatment($sql, $params);
-
 		isset($this->link) ?: $this->getConnection();
 		
 		if (false !== ($result = pg_query_params($this->link, $sql, $params))) {
-
 			return is_callable($callback)
 				? $callback($result, $this->link)
 				: $result;
@@ -126,6 +124,65 @@ class PostgreSQLDBConnection extends DBConnection {
 	}
 	
 	/**
+	 * Execute Update
+	 * 
+	 * @param type $sql
+	 * @param array $params
+	 * @return type 
+	 */
+	public function executeUpdate($sql, array $params) {
+		$pg_result = self::execute($sql, $params);
+		return pg_affected_rows($pg_result);
+	}
+	
+	/**
+	 * Execute Delete
+	 * @param type $sql
+	 * @param array $params
+	 * @return type 
+	 */
+	public function executeDelete($sql, array $params) {
+		$pg_result = self::execute($sql, $params);
+		return pg_affected_rows($pg_result);
+	}
+	
+	/**
+	 * Execute Insert and return last insert ID
+	 *		Assume the use of Returning ID or NOT
+	 * @param type $sql
+	 * @param array $params
+	 * @return Integer Last Insert ID or true to indicate successful insert
+	 *			Failed insert already thow an exception
+	 * @throws DatabaseErrorException 
+	 */
+	public function executeInsert($sql, array $params) {
+		if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
+			$pg_result = self::execute($sql, $params);
+			if( pg_affected_rows($pg_result) !== 0 ) {
+				$insert_row = pg_fetch_row($pg_result);
+//				if (!is_array($insert_row)) {
+//					$result = $this->execute('SELECT lastval();');
+//					$insert_row = pg_fetch_row($result);
+//				}
+				return is_array($insert_row) ? array_shift($insert_row) : true;
+			}
+		} else {
+			throw new DatabaseErrorException('Unable to execute insert Statement', $sql);
+		}
+	}
+	
+	/**
+	 *
+	 * @param type $sql
+	 * @param array $params
+	 * @return type 
+	 */
+	public static function executeSelect($sql, array $params) {
+		$pg_result = self::execute($sql, $params );
+		return pg_fetch_all($pg_result);
+	}
+
+	/**
 	 *
 	 * @param type $sql
 	 * @param array $params
@@ -133,7 +190,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return type 
 	 */
 	public function getList( $sql, array $params = null, $callback = null ) {
-		return $this->executeQuery($sql, $params, function($result, $link) use ($callback){
+		return $this->execute($sql, $params, function($result, $link) use ($callback){
 			$index = 0;
 			$list = array();
 			while ($row = pg_fetch_assoc( $result )){
@@ -156,14 +213,14 @@ class PostgreSQLDBConnection extends DBConnection {
 	 */
 	public function getUnique( $sql, array $params = null, $callback = null ) {
 		if ($callback !== null) {
-			return $this->executeQuery($sql, $params, function ($result, $link) use ($callback) {
+			return $this->execute ($sql, $params, function ($result, $link) use ($callback) {
 				if($row = pg_fetch_assoc($result)) {
 					$object = $callback( $row );
 				}
 				return $object;
 			});
 		}
-		$pg_result = $this->executeQuery($sql, $params);
+		$pg_result = $this->execute($sql, $params);
 		return pg_fetch_assoc($pg_result);
 	}
 	
@@ -171,24 +228,22 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	public function beginTransaction() {
-		if ($this->link === null) {
-			$this->getConnection();
-		}
-		$this->link->pg_query('START TRANSACTION');
-		if ($conn->errno != 0) {
+		!is_null ($this->link) ?: $this->getConnection();
+		
+		pg_query($this->link, 'BEGIN TRANSACTION');
+		if (pg_last_error($this->link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
-
+	
 	/**
 	 * 
 	 */
 	protected function commitTransaction () {
-		if ($this->link === null) {
-			$this->getConnection();
-		}
-		$this->link->pg_query('COMMIT');
-		if ($conn->errno != 0) {
+		!is_null ($this->link) ?: $this->getConnection();
+		
+		pg_query($this->link, 'COMMIT TRANSACTION');
+		if (pg_last_error($this->link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
@@ -197,13 +252,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	protected function rollbackTransaction () {
-		/*if ($this->link === null) {
-			$this->getConnection();
-		}*/
-		!isset ($this->link) ?: $this->getConnection();
+		!is_null ($this->link) ?: $this->getConnection();
 		
-		$this->link->pg_query('ROLLBACK');
-		if ($this->link->pg_last_error != 0) {
+		pg_qery($this->link, 'ROLLBACK TRANSACTION');
+		if (pg_last_error($this->link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
@@ -214,6 +266,6 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return void
 	 */
 	public function __destruct() {
-		$this->link = null;
+		is_resource($this->link) ? pg_close($this->link) : $this->link = null;
 	}
 }
