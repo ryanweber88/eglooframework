@@ -13,6 +13,7 @@ require 'sys/proctable'
 require 'net/telnet'
 require 'socket'
 require 'net/http'
+require 'fileutils'
 
 ###  CONSTANTS 
 Host          = '0.0.0.0'
@@ -26,6 +27,7 @@ BinaryApache  = '/usr/sbin/apache2'
 IndexPid      = 1
 IndexApache   = 10
 Sleep         = 5
+LogDirectory  = '/var/log/kick_apache'
 
 ### CLASSES
 
@@ -76,6 +78,25 @@ class Firewall
     end
   end
   
+  class << self
+    def save_rules()
+      timestamp = Time.now.to_i
+      
+      puts "Saving ufw riles to #{LogDirectory}"
+      
+      # raise exception if  rules files do not exist
+      raise 'Cannot find ufw rules @ /lib/ufw/user.rules' unless File.file? '/lib/ufw/user.rules'
+      
+      # save ufw rules from /etc/rules
+      FileUtils.cp '/lib/ufw/user.rules', "#{LogDirectory}/ufw.user.rules.#{timestamp}"
+      
+      # save iptables rules       
+      try_exec "Saving iptables firewall rules to #{LogDirectory}/iptables.rules.#{timestamp}" do
+        system "iptables-save > #{LogDirectory}/iptables.rules.#{timestamp}"
+      end
+                 
+    end
+  end
 
 end
  
@@ -145,6 +166,12 @@ EM.run do
   
   # handle apache graceful restart on separate thread
   EM.defer do    
+    
+    # create kick_apache log directory if it does not exist
+    FileUtils.mkdir_p LogDirectory
+    
+    # save Firewall rules
+    Firewall.save_rules
     
     # start apache if not currently running
     # @todo remove from production

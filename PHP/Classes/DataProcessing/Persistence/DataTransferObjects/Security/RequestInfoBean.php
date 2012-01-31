@@ -3,21 +3,21 @@
  * RequestInfoBean Class File
  *
  * Needs to be commented
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *		  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *	
+ *
  * @author Keith Buel
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -29,14 +29,16 @@
 
 /**
  * RequestInfoBean
- * 
+ *
  * This class is simply a data holder for current validated request info.
  *
  * @category DataProcessing
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-class RequestInfoBean implements ArrayAccess {
+
+class RequestInfoBean implements \ArrayAccess {
+
 
 	private $arguments = null;
 	private $requestProcessorID = null;
@@ -50,23 +52,23 @@ class RequestInfoBean implements ArrayAccess {
 	// Sanitized
 	private $COOKIES = null;
 	private $FILES = null;
-	private $GET = null; 
+	private $GET = null;
 	private $POST = null;
 
 	private $forms = null;
-	
+
 	// Unset Required
 	private $UNSET_COOKIES = null;
 	private $UNSET_FILES = null;
-	private $UNSET_GET = null; 
+	private $UNSET_GET = null;
 	private $UNSET_POST = null;
 
 	private $unsetForms = null;
-	
+
 	// Invalid provided
 	private $INVALID_COOKIES = null;
 	private $INVALID_FILES = null;
-	private $INVALID_GET = null; 
+	private $INVALID_GET = null;
 	private $INVALID_POST = null;
 
 	private $invalidForms = null;
@@ -78,16 +80,16 @@ class RequestInfoBean implements ArrayAccess {
 
 	protected static $singleton;
 	protected static $signature;
-	
+
 	//final private function __construct() {
-	function __construct() { 
+	function __construct() {
 		if ( isset(self::$singleton) ) {
 			throw new Exception('Attempted __construct(): An instance of RequestInfoBean already exists');
 		}
 
 		// $this injected; magic method invocation
 		$this->init();
-	} 
+	}
 
 	/**
 	 * getInstance()
@@ -96,7 +98,7 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset(self::$singleton) ) {
 			self::$singleton = new RequestInfoBean();
 		}
-	
+
 		return self::$singleton;
 	}
 
@@ -126,88 +128,94 @@ class RequestInfoBean implements ArrayAccess {
 
 		$this->invalidForms = array();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Provides method missing functionality to requestinfobean in order
-	 * access (php GLOBALS) properties 
+	 * access (php GLOBALS) properties
 	 * @param string  $name
 	 * @param mixed[] $arguments
 	 */
 	public function __call($name, $arguments) {
 		// @TODO test and implement this
-				
+
 		// match against xxx(Xxx) method name patterns, where it is assumed
 		// that our submatch is the name of property - in reality we are
-		// matching against GET/POST/DELETE/PUT 
+		// matching against GET/POST/DELETE/PUT
 		if (preg_match('/([a-z]+)([A-Z].+)/', $name, $match)) {
 			$action = $match[1];
-			
+
 			// ensure that property exists on self
 			if (property_exists($this, $match[2])) {
 				$property = &$this->{$match[2]};
-				
+
 				// an isset action asks if value(s) are set within
 				// array property - if all items match, then absolute
 				// true will be returned, if only some are set, then
 				// number of matched items will be returned; otherwise,
 				// absolute false is returned if no items are matched
 				if ($action == 'isset' && is_array($property)) {
-					
+
 					$matched = 0;
-					
-					// itereate through arguments 
-					foreach ($arguments as $argument) {	
+
+					// itereate through arguments
+					foreach ($arguments as $argument) {
 						if (in_array($argument, $property)) {
 							$matched += 1;
 						}
 					}
-					
+
 					// if number matched is equal to count of array property
 					// then we have matched all items
 					if ($matched == count($property)) {
 						return true;
 					}
-					
-					return ($matched > 0) 
-						 ? $matched 
+
+					return ($matched > 0)
+						 ? $matched
 						 : false;
-					
+
 				}
 			}
 		}
 	}
-	
+
 	// ArrayAccess Interface //////////////////////////////////////////////////
-	
+
 	/**
 	 * (non-PHPdoc)
 	 * @see ArrayAccess::offsetExists()
 	 */
 	public function offsetExists($offset) {
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
-			if (property_exists($this, $method) && isset($this->$method[$offset])) {
+			// have to assign into holder prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * (non-PHPdoc)
 	 * @see ArrayAccess::offsetGet()
 	 */
 	public function offsetGet($offset) {
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
-			if (property_exists($this, $method) && isset($this->$method[$offset])) {
-				return $this->$method[$offset];
+			// have to do this prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
+				return $property[$offset];
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * (non-PHPdoc)
 	 * @see ArrayAccess::offsetSet()
@@ -217,7 +225,7 @@ class RequestInfoBean implements ArrayAccess {
 			'Do not set bean values via array notation'
 		);
 	}
-	
+
 	/**
 	 * (non-PHPdoc)
 	 * @see ArrayAccess::offsetUnset()
@@ -227,7 +235,7 @@ class RequestInfoBean implements ArrayAccess {
 			'Do not unset bean values via array notation'
 		);
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////
 
 	public function issetCOOKIE( $key ) {
@@ -256,14 +264,14 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->COOKIES[$key] ) ) {
 			$this->COOKIES[$key] = $value;
 		} else if ( $this->COOKIES[$key] !== $value ) {
-			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change COOKIE key \'' . 
+			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change COOKIE key \'' .
 				$key . '\' (value = \'' . $this->COOKIES[$key] . '\') to \'' . $value . '\'' );
 		}
 	}
 
 	public function issetFILES( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->FILES[$key] ) ) {
 			$retVal = true;
 		}
@@ -287,14 +295,14 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->FILES[$key] ) ) {
 			$this->FILES[$key] = $value;
 		} else if ( $this->FILES[$key] !== $value ) {
-			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change FILES key \'' . 
+			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change FILES key \'' .
 				$key . '\' (value = \'' . $this->FILES[$key] . '\') to \'' . $value . '\'' );
-		}		 
+		}
 	}
 
 	public function issetGET( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->GET[$key] ) ) {
 			$retVal = true;
 		}
@@ -304,7 +312,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function issetInvalidGET( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->INVALID_GET[$key] ) ) {
 			$retVal = true;
 		}
@@ -314,7 +322,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function isRequiredGETUnset( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->UNSET_GET[$key] ) ) {
 			$retVal = true;
 		}
@@ -326,9 +334,9 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->GET[$key] ) ) {
 			trigger_error( 'SECURITY ALERT: Attempted to access unset GET with unvalidated key \'' . $key . '\'', E_USER_ERROR );
 		}
-		
+
 		return $this->GET[$key];
-	}	 
+	}
 
 	public function getGETArray() {
 		return $this->GET;
@@ -354,9 +362,9 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->GET[$key] ) ) {
 			$this->GET[$key] = $value;
 		} else if ( $this->GET[$key] !== $value ) {
-			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change GET key \'' . 
+			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change GET key \'' .
 				$key . '\' (value = \'' . $this->GET[$key] . '\') to \'' . $value . '\'' );
-		}	 
+		}
 	}
 
 	public function setInvalidGET( $key, $value ) {
@@ -369,18 +377,18 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function issetPOST( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->POST[$key] ) ) {
 			$retVal = true;
 		}
 
 		return $retVal;
 	}
-	
+
 
 	public function issetInvalidPOST( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->INVALID_POST[$key] ) ) {
 			$retVal = true;
 		}
@@ -390,7 +398,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function isRequiredPOSTUnset( $key ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->UNSET_POST[$key] ) ) {
 			$retVal = true;
 		}
@@ -402,7 +410,7 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->POST[$key] ) ) {
 			trigger_error( 'SECURITY ALERT: Attempted to access unset POST with unvalidated key \'' . $key . '\'', E_USER_ERROR );
 		}
-		
+
 		return $this->POST[$key];
 	}
 
@@ -430,9 +438,9 @@ class RequestInfoBean implements ArrayAccess {
 		if ( !isset( $this->POST[$key] ) ) {
 			$this->POST[$key] = $value;
 		} else if ( $this->POST[$key] !== $value ) {
-			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change POST key \'' . 
+			throw new RequestInfoBeanException( 'Programmer Error: Attempted to change POST key \'' .
 				$key . '\' (value = \'' . $this->POST[$key] . '\') to \'' . $value . '\'' );
-		}	 
+		}
 	}
 
 	public function setInvalidPOST( $key, $value ) {
@@ -445,7 +453,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function issetForm( $formID ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->forms[$formID] ) ) {
 			$retVal = true;
 		}
@@ -455,7 +463,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function issetInvalidForm( $formID ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->invalidForms[$formID] ) ) {
 			$retVal = true;
 		}
@@ -465,7 +473,7 @@ class RequestInfoBean implements ArrayAccess {
 
 	public function isRequiredFormUnset( $formID ) {
 		$retVal = false;
-		
+
 		if ( isset( $this->unsetForms[$formID] ) ) {
 			$retVal = true;
 		}
@@ -517,18 +525,18 @@ class RequestInfoBean implements ArrayAccess {
 	public function setRequestClass( $requestClass ) {
 		$this->requestClass = $requestClass;
 	}
-	
+
 	public function getRequestClass() {
-		return $this->requestClass;	   
+		return $this->requestClass;
 	}
-	
+
 	public function setRequestID( $requestID ) {
 		$this->requestID = $requestID;
 	}
-	
+
 	public function getRequestID() {
 		return $this->requestID;
-	}	
+	}
 
 	public function isWildCardRequest() {
 		return $this->_wildCardRequest;
@@ -541,38 +549,38 @@ class RequestInfoBean implements ArrayAccess {
 	public function setWildCardRequestClass( $wildCardRequestClass ) {
 		$this->_wildCardRequestClass = $wildCardRequestClass;
 	}
-	
+
 	public function getWildCardRequestClass() {
-		return $this->_wildCardRequestClass;	   
+		return $this->_wildCardRequestClass;
 	}
-	
+
 	public function setWildCardRequestID( $wildCardRequestID ) {
 		$this->_wildCardRequestID = $wildCardRequestID;
 	}
-	
+
 	public function getWildCardRequestID() {
 		return $this->_wildCardRequestID;
 	}
 
 	public function hasWildCardRequestID() {
 		return !is_null($this->_wildCardRequestID);
-	}	
+	}
 
 	public function setRequestProcessorID( $requestProcessorID ) {
 		$this->requestProcessorID = $requestProcessorID;
 	}
-	
+
 	public function getRequestProcessorID() {
 		return $this->requestProcessorID;
-	}	
+	}
 
 	public function setErrorRequestProcessorID( $errorRequestProcessorID ) {
 		$this->errorRequestProcessorID = $errorRequestProcessorID;
 	}
-	
+
 	public function getErrorRequestProcessorID() {
 		return $this->errorRequestProcessorID;
-	}	
+	}
 
 	/**
 	 * A convenience method for getting a fully qualified URI based on validated GET parameters
@@ -609,10 +617,10 @@ class RequestInfoBean implements ArrayAccess {
 	public function setDecoratorArray( $decoratorArray ) {
 		$this->decoratorArray = $decoratorArray;
 	}
-	
+
 	public function getDecoratorArray() {
 		return $this->decoratorArray;
-	}	
+	}
 
 	public function getApplication() {
 		return $this->application;
@@ -621,7 +629,7 @@ class RequestInfoBean implements ArrayAccess {
 	public function setApplication( $application ) {
 		$this->application = $application;
 	}
-	
+
 	public function getInterfaceBundle() {
 		return $this->interfaceBundle;
 	}
@@ -629,40 +637,40 @@ class RequestInfoBean implements ArrayAccess {
 	public function setInterfaceBundle( $interfaceBundle ) {
 		$this->interfaceBundle = $interfaceBundle;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Returns an instance 'signature' of requestInfoBean, based upon makeup of private properties;
 	 * this is in turn used to generate a key for caching instantiated classes based upon the
 	 * request info bean's current state
 	 */
-	public function signature() { 
-				
-		//if (!isset(static::$signature)) { 
+	public function signature() {
+
+		//if (!isset(static::$signature)) {
 		$rclass = new \ReflectionClass($this);
 		$values = array();
-		
-		foreach($rclass->getProperties(\ReflectionProperty::IS_PRIVATE) as $property) { 
+
+		foreach($rclass->getProperties(\ReflectionProperty::IS_PRIVATE) as $property) {
 			$value = $this->{$property->getName()};
 
-			if (is_array($value)) { 
+			if (is_array($value)) {
 				$value = implode(":", $value);
 			}
-			
-			$values[] = $property->getName() . ':' . ((!is_object($value) && !is_array($value)) ? 
+
+			$values[] = $property->getName() . ':' . ((!is_object($value) && !is_array($value)) ?
 				$value : 'NA'
 			);
 		}
-		
+
 		//var_export($values); exit;
-		
+
 		// how much overhead is associated with md5 value here?
 		// enough to worry about if signature is singleton?
 		//static::$signature = md5(implode(':', $values));
 
 		return md5(implode(':', $values));
 		//}
-		
+
 		//return static::$signature;
 	}
 
