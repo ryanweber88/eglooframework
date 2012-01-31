@@ -102,8 +102,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			throw new Connection\DatabaseErrorException('::Missing argument error', __METHOD__);
 		}
 		$sql = "SELECT * FROM brands WHERE {$field_name} = ? AND status = ?";
-		//return $this->executeQuery($sql, array($field_value, 1));
-		
+			
 		return parent::getUnique($sql, array($field_value, 1), function ($row) {
 							return $row;
 		});
@@ -111,7 +110,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	
 	public function loadBrandList() {
 		$sql = "SELECT brand_id, name FROM brands WHERE status = ? ORDER BY name ASC";
-		return $this->executeQuery($sql, array(1));
+		return parent::getList($sql, array(1));
 	}
 
 		/**
@@ -126,8 +125,8 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			throw new \Connection\DatabaseErrorException();
 		}
 		
-		$sql = "SELECT * FROM brands b WHERE b.status = 1 ORDER BY name ASC LIMIT ? OFFSET ?";	
-		return $this->executeQuery($sql, array($limit, $offset));
+		$sql = "SELECT * FROM organization o WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?";	
+		return parent::getList($sql, array($limit, $offset));
 		
 		/*foreach ($brand_result as $brand) {
 			$brand['brand_images'] = $this->getBrandImages($brand['brand_id']);
@@ -194,7 +193,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	 */
 	public function getBrandImages($brand_id) {
 		if ($brand_id == '') {
-			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!!');
 		}
 		
 		$sql = 'SELECT * FROM store_image_brand sib INNER JOIN image_file fi ON '
