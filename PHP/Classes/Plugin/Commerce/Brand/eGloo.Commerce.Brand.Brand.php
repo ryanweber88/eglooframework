@@ -41,6 +41,12 @@ class Brand {
 
 	/** @var integer brand id */
 	public		$brand_id;
+	
+	public $organization_id;
+	
+	public $parent_organization_id;
+	
+	public $organization_status_id;
 
 	/** @var string Name */
 	public		$name;
@@ -49,13 +55,18 @@ class Brand {
 	public 		$description;
 
 	/** @var string Object creation date */
-	public 		$date_added;
+	public 		$last_action;
 
 	/** @var string Object last modification date */
-	public 		$date_updated;
+	public 		$last_action_taken;
 
 	/** @var boolean active */
-	public		$status;
+	public		$brand_status_id;
+	
+	/** @var boolean active */
+	public		$requires_prescription;
+	
+	public		$action_by;
 	
 	/** @var brand firendlyy url */
 	public		$friendly_url	=	'';
@@ -87,7 +98,7 @@ class Brand {
 	 */
 	public function loadBrandImages() {
 		if (empty ($this->brand_images)) {
-			$this->brand_images = BrandDataAccess::fetch()->getBrandImages($this->brand_id);
+			$this->brand_images = BrandDataAccess::fetch()->getBrandImagesByID($this->brand_id);
 		}
 		$this->brand_images;
 		return $this;
@@ -103,7 +114,7 @@ class Brand {
 	
 	public function loadBrandSlug() {
 		if ($this->friendly_url == '') {
-			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlug($this->brand_id);
+			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlugByID($this->brand_id);
 		}
 		$this->friendly_url;
 		return $this;
@@ -174,11 +185,11 @@ class Brand {
 	 * @param type $brand_id
 	 * @return Brand 
 	 */
-	public static function loadBrandById($brand_id) {
+	public static function loadByID($brand_id) {
 		if ((int)$brand_id <= 0) {
 			throw new \InvalidArgumentException();
 		}
-		$rows = BrandDataAccess::fetch()->loadBrandById($brand_id);
+		$rows = BrandDataAccess::fetch()->loadBrandByID($brand_id);
 		return new Brand($rows);
 	}
 	
@@ -208,10 +219,10 @@ class Brand {
 			throw new \InvalidArgumentException();
 		}
 		foreach ($brands as $brand_id) {
-			$brand					= self::loadBrandById($brand_id);
-			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImages((int)$brand->brand_id);
+			$brand					= self::loadByID($brand_id);
+			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImagesByID((int)$brand->brand_id);
 			//$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
-			$brand->friendly_url	= BrandDataAccess::fetch()->loadBrandSlug((int)$brand->brand_id);
+			$brand->friendly_url	= BrandDataAccess::fetch()->loadBrandSlugByID((int)$brand->brand_id);
 			$result[]				= $brand;
 		}
 		return $result;

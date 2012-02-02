@@ -119,7 +119,11 @@ class User {
 		return md5($password) == $this->password_hash ?: false;
 	}
 	
-	/**
+	public function updateUser() {
+		
+	}
+
+		/**
 	 * Check for valid User
 	 * 
 	 * @return boolean static true/false 
@@ -211,6 +215,14 @@ class User {
 		return static::$loggedIn;
 	}
 	
+	/**
+	 * Login Method
+	 * 
+	 * @param type $email
+	 * @param type $passwd
+	 * @return type
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function login ($email, $passwd) {
 		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
@@ -218,6 +230,20 @@ class User {
 		
 		$user = UserDataAccess::fetch()->login($email, $passwd);
 		return isset($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+	}
+	
+	/**
+	 *
+	 * @param type $hash
+	 * @return type
+	 * @throws \InvalidArgumentException 
+	 */
+	public static function validateCommunicationKey($hash) {
+		if ($hash == '' ) {
+			throw new \InvalidArgumentException('Hash key needed');
+		}
+		$key = UserDataAccess::fetch()->getCommunicationKey($hash);
+		return !empty($key) ? $key : false;
 	}
 
 	/**
@@ -252,6 +278,14 @@ class User {
 		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
 	}
 
+	public static function loadByPassword($passwd) {
+		if ($passwd == '') {
+			throw new \InvalidArgumentException();
+		}
+		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
+		return !empty($user) ? new User($user) : 'Unable to find User';
+	}
+	
 	/**
 	 *
 	 * @param type $zip_code

@@ -147,4 +147,12 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 			date('Y-m-d H:i:s',time()), $user_id);
 		return parent::executeInsert($sql, $params);
 	}
+	
+	public function getCommunicationKey($hash) {
+		if ($hash == '') {
+			throw new \InvalidArgumentException('::Missing argument error: hash code is required!', __METHOD__);
+		}
+		$sql = 'SELECT * FROM user_communication WHERE hashcode = ? AND valid_through > ?';
+		return parent::getUnique($sql, array($hash, date('Y-m-d H:i:s', time())));
+	}
 }

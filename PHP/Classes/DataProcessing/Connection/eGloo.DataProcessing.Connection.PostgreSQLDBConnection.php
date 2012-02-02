@@ -177,7 +177,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param array $params
 	 * @return type 
 	 */
-	public static function executeSelect($sql, array $params) {
+	public static function executeSelect($sql, $params = array()) {
 		$pg_result = self::execute($sql, $params );
 		return pg_fetch_all($pg_result);
 	}
@@ -189,7 +189,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param type $callback
 	 * @return type 
 	 */
-	public function getList( $sql, array $params = null, $callback = null ) {
+	public function getList( $sql, $params = array(), $callback = null ) {
 		return $this->execute($sql, $params, function($result, $link) use ($callback){
 			$index = 0;
 			$list = array();
@@ -211,7 +211,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param type $callback
 	 * @return type 
 	 */
-	public function getUnique( $sql, array $params = null, $callback = null ) {
+	public function getUnique( $sql, $params = array(), $callback = null ) {
 		if ($callback !== null) {
 			return $this->execute ($sql, $params, function ($result, $link) use ($callback) {
 				if($row = pg_fetch_assoc($result)) {

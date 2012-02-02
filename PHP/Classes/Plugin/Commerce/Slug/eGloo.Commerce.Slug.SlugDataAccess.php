@@ -65,7 +65,9 @@ class SlugDataAccess extends Connection\PostgreSQLDBConnection {
 		$result = array();
 		$sql = "SELECT ps.value, ps.dst, b.name FROM product_slug ps INNER JOIN brands b 
 			ON ps.value = b.brand_id WHERE ps.source = 'B' ORDER BY b.name ASC";
-		$slugs = parent::executeQuery($sql, array());
+		$slugs = parent::getUnique($sql);
+		die_r($slugs);
+		
 		foreach ($slugs as $slug) {
 			$result[$slug['name']] = str_replace('brand/', '', $slug['dst']);
 		}

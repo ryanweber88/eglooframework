@@ -39,7 +39,7 @@ use \eGloo\Commerce\Slug\SlugDataAccess;
 class Slug {
 	
 	public static function loadBrandSlugs() {
-		return \eGloo\Commerce\Slug\SlugDataAccess::fetch()->loadBrandSlugs();
+		return SlugDataAccess::fetch()->loadBrandSlugs();
 	}
 	
 	public static function loadProductSlugs() {
