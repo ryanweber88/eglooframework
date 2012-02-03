@@ -1,9 +1,8 @@
 <?php
-namespace eGloo\Commerce\Slug;
-use \eGloo\Commerce\Slug\SlugDataAccess;
+namespace eGloo\Commerce\Logistic;
 
 /**
- * Slug Class File
+ * PurchaseOrder Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -28,21 +27,14 @@ use \eGloo\Commerce\Slug\SlugDataAccess;
  */
 
 /**
- * Description of Slug
+ * Description of PurchaseOrder
  * 
- * Representation of Slug Entity
- * Hold CRUD functionalities and Slug related method
+ * Representation of PurchaseOrder Entity
+ * Hold CRUD functionalities and PurchaseOrder related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class Slug {
-	
-	public static function loadBrandSlugs() {
-		return SlugDataAccess::fetch()->loadBrandSlugs();
-	}
-	
-	public static function loadProductSlugs() {
-		return SlugDataAccess::fetch()->loadProductSlugs();
-	}
+class Pet {
+	//put your code here
 }

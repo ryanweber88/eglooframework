@@ -1,8 +1,9 @@
 <?php
-namespace eGloo\Commerce\Slug;
+namespace eGloo\Commerce\Program;
 use \eGloo\DataProcessing\Connection;
+
 /**
- * SlugData Class File
+ * Program Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -27,16 +28,15 @@ use \eGloo\DataProcessing\Connection;
  */
 
 /**
- * Description of SlugData
+ * Description of Program
  * 
- * Representation of SlugData Entity
- * Hold CRUD functionalities and SlugData related method
+ * Representation of Program Entity
+ * Hold CRUD functionalities and Program related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class SlugDataAccess extends Connection\PostgreSQLDBConnection {
-	
+class ProgramDataAccess  extends Connection\PostgreSQLDBConnection{
 	/** @var resource Object */
 	protected static $instance = null;
 	
@@ -61,29 +61,44 @@ class SlugDataAccess extends Connection\PostgreSQLDBConnection {
 		return static::$instance;
 	}
 	
-	public function loadBrandSlugs() {
-		$result = array();
-		$sql = "SELECT ps.value, ps.dst, b.name FROM product_slug ps INNER JOIN brands b 
-			ON ps.value = b.brand_id WHERE ps.source = 'B' ORDER BY b.name ASC";
-		$slugs = parent::getUnique($sql);
-		die_r($slugs);
+	public function createProgram() {
 		
-		foreach ($slugs as $slug) {
-			$result[$slug['name']] = str_replace('brand/', '', $slug['dst']);
-		}
-		return $result;
 	}
 	
-	public function loadProductSlugs() {
-		$result = array();
-		$sql = "SELECT ps.value, ps.dst, b.name FROM product_slug ps INNER JOIN brands b 
-			ON ps.value = b.brand_id WHERE ps.source = 'B' ORDER BY b.name ASC";
-		$slugs = parent::executeQuery($sql, array());
-		foreach ($slugs as $slug) {
-			$result[$slug['name']] = str_replace('product/', '', $slug['dst']);
+	public function loadProgramById($program_id) {
+		if ($program_id == '') {
+			throw new \InvalidArgumentException('[: Missing argument error:] Program id is required!', __METHOD__);
 		}
-		return $result;
+	}
+	
+	public function loadProgramByName($program_name) {
+		if ($program_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: program name is required!', __METHOD__);
+		}
+		return $this->loadBrand('name', $program_name);
+	}
+
+	public function loadProgram($field_name, $field_value) {
+		if ($field_name == '' || $field_value == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = '';
+		return parent::getUnique($sql, array($field_value, 1), function ($row) {
+							return $row;
+		});
+	}
+	
+	public function deleteProgramById($program_id) {
+		if ($program_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: program id is required!', __METHOD__);
+		}
+		
+	}
+	
+	public function deleteProgramByName($program_name) {
+		if ($program_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: program name is required!', __METHOD__);
+		}
+		
 	}
 }
-
-?>

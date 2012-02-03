@@ -1,9 +1,7 @@
 <?php
-namespace eGloo\Commerce\Slug;
-use \eGloo\Commerce\Slug\SlugDataAccess;
 
 /**
- * Slug Class File
+ * Role Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -28,21 +26,14 @@ use \eGloo\Commerce\Slug\SlugDataAccess;
  */
 
 /**
- * Description of Slug
+ * Description of Role
  * 
- * Representation of Slug Entity
- * Hold CRUD functionalities and Slug related method
+ * Representation of Role Entity
+ * Hold CRUD functionalities and Role related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class Slug {
-	
-	public static function loadBrandSlugs() {
-		return SlugDataAccess::fetch()->loadBrandSlugs();
-	}
-	
-	public static function loadProductSlugs() {
-		return SlugDataAccess::fetch()->loadProductSlugs();
-	}
+class Role {
+	//put your code here
 }

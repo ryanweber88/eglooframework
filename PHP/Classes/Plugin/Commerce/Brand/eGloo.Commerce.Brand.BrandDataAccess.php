@@ -101,17 +101,16 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if ($field_name == '' || $field_value == '') {
 			throw new Connection\DatabaseErrorException('::Missing argument error', __METHOD__);
 		}
-		$sql = "SELECT * FROM brands WHERE {$field_name} = ? AND status = ?";
-		//return $this->executeQuery($sql, array($field_value, 1));
-		
-		return parent::getUnique($sql, array($field_value, 1), function ($row) {
+		$sql = "SELECT * FROM brand WHERE {$field_name} = ?";
+			
+		return parent::getUnique($sql, array($field_value), function ($row) {
 							return $row;
 		});
 	}
 	
 	public function loadBrandList() {
 		$sql = "SELECT brand_id, name FROM brands WHERE status = ? ORDER BY name ASC";
-		return $this->executeQuery($sql, array(1));
+		return parent::getList($sql, array(1));
 	}
 
 		/**
@@ -125,9 +124,11 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if (isset ($limit) && $limit < 0 || isset ($offset) && $offset < 1) {
 			throw new \Connection\DatabaseErrorException();
 		}
+		$sql = 'SELECT o.organization_id AS brand_id, o.name, b.requires_prescription, '
+			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
+			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?';
 		
-		$sql = "SELECT * FROM brands b WHERE b.status = 1 ORDER BY name ASC LIMIT ? OFFSET ?";	
-		return $this->executeQuery($sql, array($limit, $offset));
+		return parent::getList($sql, array($limit, $offset));
 		
 		/*foreach ($brand_result as $brand) {
 			$brand['brand_images'] = $this->getBrandImages($brand['brand_id']);
@@ -177,30 +178,35 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	 * @param type $brand_id
 	 * @return type 
 	 */
-	public function loadBrandSlug($brand_id) {
+	public function loadBrandSlugByID($brand_id) {
 		if ($brand_id == '') {
 			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
 		}
-		$sql = "SELECT dst FROM product_slug WHERE source ='B' AND value = ?";
-		return parent::getUnique($sql, array($brand_id), function ($row) {
-							return $row['dst'];
-		});
+		$sql = 'SELECT u.destination, u.url_slug_id, u.url_slug_type_id, bu.brand_id FROM '
+			 . 'url_slug u INNER JOIN brand_slug bu ON u.url_slug_id=bu.url_slug_id WHERE '
+			 . 'bu.brand_id=?;';
+		return parent::getUnique($sql, array($brand_id));
 	}
 
-		/**
+	/**
 	 *
 	 * @param type $brand_id
 	 * @return type 
 	 */
-	public function getBrandImages($brand_id) {
+	public function getBrandImagesByID($brand_id) {
 		if ($brand_id == '') {
-			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!!');
 		}
 		
-		$sql = 'SELECT * FROM store_image_brand sib INNER JOIN image_file fi ON '
-			 . 'sib.image_id = fi.data_store_image_id WHERE sib.brand_id = ?';
+		$sql = 'SELECT cf.cloudfront_file_id, cf.cloudfront_file_name, cf.cloudfront_bucket,'
+			 . 'cb.distribution_url, cf.file_bucket, cf.file_store, cf.mime_type,'
+			 . 'cf.file_uri, cf.file_zone, cf.original_file_path, cf.file_association_type,'
+			 . 'bf.brand_id, bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb'
+			 . ' INNER JOIN cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
+			 . ' INNER JOIN brand_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id '
+			 . ' WHERE brand_id=? ';
 		$params = array($brand_id);
-		return $this->executeQuery($sql, $params);
+		return parent::getList($sql, $params);
 	}
 
 	/**

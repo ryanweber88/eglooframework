@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Commerce\User;
-use eGloo\Commerce;
+use eGloo\Commerce\User\UserDataAccess;
 
 /**
  * User Class File
@@ -42,81 +42,125 @@ class User {
 	public $user_id;
 
 	/** @var string user email address */
-	public $email;
+	public $email_address;
 
 	/** @var string user name */
 	public $username;
 
 	/** @var string password */
-	public $password;
+	public $password_hash;
+	
+	/** @var string first name */
+	public $first_name;
+	
+	/** @var string last name */
+	public $last_name;
+	
+	/** @var int Security Question ID*/
+	public $security_question_id;
+	
+	/** @var string first name */
+	public $security_answer_hash;
 
-	/** @var string security hash key */
-	public $secure_key;
-
-	/** @var integer 1/0 for active user */
-	public $is_active = 1;
-
-	/** @var integer 1/0 for deleted user */
-	public $is_deleted = 0;
-
-	/** @var integer 1/0 for guest user */
-	public $is_guest = 0;
+	/** @var integer 1/0 for user type */
+	public $user_type_id = 0;
+	
+	/** @var integer 1/0 for user status */
+	public $user_status_id = 0;
 
 	/** @var string created date */
-	public $created_date;
+	public $registration_date;
 
 	/** @var string deleted date */
 	public $deleted_date;
+	
+	/** @var string birthday date */
+	public $birthday;
 
 	/** @var string updated date */
-	public $updated_date;
+	public $last_action;
 
 	/** @var string last logged in date */
-	public $last_logged_date;
+	public $last_action_date;
 
-	/** @var string is user logged in */
-	public $logged_in				= false;
+	/** @var string is user logged in */	
+	protected static $logged_in		= false;
 	
-	protected static $loggedIn = false;
+	/** @var array/Mix properties of Brands */
+	public		$properties;
 
-	const PRIVILEGES_REGULAR_USER	= 0;
-	const PRIVILEGES_ADMIN_USER		= 1;
+	const USER_TYPE_NORMAL			= 1,
+			USER_TYPE_EMPLOYEE		= 2,
+			USER_TYPE_AFFILIATE		= 3;
 
-
-	public function __contruct ($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
-		if ($uname == '' || $pwd == '') {
-			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+	/**
+	 * Construct User Object
+	 * 
+	 * @param array $args
+	 * @throws \InvalidArgumentException 
+	 */
+	public function __construct (array $args) {
+		if (!is_array($args) || sizeof($args) == 0) {
+			throw new \InvalidArgumentException("User does not exist in the System");
 		}
-
-
-
-		static::$loggedIn = true;
-
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
+		($this->user_status_id === 1) ? static::$logged_in == true : false;
 	}
 
-	public function __construct($mixed = null) {
+	/**
+	 * Validate User password
+	 * 
+	 * @param type $password
+	 * @return boolean true/false 
+	 */
+	public function validatePassword ($password) {
+		return md5($password) == $this->password_hash ?: false;
+	}
 	
-		if (is_callable($mixed)) {
-			$mixed($this);
-
-			new User(function($entiy) {
-				$this->entity->id = valuePassedFromJsonOrScope;
-			});
-		}
-
-		foreach($mixed as $name => $value) {
-
-		}
-
-			
+	public function updateUser() {
 		
 	}
 
-	public function checkPassword ($password) {
-		return MD5($password) == $this->password ? true : false;
+		/**
+	 * Check for valid User
+	 * 
+	 * @return boolean static true/false 
+	 */
+	public static function isLoggedIn() {
+		return static::$logged_in;
 	}
 
 
+	/**
+	 * Populate data int the User object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the User Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from user
+	 */
+	public function __get( $key ) {
+		if (isset($this->properties[$key])) {
+			return $this->properties[$key];
+		}
+		return false;
+	}
+	
+	/**
+	 * Return String version of this object
+	 * @return type 
+	 */
 	public function __toString () {
 		$user_data = '';
 		foreach ($this as $field => $value) {
@@ -128,6 +172,12 @@ class User {
 		return $user_data;
 	}
 	
+	/**
+	 * Magic method __Call
+	 * @param type $name
+	 * @param type $arguments
+	 * @return type 
+	 */
 	public function __call($name, $arguments) {
 		
 		if ($name == 'logout') {
@@ -137,6 +187,12 @@ class User {
 		// @TODO delegate to EPA
 	}
 	
+	/**
+	 * Magic Method
+	 * 
+	 * @param type $name
+	 * @param type $arguments 
+	 */
 	public function __callstatic($name, $arguments) {
 		
 		if ($name == 'logout' && isset($arguments[0])) {
@@ -158,107 +214,179 @@ class User {
 	public static function loggedIn() {
 		return static::$loggedIn;
 	}
-
-	
 	
 	/**
+	 * Login Method
 	 * 
-	 * Determines user login destination
+	 * @param type $email
+	 * @param type $passwd
+	 * @return type
+	 * @throws \InvalidArgumentException 
 	 */
-	public static function loginDestination() {
-		// @TODO pass
-	}
-	
-
-
-	public static function createUser($uname, $email, $pwd, $priv = self::PRIVILEGES_REGULAR_USER) {
-		if ($uname == '' || $pwd == '') {
+	public static function login ($email, $passwd) {
+		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
-		$this->username		= $uname;
-		$this->password		= $pwd;
-		$this->privileges	= $priv;
-
-		$row = Commerce\User\UserDataAccess::fetch()->createUser();
-		return new User(self::createUserFromArray($row));
+		
+		$user = UserDataAccess::fetch()->login($email, $passwd);
+		return isset($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+	}
+	
+	/**
+	 *
+	 * @param type $hash
+	 * @return type
+	 * @throws \InvalidArgumentException 
+	 */
+	public static function validateCommunicationKey($hash) {
+		if ($hash == '' ) {
+			throw new \InvalidArgumentException('Hash key needed');
+		}
+		$key = UserDataAccess::fetch()->getCommunicationKey($hash);
+		return !empty($key) ? $key : false;
 	}
 
+	/**
+	 * Create User Object
+	 * 
+	 * @param type $uname
+	 * @param type $pwd
+	 * @param type $priv
+	 * @return type
+	 * @throws \InvalidArgumentException 
+	 */
+	public static function register($email, $passwd, $user_type = self::USER_TYPE_NORMAL) {
+		if ($email == '' || $passwd == '') {
+			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
+		}
+		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
+
+		return ($id > 0) ? self::loadByID($id) : 'Account creation failed';
+	}
+
+	/**
+	 *
+	 * @param type $user_id
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
+	public static function loadByID($user_id) {
+		if ((int)$user_id <= 0) {
+			throw new \InvalidArgumentException();
+		}
+		$user = UserDataAccess::fetch()->loadUserByID($user_id);
+		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
+	}
+
+	public static function loadByPassword($passwd) {
+		if ($passwd == '') {
+			throw new \InvalidArgumentException();
+		}
+		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
+		return !empty($user) ? new User($user) : 'Unable to find User';
+	}
+	
+	/**
+	 *
+	 * @param type $zip_code
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByZipCode($zip_code) {
 		$result = array();
 		if ((int) $zip_code == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserByZipCode($zip_code);
+		$users = UserDataAccess::fetch()->loadUserByZipCode($zip_code);
 		foreach ($users as $user) {
 			$result[] = new User($user);
 		}
 		return $result;
 	}
 
+	/**
+	 *
+	 * @param type $email
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByEmail($email) {
-		$result = array();
 		if ($email == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserByEmail($email);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
+		$user = UserDataAccess::fetch()->loadUserByEmail($email);
+		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $email;
 	}
 
+	/**
+	 *
+	 * @param type $cc_code
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByCreditCardCode($cc_code) {
 		$result = array();
 		if ((int) $cc_code == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserByCCCode($cc_code);
+		$users = UserDataAccess::fetch()->loadUserByCCCode($cc_code);
 		foreach ($users as $user) {
 			$result[] = new User($user);
 		}
 		return $result;
 	}
 
+	/**
+	 *
+	 * @param type $state
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByState($state) {
 		$result = array();
 		if ((int) $state == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserByState($state);
+		$users = UserDataAccess::fetch()->loadUserByState($state);
 		foreach ($users as $user) {
 			$result[] = new User($user);
 		}
 		return $result;
 	}
 
-
+	/**
+	 *
+	 * @param type $program_id
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByProgramId($program_id) {
 		$result = array();
 		if ((int) $program_id == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserProgramId($program_id);
+		$users = UserDataAccess::fetch()->loadUserProgramId($program_id);
 		foreach ($users as $user) {
 			$result[] = new User($user);
 		}
 		return $result;
 	}
 
-
+	/**
+	 *
+	 * @param type $order_id
+	 * @return \eGloo\Commerce\User\User
+	 * @throws \InvalidArgumentException 
+	 */
 	public static function loadUserByOrderId($order_id) {
 		$result = array();
 		if ((int) $order_id == '') {
 			throw new \InvalidArgumentException();
 		}
-		$users = Commerce\User\UserDataAccess::loadUserByOrderId($order_id);
+		$users = UserDataAccess::fetch()->loadUserByOrderId($order_id);
 		foreach ($users as $user) {
 			$result[] = new User($user);
 		}
 		return $result;
-	}
-
-
-	public static function createUserFromArray(array $args) {
-		return ;
 	}
 }
