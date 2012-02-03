@@ -1,6 +1,9 @@
 <?php
 namespace eGloo\Commerce\Product;
 
+use \eGloo\Commerce;
+use \eGloo\Commerce\Domain;
+
 /**
  * Product Class File
  * 
@@ -36,7 +39,7 @@ namespace eGloo\Commerce\Product;
  * @subpackage Commerce
  */
 
-class Product {
+class Product extends Domain\Model {
 
 	/** @var integer Product ID */
 	public			$product_id;

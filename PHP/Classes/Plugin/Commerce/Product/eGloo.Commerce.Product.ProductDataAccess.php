@@ -1,5 +1,7 @@
 <?php
 namespace eGloo\Commerce\Product;
+
+use \eGloo\Commerce;
 use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection;
 
 /**
@@ -36,7 +38,7 @@ use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection;
  * @package Plugins
  * @subpackage Commerce
  */
-class ProductDataAccess extends PostgreSQLDBConnection {
+class ProductDataAccess extends Commerce\Domain\Data {
 	
 	/** @var resource Object */
 	protected static $instance = null;

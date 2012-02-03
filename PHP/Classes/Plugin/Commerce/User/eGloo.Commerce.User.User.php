@@ -100,13 +100,17 @@ class User {
 	 * @throws \InvalidArgumentException 
 	 */
 	public function __construct (array $args) {
-		if (!is_array($args) || sizeof($args) == 0) {
-			throw new \InvalidArgumentException("User does not exist in the System");
+		if (count($args)) {
+		
+			foreach ( $args as $key => $value ){
+				$this->{$key} = $value;
+			}
+		
+			$this->user_status_id === 1 ? static::$logged_in == true : false;
 		}
-		foreach ( $args as $key => $value ){
-			$this->{$key} = $value;
-		}
-		($this->user_status_id === 1) ? static::$logged_in == true : false;
+		
+		throw new \InvalidArgumentException("User does not exist in the System");
+		
 	}
 
 	/**
@@ -275,8 +279,11 @@ class User {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
-	}
+		
+		return !empty($user) 
+			? new User($user) 
+			: false;
+			
 
 	public static function loadByPassword($passwd) {
 		if ($passwd == '') {

@@ -26,6 +26,9 @@
  * @version 1.0
  */
 
+// @TODO replace_object_safe
+use \eGloo\Dialect\ObjectSafe as Object;
+
 /**
  * Connection
  *
@@ -36,7 +39,7 @@
  * @package $package
  * @subpackage $subpackage
  */
-abstract class eGlooConnection {
+abstract class eGlooConnection extends ObjectSafe {
 
 	protected $_rawHandle = null;
 
