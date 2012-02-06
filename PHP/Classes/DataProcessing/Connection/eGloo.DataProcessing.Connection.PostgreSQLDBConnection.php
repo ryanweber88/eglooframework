@@ -111,7 +111,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return string postgres result
 	 * @exception throw \Connection\DatabaseErrorException
 	 */
-	private function execute ($sql, array $params = array(), $callback = null) {
+	protected function execute ($sql, array $params = array(), $callback = null) {
 		$this->prepareStatment($sql, $params);
 		isset($this->link) ?: $this->getConnection();
 		
@@ -123,7 +123,18 @@ class PostgreSQLDBConnection extends DBConnection {
 		throw new DatabaseErrorException(pg_last_error($this->link), $sql);
 	}
 	
-	/**
+	public function executeArbitrary ($sql, array $params = array()) {
+		$this->prepareStatment($sql, $params);
+		isset($this->link) ?: $this->getConnection();
+		var_dump($params);
+		try {
+			return pg_query_params($this->link, $sql, $params);
+		} catch (Exception $exc) {
+			throw $exc;
+		}
+	}
+
+		/**
 	 * Execute Update
 	 * 
 	 * @param type $sql

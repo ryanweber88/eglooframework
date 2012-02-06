@@ -94,7 +94,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	}
 
 	public function loadUserById($user_id) {
-		if ($user_id == '') {
+		if ($user_id === '') {
 			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
 		}
 		return $this->loadUserByField('user_id', $user_id);
@@ -115,7 +115,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	}
 
 	public function loadUserByField($field_name, $field_value) {
-		if ($field_name == '' || $field_value == '') {
+		if ($field_name == '' || $field_value === '') {
 			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
 		}
 		$sql = "SELECT * FROM site_user WHERE {$field_name} = ? AND user_status_id = ?";
