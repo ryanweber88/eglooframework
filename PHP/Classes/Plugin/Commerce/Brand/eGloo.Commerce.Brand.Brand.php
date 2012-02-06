@@ -149,7 +149,8 @@ class Brand {
 	 * @return Brand 
 	 */
 	public function __toString(){
-		return serialize($this);
+		//return serialize($this);
+		return $this->name;
 	}
 	
 	/**
@@ -176,6 +177,14 @@ class Brand {
 			$result[] = new Brand($row);
 		}
 		return $result;
+	}
+	
+	/**
+	 * Acts as an alias to loadBrandList - is provided to create lcd
+	 * interface between domain classes
+	 */
+	public static function all() {
+		return static::loadBrandList();
 	}
 
 
