@@ -112,8 +112,11 @@ class User {
 			$this->{$key} = $value;
 		}
 		
-		($this->user_status_id == 1) ? static::$logged_in = true : false;
-		isset($this->user_id) ? self::$active_user_id = $this->user_id : null;
+		if ($this->user_id > 0 && $this->user_status_id == 1) {
+			static::$logged_in = true;
+			self::$active_user_id = $this->user_id;
+		}
+		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
 	}
 	
 	/**

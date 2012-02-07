@@ -63,13 +63,13 @@ class SlugDataAccess extends Connection\PostgreSQLDBConnection {
 	
 	public function loadBrandSlugs() {
 		$result = array();
-		$sql = "SELECT ps.value, ps.dst, b.name FROM product_slug ps INNER JOIN brands b 
-			ON ps.value = b.brand_id WHERE ps.source = 'B' ORDER BY b.name ASC";
-		$slugs = parent::getUnique($sql);
-		die_r($slugs);
+		$sql = 'SELECT u.destination, u.url_slug_id, u.url_slug_type_id, bu.brand_id '
+			 . 'FROM url_slug u INNER JOIN brand_slug bu ON u.url_slug_id=bu.url_slug_id';
+		
+		$slugs = parent::executeSelect($sql);
 		
 		foreach ($slugs as $slug) {
-			$result[$slug['name']] = str_replace('brand/', '', $slug['dst']);
+			$result[$slug['brand_id']] = str_replace('brand/', '', $slug['destination']);
 		}
 		return $result;
 	}

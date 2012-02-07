@@ -126,7 +126,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	public function executeArbitrary ($sql, array $params = array()) {
 		$this->prepareStatment($sql, $params);
 		isset($this->link) ?: $this->getConnection();
-		var_dump($params);
+
 		try {
 			return pg_query_params($this->link, $sql, $params);
 		} catch (Exception $exc) {
@@ -188,7 +188,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param array $params
 	 * @return type 
 	 */
-	public static function executeSelect($sql, $params = array()) {
+	public function executeSelect($sql, $params = array()) {
 		$pg_result = self::execute($sql, $params );
 		return pg_fetch_all($pg_result);
 	}
