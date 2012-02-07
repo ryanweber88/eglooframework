@@ -82,9 +82,14 @@ class User {
 
 	/** @var string last logged in date */
 	public $last_action_date;
+	
+	public $user_roles = array();
 
 	/** @var string is user logged in */	
 	protected static $logged_in		= false;
+	
+	/** * @var type Anonymous	 */
+	public static $active_user_id = 0;
 	
 	/** @var array/Mix properties of Brands */
 	public		$properties;
@@ -109,10 +114,18 @@ class User {
 			$this->user_status_id === 1 ? static::$logged_in == true : false;
 		}
 		
+<<<<<<< HEAD
 		throw new \InvalidArgumentException("User does not exist in the System");
 		
+=======
+		if ($this->user_id > 0 && $this->user_status_id == 1) {
+			static::$logged_in = true;
+			self::$active_user_id = $this->user_id;
+		}
+		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
+>>>>>>> f3e369a04aae64eb702c0316f86f31b7cb7bbe39
 	}
-
+	
 	/**
 	 * Validate User password
 	 * 
@@ -127,7 +140,7 @@ class User {
 		
 	}
 
-		/**
+	/**
 	 * Check for valid User
 	 * 
 	 * @return boolean static true/false 
@@ -136,7 +149,10 @@ class User {
 		return true;
 		return static::$logged_in;
 	}
-
+	
+	public static function getActiveUserID() {
+		return self::$active_user_id;
+	}
 
 	/**
 	 * Populate data int the User object
@@ -145,6 +161,9 @@ class User {
 	 * @param type $value 
 	 */
 	public function __set($key, $value) {
+		if (property_exists($key, $this)) {
+			$this->$key = $value;
+		}
 		$this->properties[$key] = $value;
 		return $this;
 	}
@@ -198,7 +217,7 @@ class User {
 	 * @param type $name
 	 * @param type $arguments 
 	 */
-	public function __callstatic($name, $arguments) {
+	public static function __callstatic($name, $arguments) {
 		
 		if ($name == 'logout' && isset($arguments[0])) {
 			// @TODO perform needed actions for a static user logout
@@ -277,7 +296,7 @@ class User {
 	 * @throws \InvalidArgumentException 
 	 */
 	public static function loadByID($user_id) {
-		if ((int)$user_id <= 0) {
+		if ($user_id === '') {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);

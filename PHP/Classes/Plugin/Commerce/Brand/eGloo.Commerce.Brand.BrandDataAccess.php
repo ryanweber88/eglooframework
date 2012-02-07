@@ -53,7 +53,7 @@ class BrandDataAccess extends Domain\Data {
 	 */
 	public function loadBrandByName($brand_name) {
 		if ($brand_name == '') {
-			throw new Connection\DatabaseErrorException('::Missing argument error: brand_name is required!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_name is required!', __METHOD__);
 		}
 		return $this->loadBrand('name', $brand_name);
 	}
@@ -65,9 +65,14 @@ class BrandDataAccess extends Domain\Data {
 	 */
 	public function loadBrandById($brand_id) {
 		if ($brand_id == '') {
-			throw new Connection\DatabaseErrorException('::Missing argument error: brand_id is required!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!', __METHOD__);
 		}
-		return $this->loadBrand('brand_id', $brand_id);
+		//return $this->loadBrand('brand_id', $brand_id);
+		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
+			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
+			 . 'b.brand_id WHERE o.organization_status_id=1 AND b.brand_id = ? ORDER BY name ASC';
+		
+		return parent::getUnique($sql, array($brand_id));
 	}
 
 	/**
@@ -78,13 +83,10 @@ class BrandDataAccess extends Domain\Data {
 	 */
 	public function loadBrand($field_name, $field_value) {
 		if ($field_name == '' || $field_value == '') {
-			throw new Connection\DatabaseErrorException('::Missing argument error', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
 		}
-		$sql = "SELECT * FROM brand WHERE {$field_name} = ?";
-			
-		return parent::getUnique($sql, array($field_value), function ($row) {
-							return $row;
-		});
+		$sql = "SELECT * FROM brand WHERE {$field_name} = ?";		
+		return parent::getUnique($sql, array($field_value));
 	}
 	
 	public function loadBrandList() {
@@ -103,7 +105,7 @@ class BrandDataAccess extends Domain\Data {
 		$result = array();
 
 		if (isset ($limit) && $limit < 0 || isset ($offset) && $offset < 1) {
-			throw new \Connection\DatabaseErrorException();
+			throw new \InvalidArgumentException();
 		}
 		
 		
@@ -149,9 +151,21 @@ class BrandDataAccess extends Domain\Data {
 	public function getBrandProducts($brand_id) {
 		$result = array();
 		if ($brand_id == '') {
-			throw new Connection\DatabaseErrorException('::Missing argument error: brand_id is required!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!', __METHOD__);
 		}
-		$sql = 'SELECT * FROM product_line WHERE status = 1 and brand_id = ?';
+		
+		$sql = 'SELECT p.brand_id, p.product_id, p.title, bd.description AS product_body,'
+			 . 'po.product_option_id, po.sku, po.base_retail_price, po.competitor_markup,'
+			 . 'po.recurring_only, pos.size_description FROM product p LEFT JOIN '
+			 . 'product_description bd ON p.product_id=bd.product_id '
+			 . 'INNER JOIN product_option po ON p.product_id=po.product_id '
+			 . 'INNER JOIN product_migrated_selection pos '
+			 . 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=?'
+			 . ' AND po.status_id=1 AND bd.description_type="body"';
+		
+		return parent::getList($brand_id);
+		
+		/*$sql = 'SELECT * FROM product_line WHERE status = 1 and brand_id = ?';
 		$product_lines = $this->executeQuery($sql, array($brand_id));
 
 		foreach ( $product_lines as $product ) {
@@ -163,7 +177,7 @@ class BrandDataAccess extends Domain\Data {
 				WHERE sip.product_line_id = ?', array($product['product_line_id']));
 			$result[] = $product;
 		}
-		return $result;
+		return $result;*/
 	}
 	
 	/**
@@ -173,12 +187,23 @@ class BrandDataAccess extends Domain\Data {
 	 */
 	public function loadBrandSlugByID($brand_id) {
 		if ($brand_id == '') {
-			throw new \Connection\DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!!', __METHOD__);
 		}
 		$sql = 'SELECT u.destination, u.url_slug_id, u.url_slug_type_id, bu.brand_id FROM '
 			 . 'url_slug u INNER JOIN brand_slug bu ON u.url_slug_id=bu.url_slug_id WHERE '
 			 . 'bu.brand_id=?;';
 		return parent::getUnique($sql, array($brand_id));
+	}
+	
+	public function loadBrandSlugDestination($brand_id) {
+		if ($brand_id == '') {
+			throw new DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);
+		}
+		$sql = 'SELECT u.destination FROM '
+			 . 'url_slug u INNER JOIN brand_slug bu ON u.url_slug_id=bu.url_slug_id WHERE '
+			 . 'bu.brand_id=?;';
+		$result = parent::getUnique($sql, array($brand_id));
+		return array_pop($result);
 	}
 
 	/**
@@ -197,7 +222,7 @@ class BrandDataAccess extends Domain\Data {
 			 . 'bf.brand_id, bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb'
 			 . ' INNER JOIN cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
 			 . ' INNER JOIN brand_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id '
-			 . ' WHERE brand_id=? ';
+			 . ' WHERE brand_id=?';
 		$params = array($brand_id);
 		return parent::getList($sql, $params);
 	}
