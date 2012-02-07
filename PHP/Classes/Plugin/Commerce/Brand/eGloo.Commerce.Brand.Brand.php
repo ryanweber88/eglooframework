@@ -104,6 +104,14 @@ class Brand {
 		return $this;
 	}
 	
+	public function loadFilteredImages() {
+		if (empty ($this->brand_images)) {
+			$this->brand_images = BrandDataAccess::fetch()->loadFilteredImages($this->brand_id);
+		}
+		$this->brand_images;
+		return $this;
+	}
+	
 	public function loadBrandProducts() {
 		if (empty ($this->brand_products)) {
 			$this->brand_products = BrandDataAccess::fetch()->getBrandProducts($this->brand_id);
@@ -115,6 +123,14 @@ class Brand {
 	public function loadBrandSlug() {
 		if ($this->friendly_url == '') {
 			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlugByID($this->brand_id);
+		}
+		$this->friendly_url;
+		return $this;
+	}
+	
+	public function loadBrandSlugDestination() {
+		if ($this->friendly_url == '') {
+			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlugDestination($this->brand_id);
 		}
 		$this->friendly_url;
 		return $this;

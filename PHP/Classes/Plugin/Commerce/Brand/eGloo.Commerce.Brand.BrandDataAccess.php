@@ -111,8 +111,10 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	}
 	
 	public function loadBrandList() {
-		$sql = "SELECT brand_id, name FROM brands WHERE status = ? ORDER BY name ASC";
-		return parent::getList($sql, array(1));
+		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
+			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
+			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC';
+		return parent::executeSelect($sql);
 	}
 
 		/**
@@ -126,7 +128,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		if (isset ($limit) && $limit < 0 || isset ($offset) && $offset < 1) {
 			throw new \InvalidArgumentException();
 		}
-		$sql = 'SELECT o.organization_id AS brand_id, o.name, b.requires_prescription, '
+		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
 			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
 			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?';
 		
@@ -210,7 +212,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			 . 'url_slug u INNER JOIN brand_slug bu ON u.url_slug_id=bu.url_slug_id WHERE '
 			 . 'bu.brand_id=?;';
 		$result = parent::getUnique($sql, array($brand_id));
-		return array_pop($result);
+		return !empty($result) ? array_pop($result) : false;
 	}
 
 	/**
@@ -232,6 +234,23 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			 . ' WHERE brand_id=?';
 		$params = array($brand_id);
 		return parent::getList($sql, $params);
+	}
+	
+	public function loadFilteredImages($brand_id) {
+		if ($brand_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!!');
+		}
+		
+		$sql = 'SELECT cf.cloudfront_file_id, cf.cloudfront_file_name, cf.cloudfront_bucket,'
+			 . 'cb.distribution_url, cf.file_bucket, cf.file_store, cf.mime_type,'
+			 . 'cf.file_uri, cf.file_zone, cf.original_file_path, cf.file_association_type,'
+			 . 'bf.brand_id, bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb'
+			 . ' INNER JOIN cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
+			 . ' INNER JOIN brand_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id '
+			 . ' WHERE brand_id=?';
+		$params = array($brand_id);
+		
+		return parent::executeSelect($sql, $params);
 	}
 
 	/**
