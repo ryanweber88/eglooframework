@@ -207,7 +207,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		return $this->execute($sql, $params, function($result, $link) use ($callback){
 			$index = 0;
 			$list = array();
-			while ($row = pg_fetch_assoc( $result )){
+			for($index = 0; ($row = pg_fetch_assoc( $result )) !== false; $index++) {
 				if ($callback !== null ) {
 					$list[$index] = $callback($index++, $row );
 				} else {

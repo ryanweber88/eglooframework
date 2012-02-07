@@ -81,7 +81,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		$method = 'getList';
 		
 		// retrieve data set
-		$set = $dataAccess::$method($statement);
+		$set = $dataAccess->$method($statement);
 		
 		// return set if lambda has not been provided
 		if (is_null($lambda)) {
