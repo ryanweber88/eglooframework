@@ -32,15 +32,12 @@ class ObjectSafe {
 	 */
 	public static function caller() {
 	
-		// use backtrace to determine caller - we have to backtrace twice as
-		// we are not looking for caller of this method, but the caller of
-		// where this method is called (a little confusing?)
+		// use backtrace to determine caller
 		$trace  = debug_backtrace();
-		$caller = array_shift($caller = array_shift(
-				$trace
-		));
-	
-		return new \eGloo\Utilities\Caller($caller);
+		
+		// wrap in caller instance, which should provide convenience methods 
+		// for dealing with caller
+		return new \eGloo\Utilities\Caller($trace[1]);
 	}	
 	
 	/**
@@ -62,7 +59,7 @@ class ObjectSafe {
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)
 		trigger_error(
-			"Call to undefined method $name on " . get_class($this), E_USER_ERROR
+			"Call to undefined method \"$name\" on " . get_class($this), E_USER_ERROR
 		);
 		
 	}
@@ -74,7 +71,7 @@ class ObjectSafe {
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)		
 		trigger_error(
-				"Call to undefined method $name on " . get_called_class(), E_USER_ERROR
+				"Call to undefined method \"$name\" on " . get_called_class(), E_USER_ERROR
 		);		
 	}
 	

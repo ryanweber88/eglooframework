@@ -213,7 +213,7 @@ class Product extends Domain\Model {
 	/**
 	 * Extract Product property out for clean UI display
 	 * 
-	 * @return array of Product property 
+	 * @return array of Prkjjkoduct property 
 	 */
 	public function getProductArray(){
 		return (array) $this->properties;

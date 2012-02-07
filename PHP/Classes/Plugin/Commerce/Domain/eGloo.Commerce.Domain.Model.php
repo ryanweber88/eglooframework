@@ -18,11 +18,8 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		// there is not a gaurentee that every class will have an
 		// associated *DataAccess to delegate to - in which case
 		// we simply ignore the generated exception
-		catch(\Exception $ignore) {
-			exit("here");
-		}
+		catch(\Exception $ignore) { }
 		
-		//exit("there");
 	}
 	
 	/**
@@ -49,8 +46,23 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	 * Executes a statement on underlying layer - currently makes use of *DataAccess
 	 * classes, but will be replaced with dpstatement - think about this some more
 	 */
-	protected static function statement($mixed, array $arguments = null) {
+	protected static function statement($statement, $mixed = null, $lambda = null) {
 		
+		// make sence of our params - our second param may be arguments, or callable
+		// our third param will be callable		
+		if (!is_null($mixed)) {
+			if (is_callable($mixed)) {
+				$lambda = $mixed;
+			}
+			
+			else {
+				$arguments = $mixed; 
+			}
+		}
+		
+		
+		// determine who is calling method - this will be used to track down where/when
+		// statements are made for later refactor
 		$caller = static::caller();
 		
 		// retrieve *DataAccess instance
@@ -62,10 +74,24 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 			throw $passthrough;
 		}
 		
-		// call method if case 
-		return method_exists($dataAccess, $statement) 
-			? call_user_func_array(array($dataAccess, $statement), $arguments)
-			: $dataAccess->executeQuery($statement, $arguments);
+		// determine method to call on delegated data access
+		// class - for the time being, we will use getList, but
+		// we will need to inspect our statement for query type
+		// @TODO inspect statement for query type
+		$method = 'getList';
+		
+		// retrieve data set
+		$set = $dataAccess::$method($statement);
+		
+		// return set if lambda has not been provided
+		if (is_null($lambda)) {
+			return $set;
+		}
+		
+		// otherwise, iterate through set 
+		foreach($set as $record) {
+			$lambda($record);
+		}
 
 	}
 	

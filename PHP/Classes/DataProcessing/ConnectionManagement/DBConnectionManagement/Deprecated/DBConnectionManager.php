@@ -49,26 +49,12 @@ final class DBConnectionManager extends ConnectionManager {
 	private static $connections = array('egCustomConnections' => array());
 
 	public static function getConnection( $connection_name = 'egPrimary', $engine_mode = null ) {
-		$retVal = null;
-
-		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+		$retVal          = null;
+		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo(
+			$connection_name
+		);
 		
 		if ($connection_info['password']) {
-			
-			// const AQUINAS		= 0x00;
-			// const CASSANDRA		= 0x01;
-			// const DOCTRINE		= 0x02;
-			// const EGLOO			= 0x03;
-			// const MONGO			= 0x04;
-			// const MYSQL			= 0x05;
-			// const MYSQLI		= 0x06;
-			// const MYSQLIOOP		= 0x07;
-			// const ORACLE		= 0x08;
-			// const PDO			= 0x09;
-			// const POSTGRESQL	= 0x0a;
-			// const REST			= 0x0b;
-			// const SOAP			= 0x0c;
-			
 	
 			if ($engine_mode !== null) {
 				if ( $engine_mode === eGlooConfiguration::DOCTRINE ) {
@@ -143,6 +129,7 @@ final class DBConnectionManager extends ConnectionManager {
 	
 			return $retVal;
 		}
+		
 		
 		throw new \Exception(
 			'You must provide a password for database connection'	

@@ -42,6 +42,8 @@ use \eGloo\Commerce\Brand\BrandDataAccess,
 class Brand extends Domain\Model {
 
 
+	protected $properties;
+	
 	/**
 	 * Create a new Brand object
 	 * 
