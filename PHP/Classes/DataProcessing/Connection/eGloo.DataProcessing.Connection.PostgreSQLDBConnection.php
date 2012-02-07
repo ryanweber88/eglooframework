@@ -56,6 +56,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		if (is_null ($rawConnectionResource)) {
 			\DBConnectionManager::resetConnections();
 			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+
 			if (null == $this->link) {
 				throw new DatabaseErrorException('Can\'t connect to database server.');
 			}
@@ -114,6 +115,8 @@ class PostgreSQLDBConnection extends DBConnection {
 	private function execute ($sql, array $params = array(), $callback = null) {
 		$this->prepareStatment($sql, $params);
 		isset($this->link) ?: $this->getConnection();
+		
+		
 		
 		if (false !== ($result = pg_query_params($this->link, $sql, $params))) {
 			return is_callable($callback)

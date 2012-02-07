@@ -39,7 +39,7 @@ use \eGloo\Dialect\ObjectSafe as Object;
  * @package $package
  * @subpackage $subpackage
  */
-abstract class eGlooConnection extends ObjectSafe {
+abstract class eGlooConnection extends Object {
 
 	protected $_rawHandle = null;
 

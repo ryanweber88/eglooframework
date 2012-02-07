@@ -1,5 +1,8 @@
 <?php
 namespace eGloo\Commerce\Brand;
+
+use \eGloo\Commerce;
+use \eGloo\Commerce\Domain;
 use \eGloo\DataProcessing\Connection;
 
 /**
@@ -36,34 +39,10 @@ use \eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class BrandDataAccess extends Connection\PostgreSQLDBConnection {
+class BrandDataAccess extends Domain\Data {
 	
-	/** @var resource Object */
-	protected static $instance = null;
 	
-	/**
-	 * Overwrite $rawConnectionResource setting in connection file
-	 * 
-	 * @param resource $rawConnectionResource = null
-	 * @return void
-	 */
-	public function __construct() {}
-	
-	/**
-	 * Create an instance of the class
-	 * Delegate class to access Database layer
-	 * 
-	 * @return $this class object
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self();
-		}
-		return static::$instance;
-	}
-	
-	public function createBrand() {
-		
+	public function createBrand() {	
 		$this->beginTransaction();
 	}
 	
@@ -118,16 +97,30 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	 * @param type $limit
 	 * @param type $offset
 	 * @return type 
+	 * @note this should be made static
 	 */
 	public function getBrandList($limit = null, $offset = null) {
 		$result = array();
+
 		if (isset ($limit) && $limit < 0 || isset ($offset) && $offset < 1) {
 			throw new \Connection\DatabaseErrorException();
 		}
-		$sql = 'SELECT o.organization_id AS brand_id, o.name, b.requires_prescription, '
-			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
-			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?';
 		
+		
+		$sql = 
+			'SELECT 
+			 	o.organization_id AS brand_id, 
+			 	o.name, 
+			 	b.requires_prescription,
+			 	b.brand_status_id 
+			 FROM 
+			 	organization o 
+			 INNER JOIN 
+			 	brand b ON o.organization_id = b.brand_id 
+			 WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?';
+
+		//$sql = 'SELECT current_database()';
+
 		return parent::getList($sql, array($limit, $offset));
 		
 		/*foreach ($brand_result as $brand) {
