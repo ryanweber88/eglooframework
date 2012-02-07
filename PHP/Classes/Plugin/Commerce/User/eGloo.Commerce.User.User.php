@@ -241,7 +241,7 @@ class User extends Domain\Model {
 		return !empty($user) 
 			? new User($user) 
 			: false;
-			
+	}		
 
 	public static function loadByPassword($passwd) {
 		if ($passwd == '') {

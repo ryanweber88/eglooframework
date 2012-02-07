@@ -22,7 +22,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 			exit("here");
 		}
 		
-		exit("there");
+		//exit("there");
 	}
 	
 	/**
