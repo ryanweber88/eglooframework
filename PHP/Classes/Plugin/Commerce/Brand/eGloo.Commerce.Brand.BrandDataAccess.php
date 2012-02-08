@@ -113,7 +113,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 	public function loadBrandList() {
 		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
 			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
-			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC';
+			 . 'b.brand_id WHERE o.organization_status_id=1 AND b.brand_status_id=1 ORDER BY name ASC';
 		return parent::executeSelect($sql);
 	}
 
@@ -130,7 +130,7 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 		}
 		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
 			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
-			 . 'b.brand_id WHERE o.organization_status_id = 1 ORDER BY name ASC LIMIT ? OFFSET ?';
+			 . 'b.brand_id WHERE o.organization_status_id=1 AND b.brand_status_id=1 ORDER BY name ASC LIMIT ? OFFSET ?';
 		
 		return parent::getList($sql, array($limit, $offset));
 		

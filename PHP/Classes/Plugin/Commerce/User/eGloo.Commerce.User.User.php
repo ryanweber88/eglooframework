@@ -113,7 +113,7 @@ class User {
 		}
 		
 		if ($this->user_id > 0 && $this->user_status_id == 1) {
-			static::$logged_in = true;
+			self::$logged_in = true;
 			self::$active_user_id = $this->user_id;
 		}
 		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
@@ -139,7 +139,7 @@ class User {
 	 * @return boolean static true/false 
 	 */
 	public static function isLoggedIn() {
-		return static::$logged_in;
+		return self::$logged_in;
 	}
 	
 	public static function getActiveUserID() {
