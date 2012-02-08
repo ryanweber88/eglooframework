@@ -2,7 +2,7 @@
 namespace eGloo\Commerce\Product;
 
 use \eGloo\Commerce;
-use \eGloo\Commerce\Domain;
+use \eGloo\Domain;
 
 /**
  * Product Class File

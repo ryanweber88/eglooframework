@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\Commerce\Domain;
+namespace eGloo\Domain;
 
 
 /**
@@ -69,11 +69,13 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	 * fucking static constructing
 	 */
 	public static function __callstatic($name, $arguments) {
-				
-		if (method_exists($data = static::data(), $name)) {
+
+		
+		if (method_exists($data = static::data(), $name)) {			
 			return call_user_func_array(
 				array($data, $name), $arguments	
 			);
+			
 		}
 			
 		// defer to parent if not able to delegate

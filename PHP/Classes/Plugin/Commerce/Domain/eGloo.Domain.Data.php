@@ -1,9 +1,6 @@
 <?php
-namespace eGloo\Commerce\Domain;
+namespace eGloo\Domain;
 
-// @TODO replace_object_safe
-use \eGloo\Dialect\ObjectSafe as Object;
-use \eGloo\Commerce;
 
 /**
  * Serves as parent class to all *DataAcces Classes; general purpose is to provide
@@ -26,18 +23,22 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return static::instance();
 	}
 	
+	public static function test() {
+		echo 'test'; exit;
+	}
+	
 	/**
 	 * Executes a statement on underlying layer - currently makes use of *DataAccess
 	 * classes, but will be replaced with dpstatement - think about this some more
 	 * @param string $statement
 	 * @param variable-length $__mixed
 	 */
-	protected static function statement($statement, $__mixed = null) {
+	public static function statement($statement, $__mixed = null) {
 	
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
 		// to callable is found
-		if (count($arguments = array_slice(func_get_args())) >= 1) {
+		if (count($arguments = array_slice(func_get_args(), 1)) >= 1) {
 			
 			// first we are going to check for our lambda, which must come
 			// at the end of our argument list
@@ -61,9 +62,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 				// slice the end off of arguments if a lambda has indeed been found
 				// since we know that it must occupy the last rung
-				if (is_callabe($lambda)) {
+				if (is_callable($lambda)) {
 					$arguments = array_slice(
-						$lambda, 0, count($arguments)-1
+						$arguments, 0, count($arguments)-1
 					);
 				}
 			}
@@ -75,7 +76,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// determine who is calling method - this will be used to track down where/when
 		// statements are made for later refactor
 		$caller = static::caller();
-	
 		// retrieve *DataAccess instance
 		//try {
 		//	$dataAccess = static::data();
@@ -86,23 +86,27 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		//}
 		
 		// need to think whether this method should be here
-		$dataAccess = $this;
-	
+		$dataAccess = new static;
+
 		// determine method to call on delegated data access
 		// class - for the time being, we will use getList, but
 		// we will need to inspect our statement for query type
 		// @TODO inspect statement for query type - for now just
 		// perform messy regex
-		$method = preg_match('/^\s*?select/is', $statement)
+		preg_match('/^\s*?(\S+)/is', $statement, $match);
+		
+		
+		
+		
+		$method = ($match = strtolower($match[1])) == 'select'
 			? 'getList'
-			: 'execute';
-	
+			: 'execute' . ucfirst($match);
+			
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
 		$result = $dataAccess->$method($statement, $arguments);
-		
 		
 		// determine if result is array, in which case take a look at
 		// make up for return set
@@ -114,51 +118,49 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			// at the bottom of this method (perhaps not the clearest)
 			// but a tad slick
 			$set = &$result;
-		
-			// if our result set
-			if (is_null($lambda)) {
-				
-				// perform a count on a single record in set and determine
-				// if it only contains one field value - in this instance
-				// we truncate the array to just that value because 99%
-				// of the time, we will know the field key being used - 
-				// if not, we can use one of the baser methods
-				if (count($set[0]) == 1) {
-					$values = array();
-					$key    = array_current(array_keys(
-						$set[0]
-					));
-					
-					foreach($set as $record) {
-						$values[] = $record[$key]; 
-					}
-					
-					$set = $values;
-				}
-				
-				// here we provide some convenience for our returned
-				// set - if only one record within set, then we don't
-				// want to return multidimensional set
-				if (count($set) == 1) {
-					$set = $set[0]; 
-				}
 
+			// perform a count on a single record in set and determine
+			// if it only contains one field value - in this instance
+			// we truncate the array to just that value because 99%
+			// of the time, we will know the field key being used -
+			// if not, we can use one of the baser methods
+			if (count($set[0]) == 1) {
+				$values = array();
+				$key    = \current(array_keys(
+						$set[0]
+				));
+					
+				foreach($set as $record) {
+					$values[] = $record[$key];
+				}
+					
+				$set = $values;
 			}
 			
-			else { 
-			
+			// here we provide some convenience for our returned
+			// set - if only one record within set, then we don't
+			// want to return multidimensional set
+			if (count($set) == 1) {
+				$set = $set[0];
+			}
+						
+			// if our result set
+			if (isset($lambda) && is_callable($lambda)) {
 				// otherwise, iterate through set
+				$inject = false;
+				
 				foreach($set as $record) {
 					// here we copy the ruby array#inject, by allowing
 					// to pass forward the value returned from last lambda
 					// call
 					$inject = $lambda($record, $inject);
+						
 				}
 				
 				// return inject to caller - in most instances this will null
-				return $inject;
-				
+				return $inject;				
 			}
+			
 		}
 		
 		// return result, which is being referenced by $set and whose

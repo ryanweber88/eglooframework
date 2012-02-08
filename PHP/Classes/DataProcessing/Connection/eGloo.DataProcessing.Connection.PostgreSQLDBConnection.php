@@ -170,19 +170,38 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @throws DatabaseErrorException 
 	 */
 	public function executeInsert($sql, array $params) {
-		if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
-			$pg_result = self::execute($sql, $params);
+		// removing match to see if sql is indeed an insert statement - we
+		// are big boys and if executeInsert is called without an insert statement
+		// then we suffer the consequences
+		
+		//if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
+			
+			// parse sql for table name - this isn't a perfect solution and will not work
+			// for all cases, but will work for the majority of them
+			if (!preg_match('/returning\s/is', $sql)) { 
+				preg_match(						
+					'/insert\s+?into\s+?(\S+)/is', $sql, $match
+				);
+				
+				$sql .= " RETURNING {$match[1]}.* ";								
+			}
+
+			
+			$pg_result = self::execute("$sql", $params);
+			
 			if( pg_affected_rows($pg_result) !== 0 ) {
 				$insert_row = pg_fetch_row($pg_result);
+				
 //				if (!is_array($insert_row)) {
 //					$result = $this->execute('SELECT lastval();');
 //					$insert_row = pg_fetch_row($result);
 //				}
 				return is_array($insert_row) ? array_shift($insert_row) : true;
 			}
-		} else {
-			throw new DatabaseErrorException('Unable to execute insert Statement', $sql);
-		}
+			
+		//} else {
+		//	throw new DatabaseErrorException('Unable to execute insert Statement', $sql);
+		//}
 	}
 	
 	/**

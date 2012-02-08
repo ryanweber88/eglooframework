@@ -2,7 +2,7 @@
 namespace eGloo\Commerce\Brand;
 
 use \eGloo\Commerce;
-use \eGloo\Commerce\Domain;
+use \eGloo\Domain;
 use \eGloo\DataProcessing\Connection;
 
 /**
