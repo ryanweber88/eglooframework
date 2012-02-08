@@ -18,7 +18,12 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		// there is not a gaurentee that every class will have an
 		// associated *DataAccess to delegate to - in which case
 		// we simply ignore the generated exception
-		catch(\Exception $ignore) { }
+		catch(\Exception $ignore) { 
+			exit;
+			// if there is not an associated *DataAccess, we fall back to our 
+			// moreso abstract parent Domain\Data
+			parent::__construct(new Domain\Data);
+		}
 		
 	}
 	
@@ -27,12 +32,13 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	 * which we derive the name of our *DataAccess class; this simply
 	 * serves as a convenience to access *DataAccess::instance()
 	 * @return Data
+	 * @TODO is this even needed anymore if we are delegating to data class?
 	 */
 	protected static function data() {
 		$className     = get_called_class();
 		$dataClassName = get_called_class() . 'DataAccess';
-		
-		if (class_exists($className)) {
+
+		if (class_exists($dataClassName)) {
 			return $dataClassName::instance();
 		} 
 		
@@ -42,113 +48,8 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		); 
 	}
 	
-	/**
-	 * Executes a statement on underlying layer - currently makes use of *DataAccess
-	 * classes, but will be replaced with dpstatement - think about this some more
-	 */
-	protected static function statement($statement, $mixed = null, $lambda = null) {
-		
-		// make sence of our params - our second param may be arguments, or callable
-		// our third param will be callable		
-		if (!is_null($mixed)) {
-			if (is_callable($mixed)) {
-				$lambda = $mixed;
-			}
-			
-			else {
-				$arguments = $mixed; 
-			}
-		}
-		
-		
-		// determine who is calling method - this will be used to track down where/when
-		// statements are made for later refactor
-		$caller = static::caller();
-		
-		// retrieve *DataAccess instance
-		try { 
-			$dataAccess = static::data();
-		}
-		
-		catch(\Exception $passthrough) {
-			throw $passthrough;
-		}
-		
-		// determine method to call on delegated data access
-		// class - for the time being, we will use getList, but
-		// we will need to inspect our statement for query type
-		// @TODO inspect statement for query type
-		$method = 'getList';
-		
-		// retrieve data set
-		$set = $dataAccess->$method($statement);
-		
-		// return set if lambda has not been provided
-		if (is_null($lambda)) {
-			return $set;
-		}
-		
-		// otherwise, iterate through set 
-		foreach($set as $record) {
-			$lambda($record);
-		}
 
-	}
-	
-	/**
-	 * The 'find' method serves as a alias to loadById method, employed by many of the domain model
-	 * classes; dynamic finders are also used by EPA, which will make transition easier
-	 * @return Model | Model[]
-	 */
-	public static function find($key) {
 
-		$className = get_called_class();
-		
-		if (method_exists($className, 'loadByID')) {
-			// convert key to array, in instances where we want to return
-			// a set, as opposed to individual object
-			$key = count(func_get_args()) > 1
-				? func_get_args()
-				: array($key);
-				
-			
-			if (count(func_get_args()) > 1) {
-				$key = func_get_args();
-			}
-			
-			$models = array();
-			
-			foreach($key as $key) {
-				$models[] = $className::loadByID($key);				
-			}
-			
-			if (count($models)) { 
-				return count($models) > 1
-					? $models 
-					: array_pop($models);
-			}
-			
-			return false;
-		}
-		
-		throw new \Exception(
-			"Cannot alias to loadByID because it does not exist in domain class $className"		
-		);
-
-	}
-	
-	/**
-	 * Acts as retrieve all - in most cases this will serve as an alias to load*List in
-	 * domain model classes; this method should be declared abstract, but since it
-	 * was provided after the meat of the domain has been built, and because I don't
-	 * want to go through every single domain class and add method, an exception
-	 * has been added so user can override in calling child individualy
-	 */
-	public static function all() {
-		throw new \Exception(
-			'You must override all method in ' . get_called_class()
-		);
-	}
 
 	/**
 	 * Currently this acts as a passthrough to our parent delegator
