@@ -1,6 +1,9 @@
 <?php
 namespace eGloo\Commerce\Product;
 
+use \eGloo\Commerce;
+use \eGloo\Domain;
+
 /**
  * Product Class File
  * 
@@ -36,7 +39,7 @@ namespace eGloo\Commerce\Product;
  * @subpackage Commerce
  */
 
-class Product {
+class Product extends Domain\Model {
 
 	/** @var integer Product ID */
 	public			$product_id;
@@ -210,7 +213,7 @@ class Product {
 	/**
 	 * Extract Product property out for clean UI display
 	 * 
-	 * @return array of Product property 
+	 * @return array of Prkjjkoduct property 
 	 */
 	public function getProductArray(){
 		return (array) $this->properties;

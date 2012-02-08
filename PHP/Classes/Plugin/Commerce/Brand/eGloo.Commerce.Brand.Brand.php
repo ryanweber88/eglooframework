@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Commerce\Brand;
+
 use \eGloo\Commerce\Brand\BrandDataAccess,
-	\eGloo\Utilities\Utilities;
+	  \eGloo\Utilities\Utilities,
+	  \eGloo\Commerce\Domain;
 
 /**
  * Brand Class File
@@ -37,55 +39,20 @@ use \eGloo\Commerce\Brand\BrandDataAccess,
  * @package Plugins
  * @subpackage Commerce
  */
-class Brand {
+class Brand extends Domain\Model {
 
-	/** @var integer brand id */
-	public		$brand_id;
-	
-	public $organization_id;
-	
-	public $parent_organization_id;
-	
-	public $organization_status_id;
 
-	/** @var string Name */
-	public		$name;
+	protected $properties;
 	
-	/** @var string description */
-	public 		$description;
-
-	/** @var string Object creation date */
-	public 		$last_action;
-
-	/** @var string Object last modification date */
-	public 		$last_action_taken;
-
-	/** @var boolean active */
-	public		$brand_status_id;
-	
-	/** @var boolean active */
-	public		$requires_prescription;
-	
-	public		$action_by;
-	
-	/** @var brand firendlyy url */
-	public		$friendly_url	=	'';
-	
-	/** @var array of brand Product  */
-	public		$brand_products = array();
-	
-	/** @var array for Brand Images */
-	public		$brand_images	= array();
-
-	/** @var array/Mix properties of Brands */
-	public		$properties;
-
 	/**
 	 * Create a new Brand object
 	 * 
 	 * @param array $args optional
 	 */
 	public function __construct ( array $args = null ) {
+		// call our domain\model constructor
+		parent::__construct();
+		
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
@@ -165,7 +132,8 @@ class Brand {
 	 * @return Brand 
 	 */
 	public function __toString(){
-		return serialize($this);
+		//return serialize($this);
+		return $this->name;
 	}
 	
 	/**
@@ -192,6 +160,14 @@ class Brand {
 			$result[] = new Brand($row);
 		}
 		return $result;
+	}
+	
+	/**
+	 * Acts as an alias to getBrandList - is provided to create lcd
+	 * interface between domain classes
+	 */
+	public static function all() {
+		return static::getBrandList();
 	}
 
 

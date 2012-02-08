@@ -1,8 +1,4 @@
 <?php
-/**
- * 
- */
-
 namespace eGloo\Utilities;
 
 
@@ -10,7 +6,7 @@ namespace eGloo\Utilities;
  * Provides utility methods, mostly static, for array manipulation
  * @author Christian Calloway callowaylc@gmail.com
  */
-class Collection extends \eGloo\Dialect\Object {
+class Collection extends \eGloo\Dialect\ObjectSafe {
 	
 	/**
 	 * 
@@ -22,4 +18,5 @@ class Collection extends \eGloo\Dialect\Object {
 	public static function isHash($collection) {
 		return array_keys($collection) !== range(0, count($collection) - 1);
 	}
+
 } 

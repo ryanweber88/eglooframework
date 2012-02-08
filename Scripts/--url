@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Date: Thu, 19 Jan 2012 21:06:10 GMT
+Server: Apache/2.2.14 (Ubuntu)
+X-Powered-By: PHP/5.3.2-1ubuntu4.11
+Set-Cookie: pf-mascotas-localhost%3A81=50p4jqocjnpatiqgp83f72stj5; path=/
+Expires: Mon, 26 Jul 1997 05:00:00 GMT
+Cache-Control: store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: cache
+P3P: CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"
+Vary: Accept-Encoding
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=UTF-8
+

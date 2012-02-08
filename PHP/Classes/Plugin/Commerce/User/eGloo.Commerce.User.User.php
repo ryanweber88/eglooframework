@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\User;
-use eGloo\Commerce\User\UserDataAccess;
+
+use \eGloo\Domain;
+use \eGloo\Commerce\User\UserDataAccess;
 
 /**
  * User Class File
@@ -36,67 +38,13 @@ use eGloo\Commerce\User\UserDataAccess;
  * @package Plugins
  * @subpackage Commerce
  */
-class User {
+class User extends Domain\Model {
 
-	/** @var integer user id */
-	public $user_id;
-
-	/** @var string user email address */
-	public $email_address;
-
-	/** @var string user name */
-	public $username;
-
-	/** @var string password */
-	public $password_hash;
-	
-	/** @var string first name */
-	public $first_name;
-	
-	/** @var string last name */
-	public $last_name;
-	
-	/** @var int Security Question ID*/
-	public $security_question_id;
-	
-	/** @var string first name */
-	public $security_answer_hash;
-
-	/** @var integer 1/0 for user type */
-	public $user_type_id = 0;
-	
-	/** @var integer 1/0 for user status */
-	public $user_status_id = 0;
-
-	/** @var string created date */
-	public $registration_date;
-
-	/** @var string deleted date */
-	public $deleted_date;
-	
-	/** @var string birthday date */
-	public $birthday;
-
-	/** @var string updated date */
-	public $last_action;
-
-	/** @var string last logged in date */
-	public $last_action_date;
-	
-	public $user_roles = array();
-
-	/** @var string is user logged in */	
-	protected static $logged_in		= false;
-	
-	/** * @var type Anonymous	 */
-	public static $active_user_id = 0;
-	
-	/** @var array/Mix properties of Brands */
-	public		$properties;
+	protected $properties;
 
 	const USER_TYPE_NORMAL			= 1,
-			USER_TYPE_EMPLOYEE		= 2,
-			USER_TYPE_AFFILIATE		= 3;
+	      USER_TYPE_EMPLOYEE		= 2,
+	      USER_TYPE_AFFILIATE		= 3;
 
 	/**
 	 * Construct User Object
@@ -105,20 +53,25 @@ class User {
 	 * @throws \InvalidArgumentException 
 	 */
 	public function __construct (array $args) {
-		if (!is_array($args) || sizeof($args) == 0) {
-			throw new \InvalidArgumentException("User does not exist in the System");
-		}
-		foreach ( $args as $key => $value ){
-			$this->{$key} = $value;
+		parent::__construct();	
+		
+	
+		if (count($args)) {
+		
+			foreach ( $args as $key => $value ) {
+				$this->{$key} = $value;
+			}
+				
+			if ($this->user_id > 0 && $this->user_status_id == 1) {
+				static::$logged_in = true;
+				static::$active_user_id = $this->user_id;
+			}
 		}
 		
-		if ($this->user_id > 0 && $this->user_status_id == 1) {
-			self::$logged_in = true;
-			self::$active_user_id = $this->user_id;
-		}
-		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
+		throw new \InvalidArgumentException("User does not exist in the System");
+		
 	}
-	
+
 	/**
 	 * Validate User password
 	 * 
@@ -133,18 +86,16 @@ class User {
 		
 	}
 
-	/**
+		/**
 	 * Check for valid User
 	 * 
 	 * @return boolean static true/false 
 	 */
 	public static function isLoggedIn() {
-		return self::$logged_in;
+		return static::$logged_in;
+
 	}
-	
-	public static function getActiveUserID() {
-		return self::$active_user_id;
-	}
+
 
 	/**
 	 * Populate data int the User object
@@ -153,9 +104,6 @@ class User {
 	 * @param type $value 
 	 */
 	public function __set($key, $value) {
-		if (property_exists($key, $this)) {
-			$this->$key = $value;
-		}
 		$this->properties[$key] = $value;
 		return $this;
 	}
@@ -228,7 +176,7 @@ class User {
 	 * Returns user logged in status
 	 */
 	public static function loggedIn() {
-		return static::$loggedIn;
+		return static::$logged_in;
 	}
 	
 	/**
@@ -287,12 +235,15 @@ class User {
 	 * @throws \InvalidArgumentException 
 	 */
 	public static function loadByID($user_id) {
-		if ($user_id === '') {
+		if ((int)$user_id <= 0) {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
-	}
+		
+		return !empty($user) 
+			? new User($user) 
+			: false;
+	}		
 
 	public static function loadByPassword($passwd) {
 		if ($passwd == '') {
