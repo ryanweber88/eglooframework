@@ -96,7 +96,7 @@ class Brand extends Domain\Model {
 	 * @return Brand 
 	 */
 	public function __toString(){
-		return serialize($this);
+		return $this->name;
 	}
 	
 	/**
@@ -123,6 +123,15 @@ class Brand extends Domain\Model {
 			$result[] = new Brand($row);
 		}
 		return $result;
+	}
+	
+	/**
+	 * An alias to loadBrandList - the purpose is to 1) provide a single
+	 * comprehensive interface and 2) make refactoring easier when delegated
+	 * data layer is changed
+	 */
+	public static function all() {
+		return static::loadBrandList();
 	}
 
 

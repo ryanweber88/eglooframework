@@ -48,7 +48,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	 * @param variable-length $__mixed 
 	 * @TODO is this even needed anymore if we are delegating to data class?
 	 */
-	protected static function data($__mixed) {
+	protected static function data($__mixed = null) {
 		$className     = get_called_class();
 		$dataClassName = get_called_class() . 'DataAccess';
 
@@ -68,7 +68,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 			if (is_string($method = $arguments[0])) {
 				return call_user_func_array(
 						array($interface, $method), array_slice($arguments, 1)
-				)
+				);
 			}
 			
 			// in the instance of passing a lambda/block, we will pass the interface to
@@ -81,6 +81,16 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		return $interface;
 		
  
+	}
+	
+	/**
+	 * Provides 2array access for domain models
+	 */
+	public function toArray() {
+		// simplified behavior is simply to return to properties,
+		// but this will have to be changed in future
+		
+		return $this->properties;
 	}
 	
 

@@ -108,6 +108,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// for example
 		$result = $dataAccess->$method($statement, $arguments);
 		
+		// set result to false if we don't have a match
+		// @TODO this should be fixed at connection level,
+		// but that can be managed later - need to make sure
+		// an empty array isnt expected behavior
+		if (is_array($result) && !count($result)) {
+			$result = false;
+		}
+		
 		// determine if result is array, in which case take a look at
 		// make up for return set
 		if (is_array($result)) {
@@ -124,6 +132,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			// we truncate the array to just that value because 99%
 			// of the time, we will know the field key being used -
 			// if not, we can use one of the baser methods
+			
 			if (count($set[0]) == 1) {
 				$values = array();
 				$key    = \current(array_keys(
