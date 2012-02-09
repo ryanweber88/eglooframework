@@ -10,6 +10,8 @@ use \eGloo\Dialect\ObjectSafe as Object;
 class Delegator extends Object {
 
 	function __construct($delegated) {
+		parent::__construct();
+		
 		$this->delegated = $delegated;
 
 		// for static delegation, we will be have to create association between

@@ -36,15 +36,21 @@ abstract class ObjectSafe {
 	protected function aliasMethod($alias, $from) {
 		
 		if (method_exists($this, $from)) { 
-			// use lambda/block to place method alias method definition into 
-			// this instance "singleton" or eigenclass 
-			$this->defineMethod($alias, function($__mixed = null) { 
-				// call original method
-				call_user_func_array(array(
-						$this, $from
-				),  $__mixed); 
-			});
 			
+			if (!method_exists($this, $alias)) {
+				// use lambda/block to place method alias method definition into 
+				// this instance "singleton" or eigenclass 
+				$this->defineMethod($alias, function($__mixed = null) { 
+					// call original method
+					return call_user_func_array(array(
+							$this, $from
+					),  $__mixed); 
+				});
+			}
+			
+			throw new \Exception(
+				"Attempted alias on $alias failed because it already exists as method on instance"		
+			);
 		}
 		
 		throw new \Exception(
@@ -52,6 +58,31 @@ abstract class ObjectSafe {
 		);
 	}
 	
+	protected function aliasMethodStatic($alias, $from) {
+		$class = get_called_class();
+		
+		if (method_exists($class, $from)) { 
+			
+			if (!method_exists($class, $alias)) {
+				// use lambda/block to place method alias method definition into 
+				// this instance "singleton" or eigenclass 
+				static::defineMethodStatic($alias, function($__mixed = null) { 
+					// call original method
+					return call_user_func_array(array(
+							$class, $from
+					),  $__mixed); 
+				});
+			}
+			
+			throw new \Exception(
+				"Attempted alias on $alias failed because it already exists as method on class"		
+			);
+		}
+		
+		throw new \Exception(
+			"Attempting an alias on method $from which does not exist"		
+		);
+	}
 	
 	/**
 	 * Aliases a property using reference; does not check on property existence
@@ -65,7 +96,7 @@ abstract class ObjectSafe {
 		
 		throw new \Exception(
 			"Attempted alias on $alias failed because it already exists as a property on this instance"		
-		)
+		);
 	}
 	
 	/**
@@ -161,6 +192,7 @@ abstract class ObjectSafe {
 
 		// here we are going to use reflection to receive list of methods
 		// @TODO place into static container
+		/*
 		$reflection = new \ReflectionClass($class = get_called_class());
 		
 		foreach ($reflection->getMethods(\ReflectionMethod::IS_STATIC) as $method) {
@@ -168,10 +200,10 @@ abstract class ObjectSafe {
 			// see if our static call to main matches against __call static method
 			// pattern, if so, dynamically invoke method and pass in arguments
 			if ($name == lcfirst(str_replace('__call', $method->getName()))) {
-				return $method->invokeArgs(null, $arguments)
+				return $method->invokeArgs(null, $arguments);
 			}
 		}
-		
+		*/
 		
 		// magic - here we define dynamic calls on existing properties and methods
 		// such as $this->$property_like(regexp)
@@ -207,7 +239,7 @@ abstract class ObjectSafe {
 	
 	protected static $_singleton;
 	
-	protected static $_methodsStatic = array()
+	protected static $_methodsStatic = array();
 	protected        $_methods       = array();
 	
 }

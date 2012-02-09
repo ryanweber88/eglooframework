@@ -708,7 +708,7 @@ function __constructStatic($name) {
 	// actualy definition - since we are checking
 	// on a string, we need to call methodExists
 	// over 
-	if (method_exist($name, '__constructStatic')) {
+	if (method_exists($name, '__constructStatic')) {
 		$name::__constructStatic();
 	}
 }

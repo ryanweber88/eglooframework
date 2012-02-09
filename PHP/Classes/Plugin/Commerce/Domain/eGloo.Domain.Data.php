@@ -261,7 +261,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// provide this method to throw an exception if method
 		// is not overriden in calling class
 		throw new \Exception(
-			"You must override $method in " . get_called_class();		
+			"You must override $method in " . get_called_class()
 		);
 	}
 		
