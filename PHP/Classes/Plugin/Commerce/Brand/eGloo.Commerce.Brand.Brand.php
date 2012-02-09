@@ -42,11 +42,11 @@ class Brand {
 	/** @var integer brand id */
 	public		$brand_id;
 	
-	public $organization_id;
+	public		$organization_id;
 	
-	public $parent_organization_id;
+	public		$parent_organization_id;
 	
-	public $organization_status_id;
+	public		$organization_status_id;
 
 	/** @var string Name */
 	public		$name;
@@ -220,7 +220,7 @@ class Brand {
 			throw new \InvalidArgumentException();
 		}
 		$rows = BrandDataAccess::fetch()->loadBrandByName($brand_name);
-		return new Brand($rows);
+		return !empty($rows) ? new Brand($rows) : false;
 	}
 	
 	/**

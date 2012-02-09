@@ -1,8 +1,9 @@
 <?php
-namespace eGloo\Commerce\Slug;
+namespace eGloo\Commerce\Coupon;
 use \eGloo\DataProcessing\Connection;
+
 /**
- * SlugData Class File
+ * CouponDataAccess Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -27,16 +28,15 @@ use \eGloo\DataProcessing\Connection;
  */
 
 /**
- * Description of SlugData
+ * Description of CouponDataAccess
  * 
- * Representation of SlugData Entity
- * Hold CRUD functionalities and SlugData related method
+ * Representation of CouponDataAccess Entity
+ * Hold CRUD functionalities and Coupon related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class SlugDataAccess extends Connection\PostgreSQLDBConnection {
-	
+class AddressDataAccess  extends Connection\PostgreSQLDBConnection{
 	/** @var resource Object */
 	protected static $instance = null;
 	
@@ -61,30 +61,44 @@ class SlugDataAccess extends Connection\PostgreSQLDBConnection {
 		return static::$instance;
 	}
 	
-	public function loadBrandSlugs() {
-		$result = array();
-		$sql = 'SELECT u.destination, u.url_slug_id, u.url_slug_type_id, bu.brand_id,'
-			 . 'o.name AS brand_name FROM  url_slug u INNER JOIN brand_slug bu '
-			 . 'ON u.url_slug_id=bu.url_slug_id INNER JOIN brand b ON bu.brand_id=b.brand_id '
-			 . 'INNER JOIN organization o ON b.brand_id=o.organization_id';
-		$slugs = parent::executeSelect($sql);
+	public function createCoupon() {
 		
-		foreach ($slugs as $slug) {
-			$result[$slug['brand_name']] = $slug['destination'];
-		}
-		return $result;
 	}
 	
-	public function loadProductSlugs() {
-		$result = array();
-		$sql = "SELECT ps.value, ps.dst, b.name FROM product_slug ps INNER JOIN brands b 
-			ON ps.value = b.brand_id WHERE ps.source = 'B' ORDER BY b.name ASC";
-		$slugs = parent::executeQuery($sql, array());
-		foreach ($slugs as $slug) {
-			$result[$slug['name']] = str_replace('product/', '', $slug['dst']);
+	public function loadCouponById($program_id) {
+		if ($program_id == '') {
+			throw new \InvalidArgumentException('[: Missing argument error:] Address id is required!', __METHOD__);
 		}
-		return $result;
+	}
+	
+	public function loadCouponByName($program_name) {
+		if ($program_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: Address name is required!', __METHOD__);
+		}
+		return $this->loadBrand('name', $program_name);
+	}
+
+	public function loadCoupon($field_name, $field_value) {
+		if ($field_name == '' || $field_value == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = '';
+		return parent::getUnique($sql, array($field_value, 1), function ($row) {
+							return $row;
+		});
+	}
+	
+	public function deleteCouponById($program_id) {
+		if ($program_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: Address id is required!', __METHOD__);
+		}
+		
+	}
+	
+	public function deleteCouponByName($program_name) {
+		if ($program_name == '') {
+			throw new \InvalidArgumentException('::Missing argument error: Address name is required!', __METHOD__);
+		}
+		
 	}
 }
-
-?>

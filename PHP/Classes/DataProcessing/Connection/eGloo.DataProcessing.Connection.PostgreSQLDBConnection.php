@@ -209,6 +209,7 @@ class PostgreSQLDBConnection extends DBConnection {
 					$list[$index] = $callback($index++, $row );
 				} else {
 					$list[$index] = $row;
+					$index++;
 				}
 			}
 			return $list;

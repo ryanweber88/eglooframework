@@ -121,6 +121,12 @@ class ProductDataAccess extends PostgreSQLDBConnection {
 		}
 	}
 
+	public function loadProductAttributes() {
+		$sql = 'SELECT product_category_id, product_category, parent_category_id,
+				parent_category FROM product_classification_meta_data;';
+		
+		return parent::getList($sql);
+	}
 
 	public function loadProductSubCategoriesById($category_id) {
 		$result = array();
