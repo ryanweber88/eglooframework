@@ -1,7 +1,8 @@
 <?php
-namespace eGloo\Commerce\Address;
+namespace eGloo\Commerce\Cart;
 use \eGloo\Commerce,
 	\eGloo\Utility;
+
 
 /**
  * Address Class File
@@ -42,7 +43,7 @@ use \eGloo\Commerce,
  * @subpackage	Subpackage
  * @version		Release: 1.0
  */
-class Address {
+class Cart {
 
 	/*** @var Integer address ID  */
 	public		$address_id;

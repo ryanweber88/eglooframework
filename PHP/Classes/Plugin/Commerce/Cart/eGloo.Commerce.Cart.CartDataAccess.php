@@ -1,5 +1,5 @@
 <?php
-namespace eGloo\Commerce\Address;
+namespace eGloo\Commerce\Cart;
 use \eGloo\DataProcessing\Connection;
 
 /**
@@ -36,7 +36,7 @@ use \eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class AddressDataAccess  extends Connection\PostgreSQLDBConnection{
+class CartDataAccess  extends Connection\PostgreSQLDBConnection{
 	/** @var resource Object */
 	protected static $instance = null;
 	
@@ -75,7 +75,7 @@ class AddressDataAccess  extends Connection\PostgreSQLDBConnection{
 		if ($program_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: Address name is required!', __METHOD__);
 		}
-		return $this->loadAddress('name', $program_name);
+		return $this->loadBrand('name', $program_name);
 	}
 
 	public function loadCoupon($field_name, $field_value) {

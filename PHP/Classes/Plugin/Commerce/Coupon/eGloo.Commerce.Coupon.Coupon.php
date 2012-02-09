@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Commerce\Coupon;
-use \eGloo\Commerce;
+use \eGloo\Commerce,
+	\eGloo\Utility;
 
 /**
  * Coupon Class File

@@ -165,21 +165,34 @@ class Product {
 	
 	public function loadProductImages() {
 		if (empty ($this->product_images)) {
-			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_line_id);
+			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_id);
 		}
 		$this->product_images;
 		return $this;
 	}
 	
-	public function getProductImages() {
-		if (empty ($this->product_images)) {
-			$this->loadProductImages();
+	public function loadProductIngredients() {
+		if (empty ($this->ingredients)) {
+			$this->ingredients = ProductDataAccess::fetch()->loadProductIngredients($this->product_id);
 		}
-		return $this->product_images;
+		$this->ingredients;
+		return $this;
 	}
-
-	public function getProductSizes() {
-		
+	
+	public function loadProductDescription() {
+		if (empty ($this->description)) {
+			$this->description = ProductDataAccess::fetch()->loadProductDescription($this->product_id);
+		}
+		$this->description;
+		return $this;
+	}
+	
+	public function loadSlugDestination() {
+		if (empty ($this->friendly_url)) {
+			$this->friendly_url = ProductDataAccess::fetch()->loadSlugDestination($this->product_id);
+		}
+		$this->friendly_url;
+		return $this;
 	}
 
 	public function loadProductLineProducts() {
@@ -191,7 +204,7 @@ class Product {
 	
 	public function loadProductSizes() {
 		if (empty ($this->product_sizes)) {
-			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_line_id);
+			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_id);
 		}
 		$this->product_sizes;
 		return $this;
