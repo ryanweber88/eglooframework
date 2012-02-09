@@ -23,10 +23,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return static::instance();
 	}
 	
-	public static function test() {
-		echo 'test'; exit;
-	}
-	
+
 	/**
 	 * Executes a statement on underlying layer - currently makes use of *DataAccess
 	 * classes, but will be replaced with dpstatement - think about this some more
@@ -220,6 +217,15 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	
 	}
 	
+
+	
+	// These are stubbed for the time being - we can't really do a full
+	// orm implementation, so they will accept variable arguments and
+	// will be drastically different in inherited classes - the point
+	// is to provide a single, comprehensive interface from which to 
+	// work - if an attempt is made to call on these method, an
+	// exception will be thrown as they cannot know their
+	// definition until defined in child classes
 	/**
 	 * Acts as retrieve all - in most cases this will serve as an alias to load*List in
 	 * domain model classes; this method should be declared abstract, but since it
@@ -228,21 +234,35 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * has been added so user can override in calling child individualy
 	 */
 	public static function all($lamba = null) {
-		throw new \Exception(
-				'You must override all method in ' . get_called_class()
-		);
+		static::fakeAbstractMethod(__FUNCTION__);
 	}	
 	
-	// These are stubbed for the time being - we can't really do a full
-	// orm implementation, so they will accept variable arguments and
-	// will be drastically different in inherited classes - the point
-	// is to provide a single, comprehensive interface from which to 
-	// work
-	public static function create($arguments = null) {}
-	public function update($arguments = null) { }
-	public function save($arguments = null)   { }
-	public function delete($arguments = null) { }
+	public static function create($arguments = null) {
+		static::fakeAbstractMethod(__FUNCTION__);
+	}
 	
 	
+	public function update($arguments = null) { 
+		static::fakeAbstractMethod(__FUNCTION__);
+	}
+	
+	public function save($arguments = null)   {
+		static::fakeAbstractMethod(__FUNCTION__);
+	}
+	
+	public function delete($arguments = null) {
+		static::fakeAbstractMethod(__FUNCTION__);
+	}
+	
+	private static function fakeAbstractMethod($method) {
+		// since this class and its descendants are delegated too, and
+		// because its descendants are numerous and I don't feel like going
+		// through each to manage an abstract method definition, we 
+		// provide this method to throw an exception if method
+		// is not overriden in calling class
+		throw new \Exception(
+			"You must override $method in " . get_called_class();		
+		);
+	}
 		
 } 

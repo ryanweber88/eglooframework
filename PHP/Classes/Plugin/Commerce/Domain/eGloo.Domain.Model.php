@@ -37,7 +37,59 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		// associated *DataAccess to delegate to - in which case
 		// we simply ignore the generated exception
 		catch(\Exception $ignore) { }
+			
+	}
+
+	
+	protected function aliasProperties() {
 		
+		// from ClassNameYada derive pattern class_class1_class2
+		$class = strtolower(preg_replace(
+			'/([a-z])([A-Z])/', '$1_$2', static::className()
+		));
+				
+		// attempt to alias class/domain/entity specific properties
+		// to generic; ie, product_id, product_name, product_count to
+		// id, name, count
+		$generics = array(
+			'id',
+			'name'		
+		);
+
+		foreach($generics as $generic) { 
+			// this will do nothing if property does not exist, and throw an exception if it
+			// does, in order to avoid an overwrite
+			$this->aliasProperty(		
+				"{$class}_id" => 'id'	
+			);
+		}
+		
+		
+	}
+	
+	protected function aliasMethods() {
+		$class = static::className();
+		
+		
+	}
+	
+	protected static function aliasMethodsStatic() {
+		$class = static::className();
+		
+		// provide reg exp list to check methods against
+		$lookFor = array(
+				'/loadByI(D|d)/'                   => 'find',
+				"/load{$class}ByI(D|d)/"           => 'find',
+				'/load([A-Z][a-z]+?)By([a-zA-Z])/' => 'find_by_$1_$2' 
+		);		
+	}
+	
+	
+	/**
+	 * Aliases our primary key to 'id'
+	 */
+	protected function aliasPrimaryKey($alias) {
+		$this->aliasProperty($alias, 'id');
 	}
 	
 	/**
@@ -162,6 +214,17 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 			
 		// defer to parent if not able to delegate
 		return parent::__callstatic($name, $arguments);
+	}
+	
+	private function guessPrimaryKey() {
+		// attempt to get primary key based on strlower(classname)_id pattern
+		$tokens       = explode('\\', get_class());
+		$primary_key  = strtolower(array_pop($tokens)) . '_id';
+		
+		return property_exists($this, $primary_key)
+			? $primary_key
+			: false;
+		
 	}
 	
 }

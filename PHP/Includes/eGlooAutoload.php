@@ -1,5 +1,6 @@
 <?php
-use \eGloo\Utility\Logger as Logger;
+use \eGloo\Utility\Logger     as Logger;
+use \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * Class and Interface Autoloader
@@ -123,6 +124,11 @@ function eglooAutoload( $class_name ) {
 	if ( strpos($class_name, '\\') === 0 ) {
 		$class_name = substr( $class_name, 1 );
 	}
+	
+	// attempt a construct static; this will be ignored if class
+	// does not fall in \eGloo\Dialect\Object class
+	// hierarchy
+	__constructStatic($class_name);
 
 	$cacheGateway = CacheGateway::getCacheGateway();
 
@@ -130,7 +136,7 @@ function eglooAutoload( $class_name ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include_once( $autoload_hash[$class_name] );
+				include_once( $autoload_hash[$class_name] );				
 			}
 
 			return;
@@ -688,3 +694,22 @@ function almost_empty($in, $trim = false) {
 		return false;
 	}
 }
+
+/**
+ *  Attempts to fire object::__constructStatic - the object parameter
+ *  or argument must be in instance of global object; the purpose is
+ *  to provide static constructor functionality on class load
+ */
+function __constructStatic($name) {
+	
+	// make sure object is instanceof of global Object 
+	// - if the case, then we are assured that we have
+	// a __constructStatic method, whether a stubb or
+	// actualy definition - since we are checking
+	// on a string, we need to call methodExists
+	// over 
+	if (method_exist($name, '__constructStatic')) {
+		$name::__constructStatic();
+	}
+}
+

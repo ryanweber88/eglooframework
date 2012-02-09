@@ -44,6 +44,8 @@ abstract class eGlooConnection extends Object {
 	protected $_rawHandle = null;
 
 	public function __construct( $rawHandle = null ) {
+		parent::__construct();
+		
 		$this->_rawHandle = $rawHandle;
 	}
 

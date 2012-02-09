@@ -41,8 +41,6 @@ use \eGloo\Commerce\Brand\BrandDataAccess,
  */
 class Brand extends Domain\Model {
 
-
-	
 	
 	/**
 	 * Get Brand images
