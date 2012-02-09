@@ -3,7 +3,7 @@ namespace eGloo\Commerce\Brand;
 
 use \eGloo\Commerce\Brand\BrandDataAccess,
 	  \eGloo\Utilities\Utilities,
-	  \eGloo\Commerce\Domain;
+	  \eGloo\Domain;
 
 /**
  * Brand Class File
@@ -42,21 +42,7 @@ use \eGloo\Commerce\Brand\BrandDataAccess,
 class Brand extends Domain\Model {
 
 
-	protected $properties;
 	
-	/**
-	 * Create a new Brand object
-	 * 
-	 * @param array $args optional
-	 */
-	public function __construct ( array $args = null ) {
-		// call our domain\model constructor
-		parent::__construct();
-		
-		foreach ( $args as $key => $value ){
-			$this->{$key} = $value;
-		}
-	}
 	
 	/**
 	 * Get Brand images
@@ -103,37 +89,14 @@ class Brand extends Domain\Model {
 		return $this;
 	}
 
-	/**
-	 * Populate data int the brand object
-	 * 
-	 * @param type $key
-	 * @param type $value 
-	 */
-	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
-	}
-	
-	/**
-	 * Getter for the brand Object
-	 * @param type $key
-	 * 
-	 * @return mix type object retrieved from brand
-	 */
-	public function __get( $key ) {
-		if ( isset($this->properties[$key] )) {
-			return $this->properties[$key];
-		}
-		return false;
-	}
+
 	
 	/**
 	 *
 	 * @return Brand 
 	 */
 	public function __toString(){
-		//return serialize($this);
-		return $this->name;
+		return serialize($this);
 	}
 	
 	/**
@@ -160,14 +123,6 @@ class Brand extends Domain\Model {
 			$result[] = new Brand($row);
 		}
 		return $result;
-	}
-	
-	/**
-	 * Acts as an alias to getBrandList - is provided to create lcd
-	 * interface between domain classes
-	 */
-	public static function all() {
-		return static::getBrandList();
 	}
 
 

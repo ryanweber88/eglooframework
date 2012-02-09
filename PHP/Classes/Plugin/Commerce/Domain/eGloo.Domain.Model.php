@@ -8,9 +8,27 @@ namespace eGloo\Domain;
  */
 abstract class Model extends \eGloo\Utilities\Delegator {
 	
-	function __construct() {
+	// this acts as a store for adding runtime instance properties
+	// @TODO this will be replaced, as storing values will be delegated
+	// in the future
+	protected $properties = array();
+	
+	/**
+	 * @param variable-length $__mixed
+	 */
+	function __construct($__mixed = null) {
+		
+		// make sence of parameter - this will change as EPA
+		// is folded into our domain model
+		if (is_array($__mixed) && \eGloo\Utilities\Collection::isHash($__mixed)) {
+			//var_export($__mixed); 
+			foreach($__mixed as $key => $value) {
+				$this->$key = $value;
+			}
+		}
+		
 		// pass to parent delegator::__construct our *DataAccess
-		// instance
+		// instance or Domain\Data
 		try {
 			parent::__construct(static::data());
 		}	
@@ -18,12 +36,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		// there is not a gaurentee that every class will have an
 		// associated *DataAccess to delegate to - in which case
 		// we simply ignore the generated exception
-		catch(\Exception $ignore) { 
-			exit;
-			// if there is not an associated *DataAccess, we fall back to our 
-			// moreso abstract parent Domain\Data
-			parent::__construct(new Domain\Data);
-		}
+		catch(\Exception $ignore) { }
 		
 	}
 	
@@ -54,7 +67,49 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	}
 	
 
-
+	/**
+	 * Set/create properties on instance; this will
+	 * eventually be removed and handled via delegated
+	 * class
+	 *
+	 * @param type $key
+	 * @param type $value
+	 */
+	public function __set($key, $value) {
+		// because we rely on certain instance fields being set
+		// during class definition (or when class is self) we
+		// also set field on public
+		// @TODO remove and place into properties when we
+		// have figured out succesful toArray implementation
+		// on our classes
+		$this->$key = $value;
+		
+		// we also set on properties to maintain backwards 
+		// compatibility on anything that is explicitly 
+		// setting/getting on properties
+		$this->properties[$key] = $value;
+		
+		return $this;
+	}
+	
+	/**
+	 * Get properties on instance that belong to
+	 * our properties array; this will eventually
+	 * be removed and handled on our delegated class
+	 * 
+	 * @param type $key
+	 *
+	 * @return mix type object retrieved from brand
+	 *
+	 */
+	public function __get( $key ) {
+		
+		//if ( isset($this->properties[$key] )) {
+		//	return $this->properties[$key];
+		//}
+		
+	}	
+	
 
 	/**
 	 * Currently this acts as a passthrough to our parent delegator

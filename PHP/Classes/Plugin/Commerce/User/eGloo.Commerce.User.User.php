@@ -40,8 +40,9 @@ use \eGloo\Commerce\User\UserDataAccess;
  */
 class User extends Domain\Model {
 
-	protected $properties;
-
+	protected static $active_user_id;
+	protected static $logged_in;
+	
 	const USER_TYPE_NORMAL			= 1,
 	      USER_TYPE_EMPLOYEE		= 2,
 	      USER_TYPE_AFFILIATE		= 3;
@@ -52,15 +53,12 @@ class User extends Domain\Model {
 	 * @param array $args
 	 * @throws \InvalidArgumentException 
 	 */
-	public function __construct (array $args) {
-		parent::__construct();	
-		
+	public function __construct (array $args) {		
 	
 		if (count($args)) {
+			
+			parent::__construct($args);
 		
-			foreach ( $args as $key => $value ) {
-				$this->{$key} = $value;
-			}
 				
 			if ($this->user_id > 0 && $this->user_status_id == 1) {
 				static::$logged_in = true;
@@ -68,8 +66,9 @@ class User extends Domain\Model {
 			}
 		}
 		
-		throw new \InvalidArgumentException("User does not exist in the System");
-		
+		else { 
+			throw new \InvalidArgumentException("User does not exist in the System");
+		}
 	}
 
 	/**
@@ -86,40 +85,20 @@ class User extends Domain\Model {
 		
 	}
 
-		/**
+	/**
 	 * Check for valid User
 	 * 
 	 * @return boolean static true/false 
 	 */
 	public static function isLoggedIn() {
 		return static::$logged_in;
-
-	}
-
-
-	/**
-	 * Populate data int the User object
-	 * 
-	 * @param type $key
-	 * @param type $value 
-	 */
-	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
 	}
 	
-	/**
-	 * Getter for the User Object
-	 * @param type $key
-	 * 
-	 * @return mix type object retrieved from user
-	 */
-	public function __get( $key ) {
-		if (isset($this->properties[$key])) {
-			return $this->properties[$key];
-		}
-		return false;
+	public static function getActiveUserID() {
+		return static::$active_user_id;
 	}
+
+
 	
 	/**
 	 * Return String version of this object
@@ -176,7 +155,7 @@ class User extends Domain\Model {
 	 * Returns user logged in status
 	 */
 	public static function loggedIn() {
-		return static::$logged_in;
+		return static::$loggedIn;
 	}
 	
 	/**
@@ -225,7 +204,7 @@ class User extends Domain\Model {
 		}
 		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
 
-		return ($id > 0) ? self::loadByID($id) : 'Account creation failed';
+		return ($id > 0) ? static::loadByID($id) : 'Account creation failed';
 	}
 
 	/**
@@ -235,15 +214,12 @@ class User extends Domain\Model {
 	 * @throws \InvalidArgumentException 
 	 */
 	public static function loadByID($user_id) {
-		if ((int)$user_id <= 0) {
+		if ($user_id === '') {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		
-		return !empty($user) 
-			? new User($user) 
-			: false;
-	}		
+		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
+	}
 
 	public static function loadByPassword($passwd) {
 		if ($passwd == '') {

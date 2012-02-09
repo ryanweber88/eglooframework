@@ -178,7 +178,7 @@ class PostgreSQLDBConnection extends DBConnection {
 			
 			// parse sql for table name - this isn't a perfect solution and will not work
 			// for all cases, but will work for the majority of them
-			if (!preg_match('/returning\s/is', $sql)) { 
+			if (!preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql)) { 
 				preg_match(						
 					'/insert\s+?into\s+?(\S+)/is', $sql, $match
 				);
