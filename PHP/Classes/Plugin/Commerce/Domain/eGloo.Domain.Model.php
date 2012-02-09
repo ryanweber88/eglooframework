@@ -45,25 +45,42 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 	 * which we derive the name of our *DataAccess class; this simply
 	 * serves as a convenience to access *DataAccess::instance()
 	 * @return Data
+	 * @param variable-length $__mixed 
 	 * @TODO is this even needed anymore if we are delegating to data class?
 	 */
-	protected static function data() {
+	protected static function data($__mixed) {
 		$className     = get_called_class();
 		$dataClassName = get_called_class() . 'DataAccess';
 
-		if (class_exists($dataClassName)) {
-			return $dataClassName::instance();
-		} 
+		$interface = class_exists($dataClassName)
+			? $dataClassName::instance()
+			: new Data;
 		
-		// otherwise fallback to domain\data
-		else {
-			return new Data;
+		// Model::data will allow us to pass arguments to invoke funcitonality
+		// directly on dataaccess, or pass in a lambda to access instance - 
+		// this may expand as need arises
+		if (count($arguments = func_get_args())) {
+			
+			// in this instance we will be dynamically invoking a method and passing
+			// any additional parameters as arguments to invoked method
+			// @TODO I don't know if this really needed, over say data()->method
+			// but does provide some niceities in terms of clean presentation
+			if (is_string($method = $arguments[0])) {
+				return call_user_func_array(
+						array($interface, $method), array_slice($arguments, 1)
+				)
+			}
+			
+			// in the instance of passing a lambda/block, we will pass the interface to
+			// the lambda and return to caller the return from lambda
+			else if (is_callable($lambda = $arguments[0])) {
+				return $lambda($interface);
+			}
 		}
 		
-		// notify caller that our DataAccess class does not exist
-		//throw new \Exception(
-		//	"DataAccess module $dataClassName does not exist for $className"	
-		//); 
+		return $interface;
+		
+ 
 	}
 	
 
