@@ -1,5 +1,8 @@
 <?php
 namespace eGloo\Commerce\Referral;
+use \eGloo\Commerce,
+	\eGloo\Utility;
+
 
 /**
  * Program Class File

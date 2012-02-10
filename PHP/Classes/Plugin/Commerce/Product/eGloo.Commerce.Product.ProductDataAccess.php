@@ -101,10 +101,29 @@ class ProductDataAccess extends Commerce\Domain\Data {
 		
 	}
 		
+	public function loadProductIngredients($product_id) {
+		if ($product_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: product id is required!', __METHOD__);
+		}
+		$sql = 'SELECT description AS ingredients FROM product_description'
+			 . ' WHERE description_type=? AND product_id=?';
+		$result =  parent::getUnique($sql, array('ingredients', $product_id));
+		return !empty($result) ? $result['ingredients'] : '';
+	}
 	
+	public function loadProductDescription($product_id) {
+		if ($product_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: product id is required!', __METHOD__);
+		}
+		$sql = 'SELECT description AS body FROM product_description'
+			 . ' WHERE description_type=? AND product_id=?';
+		$result = parent::getUnique($sql, array('body', $product_id));
+		return !empty($result) ? $result['body'] : '';
+	}
+
 	public function loadCategories() {
 		$result = array();
-		$rows = parent::executeQuery('SELECT * FROM product_tag_category', array());
+		$rows = parent::getList('SELECT * FROM product_tag_category', array());
 		foreach ($rows as $category) {
 			$result[$category['product_tag_category_id']] = $category['title'];
 		}
@@ -123,11 +142,17 @@ class ProductDataAccess extends Commerce\Domain\Data {
 		}
 	}
 
+	public function loadProductAttributes() {
+		$sql = 'SELECT product_category_id, product_category, parent_category_id,
+				parent_category FROM product_classification_meta_data;';
+		
+		return parent::getList($sql);
+	}
 
 	public function loadProductSubCategoriesById($category_id) {
 		$result = array();
 		$sql = 'SELECT * FROM product_tag_subcategory WHERE product_tag_category_id = ? ORDER BY title ASC';
-		$categories = parent::executeQuery($sql, array($category_id));
+		$categories = parent::getList($sql, array($category_id));
 		foreach ($categories as $category) {
 			$result[$category['product_tag_subcategory_id']] = $category['title'];
 		}
@@ -138,17 +163,27 @@ class ProductDataAccess extends Commerce\Domain\Data {
 		if ($product_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
 		}
-		$sql = 'SELECT * FROM product WHERE product_id = ?';
-		return parent::executeQuery($sql, array($product_id));
+		$sql = 'SELECT pro.product_option_id, pro.product_id, pro.sku, pro.status_id, '
+			 . 'pro.base_retail_price, pro.competitor_markup, pro.suggested_retail_price, '
+			 . 'pro.order_limit, pro.max_per_order, pro.recurring_only, '
+			 . 'pro.required_interval, psel.size_description FROM '
+			 . 'product_option pro INNER JOIN product_migrated_selection psel ON '
+			 . 'pro.product_id=psel.product_id WHERE pro.product_id=?';
+		return parent::getList($sql, array($product_id));
 	}
 	
 	public function loadProductImages($product_id) {
 		if ($product_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
 		}
-		$sql = 'SELECT * FROM store_image_product_v sip INNER JOIN image_file fi 
-			ON sip.image_id = fi.data_store_image_id WHERE sip.product_line_id = ?';
-		return parent::executeQuery($sql, array($product_id));
+		$sql = 'SELECT cf.cloudfront_file_id, cf.cloudfront_file_name, cf.cloudfront_bucket,'
+			 . 'cb.distribution_url, cf.file_bucket, cf.file_store, cf.mime_type, cf.file_uri,'
+			 . 'cf.file_zone, cf.original_file_path, cf.file_association_type, bf.product_id,'
+			 . 'bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb INNER JOIN'
+			 . ' cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
+			 . ' INNER JOIN product_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id'
+			 . ' WHERE product_id=?';
+		return parent::getList($sql, array($product_id));
 	}
 
 
@@ -156,18 +191,21 @@ class ProductDataAccess extends Commerce\Domain\Data {
 		if ($slug == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product slug is required!', __METHOD__);
 		}
-		
-		$sql = "SELECT value FROM product_slug_v ps WHERE ps.source = 'P' AND ps.dst = ?";
-		$product_id = parent::getUnique($sql, array($slug), function ($row) {
-							return $row['value'];
-		});
-		
-		if ((int)$product_id < 0 ) {
-			throw new Connection\DatabaseErrorException('[: Unable to locate product :]', $slug);
+		$sql = 'SELECT p.product_id, p.brand_id, p.title, p.product_status_id, '
+			 . ' p.requires_prescription, p.classification, p.order_limit, p.max_per_order FROM'
+			 . ' url_slug us INNER JOIN product_slug ps ON us.url_slug_id=ps.url_slug_id'
+			 . ' INNER JOIN product p ON ps.product_id=p.product_id WHERE us.destination = ?;';
+		return parent::getUnique($sql, array($slug));
+	}
+	
+	public function loadSlugDestination ($product_id) {
+		if ($product_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
 		}
-		$sql = 'SELECT * FROM product_line pl WHERE product_line_id = ?';
-		return parent::getUnique($sql, array($product_id), function ($row) {
-							return $row;
-		});
+		$sql = 'SELECT u.destination FROM url_slug u INNER JOIN product_slug bu ON '
+			 . 'u.url_slug_id=bu.url_slug_id WHERE bu.product_id=?;';
+		
+		$result = parent::getUnique($sql, array($product_id));
+		return !empty($result) ? $result['destination'] : '';
 	}
 }

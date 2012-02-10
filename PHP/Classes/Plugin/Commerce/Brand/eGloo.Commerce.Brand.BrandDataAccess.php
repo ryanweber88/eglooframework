@@ -55,7 +55,11 @@ class BrandDataAccess extends Domain\Data {
 		if ($brand_name == '') {
 			throw new \InvalidArgumentException('::Missing argument error: brand_name is required!', __METHOD__);
 		}
-		return $this->loadBrand('name', $brand_name);
+		//return $this->loadBrand('name', $brand_name);
+		$sql = 'SELECT o.organization_id AS brand_id, o.organization_id, o.name, b.requires_prescription, '
+			 . 'brand_status_id FROM organization o INNER JOIN brand b ON o.organization_id='
+			 . 'b.brand_id WHERE o.organization_status_id=1 AND o.name = ?';
+		return parent::getUnique($sql, array($brand_name));
 	}
 
 	/**
@@ -155,31 +159,16 @@ class BrandDataAccess extends Domain\Data {
 		if ($brand_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!', __METHOD__);
 		}
-		
 		$sql = 'SELECT p.brand_id, p.product_id, p.title, bd.description AS product_body,'
 			 . 'po.product_option_id, po.sku, po.base_retail_price, po.competitor_markup,'
 			 . 'po.recurring_only, pos.size_description FROM product p LEFT JOIN '
 			 . 'product_description bd ON p.product_id=bd.product_id '
 			 . 'INNER JOIN product_option po ON p.product_id=po.product_id '
 			 . 'INNER JOIN product_migrated_selection pos '
-			 . 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=?'
-			 . ' AND po.status_id=1 AND bd.description_type="body"';
+			 . 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=? '
+			 . ' AND po.status_id=1 AND bd.description_type=?';
 		
-		return parent::getList($brand_id);
-		
-		/*$sql = 'SELECT * FROM product_line WHERE status = 1 and brand_id = ?';
-		$product_lines = $this->executeQuery($sql, array($brand_id));
-
-		foreach ( $product_lines as $product ) {
-			$product['product_sizes'] = parent::executeQuery('SELECT * FROM product WHERE status = 1 
-				and product_id = ?', array($product['product_line_id']));
-			
-			$product['product_images'] = parent::executeQuery('SELECT * FROM store_image_product_v 
-				sip INNER JOIN image_file fi ON sip.image_id = fi.data_store_image_id 
-				WHERE sip.product_line_id = ?', array($product['product_line_id']));
-			$result[] = $product;
-		}
-		return $result;*/
+		return parent::executeSelect($sql, array($brand_id, 'body'));
 	}
 	
 	/**
@@ -197,6 +186,17 @@ class BrandDataAccess extends Domain\Data {
 		return parent::getUnique($sql, array($brand_id));
 	}
 	
+	public function loadBrandBySlug($destination) {
+		$sql = 'SELECT u.destination, u.url_slug_id, u.url_slug_type_id, bu.brand_id,'
+			 . 'o.name AS brand_name FROM url_slug u INNER JOIN brand_slug bu '
+			 . 'ON u.url_slug_id=bu.url_slug_id INNER JOIN brand b ON bu.brand_id=b.brand_id'
+			 . 'INNER JOIN organization o ON b.brand_id=o.organization_id WHERE'
+			 . 'u.destination = ?;';
+		
+		return parent::getUnique($sql, array($destination));
+	}
+
+
 	public function loadBrandSlugDestination($brand_id) {
 		if ($brand_id == '') {
 			throw new DatabaseErrorException('::Missing argument error: brand_id is required!!', __METHOD__);

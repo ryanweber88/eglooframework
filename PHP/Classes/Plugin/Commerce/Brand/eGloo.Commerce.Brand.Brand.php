@@ -41,6 +41,7 @@ use \eGloo\Commerce\Brand\BrandDataAccess,
  */
 class Brand extends Domain\Model {
 
+
 	
 	/**
 	 * Get Brand images
@@ -158,7 +159,7 @@ class Brand extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$rows = BrandDataAccess::fetch()->loadBrandByName($brand_name);
-		return new Brand($rows);
+		return !empty($rows) ? new Brand($rows) : false;
 	}
 	
 	/**
@@ -176,7 +177,7 @@ class Brand extends Domain\Model {
 			$brand					= self::loadByID($brand_id);
 			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImagesByID((int)$brand->brand_id);
 			//$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
-			$brand->friendly_url	= BrandDataAccess::fetch()->loadBrandSlugDestination((int)$brand->brand_id);
+			$brand->friendly_url	= 'brand/'. BrandDataAccess::fetch()->loadBrandSlugDestination((int)$brand->brand_id);
 			$result[]				= $brand;
 		}
 		return $result;
