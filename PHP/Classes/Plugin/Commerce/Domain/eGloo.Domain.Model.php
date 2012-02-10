@@ -81,7 +81,8 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 				'/loadByI(D|d)/'                   => 'find',
 				"/load{$class}ByI(D|d)/"           => 'find',
 				'/load([A-Z][a-z]+?)By([a-zA-Z])/' => 'find_by_$1_$2',
-				"/load{$class}List/"               => 'all' 
+				"/load{$class}List/"               => 'all',
+				"/create{$class}/"                 => 'create' 
 		);
 
 		// retrieve list of methods from class

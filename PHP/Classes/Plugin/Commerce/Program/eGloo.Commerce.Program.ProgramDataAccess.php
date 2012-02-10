@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Commerce\Program;
-use \eGloo\DataProcessing\Connection;
+
+use \eGloo\Domain;
 
 /**
  * Program Class File
@@ -36,30 +37,10 @@ use \eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class ProgramDataAccess  extends Connection\PostgreSQLDBConnection{
-	/** @var resource Object */
-	protected static $instance = null;
+class ProgramDataAccess extends Domain\Data {
+
 	
-	/**
-	 * Overwrite $rawConnectionResource setting in connection file
-	 * 
-	 * @param resource $rawConnectionResource = null
-	 * @return void
-	 */
-	public function __construct() {}
-	
-	/**
-	 * Create an instance of the class
-	 * Delegate class to access Database layer
-	 * 
-	 * @return $this class object
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self();
-		}
-		return static::$instance;
-	}
+
 	
 	public function createProgram() {
 		

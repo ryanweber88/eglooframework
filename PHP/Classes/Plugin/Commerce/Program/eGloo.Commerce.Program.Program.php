@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Program;
 
+use \eGloo\Domain;
+
 /**
  * Program Class File
  * 
@@ -35,27 +37,47 @@ namespace eGloo\Commerce\Program;
  * @package Plugins
  * @subpackage Commerce
  */
-class Program {
+class Program extends Domain\Model {
 	
-	public		$program_id;
-	
-	public		$program_title;
-	
-	public		$user_id;
-	
-	public		$interval;
-	
-	public		$interval_type;
-	
-	public		$start_date;
-	
-	public		$end_date;
-	
-
-	function __construct() {
+	/**
+	 * Retrieve model based on primary id - our argument list is fluid and
+	 * can accept multiple primary
+	 */
+	public static function find($__mixed) {
+		$models    = array();
+		$arguments = \eGloo\Utilities\Collection::flatten(
+				func_get_args()
+		);
 		
+		foreach($arguments as $key) {
+			$singular = static::statement('
+					SELECT
+						p.*
+					FROM
+						program p
+					WHERE
+					p.program_id = ?
+						
+					', $key);
+
+			// mock singular data because inserting in the databse is goin to suck
+			$singular = array_combine(preg_split(
+				'/,\s?/', 'user_id, title, program_status_id, shipping_address_id, payment_option_id, start_timestamp, recurring_interval,next_order_process_date,next_order_shipping_date,pre_authorization_number'		
+			), array_merge(array(66691), range(1,9)));
+			
+			
+			if ($singular) {
+				$models[] = new static($singular);
+			}
+		}
+	
+		return count($models)
+			? \eGloo\Utilities\Collection::trim($models)
+			: false;
+	
 	}
 	
+	/*
 	public function updateProgram() {
 		
 	}
@@ -68,5 +90,6 @@ class Program {
 	public static function deleteProgram($program_id) {
 		
 	}
+	*/
 
 }

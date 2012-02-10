@@ -44,7 +44,7 @@ File.open(file) do | file |
  
   # get class name if available
   begin
-    unless class_name = content.match(/^(abstract|final)\s+class\s+(\S+)/i)[2]
+    unless class_name = content.match(/^(abstract|final\s+)?class\s+(\S+)/i)[2]
       raise 'File does not contain valid class definition'
     end
   ensure

@@ -178,6 +178,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	/**
 	 * The 'find' method serves as a alias to loadById method, employed by many of the domain model
 	 * classes; dynamic finders are also used by EPA, which will make transition easier
+	 * @TODO this needs to be replaced with override or method alias - because not all will load
+	 * unless loadById exists - method_alias is much more flexible
 	 * @return Model | Model[]
 	 */
 	public static function find($key) {
