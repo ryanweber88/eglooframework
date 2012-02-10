@@ -117,13 +117,6 @@ abstract class ObjectSafe {
 		}
 	}
 	
-	protected function defineMethod($name, $lambda) {
-		$this->_methods[$name] = $lambda;
-	} 
-	
-	protected static function defineMethodStatic($name, $lambda) {
-		$this->_methodsStatic[get_called_class()][$name] = $lambda;
-	}
 	
 	/**
 	 * Used to determine methods caller - same idea as javascript's "caller";
@@ -161,7 +154,80 @@ abstract class ObjectSafe {
 			);
 		}
 		
-		// manage dynamically defined methods 
+		// define instance/static context free methods - this list
+		// needs to be kept as short as possible as we don't want
+		// to define a great deal of funcitonality here
+		
+		// provide defineMethod functionality to instance
+		// @TODO abstract this concept - something plugin based
+		// would be nice
+		if ($name == 'defineMethod') {
+			
+			// perform argument checking
+			if (count($arguments) >= 2 && is_string($arguments[0]) && is_callable($arguments[1])) { 
+				
+				// cache 'defineMethod' to methods
+				$this->_methods[$name] = function($name, $lambda) { 
+					$this->_methods[$name] = $lambda;
+					return $this;
+				};
+				
+				// now call our just-defined method
+				// @TODO every dynamic method definition contains this - determine
+				// how to move to after method definition section as this violates
+				// DRY
+				return call_user_func_array(
+					$this->_methods[$name], $arguments
+				);
+				
+
+					
+			}
+			
+			else {
+				throw new \Exception(
+					"Arguments provided to define method are incorrect : $arguments "			
+				);	
+			}
+		}
+		
+		else if ($name == 'aliasMethod') {
+			
+			// cache to defineMethod
+			$this->_methods[$name] = function($alias, $from) { 
+				if (method_exists($this, $from)) {
+						
+					if (!method_exists($this, $alias)) {
+						// use lambda/block to place method alias method definition into
+						// this instance "singleton" or eigenclass
+						$this->defineMethod($alias, function($__mixed = null) {
+							
+							// call original method
+							return call_user_func_array(array(
+									$this, $from
+							),  $__mixed);
+						});
+					}
+						
+					throw new \Exception(
+							"Attempted alias on $alias failed because it already exists as method on instance"
+					);
+				}
+				
+				throw new \Exception(
+						"Attempting an alias on method $from which does not exist"
+				);
+			}
+			
+			// now turn around and call our cached method
+			return call_user_func_array(
+				$this->_methods[$name], $arguments		
+			);
+			
+
+		}
+	
+		
 		
 		
 		
@@ -175,35 +241,106 @@ abstract class ObjectSafe {
 	
 	public static function __callstatic($name, $arguments) { 
 		
-		// check against dynamically defined methods 
+		// check against dynamically defined methods - since we
+		// are working class scope, we want to mimic the idea of
+		// inheritence; to do this, we move up class hierarchy,
+		// from Current to Object and check against methods
+		
 		// @TODO we need a way to call this all within one method 
 		// regardless of fucking context
-		if (isset(static::$_methods[get_called_class()][$name])) {
-			call_user_func_array(
-				static::$_methods[get_called_class()][$name], $arguments	
+		// @TODO this needs to be profiled
+		$class   = get_called_class();
+		$current = get_called_class();
+		
+		
+		do {
+			if (isset(static::$_methodsStatic[$current][$name])) {
+				return call_user_func_array(
+					static::$_methodsStatic[$current][$name], $arguments	
+				);
+			}
+			
+		} while (($current = get_parent_class($current)));
+		
+
+		
+		// define our basic building block methods - these should be context free
+		// and define limited functionality
+		// @TODO this should be done plugin fashion
+		
+		
+		if ($name == 'defineMethod') {
+			
+			// perform argument checking against defineMethod - the point here is 
+			// to not hold the developer hand, but guard against what would be a very
+			// tough bug to track down, given the dynamic nature of defineMethod
+			if (count($arguments) >= 2 && is_string($arguments[0]) && is_callable($arguments[1])) {
+				
+				// cache/bind 'defineMethod' to methods - doing this will mean method will be 
+				// called automatically as opposed to rebuilding the definition of defineMetho
+				static::$_methodsStatic[$class][$name] = function ($name, $lambda) {
+					static::$_methodsStatic[get_called_class()][$name] = $lambda;
+					return true;
+				};
+				
+				//var_export(static::$_methodsStatic); exit;
+				
+				// now call define method - unfortunately we have to fucking
+				// use two expressions since 5.3 is too fucking stupid to be
+				// able to reference a lambda from within an array
+				return call_user_func_array(
+					static::$_methodsStatic[$class][$name], $arguments	
+				);
+				
+			
+			}
+			
+			else {
+				throw new \Exception(
+					"Arguments provided to $name are incorrect : $arguments "		
+				);
+			}
+		}
+		
+		else if ($name == 'aliasMethod') {
+			// cache method to static methods container
+			
+			// here's our definition of aliasMethod
+			// @TODO again, we need plugin solution
+			static::$_methodsStatic[$class][$name] = function($alias, $from) { 
+				$class = get_called_class();
+				
+				if (method_exists($class, $from)) {
+						
+					if (!method_exists($class, $alias)) {
+						// use lambda/block to place method alias method definition into
+						// this instance "singleton" or eigenclass
+						static::defineMethod($alias, function($__mixed = null) {
+							// call original method
+							return call_user_func_array(array(
+									$class, $from
+							),  $__mixed);
+						});
+					}
+						
+					throw new \Exception(
+							"Attempted alias on $alias failed because it already exists in class scope"
+					);
+				}
+				
+				throw new \Exception(
+						"Attempting an alias on method $from which does not exist"
+				);
+			}
+			
+			// now call our just-defined method
+			return call_user_func_array(
+				static::$_methodsStatic[$class][$name], $arguments
 			);
 		}
 		
-		// specifc methods - here we define static methods that may
-		// have the same signature as instance methods; we do this
-		// so we can have the same interface to those methods,
-		// regardless of receiver/caller
-		// @TODO place into trait
-
-		// here we are going to use reflection to receive list of methods
-		// @TODO place into static container
-		/*
-		$reflection = new \ReflectionClass($class = get_called_class());
 		
-		foreach ($reflection->getMethods(\ReflectionMethod::IS_STATIC) as $method) {
-			
-			// see if our static call to main matches against __call static method
-			// pattern, if so, dynamically invoke method and pass in arguments
-			if ($name == lcfirst(str_replace('__call', $method->getName()))) {
-				return $method->invokeArgs(null, $arguments);
-			}
-		}
-		*/
+		
 		
 		// magic - here we define dynamic calls on existing properties and methods
 		// such as $this->$property_like(regexp)
@@ -238,7 +375,6 @@ abstract class ObjectSafe {
 
 	
 	protected static $_singleton;
-	
 	protected static $_methodsStatic = array();
 	protected        $_methods       = array();
 	
