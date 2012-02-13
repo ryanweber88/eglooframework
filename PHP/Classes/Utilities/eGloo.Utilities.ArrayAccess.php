@@ -40,7 +40,24 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		);
 	}
 	
-	public function offsetGet($property) {
+	public function offsetGet($member) {
+		// if offset actually reflects an object method, then we call 
+		// method on object - this will currently not work in instances
+		// where parameters are needed; if that were to be the case,
+		// the argument would be that there is a fatal design flaw
+		if (method_exists($this->wrapped, $member)) {
+			
+			// if result from receiver is an object; we wrap that result
+			// in ArrayAccess - allowing for recursive access to our
+			// properties and for the natural syntax of multidimensional
+			// array notation
+			if (is_object($result = $this->wrapped->$member())) {
+				$result = new static($result);
+			}
+			
+			return $result;
+		}
+		
 		return $this->wrapped->$property;
 	}
 	

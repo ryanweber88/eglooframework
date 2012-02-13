@@ -39,7 +39,25 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// we simply ignore the generated exception
 		catch(\Exception $ignore) { }
 			
+		
+		// call __relationships - the idea is that child classes should
+		// use method as area to concretely draw all domain based relationships;
+		// this method should be seen as a constructor for relationships
+		$this->__relationships();
 	}
+	
+	/**
+	 * This is an alias to defineMethod - currently it is here for 
+	 * idiomatic reasons only
+	 */
+	protected function defineRelationship($name, $lambda) {
+		$this->defineMethod($name, $lambda);
+	}
+	
+	/**
+	 * A stubb method here to be used by concrete model classes
+	 */
+	public function __relationships() { }
 	
 	/**
 	 * @param variable-length $__mixed
@@ -63,51 +81,41 @@ abstract class Model extends \eGloo\Utilities\Delegator
 			$this	
 		);
 		
-		/*
-		$model = array();
-	
-		foreach($this->columns() as $column) {
-			$model[$column] = $this->$column;
-		}
-	
-		return $model;
-		*/
 	}	
 
 	
-	protected function aliasProperties() {
+	protected function __properties() {
 		
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = strtolower(preg_replace(
 			'/([a-z])([A-Z])/', '$1_$2', static::className()
 		));
 				
-		// attempt to alias class/domain/entity specific properties
-		// to generic; ie, product_id, product_name, product_count to
-		// id, name, count
-		$generics = array(
-			'id',
-			'name'		
-		);
-
-		foreach($generics as $generic) { 
-			// this will do nothing if property does not exist, and throw an exception if it
-			// does, in order to avoid an overwrite
-			$this->aliasProperty(		
-				$generic, "{$class}_id"	
-			);
+		// iterate across properties and determine if they
+		// fit pattern of $class_(name)
+		// @TODO replace self reference - stupid 5.3 issue
+		$self = $this;
+		
+		$properties = static::cache(function() use ($self) {
+			return object_get_vars($self);
+		});
+		
+		foreach($properties as $name) {
+			if preg_match("/{$class}_(.+?)/", $name, $match)) {
+				$this->alias_
+			}
 		}
 		
 		
 	}
 	
-	protected function aliasMethods() {
+	protected function __methods() {
 		$class = static::className();
 		
 		
 	}
 	
-	protected static function aliasMethodsStatic() {
+	protected static function __methodsStatic() {
 		$class = static::className();
 		
 		// provide reg exp list to check methods against
@@ -234,11 +242,35 @@ abstract class Model extends \eGloo\Utilities\Delegator
 	 * @return mix type object retrieved from brand
 	 *
 	 */
-	public function __get( $key ) {
+	public function __get($name) {
 		
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
+		
+		// check if name has been defined in methods - if so, 
+		// and method does not take arguments, call method
+		if (isset($this->_methods[$name])) {
+			$reflection = new ReflectionFunction(
+					$this->_methods[$name]
+			);
+			
+			// we don't want to use __get as replacement or alternative
+			// to __call, but simply to call methods, which look like
+			// properties, where it makes sense 
+			if (count($reflection->getParameters()) == 0) {
+				return call_user_func(
+						$this->_methods[$name]
+				);
+			}
+			
+		}
+		
+		// otherwise pass to parent __get handler for higher level
+		// processing
+		return parent::__get($name);
+			
+		
 		
 	}	
 	

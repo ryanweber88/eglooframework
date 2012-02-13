@@ -8,5 +8,6 @@ namespace eGloo\Domain\Utility;
  */
 class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	
-	// public function offsetExists($offset) { }
+	
+	//public function offsetGet
 }

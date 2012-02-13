@@ -11,8 +11,10 @@ abstract class ObjectSafe {
 	function __construct() {
 		
 		// fire our alias properties and methods
-		$this->aliasMethods();
-		$this->aliasProperties();
+		//$this->aliasMethods();
+		//$this->aliasProperties();
+		$this->__methods();
+		$this->__properties();
 	}
 	
 	/**
@@ -22,13 +24,43 @@ abstract class ObjectSafe {
 	static function __constructStatic() { 
 		
 		
-		static::aliasMethodsStatic();
+		//static::aliasMethodsStatic();
+		static::__methodsStatic();
+	}
+	
+	/**
+	 * Alias to __constructStatic - I think it's a little neater and carries
+	 * the idea of a static constructor without have to explicitly spell
+	 * it out
+	 */
+	static function __static() {
+		
 	}
 	
 	// These are stubs but called by the constructor - so as they
 	// can be used inherited classes
-	protected function aliasMethods()    { }
-	protected function aliasProperties() { }
+	protected function  aliasMethods()    { }
+	protected function  aliasProperties() { }
+	protected static function aliasMethodsStatic() { }
+	
+	protected static function __staticMethods() {
+		static::aliasMethodsStatic();
+	}
+	
+	/**
+	 * Alias to aliasMethods - thought it fits more into the idea of
+	 * constructor/meta call
+	 */
+	protected function __methods() {
+		$this->aliasMethods();
+	}
+	
+	/**
+	 * Alias to aliasProperties
+	 */
+	protected function __properties() {
+		$this->aliasProperties();
+	}
 	
 	/**
 	 * Aliases a method on call/callstatic
@@ -117,6 +149,37 @@ abstract class ObjectSafe {
 		}
 	}
 	
+	/**
+	 * This is here for convenience - used so create cacheable code blocks;
+	 * this needs to be moved to a trait when 5,4 is available
+	 * @TODO remove and replace with trait
+	 * @param  mixed $mixed
+	 * @param  callable $lambda
+	 * @return mixed
+	 */
+	public static function cache($mixed, $lambda = null) {
+		
+		// determine parameters - if the first argument is a lambda, then our
+		// cache key will be a lambda signature; otherwise, if string, that
+		// will become the cache key - otherwise key is set as default to mixed.
+		// which should be a string; I am not checking against this specifically
+		$key = $mixed;
+		
+		if (is_callable($mixed)) {
+			$reflection = new \ReflectionFunction($lambda);
+			$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+			$lambda     = $mixed;
+		}
+		
+		if (!isset(static::$_cache[$key])) {
+			static::$_cache[$key] = $lambda();
+		}
+		
+		return static::$_cache[$key];
+			
+		
+	}
+	
 	
 	/**
 	 * Used to determine methods caller - same idea as javascript's "caller";
@@ -131,6 +194,31 @@ abstract class ObjectSafe {
 		// for dealing with caller
 		return new \eGloo\Utilities\Caller($trace[1]);
 	}	
+	
+	/**
+	 * Here we provide our catchall and dynamic property meta functionality
+	 */
+	public function __get($name) {
+		
+		// here we provide an "existence" operator for determining if 
+		// property exists in receiver - this is similar to obj.name?
+		// convention used in rails
+		if (preg_match('/has_?(.+)/', $name, $match)) {
+			$property = (strpos($name, 'has_', $match[1]) !== false)
+				? $match[1]
+				: lcfirst($match[1]);
+		
+			
+			// now simply return whehter proeprty exists or not
+			return property_exists($this, $property)
+		}
+		
+		// if we have reached this point, all dynamic get options have been
+		// exhausted and we trigger an error
+		throw new \Exception(
+			"Instance property $name does not exist"		
+		)
+	}
 	
 	/**
 	 * Experiment - the purpose is provide one interface for accessing __call &
@@ -375,33 +463,8 @@ abstract class ObjectSafe {
 
 	
 	protected static $_singleton;
+	protected static $_cache         = array();
 	protected static $_methodsStatic = array();
 	protected        $_methods       = array();
 	
 }
-
-class Test extends ObjectSafe {
-	
-}
-
-ObjectSafe::defineMethod('test', function($what) { 
-	echo "Would fuck $what";
-});
-
-
-$t = new Test;
-$t->defineMethod('test', function() { 
-	echo 'from t';	
-});
-$t->test();
-
-echo "\n";
-
-
-$b = new Test;
-$b->defineMethod('test', function() { 
-	echo 'from b';	
-});
-
-$b->test();
-
