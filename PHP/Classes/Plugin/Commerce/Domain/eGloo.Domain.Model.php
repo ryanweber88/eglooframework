@@ -6,7 +6,8 @@ namespace eGloo\Domain;
  * Superclass for all domain models; provides generic functionality
  * @author Christian Calloway callowaylc@gmail.com
  */
-abstract class Model extends \eGloo\Utilities\Delegator {
+abstract class Model extends \eGloo\Utilities\Delegator 
+	implements \eGloo\Utilities\ToArrayInterface {
 	
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -39,6 +40,39 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		catch(\Exception $ignore) { }
 			
 	}
+	
+	/**
+	 * @param variable-length $__mixed
+	 */
+	static function __constructStatic($__mixed = null) {
+		static::defineMethod('columns', function() {
+			throw new \Exception('columns not implemented - because it sucks'); 	
+		});
+		
+	}
+	
+	/**
+	 * Provides an array representation of model
+	 */
+	public function __toArray() {
+		
+		// wrap our current domain\model instance in arrayaccess 
+		// in most instances, this will be to our smarty instance
+		// which should only accept type scalar or array
+		return new Utility\ArrayAccess(
+			$this	
+		);
+		
+		/*
+		$model = array();
+	
+		foreach($this->columns() as $column) {
+			$model[$column] = $this->$column;
+		}
+	
+		return $model;
+		*/
+	}	
 
 	
 	protected function aliasProperties() {
@@ -96,7 +130,7 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 				if (preg_match($pattern, $method->getName(), $match)) {
 					
 					try { 
-						static::aliasMethodStatic(
+						static::aliasMethod(
 							$alias, strtolower(preg_replace(
 								$pattern, $alias, $method->getName()
 							)) 	
@@ -162,16 +196,6 @@ abstract class Model extends \eGloo\Utilities\Delegator {
 		return $interface;
 		
  
-	}
-	
-	/**
-	 * Provides 2array access for domain models
-	 */
-	public function toArray() {
-		// simplified behavior is simply to return to properties,
-		// but this will have to be changed in future
-		
-		return $this->properties;
 	}
 	
 

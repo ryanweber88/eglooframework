@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Utilities;
 
-use \eGloo\Dialect\Object;
+use \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * 
@@ -13,7 +13,7 @@ use \eGloo\Dialect\Object;
  */
 class ArrayAccess extends Object implements \ArrayAccess {
 	
-	function __construct(Object $object) {
+	function __construct($object) {
 		$this->wrapped = $object;
 	}
 	

@@ -251,7 +251,9 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 	}
 
 	protected function setTemplateVariable( $key, $value ) {
-		$this->_templateVariables[$key] = $value;
+		$this->_templateVariables[$key] = $value instanceof \eGloo\Utilities\ToArrayInterface
+			? $value->__toArray() 
+			: $value;
 	}
 
 	protected function setTemplateVariables( $templateVariables ) {

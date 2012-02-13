@@ -150,7 +150,7 @@ abstract class ObjectSafe {
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
 			return call_user_func_array(
-				$this->methods[$name], $arguments	
+				$this->_methods[$name], $arguments	
 			);
 		}
 		
@@ -217,7 +217,7 @@ abstract class ObjectSafe {
 				throw new \Exception(
 						"Attempting an alias on method $from which does not exist"
 				);
-			}
+			};
 			
 			// now turn around and call our cached method
 			return call_user_func_array(
@@ -331,7 +331,7 @@ abstract class ObjectSafe {
 				throw new \Exception(
 						"Attempting an alias on method $from which does not exist"
 				);
-			}
+			};
 			
 			// now call our just-defined method
 			return call_user_func_array(
@@ -379,3 +379,29 @@ abstract class ObjectSafe {
 	protected        $_methods       = array();
 	
 }
+
+class Test extends ObjectSafe {
+	
+}
+
+ObjectSafe::defineMethod('test', function($what) { 
+	echo "Would fuck $what";
+});
+
+
+$t = new Test;
+$t->defineMethod('test', function() { 
+	echo 'from t';	
+});
+$t->test();
+
+echo "\n";
+
+
+$b = new Test;
+$b->defineMethod('test', function() { 
+	echo 'from b';	
+});
+
+$b->test();
+
