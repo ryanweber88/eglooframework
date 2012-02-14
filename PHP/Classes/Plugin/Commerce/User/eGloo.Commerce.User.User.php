@@ -277,7 +277,7 @@ class User {
 		}
 		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
 
-		return ($id > 0) ? self::loadByID($id) : 'Account creation failed';
+		return ($id > 0) ? self::loadByID($id) : false;
 	}
 
 	/**
@@ -291,7 +291,7 @@ class User {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
+		return !empty($user) ? new User($user) : false;
 	}
 
 	public static function loadByPassword($passwd) {
@@ -299,7 +299,7 @@ class User {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
-		return !empty($user) ? new User($user) : 'Unable to find User';
+		return !empty($user) ? new User($user) : false;
 	}
 	
 	/**
@@ -331,7 +331,7 @@ class User {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByEmail($email);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+		return !empty($user) ? new User($user) : false;
 	}
 
 	/**
