@@ -1,0 +1,155 @@
+#!/usr/bin/env ruby
+# The point of this script is to run a rlocate, but pass the resulting path
+# to another command - so in essence it works as a pipe; the only difference 
+# here is that we add the pipe through at the end, and make sure to account
+# for command at beginning
+
+# REQUIRE
+
+require 'optparse'
+require 'net/ssh'
+
+# CONSTANTS
+
+Space    = ' '
+Newline  = "\n"
+Remote   = '192.168.10.7' 
+#Remote  = '192.168.93.131'
+#User    = 'christian'
+User     = 'petflowdeveloper'
+Password = 'fe5180zz'
+Editor   = 'zend' 
+Mount    = '/Volumes/' + Remote
+
+
+
+# CLASSES
+
+# add instance method to fixnum to determine
+# if value is positive
+class Fixnum
+  def positive?
+    self >= 0
+  end
+end
+
+# add instance method to array to determine
+# if index is in correct range
+class Array
+  def in_bounds?(index)
+    index.positive? && index <= (self.size - 1)
+  end
+end
+
+class String
+  def ucfirst
+    self.sub (/^(\w)/) { | s | s.capitalize }
+  end
+end
+
+
+# FUNCTIONS
+
+
+# TESTING
+
+# PRODUCTION
+
+
+
+# check if --remote option has been specified, also
+# provide default values should i not want to go
+# through that shit
+
+options = {
+  remote:   false,
+  command:  false,
+  user:     User,
+  password: Password,
+  editor:   Editor,
+  mount:    Mount
+}
+
+OptionParser.new do |opts|
+  opts.banner = 'Usage: example.rb [options]'
+    
+  %w(remote user password mount command).each do | word |
+    opts.on "-#{word[0]} [VALUE]", "--#{word}"   do | value |
+      options[:"#{word}"] = value || true
+    end    
+  end  
+end.parse!
+
+
+raise 'You must specify a command via --command or -c flag' unless options[:command]
+
+
+# set options remote to default if remote has been specified,
+# but without a value - this is redundant and needs to be 
+# replaced
+options.each_with_index do | (key, value), index |
+  if options[key] == true
+    unless (const = Object.const_get(key.to_s.ucfirst)).nil?
+      options[key] = const unless Object.const_get(key.to_s.ucfirst).nil?
+    end
+  end
+end
+
+# make sure something.. anything has been passed as our main
+# argument to locate
+raise 'You forgot to pass a value cunt' if ARGV.empty?
+
+# we are simply passing parameter values to locate command
+parameters = ARGV.join(Space)
+
+# if doing a remote check, we will to ssh into our remote
+# and perform a locate there
+
+if options[:remote]
+  
+  # raise an exception if 
+  begin
+    Net::SSH.start(options[:remote], options[:user], :password => options[:password]) do | ssh |
+      @results = (ssh.exec! "locate #{parameters}").split Newline
+    end
+  
+  rescue => error
+    raise "Problem with connection to #{options[:remote]} with error : #{error}"  
+      
+  end
+  
+# otherwise we simply call a  
+else
+  @results = `locate #{parameters}`.split Newline   
+end
+
+
+unless @results.empty?
+
+  if @results.length == 1
+    result = @results.pop
+    result = "#{options[:mount]}/#{result}" unless options[:remote] == false
+        
+  else
+
+    # iterate through result set and display as choosable options
+    # user
+    @results.each_with_index do | result, index |
+      puts "#{index} ==> #{result}"
+    end
+  
+    print "\nchoose from above index: "
+  
+    # recieve user input from command line and launch gedit
+    # with filepath
+    if (answer = $stdin.gets.chomp).length > 0
+      answer = answer.to_i
+      @results[answer] = options[:mount] + "/#{@results[answer]}" unless options[:remote] == false
+      
+      result = @results[answer] if @results.in_bounds?(answer)
+    end 
+  end
+  
+  # now push result to command
+  puts `#{options[:command]} #{result}`
+end

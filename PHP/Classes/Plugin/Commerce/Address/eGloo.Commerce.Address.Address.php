@@ -69,10 +69,13 @@ class Address {
 	public		$state;
 	
 	/*** @var Integer Zip Code 	 */
-	public		$zip_code;
+	public		$postal_code;
 	
 	/*** @var String County  */
 	public		$county;
+	
+	/*** @var String Shipping Region  */
+	public		$shipping_region;
 	
 	/*** @var String Country code 2	 */
 	public		$country;
@@ -80,12 +83,16 @@ class Address {
 	/*** @var string address label 	 */
 	public		$label;
 	
+	public		$validated = false;
+
+
+	
 	const		ADDRESS_TYPE_RESIDENTIAL	= 1,
 				ADDRESS_TYPE_COMMERCIAL		= 0;
 	
 	const		ADDRESS_ALLOW_PO			= 0;
 	
-	public function __construct() {
+	public function __construct($user_id) {
 		
 	}
 	

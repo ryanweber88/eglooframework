@@ -45,60 +45,131 @@ use \eGloo\Commerce,
  */
 class Cart {
 
-	/*** @var Integer address ID  */
-	public		$address_id;
+	protected $user_id		= 0;
 	
-	/*** @var Integer User ID */
-	public		$user_id;
+	public static $cart_id	= null;
 	
-	/*** @var String Name 	*/
-	public		$first_name;
+	public $items			= array();
 	
-	/*** @var String Name  */
-	public		$last_name;
+	protected $total		= 0.0;
+
+	const	CART_ACTION_USER_ADD		= 1,
+			CART_ACTION_CUST_SERV_ADD	= 2,
+			CART_ACTION_COUPON_ADD		= 3,
+			CART_ACTION_CLEAR			= 4,
+			CART_ACTION_DEAMON_ADD		= 5; 
 	
-	/*** @var String Address 1	 */
-	public		$address_1;
+	const	CART_PROGRESS_ADD			= 1,
+			CART_PROGRESS_VIEW			= 2,
+			CART_PROGRESS_SIGN_OUT		= 3,
+			CART_PROGRESS_SIGN_IN		= 4,
+			CART_PROGRESS_COMPLETED		= 5;
 	
-	/*** @var String Address 2	 */
-	public		$address_2;
+	const	ITEM_WEIGHT_UNIT			= 'LB',
+			ITEM_SIZE_UNIT				= 'IN';
 	
-	/*** @var String City 	*/
-	public		$city;
+	protected $currency					= 'USD';
 	
-	/*** @var String State Code 2 */
-	public		$state;
+	protected $shipping_line_id			= 0;
+
+	private function __construct() {
+	}
 	
-	/*** @var Integer Zip Code 	 */
-	public		$zip_code;
+	public static function setCartID($cart_id = null) {
+		if (!is_null($cart_id) && $cart_id > 0) {
+			self::$cart_id = $cart_id;		
+			$_SESSION['cart_id'] = self::$cart_id;
+			
+			// Generate Cookies and set it to expires in 3 days
+			setcookie('cart_id', self::$cart_id, time()+24*60*60*3);
+		} else {
+						
+			if (isset($_SESSION['cart_id'])) {
+				self::$cart_id = $_SESSION['cart_id'];
+				
+				// Regenerate Cookies and set it to expires in 3 days
+				setcookie('cart_id', self::$cart_id, time()+24*60*60*3);
+			
+			} elseif (isset ($_COOKIE['cart_id'])) {
+				self::$cart_id = $_COOKIE['cart_id'];
+				$_SESSION['cart_id'] = self::$cart_id;
+				
+				// Regenerate Cookies and set it to expires in 3 days
+				setcookie('cart_id', self::$cart_id, time()+24*60*60*3);
+			} else {
+				self::$cart_id = md5(uniqid(rand(), true));
+				
+				// Generate Cookies and set it to expires in 3 days
+				setcookie('cart_id', self::$cart_id, time()+24*60*60*3);
+			}
+		}
+		return true;
+	}
+
 	
-	/*** @var String County  */
-	public		$county;
+	public static function getCartID() {
+		if (!isset(self::$cart_id)) {
+			self::setCartID();
+		}
+		return self::$cart_id;
+	}
 	
-	/*** @var String Country code 2	 */
-	public		$country;
+	public static function destroyCart() {
+		self::$cart_id = null;
+		unset($_SESSION['cart_id']);
+		setcookie('cart_id', self::$cart_id, time() - 24*60*60*3);
+		return true;
+	}
+
+
+
+	public function addItem($item_id, $qty = 1, $price = null) {
+		if ((int)$qty < 1) {
+			return false;
+		} else {
+			$this->items[$item_id] = array(
+									'size_id'	=> $item_id,
+									'qty'		=> $qty,
+									'price'		=> $price,
+									'action'	=> self::CART_ACTION_USER_ADD );
+		}
+		return true;
+	}
 	
-	/*** @var string address label 	 */
-	public		$label;
 	
-	const		ADDRESS_TYPE_RESIDENTIAL	= 1,
-				ADDRESS_TYPE_COMMERCIAL		= 0;
+	public function removeItem($item_id) {
+		foreach ($this->items as $key => $value) {
+			if ($item_id == $key) {
+				unset($this->items[$value]);
+			}
+		}
+		return true;
+	}
 	
-	const		ADDRESS_ALLOW_PO			= 0;
 	
-	public function __construct() {
+	public function clearCart() {
 		
 	}
 	
-	public function toArray() {
+	public function getCartTotal() {
 		
 	}
 	
-	public function __toString() {
-		
+	public function getItems() {
+		return $this->items;
 	}
 	
-	public static function load() {
-		
+	public function updateTotal($amount, $item = null) {
+		if (!is_null($item)) {
+			foreach ($this->items as $key => $value) {
+				if (in_array($item, $value)) {
+					$value[$item]['price'] = $amount;
+					
+					// Update total
+				}
+			}
+		} else {
+			$this->total += $amount;
+		}
 	}
 }

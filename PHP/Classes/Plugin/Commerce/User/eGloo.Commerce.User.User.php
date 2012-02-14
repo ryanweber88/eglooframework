@@ -77,12 +77,12 @@ class User extends Domain\Model {
 	 * @param type $password
 	 * @return boolean true/false 
 	 */
-	public function validatePassword ($password) {
-		return md5($password) == $this->password_hash ?: false;
+	public function validatePassword ($password) {		
+		return $password == $this->password_hash ?: false;
 	}
 	
-	public function updateUser() {
-		
+	public function updateUserProfileByID($fname, $lname) {
+		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
 	}
 
 	/**
@@ -171,8 +171,8 @@ class User extends Domain\Model {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
 		
-		$user = UserDataAccess::fetch()->login($email, $passwd);
-		return isset($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+		$result = UserDataAccess::fetch()->login($email, $passwd);
+		return is_array($result) ? new User($result) : false;
 	}
 	
 	/**
@@ -205,6 +205,7 @@ class User extends Domain\Model {
 		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
 
 		return ($id > 0) ? static::loadByID($id) : 'Account creation failed';
+
 	}
 
 	/**
@@ -218,7 +219,7 @@ class User extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $user_id;
+		return !empty($user) ? new User($user) : false;
 	}
 
 	public static function loadByPassword($passwd) {
@@ -226,7 +227,7 @@ class User extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
-		return !empty($user) ? new User($user) : 'Unable to find User';
+		return !empty($user) ? new User($user) : false;
 	}
 	
 	/**
@@ -258,7 +259,7 @@ class User extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$user = UserDataAccess::fetch()->loadUserByEmail($email);
-		return !empty($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+		return !empty($user) ? new User($user) : false;
 	}
 
 	/**

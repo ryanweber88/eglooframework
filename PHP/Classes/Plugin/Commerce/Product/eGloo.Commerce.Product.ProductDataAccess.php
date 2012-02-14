@@ -184,6 +184,9 @@ class ProductDataAccess extends Domain\Data {
 			 . ' cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
 			 . ' INNER JOIN product_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id'
 			 . ' WHERE product_id=?';
+
+		//$result = parent::getList($sql, array($product_id));
+		//echo_r($result);
 		return parent::getList($sql, array($product_id));
 	}
 

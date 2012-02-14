@@ -160,17 +160,21 @@ class BrandDataAccess extends Domain\Data {
 			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!', __METHOD__);
 		}
 		$sql = 'SELECT p.brand_id, p.product_id, p.title, bd.description AS product_body,'
-			 . 'po.product_option_id, po.sku, po.base_retail_price, po.competitor_markup,'
-			 . 'po.recurring_only, pos.size_description FROM product p LEFT JOIN '
-			 . 'product_description bd ON p.product_id=bd.product_id '
-			 . 'INNER JOIN product_option po ON p.product_id=po.product_id '
-			 . 'INNER JOIN product_migrated_selection pos '
-			 . 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=? '
-			 . ' AND po.status_id=1 AND bd.description_type=?';
-		
-		return parent::executeSelect($sql, array($brand_id, 'body'));
+			. 'po.product_option_id, po.sku, po.base_retail_price, po.competitor_markup,'
+			. 'po.recurring_only, pos.size_description FROM product p LEFT JOIN '
+			. 'product_description bd ON p.product_id=bd.product_id '
+			. 'INNER JOIN product_option po ON p.product_id=po.product_id '
+			. 'INNER JOIN product_migrated_selection pos '
+			. 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=? '
+			. ' AND po.status_id=1 AND bd.description_type=?';
+
+		return parent::getList($sql, array($brand_id, 'body'), function($index, $row) {
+				$product = new Commerce\Product\Product($row);
+				$product->loadProductSizes()->loadProductImages()->loadSlugDestination();
+				return $product;
+				});
 	}
-	
+
 	/**
 	 *
 	 * @param type $brand_id

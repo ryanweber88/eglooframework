@@ -136,6 +136,15 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 
 	}
 	
+	public function updateUserProfileByID($fname, $lname, $user_id) {
+		if ($fname == '' || $lname === '' || $user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = 'UPDATE site_user set first_name = ?, last_name = ? WHERE user_id=?';
+		return parent::executeUpdate($sql, array($fname, $lname, $user_id));
+	}
+
+
 	public function sendCommunication($user_id, $comm_type_id, $end_time, $code, $user_id, $start_time = null) {
 		$sql = 'INSERT INTO user_communication (user_id, user_communication_type_id,'
 			 . 'initiation_timestamp, hashcode, valid_through, used, last_action,'
