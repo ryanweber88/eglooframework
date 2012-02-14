@@ -166,7 +166,7 @@ abstract class ObjectSafe {
 		$key = $mixed;
 		
 		if (is_callable($mixed)) {
-			$reflection = new \ReflectionFunction($lambda);
+			$reflection = new \ReflectionFunction($mixed);
 			$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
 			$lambda     = $mixed;
 		}
@@ -207,6 +207,25 @@ abstract class ObjectSafe {
 	}	
 	
 	/**
+	 * Retrieves late-static-bound namespace
+	 */
+	public static function ns() {
+		
+		if (!isset(static::$ns)) {
+			
+			// use reflection to get namespace name
+			$reflection = new \ReflectionClass($class = get_called_class());
+			static::$ns = $reflection->getNamespaceName();
+			
+			// we don't want this shared down hierarchy, so we set accessible to false
+			$reflection = new \ReflectionProperty($class, 'ns');
+			$reflection->setAccessible(false);
+		}
+			
+		return static::$ns;
+	}
+	
+	/**
 	 * Here we provide our catchall and dynamic property meta functionality
 	 */
 	public function __get($name) {
@@ -215,7 +234,7 @@ abstract class ObjectSafe {
 		// property exists in receiver - this is similar to obj.name?
 		// convention used in rails
 		if (preg_match('/has_?(.+)/', $name, $match)) {
-			$property = (strpos($name, 'has_', $match[1]) !== false)
+			$property = (strpos($name, 'has_') !== false)
 				? $match[1]
 				: lcfirst($match[1]);
 		

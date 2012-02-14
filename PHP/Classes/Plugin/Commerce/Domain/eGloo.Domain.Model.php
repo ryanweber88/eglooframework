@@ -22,10 +22,7 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if (is_array($__mixed) && \eGloo\Utilities\Collection::isHash($__mixed)) {
-			//var_export($__mixed); 
-			foreach($__mixed as $key => $value) {
-				$this->$key = $value;
-			}
+			$this->initialize($mixed);
 		}
 		
 		// pass to parent delegator::__construct our *DataAccess
@@ -40,11 +37,35 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		catch(\Exception $ignore) { }
 			
 		
+
+	}
+	
+	/**
+	 * Responsible for initialize of model attributes
+	 */
+	protected function initialize(array $arguments = array()) {
+
+		foreach($arguments as $name => $value) { 
+			$this->$name = $value;
+		}
+		
 		// call __relationships - the idea is that child classes should
 		// use method as area to concretely draw all domain based relationships;
 		// this method should be seen as a constructor for relationships
 		$this->__relationships();
+		
+		// finally set flag 'initialized' to true
+		$this->initialized = true;
 	}
+	
+	/**
+	 * Makes a determination if model has been initialized
+	 */
+	public function initialized() {
+		return $this->initialized;
+	}
+	
+
 	
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
@@ -68,6 +89,8 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		});
 		
 	}
+	
+	
 	
 	/**
 	 * Provides an array representation of model
@@ -252,6 +275,11 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		//	return $this->properties[$key];
 		//}
 		
+		if ($name == 'product_id') {
+			echo get_parent_class(get_parent_class($this)); exit;
+			var_export(get_class_vars(get_class($this))); exit;
+		}
+	
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if (isset($this->_methods[$name])) {
@@ -316,4 +344,22 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		
 	}
 	
+	static protected function factory($name) {
+		/*
+		$refle
+		$class = static::namespace() . "\\Model\\$name";
+	
+		if (class_exists($class)) {
+			return new $class;
+		}
+		*/
+		throw new \Exception(
+				"Failed to create model $class becfause it does not exist"
+		);
+	}	
+	
+	
+	
+	
+	private $initialized = false;
 }
