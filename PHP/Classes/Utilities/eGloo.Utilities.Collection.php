@@ -65,4 +65,6 @@ class Collection extends \eGloo\Dialect\ObjectSafe {
 		
 		return $collection;
 	}
+	
+
 } 

@@ -57,7 +57,7 @@ abstract class Model extends \eGloo\Utilities\Delegator
 	/**
 	 * A stubb method here to be used by concrete model classes
 	 */
-	public function __relationships() { }
+	protected function __relationships() { }
 	
 	/**
 	 * @param variable-length $__mixed
@@ -90,6 +90,8 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		$class = strtolower(preg_replace(
 			'/([a-z])([A-Z])/', '$1_$2', static::className()
 		));
+		
+		//echo $class; exit;
 				
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
@@ -101,8 +103,10 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		});
 		
 		foreach($properties as $name) {
-			if preg_match("/{$class}_(.+?)/", $name, $match)) {
-				$this->alias_
+			if (preg_match("/{$class}_(.+?)/", $name, $match)) {
+				$this->aliasProperty(
+					strtolower($match[1]), $name	
+				);
 			}
 		}
 		
@@ -251,7 +255,7 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if (isset($this->_methods[$name])) {
-			$reflection = new ReflectionFunction(
+			$reflection = new \ReflectionFunction(
 					$this->_methods[$name]
 			);
 			

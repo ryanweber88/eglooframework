@@ -67,9 +67,9 @@ abstract class ObjectSafe {
 	 */
 	protected function aliasMethod($alias, $from) {
 		
-		if (method_exists($this, $from)) { 
+		if (\method_exists($this, $from)) { 
 			
-			if (!method_exists($this, $alias)) {
+			if (!\method_exists($this, $alias)) {
 				// use lambda/block to place method alias method definition into 
 				// this instance "singleton" or eigenclass 
 				$this->defineMethod($alias, function($__mixed = null) { 
@@ -93,9 +93,9 @@ abstract class ObjectSafe {
 	protected function aliasMethodStatic($alias, $from) {
 		$class = get_called_class();
 		
-		if (method_exists($class, $from)) { 
+		if (\method_exists($class, $from)) { 
 			
-			if (!method_exists($class, $alias)) {
+			if (!\method_exists($class, $alias)) {
 				// use lambda/block to place method alias method definition into 
 				// this instance "singleton" or eigenclass 
 				static::defineMethodStatic($alias, function($__mixed = null) { 
@@ -121,7 +121,7 @@ abstract class ObjectSafe {
 	 * and will be affected by get/set definition
 	 */
 	protected function aliasProperty($alias, $from) {
-		if (!property_exists($this, $alias)) { 
+		if (!\property_exists($this, $alias)) { 
 			$this->$alias = &$this->$from;
 			return $this;
 		}
@@ -177,6 +177,17 @@ abstract class ObjectSafe {
 		
 		return static::$_cache[$key];
 			
+	}
+	
+	/**
+	 * Because php 5.3's handling of closures is retarded, we need to provide this
+	 * method in order to access protected/private members from
+	 */
+	protected static function access($instance, $member) {
+		// there is a point of failure here in that a property will take presedence of a method
+		// -in that event, you fucked up, because that really shouldnt be the case
+
+		
 		
 	}
 	
@@ -210,14 +221,46 @@ abstract class ObjectSafe {
 		
 			
 			// now simply return whehter proeprty exists or not
-			return property_exists($this, $property)
+			return \property_exists($this, $property);
 		}
 		
 		// if we have reached this point, all dynamic get options have been
 		// exhausted and we trigger an error
 		throw new \Exception(
 			"Instance property $name does not exist"		
-		)
+		);
+	}
+	
+	/**
+	 * Provides a sneaky mechanism to get a reference to class
+	 * protected/private members; this is FUCKING required because
+	 * lambda/closure/block CANNOT bind to an external fucking scope
+	 */
+	public function &reference($member) {
+		// if property, return reference to property using a local 
+		// variable - this shouldn't work, but fuck it
+		if (\property_exists($this, $member)) {
+			$mirror = &$this->$member;
+			return $mirror;
+		}
+		
+		// in the case of a protected/private method, we will wrap in closure and
+		// return to caller
+		else if (\method_exists($this, $member)) {
+			$self       = $this;
+			$reflection = new \ReflectionMethod($this, $member);
+			$r->setAccessible(true);
+			
+			return function($__mixed) use ($reflection, $self) {
+				return $reflection->invokeArgs($self, $__mixed);
+			};
+		}
+		
+		// otherwise, the member cannot be found and we throw an exception
+		// to that effect
+		throw new \Exception(
+			"Failed to reference instance member $member as it does exist"		
+		);
 	}
 	
 	/**
@@ -255,9 +298,13 @@ abstract class ObjectSafe {
 			if (count($arguments) >= 2 && is_string($arguments[0]) && is_callable($arguments[1])) { 
 				
 				// cache 'defineMethod' to methods
-				$this->_methods[$name] = function($name, $lambda) { 
-					$this->_methods[$name] = $lambda;
-					return $this;
+				$self = $this;
+				$this->_methods[$name] = function($name, $lambda) use ($self) {
+					
+					$methods = &$self->reference('_methods');
+					$methods[$name] = $lambda;
+					
+					return $self;
 				};
 				
 				// now call our just-defined method
@@ -283,9 +330,9 @@ abstract class ObjectSafe {
 			
 			// cache to defineMethod
 			$this->_methods[$name] = function($alias, $from) { 
-				if (method_exists($this, $from)) {
+				if (\method_exists($this, $from)) {
 						
-					if (!method_exists($this, $alias)) {
+					if (!\method_exists($this, $alias)) {
 						// use lambda/block to place method alias method definition into
 						// this instance "singleton" or eigenclass
 						$this->defineMethod($alias, function($__mixed = null) {
@@ -398,9 +445,9 @@ abstract class ObjectSafe {
 			static::$_methodsStatic[$class][$name] = function($alias, $from) { 
 				$class = get_called_class();
 				
-				if (method_exists($class, $from)) {
+				if (\method_exists($class, $from)) {
 						
-					if (!method_exists($class, $alias)) {
+					if (!\method_exists($class, $alias)) {
 						// use lambda/block to place method alias method definition into
 						// this instance "singleton" or eigenclass
 						static::defineMethod($alias, function($__mixed = null) {
