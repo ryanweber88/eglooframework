@@ -244,8 +244,8 @@ class User {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
 		
-		$user = UserDataAccess::fetch()->login($email, $passwd);
-		return isset($user) ? new User($user) : 'Unable to find User with email: ' . $email;
+		$result = UserDataAccess::fetch()->login($email, $passwd);
+		return is_array($result) ? new User($result) : false;
 	}
 	
 	/**
