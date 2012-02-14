@@ -69,7 +69,7 @@ class Product {
 	public			$supplier_name;
 
 	/** @var string Retail price */
-	public			$retail_price;
+	public			$base_retail_price;
 	
 	/** @var string Unit price */
 	public			$unit_price;
@@ -103,6 +103,9 @@ class Product {
 
 	/** @var string Depth */
 	public			$depth = 0;
+	
+	/** @var string Size Description */
+	public			$size_description;
 
 	/** @var string Weight */
 	public			$weight = 0;
@@ -124,6 +127,9 @@ class Product {
 
 	/** @var string Unit for number of items */
 	public			$units = 1;
+	
+	/** @var string Sku/UPC  */
+	public			$sku;
 
 	/** @var string Ingredients */
 	public			$ingredients;
@@ -144,7 +150,7 @@ class Product {
 	protected		$cache;
 	
 	/** @var is recuring product */
-	protected		$recurring_ok;
+	public			$recurring_only;
 
 	/** @var array list user objects */
 	public static	$config = array();

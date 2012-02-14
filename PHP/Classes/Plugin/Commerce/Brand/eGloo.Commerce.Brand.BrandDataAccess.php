@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Commerce\Brand;
-use \eGloo\DataProcessing\Connection;
+use \eGloo\DataProcessing\Connection,
+	\eGloo\Commerce;
 
 /**
  * BrandDataAccess Class File
@@ -175,7 +176,11 @@ class BrandDataAccess extends Connection\PostgreSQLDBConnection {
 			 . 'ON po.product_option_id=pos.product_option_id WHERE p.brand_id=? '
 			 . ' AND po.status_id=1 AND bd.description_type=?';
 		
-		return parent::executeSelect($sql, array($brand_id, 'body'));
+		return parent::getList($sql, array($brand_id, 'body'), function($index, $row) {
+			$product = new Commerce\Product\Product($row);
+			$product->loadProductSizes()->loadProductImages()->loadSlugDestination();
+					return $product;
+		});
 	}
 	
 	/**

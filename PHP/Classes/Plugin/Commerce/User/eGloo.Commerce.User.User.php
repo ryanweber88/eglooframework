@@ -125,12 +125,12 @@ class User {
 	 * @param type $password
 	 * @return boolean true/false 
 	 */
-	public function validatePassword ($password) {
-		return md5($password) == $this->password_hash ?: false;
+	public function validatePassword ($password) {		
+		return $password == $this->password_hash ?: false;
 	}
 	
-	public function updateUser() {
-		
+	public function updateUserProfileByID($fname, $lname) {
+		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
 	}
 
 	/**
