@@ -21,9 +21,7 @@ abstract class ObjectSafe {
 	 * Provides an idea of a static constructor - will have to be explicitly called from
 	 * autoloader and overriden in descendant classes
 	 */
-	static function __constructStatic() { 
-		
-		
+	static function __constructStatic() { 		
 		static::__methodsStatic();
 	}
 	
@@ -43,6 +41,29 @@ abstract class ObjectSafe {
 	protected function  aliasMethods() {
 		
 		$self = $this;
+		
+		$this->defineMethod('cache', function($mixed, $lambda = null) use ($self) { 
+			$key = $mixed;
+			
+			if (is_callable($mixed)) {
+				$reflection = new \ReflectionFunction($mixed);
+				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+				$lambda     = $mixed;
+			}
+			
+			// we are going to tack the object hash id on the end for 
+			// good effect
+			$key   += "::" + spl_object_hash($self);
+			$cache = &$self->reference('_cache'); 
+			
+			if (!isset($cache[$key])) {
+				$cache[$key] = $lambda();
+			}
+			
+			return $cache[$key];
+		});
+
+		
 		
 		$this->defineMethod('memberExists', function($member) use ($self) {
 			return property_exists($self, $member) || method_exists($self, $member);
@@ -87,8 +108,28 @@ abstract class ObjectSafe {
 	
 	protected static function aliasMethodsStatic() { 
 		
-		static::defineMethod('aliasMethod', function($alias, $from) {
-			$class = get_called_class();
+		// the cache method stores the return of lambda into static space
+		// but makes use of object id to 
+		$class = get_called_class();
+		
+		static::defineMethod('cache', function($mixed, $lambda = null) use($class) { 
+			$key   = $mixed;
+			$cache = $class::referenceStatic('_scache'); 
+			
+			if (is_callable($mixed)) {
+				$reflection = new \ReflectionFunction($mixed);
+				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+				$lambda     = $mixed;
+			}
+			
+			if (!isset($cache[$key])) {
+				$cache[$key] = $lambda();
+			}
+			
+			return $cache[$key];		
+		});
+		
+		static::defineMethod('aliasMethod', function($alias, $from) use ($class) {
 				
 			if (\method_exists($class, $from)) {
 					
@@ -99,7 +140,7 @@ abstract class ObjectSafe {
 						
 						// call original method
 						return call_user_func_array(array(
-								get_called_class(), $from
+								$class, $from
 						),  $__mixed);
 					});
 				}
@@ -117,8 +158,8 @@ abstract class ObjectSafe {
 		
 		
 		
-		static::defineMethod('memberExists', function($member) {
-			return property_exists($class = get_called_class(), $member) || method_exists($class, $member);
+		static::defineMethod('memberExists', function($member) use ($class) {
+			return property_exists($class, $member) || method_exists($class, $member);
 		});
 				
 	}
@@ -173,35 +214,6 @@ abstract class ObjectSafe {
 		}
 	}
 	
-	/**
-	 * This is here for convenience - used so create cacheable code blocks;
-	 * this needs to be moved to a trait when 5,4 is available
-	 * @TODO remove and replace with trait
-	 * @param  mixed $mixed
-	 * @param  callable $lambda
-	 * @return mixed
-	 */
-	public static function cache($mixed, $lambda = null) {
-		
-		// determine parameters - if the first argument is a lambda, then our
-		// cache key will be a lambda signature; otherwise, if string, that
-		// will become the cache key - otherwise key is set as default to mixed.
-		// which should be a string; I am not checking against this specifically
-		$key = $mixed;
-		
-		if (is_callable($mixed)) {
-			$reflection = new \ReflectionFunction($mixed);
-			$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
-			$lambda     = $mixed;
-		}
-		
-		if (!isset(static::$_cache[$key])) {
-			static::$_cache[$key] = $lambda();
-		}
-		
-		return static::$_cache[$key];
-			
-	}
 	
 
 	
@@ -281,7 +293,8 @@ abstract class ObjectSafe {
 		else if (\method_exists($this, $member)) {
 			$self       = $this;
 			$reflection = new \ReflectionMethod($this, $member);
-			$r->setAccessible(true);
+			
+			$reflection->setAccessible(true);
 			
 			return function($__mixed) use ($reflection, $self) {
 				return $reflection->invokeArgs($self, $__mixed);
@@ -293,6 +306,38 @@ abstract class ObjectSafe {
 		throw new \Exception(
 			"Failed to reference instance member $member as it does exist"		
 		);
+	}
+	
+	/**
+	 * See above - needed in 5.3 context to access protected members
+	 * from lambdas
+	 */
+	public static function &referenceStatic($member) {
+		$class = get_called_class();
+		
+		// if property, return reference to property using a local
+		// variable - this shouldn't work, but fuck it
+		if (\property_exists($class, $member)) {
+			$mirror = &static::$$member;
+			return $mirror;
+		}
+		
+		// in the case of a protected/private method, we will wrap in closure and
+		// return to caller
+		else if (\method_exists($class, $member)) {
+			$reflection = new \ReflectionMethod($class, $member);
+			$reflection->setAccessible(true);
+				
+			return function($__mixed) use ($reflection) {
+				return $reflection->invokeArgs(null, $__mixed);
+			};
+		}
+		
+		// otherwise, the member cannot be found and we throw an exception
+		// to that effect
+		throw new \Exception(
+				"Failed to reference class member $member as it does exist"
+		);		
 	}
 	
 	/**
@@ -331,8 +376,10 @@ abstract class ObjectSafe {
 				
 				// cache 'defineMethod' to methods
 				$self = $this;
-				$this->_methods[$name] = function($name, $lambda) use ($self) {
+				$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
 					
+					// create a reference to methods, since they cannot be directly referenced
+					// by self given class access modifer protected
 					$methods = &$self->reference('_methods');
 					$methods[$name] = $lambda;
 					
@@ -406,8 +453,10 @@ abstract class ObjectSafe {
 				
 				// cache/bind 'defineMethod' to methods - doing this will mean method will be 
 				// called automatically as opposed to rebuilding the definition of defineMetho
-				static::$_methodsStatic[$class][$name] = function ($name, $lambda) {
-					static::$_methodsStatic[get_called_class()][$name] = $lambda;
+				static::$_methodsStatic[$class][$name] = function($name, $lambda) use ($class) {
+					$methods = &$class::referenceStatic('_methodsStatic');
+					$methods[$class][$name] = $lambda;
+					
 					return true;
 				};
 				
@@ -443,14 +492,7 @@ abstract class ObjectSafe {
 				"Call to undefined method \"$name\" on " . get_called_class(), E_USER_ERROR
 		);		
 	}
-	
-	/** @deprecated */
-	protected static function __callAliasMethod($alias, $from) {
-		// this method is not intended to ever be directly invoked, but
-		// called from our __callstatic meta method - the point is
-		// to provide aliasMethod functionality from static context
-	
-	}
+
 	
 	
 	/**
@@ -468,8 +510,9 @@ abstract class ObjectSafe {
 
 	
 	protected static $_singleton;
-	protected static $_cache         = array();
-	protected static $_methodsStatic = array();
-	protected        $_methods       = array();
+	protected static $_scache         = array();
+	protected static $_methodsStatic  = array();
+	protected        $_methods        = array();
+	protected        $_cache          = array();
 	
 }

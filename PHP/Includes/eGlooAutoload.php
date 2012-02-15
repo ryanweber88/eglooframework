@@ -125,10 +125,7 @@ function eglooAutoload( $class_name ) {
 		$class_name = substr( $class_name, 1 );
 	}
 	
-	// attempt a construct static; this will be ignored if class
-	// does not fall in \eGloo\Dialect\Object class
-	// hierarchy
-	__constructStatic($class_name);
+
 
 	$cacheGateway = CacheGateway::getCacheGateway();
 
@@ -136,7 +133,12 @@ function eglooAutoload( $class_name ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include_once( $autoload_hash[$class_name] );				
+				include_once( $autoload_hash[$class_name] );		
+
+				// attempt a construct static; this will be ignored if class
+				// does not fall in \eGloo\Dialect\Object class
+				// hierarchy
+				__constructStatic($class_name);
 			}
 
 			return;
@@ -271,6 +273,11 @@ function eglooAutoload( $class_name ) {
 				}
 
 				include_once( $realPath );
+				
+				// attempt a construct static; this will be ignored if class
+				// does not fall in \eGloo\Dialect\Object class
+				// hierarchy
+				__constructStatic($class_name);
 
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
@@ -353,6 +360,11 @@ function eglooAutoload( $class_name ) {
 			include_once ( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+			
+			// attempt a construct static; this will be ignored if class
+			// does not fall in \eGloo\Dialect\Object class
+			// hierarchy
+			__constructStatic($class_name);
 		}
 	}
 
@@ -702,14 +714,28 @@ function almost_empty($in, $trim = false) {
  */
 function __constructStatic($name) {
 	
+	
 	// make sure object is instanceof of global Object 
 	// - if the case, then we are assured that we have
-	// a __constructStatic method, whether a stubb or
+	// a __statuc method, whether a stubb or
 	// actualy definition - since we are checking
 	// on a string, we need to call methodExists
 	// over 
-	if (method_exists($name, '__constructStatic')) {
-		$name::__constructStatic();
+	
+	if (method_exists($name, '__static')) {
+		
+		// because method exists will return true for inherited methods that
+		// are NOT explicitly defined in class - we need to determine that
+		// __static is in fact defined in loaded classes, otherwise we will
+		// constantly call the Object::__static for all of its descendants;
+		// to do this, we use reflection and check the declaring class against
+		// our passed name parameter
+		$reflection = new \ReflectionMethod($name, '__static');
+		
+		
+		if ($reflection->getDeclaringClass()->getName() == $name) { 
+			$name::__static();
+		}
 	}
 }
 

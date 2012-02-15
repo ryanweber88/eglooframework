@@ -75,9 +75,17 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
-		$model = '';
+		$model = '\\Common\\Domain\\Model\\' . 
+		         \eGloo\Utilities\InflectionsSafe::instance()
+			       ->singularize($name);
 		
-		$this->defineMethod($name, $lambda);
+		if (class_exists($model)) {
+			return $this->defineMethod($name, $lambda());
+		}
+		
+		throw new \Exception(
+			"Failed to define relationship using model $model"	
+		);
 	}
 	
 	/**

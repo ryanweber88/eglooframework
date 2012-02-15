@@ -113,13 +113,15 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 				}
 			}
 		}
-
+		
 		// begin -200 t/s
 		$this->populateTemplateVariables();
 		// end
 		
 		//echo $GLOBALS['payload']; return;
 
+		// add nil value to all templates as empty placeholder
+		$this->setTemplateVariable('nil', '');
 		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
 		$output = $templateDirector->processTemplate();
