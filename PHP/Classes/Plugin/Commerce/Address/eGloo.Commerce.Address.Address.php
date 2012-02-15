@@ -57,10 +57,10 @@ class Address {
 	public		$last_name;
 	
 	/*** @var String Address 1	 */
-	public		$address_1;
+	public		$address_line_1;
 	
 	/*** @var String Address 2	 */
-	public		$address_2;
+	public		$address_line_2;
 	
 	/*** @var String City 	*/
 	public		$city;
@@ -69,7 +69,16 @@ class Address {
 	public		$state;
 	
 	/*** @var Integer Zip Code 	 */
-	public		$postal_code;
+	public		$zip_code5;
+	
+	/*** @var Integer Zip Code 	 */
+	public		$zip_code4;
+	
+	/*** @var boolean residential 	 */
+	public		$residential = true;
+	
+	/*** @var boolean shippable 	 */
+	public		$shippable = true;
 	
 	/*** @var String County  */
 	public		$county;
@@ -84,16 +93,14 @@ class Address {
 	public		$label;
 	
 	public		$validated = false;
-
-
 	
-	const		ADDRESS_TYPE_RESIDENTIAL	= 1,
-				ADDRESS_TYPE_COMMERCIAL		= 0;
+	const		TYPE_RESIDENTIAL	= 1,
+				TYPE_COMMERCIAL		= 0;
 	
-	const		ADDRESS_ALLOW_PO			= 0;
-	
-	public function __construct($user_id) {
-		
+	public function __construct($args) {
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
 	}
 	
 	public function toArray() {
@@ -104,7 +111,14 @@ class Address {
 		
 	}
 	
-	public static function load() {
+	public static function loadByID($address_id) {
 		
+	}
+	
+	public static function saveAddress($label, $fname, $lname, $user_id, $address, $address2, 
+			$city, $state, $postal, $phone, $default, $residential = Address::TYPE_RESIDENTIAL, 
+			$shippable = Address::TYPE_RESIDENTIAL) {
+		return AddressDataAccess::fetch()->insertAddress($label, $fname, $lname, $user_id, $address,
+				$address2, $city, $state, $postal, $phone, $default, $residential, $shippable );
 	}
 }

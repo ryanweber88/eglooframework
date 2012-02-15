@@ -61,12 +61,14 @@ class AddressDataAccess  extends Connection\PostgreSQLDBConnection{
 		return static::$instance;
 	}
 	
-	public function createCoupon() {
+	/*public function insertAddress($label, $fname, $lname, $user_id, $address,
+				$address2, $city, $state, $postal, $phone, $default, $residential, $shippable) {
+		echo __METHOD__;
 		
-	}
+	}*/
 	
-	public function loadCouponById($program_id) {
-		if ($program_id == '') {
+	public function loadByID($address_id) {
+		if ($address_id == '') {
 			throw new \InvalidArgumentException('[: Missing argument error:] Address id is required!', __METHOD__);
 		}
 	}
