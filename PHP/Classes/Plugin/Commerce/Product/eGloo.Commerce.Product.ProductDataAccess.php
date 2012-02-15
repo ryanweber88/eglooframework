@@ -41,16 +41,8 @@ use \eGloo\Domain;
  */
 class ProductDataAccess extends Domain\Data {
 	
-	/** @var resource Object */
-	protected static $instance = null;
+
 	
-	/**
-	 * Overwrite $rawConnectionResource setting in connection file
-	 * 
-	 * @param resource $rawConnectionResource = null
-	 * @return void
-	 */
-	public function __construct() {}
 	
 	/**
 	 * Create an instance of the class

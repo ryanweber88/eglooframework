@@ -24,7 +24,6 @@ abstract class ObjectSafe {
 	static function __constructStatic() { 
 		
 		
-		//static::aliasMethodsStatic();
 		static::__methodsStatic();
 	}
 	
@@ -34,19 +33,49 @@ abstract class ObjectSafe {
 	 * it out
 	 */
 	static function __static() {
-		
+		static::__constructStatic();
 	}
 	
 	// These are stubs but called by the constructor - so as they
 	// can be used inherited classes
-	protected function  aliasMethods()    { }
 	protected function  aliasProperties() { }
-	protected static function aliasMethodsStatic() { }
 	
-	protected static function __staticMethods() {
-		static::aliasMethodsStatic();
+	protected function  aliasMethods() {
+		
+		$self = $this;
+		
+		$this->defineMethod('memberExists', function($member) use ($self) {
+			return property_exists($self, $member) || method_exists($self, $member);
+		});
+		
+		// define aliasMethod at instance level
+		$this->defineMethod('aliasMethod', function($alias, $from) use ($self) {
+			if (\method_exists($self, $from)) {
+		
+				if (!\method_exists($self, $alias)) {
+					// use lambda/block to place method alias method definition into
+					// this instance "singleton" or eigenclass
+					$self->defineMethod($alias, function($__mixed = null) {
+							
+						// call original method
+						return call_user_func_array(array(
+								$self, $from
+						),  $__mixed);
+					});
+				}
+		
+				throw new \Exception(
+						"Attempted alias on $alias failed because it already exists as method on instance"
+				);
+			}
+		
+			throw new \Exception(
+					"Attempting an alias on method $from which does not exist"
+			);
+		});
+				
 	}
-	
+		
 	/**
 	 * Alias to aliasMethods - thought it fits more into the idea of
 	 * constructor/meta call
@@ -55,6 +84,51 @@ abstract class ObjectSafe {
 		$this->aliasMethods();
 	}
 	
+	
+	protected static function aliasMethodsStatic() { 
+		
+		static::defineMethod('aliasMethod', function($alias, $from) {
+			$class = get_called_class();
+				
+			if (\method_exists($class, $from)) {
+					
+				if (!\method_exists($class, $alias)) {
+					// use lambda/block to place method alias method definition into
+					// this instance "singleton" or eigenclass
+					static::defineMethod($alias, function($__mixed = null) {
+						
+						// call original method
+						return call_user_func_array(array(
+								get_called_class(), $from
+						),  $__mixed);
+					});
+				}
+					
+				throw new \Exception(
+						"Attempted alias on $alias failed because it already exists in class scope"
+				);
+			}
+				
+			throw new \Exception(
+					"Attempting an alias on method $from which does not exist"
+			);
+				
+		});
+		
+		
+		
+		static::defineMethod('memberExists', function($member) {
+			return property_exists($class = get_called_class(), $member) || method_exists($class, $member);
+		});
+				
+	}
+	
+	protected static function __methodsStatic() {
+		static::aliasMethodsStatic();			
+	}
+	
+
+	
 	/**
 	 * Alias to aliasProperties
 	 */
@@ -62,59 +136,9 @@ abstract class ObjectSafe {
 		$this->aliasProperties();
 	}
 	
-	/**
-	 * Aliases a method on call/callstatic
-	 */
-	protected function aliasMethod($alias, $from) {
-		
-		if (\method_exists($this, $from)) { 
-			
-			if (!\method_exists($this, $alias)) {
-				// use lambda/block to place method alias method definition into 
-				// this instance "singleton" or eigenclass 
-				$this->defineMethod($alias, function($__mixed = null) { 
-					// call original method
-					return call_user_func_array(array(
-							$this, $from
-					),  $__mixed); 
-				});
-			}
-			
-			throw new \Exception(
-				"Attempted alias on $alias failed because it already exists as method on instance"		
-			);
-		}
-		
-		throw new \Exception(
-			"Attempting an alias on method $from which does not exist"		
-		);
-	}
+
 	
-	protected function aliasMethodStatic($alias, $from) {
-		$class = get_called_class();
-		
-		if (\method_exists($class, $from)) { 
-			
-			if (!\method_exists($class, $alias)) {
-				// use lambda/block to place method alias method definition into 
-				// this instance "singleton" or eigenclass 
-				static::defineMethodStatic($alias, function($__mixed = null) { 
-					// call original method
-					return call_user_func_array(array(
-							$class, $from
-					),  $__mixed); 
-				});
-			}
-			
-			throw new \Exception(
-				"Attempted alias on $alias failed because it already exists as method on class"		
-			);
-		}
-		
-		throw new \Exception(
-			"Attempting an alias on method $from which does not exist"		
-		);
-	}
+
 	
 	/**
 	 * Aliases a property using reference; does not check on property existence
@@ -179,18 +203,7 @@ abstract class ObjectSafe {
 			
 	}
 	
-	/**
-	 * Because php 5.3's handling of closures is retarded, we need to provide this
-	 * method in order to access protected/private members from
-	 */
-	protected static function access($instance, $member) {
-		// there is a point of failure here in that a property will take presedence of a method
-		// -in that event, you fucked up, because that really shouldnt be the case
 
-		
-		
-	}
-	
 	
 	/**
 	 * Used to determine methods caller - same idea as javascript's "caller";
@@ -344,50 +357,11 @@ abstract class ObjectSafe {
 				);	
 			}
 		}
-		
-		else if ($name == 'aliasMethod') {
 			
-			// cache to defineMethod
-			$this->_methods[$name] = function($alias, $from) { 
-				if (\method_exists($this, $from)) {
-						
-					if (!\method_exists($this, $alias)) {
-						// use lambda/block to place method alias method definition into
-						// this instance "singleton" or eigenclass
-						$this->defineMethod($alias, function($__mixed = null) {
-							
-							// call original method
-							return call_user_func_array(array(
-									$this, $from
-							),  $__mixed);
-						});
-					}
-						
-					throw new \Exception(
-							"Attempted alias on $alias failed because it already exists as method on instance"
-					);
-				}
-				
-				throw new \Exception(
-						"Attempting an alias on method $from which does not exist"
-				);
-			};
-			
-			// now turn around and call our cached method
-			return call_user_func_array(
-				$this->_methods[$name], $arguments		
-			);
-			
-
-		}
-	
-		
-		
-		
 		
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)
-		trigger_error(
+		throw new \Exception (
 			"Call to undefined method \"$name\" on " . get_class($this), E_USER_ERROR
 		);
 		
@@ -456,44 +430,7 @@ abstract class ObjectSafe {
 			}
 		}
 		
-		else if ($name == 'aliasMethod') {
-			// cache method to static methods container
-			
-			// here's our definition of aliasMethod
-			// @TODO again, we need plugin solution
-			static::$_methodsStatic[$class][$name] = function($alias, $from) { 
-				$class = get_called_class();
-				
-				if (\method_exists($class, $from)) {
-						
-					if (!\method_exists($class, $alias)) {
-						// use lambda/block to place method alias method definition into
-						// this instance "singleton" or eigenclass
-						static::defineMethod($alias, function($__mixed = null) {
-							// call original method
-							return call_user_func_array(array(
-									$class, $from
-							),  $__mixed);
-						});
-					}
-						
-					throw new \Exception(
-							"Attempted alias on $alias failed because it already exists in class scope"
-					);
-				}
-				
-				throw new \Exception(
-						"Attempting an alias on method $from which does not exist"
-				);
-			};
-			
-			// now call our just-defined method
-			return call_user_func_array(
-				static::$_methodsStatic[$class][$name], $arguments
-			);
-		}
-		
-		
+
 		
 		
 		// magic - here we define dynamic calls on existing properties and methods
@@ -502,17 +439,19 @@ abstract class ObjectSafe {
 		
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)		
-		trigger_error(
+		throw new \Exception(
 				"Call to undefined method \"$name\" on " . get_called_class(), E_USER_ERROR
 		);		
 	}
 	
+	/** @deprecated */
 	protected static function __callAliasMethod($alias, $from) {
 		// this method is not intended to ever be directly invoked, but
 		// called from our __callstatic meta method - the point is
 		// to provide aliasMethod functionality from static context
 	
 	}
+	
 	
 	/**
 	 * Convenience method for determining class name - 

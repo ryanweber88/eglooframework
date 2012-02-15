@@ -72,6 +72,11 @@ abstract class Model extends \eGloo\Utilities\Delegator
 	 * idiomatic reasons only
 	 */
 	protected function defineRelationship($name, $lambda) {
+		// get model name, using inflection class
+		// @TODO this will need to be changed as it doesn't
+		// belong here
+		$model = '';
+		
 		$this->defineMethod($name, $lambda);
 	}
 	
