@@ -164,4 +164,9 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		$sql = 'SELECT * FROM user_communication WHERE hashcode = ? AND valid_through > ?';
 		return parent::getUnique($sql, array($hash, date('Y-m-d H:i:s', time())));
 	}
+	
+	public function loadAddressByID($user_id) {
+		$sql = 'SELECT * FROM user_address WHERE user_id =?';
+		return parent::executeSelect($sql, array($user_id));
+	}
 }

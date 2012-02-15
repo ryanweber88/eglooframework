@@ -83,7 +83,9 @@ class User {
 	/** @var string last logged in date */
 	public $last_action_date;
 	
-	public $user_roles = array();
+	public $user_roles		= array();
+	
+	public $user_addresses	= array();
 
 	/** @var string is user logged in */	
 	protected static $logged_in		= false;
@@ -131,6 +133,14 @@ class User {
 	
 	public function updateUserProfileByID($fname, $lname) {
 		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
+	}
+	
+	public function loadAddress () {
+		if (empty ($this->user_addresses)) {
+			$this->user_addresses = UserDataAccess::fetch()->loadAddressByID($this->user_id);
+		}
+		$this->user_addresses;
+		return $this;
 	}
 
 	/**
