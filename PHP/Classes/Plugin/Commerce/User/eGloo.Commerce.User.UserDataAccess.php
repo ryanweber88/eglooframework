@@ -166,7 +166,18 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	}
 	
 	public function loadAddressByID($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
 		$sql = 'SELECT * FROM user_address WHERE user_id =?';
+		return parent::executeSelect($sql, array($user_id));
+	}
+	
+	public function loadPaymentsByID($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+		$sql = 'SELECT * FROM credit_debit_card WHERE user_id = ?';
 		return parent::executeSelect($sql, array($user_id));
 	}
 }
