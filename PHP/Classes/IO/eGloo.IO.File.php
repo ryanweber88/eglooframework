@@ -10,7 +10,7 @@ namespace eGloo\IO;
  */
 class File extends IO { 
 	
-	const OP_READ = 0x00;
+	const OP_READ = 'r';
 	
 	/**
 	 * 
@@ -22,7 +22,7 @@ class File extends IO {
 		$this->path    = $path;
 		
 		if (!$this->pointer) { 
-			throw new \eGloo\Dialect\Exception(
+			throw new \Exception(
 				"FAILED opening file @ path = $path"
 			);
 		}
@@ -50,7 +50,13 @@ class File extends IO {
 		}	
 			
 		if (is_callable($handler)) { 
-			return $handler($file);
+			// pass instance of self into block 
+			$result = $handler($file);
+			
+			// unset instance which will cause a close to file pointer 
+			unset($file);
+			
+			return $result;
 		} 
 		
 		else { 

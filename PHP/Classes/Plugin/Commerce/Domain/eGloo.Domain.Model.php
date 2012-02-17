@@ -1,12 +1,13 @@
 <?php
 namespace eGloo\Domain;
 
+use \eGloo\Utilities\Delegator;
 
 /**
  * Superclass for all domain models; provides generic functionality
  * @author Christian Calloway callowaylc@gmail.com
  */
-abstract class Model extends \eGloo\Utilities\Delegator 
+abstract class Model extends Delegator 
 	implements \eGloo\Utilities\ToArrayInterface {
 	
 	// this acts as a store for adding runtime instance properties
@@ -22,7 +23,7 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if (is_array($__mixed) && \eGloo\Utilities\Collection::isHash($__mixed)) {
-			$this->initialize($mixed);
+			$this->initialize($__mixed);
 		}
 		
 		// pass to parent delegator::__construct our *DataAccess
@@ -35,24 +36,35 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		// associated *DataAccess to delegate to - in which case
 		// we simply ignore the generated exception
 		catch(\Exception $ignore) { }
-			
+		
+		
+		// call our relationships method, which provides callbacks attached
+		// to the names of our relationships
+		$this->__relationships();
+		
 		
 
+	}
+	
+	static function __static() {
+		// assign static delegation 
+		Delegator::delegate(get_called_class(), get_class(static::data()));
 	}
 	
 	/**
 	 * Responsible for initialize of model attributes
 	 */
-	protected function initialize(array $arguments = array()) {
+	protected function initialize(array $arguments) {
 
 		foreach($arguments as $name => $value) { 
 			$this->$name = $value;
 		}
-		
+				
 		// call __relationships - the idea is that child classes should
 		// use method as area to concretely draw all domain based relationships;
 		// this method should be seen as a constructor for relationships
-		$this->__relationships();
+		$this->__properties();
+
 		
 		// finally set flag 'initialized' to true
 		$this->initialized = true;
@@ -78,13 +90,15 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		$model = '\\Common\\Domain\\Model\\' . 
 		         \eGloo\Utilities\InflectionsSafe::instance()
 			       ->singularize($name);
-		
+				
 		if (class_exists($model)) {
-			return $this->defineMethod($name, $lambda());
+			return $this->defineMethod($name, function() use ($model) {
+				return $lambda($model);
+			});
 		}
 		
 		throw new \Exception(
-			"Failed to define relationship using model $model"	
+			"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
 		);
 	}
 	
@@ -121,39 +135,38 @@ abstract class Model extends \eGloo\Utilities\Delegator
 
 	
 	protected function __properties() {
+		// call our parent method to ensure any property work is done
+		// up hierarchy chain
+		parent::__properties();
 		
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = strtolower(preg_replace(
 			'/([a-z])([A-Z])/', '$1_$2', static::className()
 		));
-		
-		//echo $class; exit;
 				
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
 		// @TODO replace self reference - stupid 5.3 issue
 		$self = $this;
+				
 		
 		$properties = static::cache(function() use ($self) {
-			return object_get_vars($self);
+			return \array_keys(\get_object_vars($self));
 		});
 		
+		
 		foreach($properties as $name) {
-			if (preg_match("/{$class}_(.+?)/", $name, $match)) {
+			if (preg_match("/{$class}_(.+)/", $name, $match)) {
+				//echo "found {$match[1]}"; exit;
 				$this->aliasProperty(
 					strtolower($match[1]), $name	
-				);
+				);				
 			}
 		}
 		
 		
 	}
 	
-	protected function __methods() {
-		$class = static::className();
-		
-		
-	}
 	
 	protected static function __methodsStatic() {
 		$class = static::className();
@@ -288,10 +301,6 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		//	return $this->properties[$key];
 		//}
 		
-		if ($name == 'product_id') {
-			echo get_parent_class(get_parent_class($this)); exit;
-			var_export(get_class_vars(get_class($this))); exit;
-		}
 	
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
@@ -313,38 +322,14 @@ abstract class Model extends \eGloo\Utilities\Delegator
 		
 		// otherwise pass to parent __get handler for higher level
 		// processing
+
+		
 		return parent::__get($name);
 			
 		
 		
 	}	
 	
-
-	/**
-	 * Currently this acts as a passthrough to our parent delegator
-	 */
-	public function __call($name, $arguments) {
-		return parent::__call($name, $arguments);
-	}
-	
-	/**
-	 * We must override parent delegator and attempt to delegate to
-	 * static methods on *DataAccess, because PHP does NOT having
-	 * fucking static constructing
-	 */
-	public static function __callstatic($name, $arguments) {
-
-		
-		if (method_exists($data = static::data(), $name)) {			
-			return call_user_func_array(
-				array($data, $name), $arguments	
-			);
-			
-		}
-			
-		// defer to parent if not able to delegate
-		return parent::__callstatic($name, $arguments);
-	}
 	
 	private function guessPrimaryKey() {
 		// attempt to get primary key based on strlower(classname)_id pattern

@@ -93,7 +93,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	 * @return void
 	 */
 	public function plural($regexp, $replacement) { 
-		$this->plurals[] = [ $regexp, $replacement ];
+		$this->plurals[] = array($regexp, $replacement);
 	}
 
 	/**
@@ -104,7 +104,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	 * @return void
 	 */
 	public function singular($regexp, $replacement) { 
-		$this->singulars[] = [ $regexp, $replacement ];
+		$this->singulars[] = array($regexp, $replacement);
 	}
 	
 	/**
@@ -116,7 +116,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	 * @return void
 	 */
 	public function human($regexp, $replacement) { 
-		$this->humans[] = [ $regexp, $replacement ];
+		$this->humans[] = array($regexp, $replacement);
 	}	
 	
 	/**
@@ -128,7 +128,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	 * @return void
 	 */
 	public function irregular($singular, $plural) { 
-		$this->irregulars[] = [ $singular, $plural ];
+		$this->irregulars[] = array($singular, $plural);
 	}		
 
 	/**

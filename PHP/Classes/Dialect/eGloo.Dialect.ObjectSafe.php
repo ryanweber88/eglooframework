@@ -21,7 +21,7 @@ abstract class ObjectSafe {
 	 * Provides an idea of a static constructor - will have to be explicitly called from
 	 * autoloader and overriden in descendant classes
 	 */
-	static function __constructStatic() { 		
+	static function __constructStatic() { 
 		static::__methodsStatic();
 	}
 	
@@ -41,6 +41,20 @@ abstract class ObjectSafe {
 	protected function  aliasMethods() {
 		
 		$self = $this;
+
+		//echo "creating define method on receiver " . get_called_class() . "<br />"; 
+		
+		// we need to immediately call define method, this will be the basis for
+		// all runtime defined methods
+		$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
+				
+			// create a reference to methods, since they cannot be directly referenced
+			// by self given class access modifer protected
+			$methods        = &$self->reference('_methods');
+			$methods[$name] = $lambda;
+				
+			return $self;
+		};		
 		
 		$this->defineMethod('cache', function($mixed, $lambda = null) use ($self) { 
 			$key = $mixed;
@@ -112,7 +126,14 @@ abstract class ObjectSafe {
 		// but makes use of object id to 
 		$class = get_called_class();
 		
-		static::defineMethod('cache', function($mixed, $lambda = null) use($class) { 
+		static::$_methodsStatic[$class]['defineMethod'] = function($name, $lambda) use ($class) {
+			$methods = &$class::referenceStatic('_methodsStatic');
+			$methods[$class][$name] = $lambda;
+				
+			return true;
+		};		
+		
+		static::defineMethod('cache', function($mixed, $lambda = null) use ($class) { 
 			$key   = $mixed;
 			$cache = $class::referenceStatic('_scache'); 
 			
@@ -187,9 +208,17 @@ abstract class ObjectSafe {
 	 */
 	protected function aliasProperty($alias, $from) {
 		if (!\property_exists($this, $alias)) { 
+			// this is a wtfphp issue; when assigning by reference, the __get
+			// dump is called, which throws an exception at this level; to get
+			// around, you must first assign ANY non-reference value, which
+			// has the effect of calling __set, which then officially adds
+			// property to instance
+			$this->$alias = null;
+			
 			$this->$alias = &$this->$from;
 			return $this;
 		}
+		
 		
 		throw new \Exception(
 			"Attempted alias on $alias failed because it already exists as a property on this instance"		
@@ -222,13 +251,9 @@ abstract class ObjectSafe {
 	 * this should be used sparingly, as a debug_backtrace can be expensive
 	 */
 	public static function caller() {
-	
-		// use backtrace to determine caller
-		$trace  = debug_backtrace();
-		
 		// wrap in caller instance, which should provide convenience methods 
 		// for dealing with caller
-		return new \eGloo\Utilities\Caller($trace[1]);
+		return new \eGloo\Utilities\Caller(debug_backtrace());
 	}	
 	
 	/**
@@ -271,7 +296,7 @@ abstract class ObjectSafe {
 		// if we have reached this point, all dynamic get options have been
 		// exhausted and we trigger an error
 		throw new \Exception(
-			"Instance property $name does not exist"		
+			"Instance property $name does not exist in receiver " . get_called_class()		
 		);
 	}
 	
@@ -340,6 +365,10 @@ abstract class ObjectSafe {
 		);		
 	}
 	
+	public function __toString() {
+		return get_class($this);
+	}
+	
 	/**
 	 * Experiment - the purpose is provide one interface for accessing __call &
 	 * __callstatic, but I don;t know how to at the moment
@@ -354,6 +383,19 @@ abstract class ObjectSafe {
 	 */
 	public function __call($name, $arguments) { 
 		
+		//echo "calling $name on receiver " . get_called_class() . "<br />";
+		
+		// create an instancer of Caller so we can determine
+		// origin or caller context
+		$caller = static::caller();
+		
+		// since php cannot make a determination between instance/static 
+		// receiver when called from an instance context, we have
+		// to manually pass call to our callstatic dump
+		if ($caller->isReceivedStatically()) {
+			return static::__callstatic($name, $arguments);
+		}
+		
 		
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
@@ -362,54 +404,12 @@ abstract class ObjectSafe {
 			);
 		}
 		
-		// define instance/static context free methods - this list
-		// needs to be kept as short as possible as we don't want
-		// to define a great deal of funcitonality here
-		
-		// provide defineMethod functionality to instance
-		// @TODO abstract this concept - something plugin based
-		// would be nice
-		if ($name == 'defineMethod') {
-			
-			// perform argument checking
-			if (count($arguments) >= 2 && is_string($arguments[0]) && is_callable($arguments[1])) { 
-				
-				// cache 'defineMethod' to methods
-				$self = $this;
-				$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
-					
-					// create a reference to methods, since they cannot be directly referenced
-					// by self given class access modifer protected
-					$methods = &$self->reference('_methods');
-					$methods[$name] = $lambda;
-					
-					return $self;
-				};
-				
-				// now call our just-defined method
-				// @TODO every dynamic method definition contains this - determine
-				// how to move to after method definition section as this violates
-				// DRY
-				return call_user_func_array(
-					$this->_methods[$name], $arguments
-				);
-				
-
-					
-			}
-			
-			else {
-				throw new \Exception(
-					"Arguments provided to define method are incorrect : $arguments "			
-				);	
-			}
-		}
 			
 		
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)
 		throw new \Exception (
-			"Call to undefined method \"$name\" on " . get_class($this), E_USER_ERROR
+			"Call to undefined instance method \"$name\" on receiver $this"
 		);
 		
 	}
@@ -439,49 +439,6 @@ abstract class ObjectSafe {
 		
 
 		
-		// define our basic building block methods - these should be context free
-		// and define limited functionality
-		// @TODO this should be done plugin fashion
-		
-		
-		if ($name == 'defineMethod') {
-			
-			// perform argument checking against defineMethod - the point here is 
-			// to not hold the developer hand, but guard against what would be a very
-			// tough bug to track down, given the dynamic nature of defineMethod
-			if (count($arguments) >= 2 && is_string($arguments[0]) && is_callable($arguments[1])) {
-				
-				// cache/bind 'defineMethod' to methods - doing this will mean method will be 
-				// called automatically as opposed to rebuilding the definition of defineMetho
-				static::$_methodsStatic[$class][$name] = function($name, $lambda) use ($class) {
-					$methods = &$class::referenceStatic('_methodsStatic');
-					$methods[$class][$name] = $lambda;
-					
-					return true;
-				};
-				
-				//var_export(static::$_methodsStatic); exit;
-				
-				// now call define method - unfortunately we have to fucking
-				// use two expressions since 5.3 is too fucking stupid to be
-				// able to reference a lambda from within an array
-				return call_user_func_array(
-					static::$_methodsStatic[$class][$name], $arguments	
-				);
-				
-			
-			}
-			
-			else {
-				throw new \Exception(
-					"Arguments provided to $name are incorrect : $arguments "		
-				);
-			}
-		}
-		
-
-		
-		
 		// magic - here we define dynamic calls on existing properties and methods
 		// such as $this->$property_like(regexp)
 		
@@ -489,7 +446,7 @@ abstract class ObjectSafe {
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)		
 		throw new \Exception(
-				"Call to undefined method \"$name\" on " . get_called_class(), E_USER_ERROR
+				"Call to undefined class method \"$name\" on receiver " . get_called_class()
 		);		
 	}
 
@@ -502,12 +459,11 @@ abstract class ObjectSafe {
 	 * now this will do
 	 */
 	public static function className() {
-		$tokens = implode('\\', get_called_class());
+		$tokens = explode('\\', get_called_class());
 		
 		return $tokens[count($tokens)-1];
 	}
 	
-
 	
 	protected static $_singleton;
 	protected static $_scache         = array();

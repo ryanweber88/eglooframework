@@ -723,7 +723,7 @@ function __constructStatic($name) {
 	// over 
 	
 	if (method_exists($name, '__static')) {
-		
+				
 		// because method exists will return true for inherited methods that
 		// are NOT explicitly defined in class - we need to determine that
 		// __static is in fact defined in loaded classes, otherwise we will
