@@ -31,8 +31,10 @@ abstract class Delegator extends Object {
 		if ($caller->isReceivedStatically()) {
 			return static::__callstatic($name, $arguments);
 		}
-				
-		//echo "calling instance $name on  " . get_class($this) . "<br />";
+
+		if ($name == 'statement')
+		echo "calling instance $name on  " . get_class($this) . "<br />";
+		
 		
 		if (!is_null($this->delegated) && method_exists($this->delegated, $name)) {
 
@@ -52,11 +54,15 @@ abstract class Delegator extends Object {
 	 */
 	public static function __callstatic($name, $arguments) {
 		
-		//echo "calling static $name on  " . get_called_class() . "<br />";
+		if ($name == 'statement') {
+			echo "calling static $name on  " . get_called_class() . "<br />";
+			var_export(static::$associated[get_called_class()]); exit;
+		}
 		
 		if (isset(static::$associated[$class = get_called_class()]) && 
 				method_exists($delegated = static::$associated[$class], $name)) {
 			
+			exit('here');
 			return call_user_func_array(
 				"$delegated::$name", $arguments	
 			);
