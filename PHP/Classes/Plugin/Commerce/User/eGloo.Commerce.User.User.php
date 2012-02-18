@@ -89,7 +89,7 @@ class User {
 	
 	public		$payment_options = array();
 	
-	public		$user_phones		= array();
+	public		$phone_numbers		= array();
 
 	/** @var string is user logged in */	
 	protected static $logged_in		= false;
@@ -139,6 +139,17 @@ class User {
 		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
 	}
 	
+	public function savePhoneNumber($number) {
+		if (!UserDataAccess::fetch()->savePhoneNumber($number, $this->user_id)) {
+			if (UserDataAccess::fetch()->updatePhoneNumber($number, $this->user_id)) {
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
+
 	public function loadAddress () {
 		if (empty ($this->user_addresses)) {
 			$this->user_addresses = UserDataAccess::fetch()->loadAddressByID($this->user_id);
@@ -152,6 +163,14 @@ class User {
 			$this->payment_options = UserDataAccess::fetch()->loadPaymentsByID($this->user_id);
 		}
 		$this->payment_options;
+		return $this;
+	}
+	
+	public function loadPhoneNumbers () {
+		if (empty ($this->phone_numbers)) {
+			$this->phone_numbers = UserDataAccess::fetch()->loadPhoneNumbers($this->user_id);
+		}
+		$this->phone_numbers;
 		return $this;
 	}
 

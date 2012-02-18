@@ -64,9 +64,11 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException();
 		}
-		$this->beginTransaction();
-		$date = date('Y-m-d H:i:s', time());
+		
 		try {
+			$this->beginTransaction();
+			$date = date('Y-m-d H:i:s', time());
+		
 			$email_insert_sql = 'INSERT INTO email_address (email_address, last_action,'
 							  . 'last_action_taken) VALUES(?,?,?);';
 			parent::executeInsert($email_insert_sql, array($email, 'I', $date));
@@ -143,6 +145,24 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		$sql = 'UPDATE site_user set first_name = ?, last_name = ? WHERE user_id=?';
 		return parent::executeUpdate($sql, array($fname, $lname, $user_id));
 	}
+	
+	public function savePhoneNumber($number, $user_id) {
+		if ($number == '' || $user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = 'INSERT INTO user_phone_number(user_id, phone_number, last_action, 
+			last_action_taken, action_by) VALUES (?, ?, ?, ?, ?)';
+		return parent::executeInsert($sql, array($user_id, $number, 'I', date('Y-m-d H:i:s',time()), $user_id));
+	}
+	
+	public function updatePhoneNumber($number, $user_id) {
+		if ($number == '' || $user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error', __METHOD__);
+		}
+		$sql = 'UPDATE user_phone_number SET phone_number = ?, last_action = ?, 
+			last_action_taken = ?, action_by = ? WHERE user_id = ?';
+		return parent::executeInsert($sql, array($number, 'U', date('Y-m-d H:i:s',time()), $user_id));
+	}
 
 
 	public function sendCommunication($user_id, $comm_type_id, $end_time, $code, $user_id, $start_time = null) {
@@ -178,6 +198,14 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
 		}
 		$sql = 'SELECT * FROM credit_debit_card WHERE user_id = ?';
+		return parent::executeSelect($sql, array($user_id));
+	}
+	
+	public function loadPhoneNumber($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+		$sql = 'SELECT * FROM user_phone_number WHERE user_id = ?';
 		return parent::executeSelect($sql, array($user_id));
 	}
 }
