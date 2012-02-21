@@ -732,8 +732,16 @@ function __constructStatic($name) {
 		// our passed name parameter
 		$reflection = new \ReflectionMethod($name, '__static');
 		
-		
-		if ($reflection->getDeclaringClass()->getName() == $name) { 
+		// since our static constructors do share the same concept of inheritence
+		// as do regular constructors, we use the 'Polymorphic' annotation to
+		// describe any static constructor that should be called in the 
+		// children of 
+		if (strpos($reflection->getDocComment(), '@Polymorphic') !== false || 
+				
+		// check if __static is in declaring class, as opposed to simply available
+		// through inheritence		
+				$reflection->getDeclaringClass()->getName() == $name) { 
+
 			$name::__static();
 		}
 	}

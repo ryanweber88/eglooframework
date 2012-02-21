@@ -46,6 +46,7 @@ abstract class Model extends Delegator
 
 	}
 	
+	/** @Polymorphic */
 	static function __static() {
 		// assign static delegation 
 		Delegator::delegate(get_called_class(), get_class(static::data()));
@@ -150,14 +151,17 @@ abstract class Model extends Delegator
 		$self = $this;
 				
 		
+		// @TODO static cache is not working here - needs to be
+		// polymorphic
 		$properties = static::cache(function() use ($self) {
 			return \array_keys(\get_object_vars($self));
 		});
 		
+		$properties = \array_keys(\get_object_vars($this));
+		
 		
 		foreach($properties as $name) {
 			if (preg_match("/{$class}_(.+)/", $name, $match)) {
-				//echo "found {$match[1]}"; exit;
 				$this->aliasProperty(
 					strtolower($match[1]), $name	
 				);				

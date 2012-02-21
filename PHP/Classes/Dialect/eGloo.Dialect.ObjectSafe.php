@@ -135,7 +135,7 @@ abstract class ObjectSafe {
 		
 		static::defineMethod('cache', function($mixed, $lambda = null) use ($class) { 
 			$key   = $mixed;
-			$cache = $class::referenceStatic('_scache'); 
+			$cache = &$class::referenceStatic('_scache'); 
 			
 			if (is_callable($mixed)) {
 				$reflection = new \ReflectionFunction($mixed);
@@ -208,6 +208,7 @@ abstract class ObjectSafe {
 	 */
 	protected function aliasProperty($alias, $from) {
 		if (!\property_exists($this, $alias)) { 
+
 			// this is a wtfphp issue; when assigning by reference, the __get
 			// dump is called, which throws an exception at this level; to get
 			// around, you must first assign ANY non-reference value, which
