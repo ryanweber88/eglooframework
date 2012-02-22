@@ -41,6 +41,7 @@ abstract class Model extends Delegator
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
 		$this->__relationships();
+		$this->__callbacks();
 		
 		
 
@@ -88,13 +89,33 @@ abstract class Model extends Delegator
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
-		$model = '\\Common\\Domain\\Model\\' . 
-		         \eGloo\Utilities\InflectionsSafe::instance()
-			       ->singularize($name);
+		//echo static::namespaceName(); exit;
+		$name  = \eGloo\Utilities\InflectionsSafe::instance()
+						->singularize($name);
+		$ns    = $this->namespace();
 				
-		if (class_exists($model)) {
+		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
 			return $this->defineMethod($name, function() use ($model) {
-				return $lambda($model);
+				$result = $lambda($model);
+				
+				// check if singular result or hash
+				if (is_array($result)) {
+					if (\eGloo\Utilities\Collection::isHash($result)) {
+						$result = new $model($result);
+					}
+					
+					else {
+						
+						foreach($result as $record) {
+							$temporary[] = new $model($record);	
+						}
+						
+						// replace result with temporary
+						$result = $temporary;
+					}
+				}
+				
+				return $result;
 			});
 		}
 		
@@ -107,6 +128,16 @@ abstract class Model extends Delegator
 	 * A stubb method here to be used by concrete model classes
 	 */
 	protected function __relationships() { }
+	protected function __callbacks()     { }
+	
+	/** Callbacks **************************************************************/
+	
+	protected function beforeCreate() { }
+	protected function beforeSave()   { }
+	protected function beforeUpdate() { }
+	
+	
+
 	
 	/**
 	 * @param variable-length $__mixed
@@ -359,6 +390,7 @@ abstract class Model extends Delegator
 				"Failed to create model $class becfause it does not exist"
 		);
 	}	
+	
 	
 	
 	

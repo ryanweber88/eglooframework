@@ -56,6 +56,14 @@ abstract class ObjectSafe {
 			return $self;
 		};		
 		
+		$this->defineMethod('namespace', function() use ($self) {
+			return $self->cache(function() use ($self) {
+				$reflection = new \ReflectionClass($self);
+				return $reflection->getNamespaceName();
+			});
+		});
+		
+		
 		$this->defineMethod('cache', function($mixed, $lambda = null) use ($self) { 
 			$key = $mixed;
 			
@@ -126,31 +134,54 @@ abstract class ObjectSafe {
 		// but makes use of object id to 
 		$class = get_called_class();
 		
-		static::$_methodsStatic[$class]['defineMethod'] = function($name, $lambda) use ($class) {
-			$methods = &$class::referenceStatic('_methodsStatic');
-			$methods[$class][$name] = $lambda;
-				
-			return true;
-		};		
+		static::$_methodsStatic[$class]['defineMethod'] = function($name, $lambda, $class) {
 		
-		static::defineMethod('cache', function($mixed, $lambda = null) use ($class) { 
-			$key   = $mixed;
-			$cache = &$class::referenceStatic('_scache'); 
+			// create a reference to methods, since they cannot be directly referenced
+			// by self given class access modifer protected
+			$methods                = &$class::referenceStatic('_methodsStatic');
+			$methods[$class][$name] = $lambda;
+		
+			//return $self;
+		};
+				
+		
+		static::defineMethod('namespaceName', function($class) {
+			
+			return $class::cache('namespace', function($class) {
+				$reflection = new \ReflectionClass($class);
+				return $reflection->getNamespaceName();
+			});
+		});
+		
+		
+		static::defineMethod('cache', function($mixed, $lambda = null, $class = null) {
+
+			// first we need to make sence of the parameters; lambda may be the first
+			// or second or argument, as our first parameter, which may be a lambda,
+			// or cache key only, is option as a key value (we can get a unique key 
+			// by getting a signature from closure/block
+			$key = $mixed;
 			
 			if (is_callable($mixed)) {
 				$reflection = new \ReflectionFunction($mixed);
 				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+				$class      = $lambda;
 				$lambda     = $mixed;
+				
 			}
 			
-			if (!isset($cache[$key])) {
-				$cache[$key] = $lambda();
+			// now determine if static cache has been previously
+			// set for the given key and class 
+			$cache = &$class::referenceStatic('_scache');
+			
+			if (!isset($cache[$class][$key])) {
+				$cache[$class][$key] = $lambda();
 			}
 			
-			return $cache[$key];		
+			return $cache[$class][$key];		
 		});
 		
-		static::defineMethod('aliasMethod', function($alias, $from) use ($class) {
+		static::defineMethod('aliasMethod', function($alias, $from, $class) {
 				
 			if (\method_exists($class, $from)) {
 					
@@ -179,7 +210,7 @@ abstract class ObjectSafe {
 		
 		
 		
-		static::defineMethod('memberExists', function($member) use ($class) {
+		static::defineMethod('memberExists', function($member, $class) {
 			return property_exists($class, $member) || method_exists($class, $member);
 		});
 				
@@ -257,24 +288,7 @@ abstract class ObjectSafe {
 		return new \eGloo\Utilities\Caller(debug_backtrace());
 	}	
 	
-	/**
-	 * Retrieves late-static-bound namespace
-	 */
-	public static function ns() {
-		
-		if (!isset(static::$ns)) {
-			
-			// use reflection to get namespace name
-			$reflection = new \ReflectionClass($class = get_called_class());
-			static::$ns = $reflection->getNamespaceName();
-			
-			// we don't want this shared down hierarchy, so we set accessible to false
-			$reflection = new \ReflectionProperty($class, 'ns');
-			$reflection->setAccessible(false);
-		}
-			
-		return static::$ns;
-	}
+
 	
 	/**
 	 * Here we provide our catchall and dynamic property meta functionality
@@ -428,9 +442,17 @@ abstract class ObjectSafe {
 		$class   = get_called_class();
 		$current = get_called_class();
 		
+		// if our method dump recieves a method being defined
+		// by define method, we need to inject our current
+		// context into the method definition
+		//if ($name == 'defineMethod' && is_callable($arguments[1])) {
+		array_push($arguments, $class);
+		//}
+		
 		
 		do {
 			if (isset(static::$_methodsStatic[$current][$name])) {
+				
 				return call_user_func_array(
 					static::$_methodsStatic[$current][$name], $arguments	
 				);
@@ -440,8 +462,6 @@ abstract class ObjectSafe {
 		
 
 		
-		// magic - here we define dynamic calls on existing properties and methods
-		// such as $this->$property_like(regexp)
 		
 		
 		// this will die UNGRACEFULLY if method does not exist
@@ -469,7 +489,9 @@ abstract class ObjectSafe {
 	protected static $_singleton;
 	protected static $_scache         = array();
 	protected static $_methodsStatic  = array();
+	protected static $ns;
 	protected        $_methods        = array();
 	protected        $_cache          = array();
+	
 	
 }
