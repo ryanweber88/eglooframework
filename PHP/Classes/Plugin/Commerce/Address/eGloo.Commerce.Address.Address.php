@@ -45,7 +45,7 @@ use \eGloo\Commerce,
 class Address {
 
 	/*** @var Integer address ID  */
-	public		$address_id;
+	public		$user_address_id;
 	
 	/*** @var Integer User ID */
 	public		$user_id;
@@ -94,6 +94,9 @@ class Address {
 	
 	public		$validated = false;
 	
+	/** @var array/Mix properties of Brands */
+	public		$properties;
+	
 	const		TYPE_RESIDENTIAL	= 1,
 				TYPE_COMMERCIAL		= 0;
 	
@@ -103,12 +106,35 @@ class Address {
 		}
 	}
 	
-	public function toArray() {
-		
+	/**
+	 * Populate data int the User object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */
+	public function __set($key, $value) {
+		if (property_exists($key, $this)) {
+			$this->$key = $value;
+		}
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the User Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from user
+	 */
+	public function __get( $key ) {
+		if (isset($this->properties[$key])) {
+			return $this->properties[$key];
+		}
+		return false;
 	}
 	
 	public function __toString() {
-		
+		return serialize($this);
 	}
 	
 	public static function loadByID($address_id) {
