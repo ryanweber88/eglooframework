@@ -49,22 +49,22 @@ class User {
 
 	/** @var string password */
 	public		$password_hash;
-	
+
 	/** @var string first name */
 	public		$first_name;
-	
+
 	/** @var string last name */
 	public		$last_name;
-	
+
 	/** @var int Security Question ID*/
 	public		$security_question_id;
-	
+
 	/** @var string first name */
 	public		$security_answer_hash;
 
 	/** @var integer 1/0 for user type */
 	public		$user_type_id = 0;
-	
+
 	/** @var integer 1/0 for user status */
 	public		$user_status_id = 0;
 
@@ -73,7 +73,7 @@ class User {
 
 	/** @var string deleted date */
 	public		$deleted_date;
-	
+
 	/** @var string birthday date */
 	public		$birthday;
 
@@ -82,21 +82,21 @@ class User {
 
 	/** @var string last logged in date */
 	public		$action_taken;
-	
+
 	public		$user_roles		= array();
-	
+
 	public		$user_addresses	= array();
-	
+
 	public		$payment_options = array();
-	
+
 	public		$phone_numbers		= array();
 
-	/** @var string is user logged in */	
+	/** @var string is user logged in */
 	protected static $logged_in		= false;
-	
+
 	/** * @var type Anonymous	 */
 	public static $active_user_id = 0;
-	
+
 	/** @var array/Mix properties of Brands */
 	public		$properties;
 
@@ -106,9 +106,9 @@ class User {
 
 	/**
 	 * Construct User Object
-	 * 
+	 *
 	 * @param array $args
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public function __construct (array $args) {
 		if (!is_array($args) || sizeof($args) == 0) {
@@ -117,28 +117,28 @@ class User {
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
 		}
-		
+
 		if ($this->user_id > 0 && $this->user_status_id == 1) {
 			self::$logged_in = true;
 			self::$active_user_id = $this->user_id;
 		}
 		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
 	}
-	
+
 	/**
 	 * Validate User password
-	 * 
+	 *
 	 * @param type $password
-	 * @return boolean true/false 
+	 * @return boolean true/false
 	 */
-	public function validatePassword ($password) {		
+	public function validatePassword ($password) {
 		return $password == $this->password_hash ?: false;
 	}
-	
+
 	public function updateUserProfileByID($fname, $lname) {
 		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
 	}
-	
+
 	public function savePhoneNumber($number) {
 		if (!UserDataAccess::fetch()->savePhoneNumber($number, $this->user_id)) {
 			if (UserDataAccess::fetch()->updatePhoneNumber($number, $this->user_id)) {
@@ -150,48 +150,54 @@ class User {
 	}
 
 
-	public function loadAddress () {
+	public function loadAddresses () {
 		if (empty ($this->user_addresses)) {
 			$this->user_addresses = UserDataAccess::fetch()->loadAddressByID($this->user_id);
 		}
-		$this->user_addresses;
+		//$this->user_addresses;
 		return $this;
 	}
-	
+
 	public function loadPaymentOptions () {
 		if (empty ($this->payment_options)) {
 			$this->payment_options = UserDataAccess::fetch()->loadPaymentsByID($this->user_id);
 		}
-		$this->payment_options;
 		return $this;
 	}
-	
+
 	public function loadPhoneNumbers () {
 		if (empty ($this->phone_numbers)) {
-			$this->phone_numbers = UserDataAccess::fetch()->loadPhoneNumbers($this->user_id);
+			//$this->phone_numbers = UserDataAccess::fetch()->loadPhoneNumbers($this->user_id);
 		}
-		$this->phone_numbers;
+		//$this->phone_numbers;
+		return $this;
+	}
+
+	public function loadRoles () {
+		if (empty ($this->user_roles)) {
+			//$this->user_roles = UserDataAccess::fetch()->loadPaymentsByID($this->user_id);
+		}
 		return $this;
 	}
 
 	/**
 	 * Check for valid User
-	 * 
-	 * @return boolean static true/false 
+	 *
+	 * @return boolean static true/false
 	 */
 	public static function isLoggedIn() {
 		return self::$logged_in;
 	}
-	
+
 	public static function getActiveUserID() {
 		return self::$active_user_id;
 	}
 
 	/**
 	 * Populate data int the User object
-	 * 
+	 *
 	 * @param type $key
-	 * @param type $value 
+	 * @param type $value
 	 */
 	public function __set($key, $value) {
 		if (property_exists($key, $this)) {
@@ -200,11 +206,11 @@ class User {
 		$this->properties[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Getter for the User Object
 	 * @param type $key
-	 * 
+	 *
 	 * @return mix type object retrieved from user
 	 */
 	public function __get( $key ) {
@@ -213,10 +219,10 @@ class User {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return String version of this object
-	 * @return type 
+	 * @return type
 	 */
 	public function __toString () {
 		$user_data = '';
@@ -228,12 +234,12 @@ class User {
 		}
 		return $user_data;
 	}
-	
+
 	/**
 	 * Magic method __Call
 	 * @param type $name
 	 * @param type $arguments
-	 * @return type 
+	 * @return type
 	 */
 	public function __call($name, $arguments) {
 		if ($name == 'logout') {
@@ -241,12 +247,12 @@ class User {
 		}
 		// @TODO delegate to EPA
 	}
-	
+
 	/**
 	 * Magic Method
-	 * 
+	 *
 	 * @param type $name
-	 * @param type $arguments 
+	 * @param type $arguments
 	 */
 	public static function __callstatic($name, $arguments) {
 		if ($name == 'logout' && isset($arguments[0])) {
@@ -254,40 +260,40 @@ class User {
 			// this should be possible if the user has logged in
 			// since we should be statically storing our user login
 			// information
-		} 
+		}
 		// @TODO delegate to EPA
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * Returns user logged in status
 	 */
 	public static function loggedIn() {
 		return static::$loggedIn;
 	}
-	
+
 	/**
 	 * Login Method
-	 * 
+	 *
 	 * @param type $email
 	 * @param type $passwd
 	 * @return type
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function login ($email, $passwd) {
 		if ($email == '' || $passwd == '') {
 			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
 		}
-		
+
 		$result = UserDataAccess::fetch()->login($email, $passwd);
 		return is_array($result) ? new User($result) : false;
 	}
-	
+
 	/**
 	 *
 	 * @param type $hash
 	 * @return type
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function validateCommunicationKey($hash) {
 		if ($hash == '' ) {
@@ -299,12 +305,12 @@ class User {
 
 	/**
 	 * Create User Object
-	 * 
+	 *
 	 * @param type $uname
 	 * @param type $pwd
 	 * @param type $priv
 	 * @return type
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function register($email, $passwd, $user_type = self::USER_TYPE_NORMAL) {
 		if ($email == '' || $passwd == '') {
@@ -319,7 +325,7 @@ class User {
 	 *
 	 * @param type $user_id
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadByID($user_id) {
 		if ($user_id === '') {
@@ -336,12 +342,12 @@ class User {
 		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
 		return !empty($user) ? new User($user) : false;
 	}
-	
+
 	/**
 	 *
 	 * @param type $zip_code
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByZipCode($zip_code) {
 		$result = array();
@@ -359,7 +365,7 @@ class User {
 	 *
 	 * @param type $email
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByEmail($email) {
 		if ($email == '') {
@@ -373,7 +379,7 @@ class User {
 	 *
 	 * @param type $cc_code
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByCreditCardCode($cc_code) {
 		$result = array();
@@ -391,7 +397,7 @@ class User {
 	 *
 	 * @param type $state
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByState($state) {
 		$result = array();
@@ -409,7 +415,7 @@ class User {
 	 *
 	 * @param type $program_id
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByProgramId($program_id) {
 		$result = array();
@@ -427,7 +433,7 @@ class User {
 	 *
 	 * @param type $order_id
 	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException 
+	 * @throws \InvalidArgumentException
 	 */
 	public static function loadUserByOrderId($order_id) {
 		$result = array();
@@ -441,3 +447,4 @@ class User {
 		return $result;
 	}
 }
+

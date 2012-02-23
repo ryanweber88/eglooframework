@@ -60,7 +60,11 @@ class Coupon {
 	
 	public $discount_amount;
 	
-	public $max_usage;
+	public $max_usages;
+	
+	public $max_user_orders;
+	
+	public $min_user_orders;
 	
 	public $max_per_user		= 1;
 	
