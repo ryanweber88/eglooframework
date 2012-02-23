@@ -98,6 +98,43 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		$method = ($match = strtolower($match[1])) == 'select'
 			? 'getList'
 			: 'execute' . ucfirst($match);
+		
+		// lets do some magic - lets determine arguments if first
+		// argument is a model, and we are performing an update/insert
+		// statememnt; please note that this isn't always going to 
+		// work so use with caution
+		
+		if (isset($arguments[0]) && 
+				($model = $arguments[0]) instanceof Model && 
+				$match == 'insert' ) {
+			
+			// for this to work, you must specify the fields
+			if (preg_match('/\((.+?)\)/', $statement, $match)) {
+				$arguments = array();
+				
+				foreach(explode(',', $match[1]) as $field) {
+					
+					try { 
+						$arguments[$field = trim($field)] = $model->$field;	
+					}
+									
+					catch(\Exception $passthrough) {
+						// @TODO this is an instancer where I'd like to have a StackException
+						
+						throw new \Exception(
+							"Could not find attribute $field on receiver " . get_class($this) . 
+							" when attempting to autogenerate arguments for statement"	
+							
+						);
+						
+						//throw $passthrough;
+					}
+					
+				}
+				
+				var_export($arguments); exit;
+			}
+		}
 			
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no

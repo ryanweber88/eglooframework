@@ -205,6 +205,14 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	
 		return $string;
 	}
+	
+	public static function isSingular($name) {
+		return static::singularize($name) == $name;
+	}
+	
+	public static function isPlural($name) {
+		return static::pluralize($name) == $name;
+	}
 
 	/**
 	 * 

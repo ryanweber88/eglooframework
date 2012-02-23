@@ -57,10 +57,11 @@ abstract class ObjectSafe {
 		};		
 		
 		$this->defineMethod('namespace', function() use ($self) {
-			return $self->cache(function() use ($self) {
+			//return $self->cache(function() use ($self) {
+				//exit('adsf');
 				$reflection = new \ReflectionClass($self);
 				return $reflection->getNamespaceName();
-			});
+			//});
 		});
 		
 		
@@ -220,7 +221,17 @@ abstract class ObjectSafe {
 		static::aliasMethodsStatic();			
 	}
 	
-
+	
+	/**
+	 * Allows breaking of protected/private modifiers, from outside of the
+	 * context of class; calls an method on instance receiver with arguments 
+	 * presented 
+	 */
+	public function send($method, $__mixed = null) {
+		call_user_func_array(
+			array($this, $method), array_slice(func_get_args(), 1)	
+		);
+	}
 	
 	/**
 	 * Alias to aliasProperties
@@ -230,8 +241,13 @@ abstract class ObjectSafe {
 	}
 	
 
-	
-
+	/**
+	 * Checks both method_exists and our runtime defined
+	 * methods
+	 */
+	public function respondTo($name) {
+		return method_exists($this, $name) || isset($this->_methods[$name]);
+	}
 	
 	/**
 	 * Aliases a property using reference; does not check on property existence

@@ -53,6 +53,10 @@ abstract class Model extends Delegator
 		Delegator::delegate(get_called_class(), get_class(static::data()));
 	}
 	
+	
+
+	
+	
 	/**
 	 * Responsible for initialize of model attributes
 	 */
@@ -79,6 +83,14 @@ abstract class Model extends Delegator
 		return $this->initialized;
 	}
 	
+	/**
+	 * Determines if model exists as record in underlying database; 
+	 */
+	public function exists() {
+		// @TODO this clearly needs to change - for right now, just check if id has been
+		// set
+		return !is_null($this->id);
+	}
 
 	
 	/**
@@ -90,32 +102,53 @@ abstract class Model extends Delegator
 		// @TODO this will need to be changed as it doesn't
 		// belong here
 		//echo static::namespaceName(); exit;
-		$name  = \eGloo\Utilities\InflectionsSafe::instance()
-						->singularize($name);
-		$ns    = $this->namespace();
+		$relationshipName = $name;
+		$name             = \eGloo\Utilities\InflectionsSafe::instance()
+						          ->singularize($name);
+		$ns               = $this->namespace();
+		$self             = $this;
 				
 		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
-			return $this->defineMethod($name, function() use ($model) {
-				$result = $lambda($model);
+			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName) {
 				
-				// check if singular result or hash
-				if (is_array($result)) {
-					if (\eGloo\Utilities\Collection::isHash($result)) {
-						$result = new $model($result);
-					}
+				
+				// check if the model exists in the database to ensure we are
+				// not running queries against an empty/shallow model
+				if ($self->exists()) {
+					$result = $lambda($model);
 					
-					else {
-						
-						foreach($result as $record) {
-							$temporary[] = new $model($record);	
+					// check if singular result or hash
+					if (is_array($result)) {
+						if (\eGloo\Utilities\Collection::isHash($result)) {
+							$result = new $model($result);
 						}
 						
-						// replace result with temporary
-						$result = $temporary;
+						else {
+							
+							foreach($result as $record) {
+								$temporary[] = new $model($record);	
+							}
+							
+							// replace result with temporary
+							$result = $temporary;
+						}
 					}
+				
+					return $result;
 				}
 				
-				return $result;
+				// if the model doesn't exist, or this is a case where we have a "shallow"
+				// model, we return a shallow copy of our relationship(s)
+				else {
+
+					return \eGloo\Utilities\InflectionsSafe::isSingular($relationshipName)
+						
+						// return an empty instance of model
+						? new $model
+						
+						// @TODO maybe 'EmptySet' here?
+						: new Utility\EmptySet($model);
+				}
 			});
 		}
 		
@@ -123,6 +156,77 @@ abstract class Model extends Delegator
 			"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
 		);
 	}
+
+	
+	
+	/**
+	 * Provides a variable length argument list of items that
+	 * must exist prior to certain callbacks
+	 */
+	protected function validates($__mixed) {
+		$this->validates = is_array($__mixed[0])
+			? $__mixed
+			: func_get_args();
+	}
+	
+	/**
+	 * Determines if model is valid based on attribute values specified
+	 * in validates
+	 */
+	public function valid() {
+		
+		// run our validation callbacks
+		$this->runCallbacks('validate');
+		
+		// explicitly check fields
+		foreach($this->validates as $attribute) {	
+			$hasAttribute = "has_$attribute";
+			
+			if (!$this->$hasAttribute) {
+				return false;
+			}
+		}
+				
+		return true;
+	}
+	
+	/**
+	 * Returns a printout of validation failures; this should only be used 
+	 * during testing
+	 */
+	public function whatsInvalid() {
+		
+		// right now just return a list of invalid fields
+		$attributes = array();
+		
+		foreach($this->validates as $attribute) {
+			$hasAttribute = "has_$attribute";
+			
+			if (!$this->$hasAttribute) {
+				$attributes[] = $attribute;
+			}
+		}
+		
+		return $attributes;
+	}
+	
+	/**
+	 * Convenience method meant to return array of values from
+	 * fields specified in arguments list; is not mindful of 
+	 * whether field values exists or not
+	 */
+	public function values($__mixed) {
+		$fields = is_array($__mixed[0])
+			? $__mixed
+			: func_get_args();
+		
+		foreach($fields as $name) {
+			$values[] = $this->$name;
+		}
+		
+		return $values;
+	}
+
 	
 	/**
 	 * A stubb method here to be used by concrete model classes
@@ -132,10 +236,11 @@ abstract class Model extends Delegator
 	
 	/** Callbacks **************************************************************/
 	
+	/*
 	protected function beforeCreate() { }
 	protected function beforeSave()   { }
 	protected function beforeUpdate() { }
-	
+	*/
 	
 
 	
@@ -198,9 +303,152 @@ abstract class Model extends Delegator
 				);				
 			}
 		}
+			
+	}
+	
+	
+	/**
+	 * Create method is a really wrapper to instantiate model, and then
+	 * call save
+	 * @return Model
+	 * @param  variable-length[] $__mixed
+	 */
+	public static function create($__mixed = null) {
 		
+		// because create can be sent to both instance and class
+		// receivers, we have to explicitly check to determine 
+		// who are reciever is; in the former case, receiver is
+		// passed as argument and should never been be external
+		// to Model
+		$arguments = func_get_args();
+		
+		// check if receiver has beenb passed as argument 
+		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
+			
+			// because runCallbacks is a protected method, we use the send method 
+			// to by-pass access modifier; sorry folks, this is the only way to do
+			// this without creating a static create and instance create method
+			$self->send('runCallbacks', __FUNCTION__);
+		}
+			
+		
+		// instantiate model and explicitly set primary key to nil; this will ensure
+		// that a record is created as opposed to an update - the onus lies
+		// upon the developer that they do not do an explicit call on create
+				
+		else {
+			
+			$model     = new static($arguments);
+			$model->id = null;
+			
+			// saves model to underlying data layer
+			$model->save();
+			
+			// return model to caller
+			return $model;
+		}
+	}
+	
+	public function save() {
+		
+
+		// we ask the question again, if valid, after performing
+		// our validation routines
+		if ($this->valid()) { 
+			// execute our save callbacks
+			$this->runCallbacks(__FUNCTION__);
+			
+			// based on whether model primary key is set, call the correct
+			// action method
+			return $this->exists() 
+			
+				// run update against instance if 
+				? $this->update()
+				
+				// unfortunately this has be passed here as we can call static
+				// context, but not have static funciton be aware of instance
+				: $this->create($this);
+		}
+		
+		// lets see what is missing for validation and throw exception
+		throw new \Exception(
+			"Cannot save model because the attributes did not pass validation : " . 
+			print_r($this->whatsInvalid(), true)	
+		);
 		
 	}
+	
+	
+	public function update() {
+		$this->runCallbacks(__FUNCTION__);
+	}
+	
+	public static function delete($key = null) {
+		if (isset($this)) { 
+			return $this->runCallbacks(__FUNCTION__);
+		}
+		
+		else {
+			$model = static::find($key);
+			return $model->delete();
+		}
+	}
+	
+	
+	
+	protected function defineCallback($event, $mixed, $lambda = null) {
+	
+		$point = $mixed;
+	
+		if (is_null($lambda) && is_callable($mixed)) {
+			$lambda = $mixed;
+			
+			// @TODO 'around' should not be specified inline
+			$point  = 'around';
+		}
+	
+		if (is_callable($lambda)) {
+			$this->callbacks[$event][$point][] = $lambda;
+		}
+	
+		else {
+			throw new \Exception(
+					"A block/lambda must be provided when defining a callback"
+			);
+		}
+	
+	}
+		
+	protected function runCallbacks($event) {
+		
+		// we use inject idea to pass values between callbacks,
+		// if needed; if any callback returns false, then
+		// we short-circuit execution
+		$inject = true;
+		
+		// run our before/around callbacks
+		foreach(array('before', 'around') as $point) {
+			if (isset($this->callbacks[$event][$point])) {
+				foreach($this->callbacks[$event][$point] as $lambda) {
+					if (($inject = $lambda($inject)) === false) {
+						return ;
+					}
+				}
+			}		
+		}
+		
+		// run our after callbacks in reverse order
+		if (isset($this->callbacks[$event]['after'])) { 
+			foreach(array_reverse($this->callbacks[$event]['after']) as $lambda) {
+				if (($inject = $lambda($inject)) === false) {
+					return ;
+				}
+			}
+		}
+	
+	}
+	
+	
 	
 	
 	protected static function __methodsStatic() {
@@ -339,18 +587,23 @@ abstract class Model extends Delegator
 	
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
-		if (isset($this->_methods[$name])) {
+		if ($this->respondTo($name)) {
 			$reflection = new \ReflectionFunction(
 					$this->_methods[$name]
 			);
+			
 			
 			// we don't want to use __get as replacement or alternative
 			// to __call, but simply to call methods, which look like
 			// properties, where it makes sense 
 			if (count($reflection->getParameters()) == 0) {
-				return call_user_func(
+				$this->$name = null;
+				
+				$this->$name = call_user_func(
 						$this->_methods[$name]
 				);
+				
+				return $this->$name;
 			}
 			
 		}
@@ -364,6 +617,8 @@ abstract class Model extends Delegator
 		
 		
 	}	
+	
+	
 	
 	
 	private function guessPrimaryKey() {
@@ -395,5 +650,8 @@ abstract class Model extends Delegator
 	
 	
 	
-	private $initialized = false;
+	protected $validates   = array();
+	protected $callbacks   = array();
+	private   $initialized = false;
+	
 }

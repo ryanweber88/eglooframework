@@ -655,7 +655,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	
 	}
 	
-	protected function 
+	//protected function 
 	
 	/**
 	 * Updates entity within manager context, and flags underlying data layer update;
