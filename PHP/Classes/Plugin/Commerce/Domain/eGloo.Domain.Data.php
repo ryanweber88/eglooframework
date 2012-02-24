@@ -23,6 +23,24 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return static::instance();
 	}
 	
+	/**
+	 * Used as dynamic/shorthand method to build array 
+	 * 
+	 */
+	public static function __callstatic($name, $arguments) {
+
+		// not going to do rigorous checks here right now 
+		if (strtolower($name) == 'insert') {
+			$idioms = $arguments[1]; 
+			$statement = 
+				"insert into ({$idioms['into']}) values (" .
+				array_fill(0, count(explode($idioms['with_fields'])), '?') .
+				")";
+
+			echo $statement; exit;
+		}
+	}
+	
 
 	/**
 	 * Executes a statement on underlying layer - currently makes use of *DataAccess
@@ -31,6 +49,12 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * @param variable-length $__mixed
 	 */
 	public static function statement($statement, $__mixed = null) {
+		
+		// basically we're checking to see if statement is just one word, which indicates we
+		// are passing an "idiomatic" statement 
+		if (!preg_match('/\s/', $statement)) {
+			
+		}
 	
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
@@ -64,6 +88,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						$arguments, 0, count($arguments)-1
 					);
 				}
+				
 			}
 			
 		} 
@@ -132,7 +157,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					
 				}
 				
-				var_export($arguments); exit;
 			}
 		}
 			
@@ -211,6 +235,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return $result;
 	
 	}	
+	
 	
 	/**
 	 * The 'find' method serves as a alias to loadById method, employed by many of the domain model

@@ -25,6 +25,8 @@ abstract class ObjectSafe {
 		static::__methodsStatic();
 	}
 	
+	
+	
 	/**
 	 * Alias to __constructStatic - I think it's a little neater and carries
 	 * the idea of a static constructor without have to explicitly spell
@@ -32,6 +34,12 @@ abstract class ObjectSafe {
 	 */
 	static function __static() {
 		static::__constructStatic();
+	}
+	
+	public function constGet($name) {
+		return defined("static::$name")
+			? constant('static::' . $name)
+			: null;
 	}
 	
 	// These are stubs but called by the constructor - so as they
@@ -208,6 +216,13 @@ abstract class ObjectSafe {
 			);
 				
 		});
+		
+		static::defineMethod('constant', function($name, $class) { 
+			if (defined("$class::$name")) {
+				return constant($class . '::' . $name);
+			}
+		});
+		
 		
 		
 		
