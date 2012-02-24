@@ -14,6 +14,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		parent::__construct($resource);
 	}
 	
+
+		
 	/**
 	 * Alias to Object::instance
 	 *
@@ -22,6 +24,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	public static function fetch () {
 		return static::instance();
 	}
+	
+	
 	
 	/**
 	 * Used as dynamic/shorthand method to build array 
@@ -244,11 +248,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * unless loadById exists - method_alias is much more flexible
 	 * @return Model | Model[]
 	 */
+	
+	/*
 	public static function find($key) {
 	
 		$className = get_called_class();
 	
 		if (method_exists($className, 'loadByID')) {
+			exit('there');
 			// convert key to array, in instances where we want to return
 			// a set, as opposed to individual object
 			$key = count(func_get_args()) > 1
@@ -274,12 +281,18 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 			return false;
 		}
+		
+		// lets try and run a generic find on database
+		else {
+			exit('here');	
+		}
 	
-		throw new \Exception(
-				"Cannot alias to loadByID because it does not exist in domain class $className"
-		);
+		//throw new \Exception(
+		//		"Cannot alias to loadByID because it does not exist in domain class $className"
+		//);
 	
 	}
+	*/
 	
 
 	

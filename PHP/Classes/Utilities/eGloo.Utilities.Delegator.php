@@ -71,7 +71,8 @@ abstract class Delegator extends Object {
 		catch(\Exception $hold) { }
 
 		if (isset(static::$associated[$class = get_called_class()]) && 
-				method_exists($delegated = static::$associated[$class], $name)) {
+			 (method_exists($delegated = static::$associated[$class], $name) ||
+			 isset(static::$_methodsStatic[$class][$name]))) {
 			
 			return call_user_func_array(
 				"$delegated::$name", $arguments	

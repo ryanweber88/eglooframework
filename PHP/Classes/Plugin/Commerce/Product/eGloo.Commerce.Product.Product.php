@@ -241,7 +241,8 @@ class Product extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$rows = ProductDataAccess::fetch()->loadProductById($product_id);
-		return new Product($rows);
+		//echo $product_id; exit;
+		return new static($rows);
 	}
 	
 	public static function loadProductBySlug($slug) {

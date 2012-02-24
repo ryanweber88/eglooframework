@@ -43,24 +43,23 @@ class ProductDataAccess extends Domain\Data {
 	
 
 	
-	
-	/**
-	 * Create an instance of the class
-	 * Delegate class to access Database layer
-	 * 
-	 * @return $this class object
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self();
-		}
-		return static::$instance;
-	}
+
 	
 	public function loadProductById($product_id) {
 		if ($product_id == '') {
 			throw new \InvalidArgumentException('[: Missing argument error:] product_id is required!', __METHOD__);
 		}
+		
+		return static::statement('
+			SELECT
+				*
+			FROM
+				product p
+			WHERE
+				p.product_id = ?
+			
+			', $product_id	
+		);
 	}
 	
 	public function loadProductByName($product_name) {

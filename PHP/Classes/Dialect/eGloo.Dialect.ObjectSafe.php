@@ -152,6 +152,23 @@ abstract class ObjectSafe {
 		
 			//return $self;
 		};
+		
+		static::defineMethod('respondTo', function($method, $class) { 
+			$current = $class;
+			
+
+			do {
+				if (isset(static::$_methodsStatic[$current][$name])) {
+			
+					return true;
+				}
+					
+			} while (($current = get_parent_class($current)));
+			
+			return false;
+			
+		});
+		
 				
 		
 		static::defineMethod('namespaceName', function($class) {
@@ -197,18 +214,26 @@ abstract class ObjectSafe {
 				if (!\method_exists($class, $alias)) {
 					// use lambda/block to place method alias method definition into
 					// this instance "singleton" or eigenclass
-					static::defineMethod($alias, function($__mixed = null) {
+					$class::defineMethod($alias, function($__mixed = nulll) use ($from, $class) {
+						
+						// @TODO this is an ugly hack for now
+						if (!is_array($__mixed)) {
+							$__mixed = array($__mixed);
+						}
 						
 						// call original method
 						return call_user_func_array(array(
 								$class, $from
 						),  $__mixed);
+						
 					});
 				}
-					
-				throw new \Exception(
-						"Attempted alias on $alias failed because it already exists in class scope"
-				);
+				
+				else {
+					throw new \Exception(
+							"Attempted alias '$alias' on method '$from' failed because it already exists in receiver $class" 
+					);
+				}
 			}
 				
 			throw new \Exception(
@@ -284,7 +309,7 @@ abstract class ObjectSafe {
 		
 		
 		throw new \Exception(
-			"Attempted alias on $alias failed because it already exists as a property on this instance"		
+			"Attempted alias '$alias' on property '$from' failed because it already exists as a property on receiver " . get_class($this)		
 		);
 	}
 	
@@ -473,6 +498,7 @@ abstract class ObjectSafe {
 		$class   = get_called_class();
 		$current = get_called_class();
 		
+		
 		// if our method dump recieves a method being defined
 		// by define method, we need to inject our current
 		// context into the method definition
@@ -483,6 +509,7 @@ abstract class ObjectSafe {
 		
 		do {
 			if (isset(static::$_methodsStatic[$current][$name])) {
+				
 				
 				return call_user_func_array(
 					static::$_methodsStatic[$current][$name], $arguments	
