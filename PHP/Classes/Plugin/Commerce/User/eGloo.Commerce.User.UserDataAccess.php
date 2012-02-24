@@ -208,4 +208,33 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 		$sql = 'SELECT * FROM user_phone_number WHERE user_id = ?';
 		return parent::executeSelect($sql, array($user_id));
 	}
+	
+	public function loadBillingAddress($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+		$sql = 'SELECT
+    /*cdc.credit_debit_card_id, cdc.user_id, cdc.card_number_hash, cdc.last_4, cdc.card_holder,
+    cdc.expiration_date, cdc.merchant_id, cdc.billing_address_id, cdc.card_status_id, */
+	
+    ua.user_address_id, ua.first_name, ua.last_name, ua.label,
+    ua.address_line_1, ua.address_line_2, ua.city, ua.state,
+    ua.county, ua.zip_code5, ua.zip_code4, ua.residential,
+    ua.shippable, ua.default_address FROM payment_option po INNER JOIN credit_debit_card cdc 
+        ON po.payment_option_id=cdc.credit_debit_card_id AND po.user_id=cdc.user_id
+    INNER JOIN user_address ua ON cdc.billing_address_id=ua.user_address_id
+        AND cdc.user_id=ua.user_id WHERE po.default_method=TRUE AND cdc.user_id=?;';
+		return parent::getUnique($sql, array($user_id));
+	}
+	
+	public function loadShippingAddress($user_id) {
+		if ($user_id == '') {
+			throw new \InvalidArgumentException('::Missing argument error: user_id is required!', __METHOD__);
+		}
+		$sql = 'SELECT user_address_id, user_id, first_name, last_name, label, address_line_1,'
+			 . 'address_line_2, city, state, county, zip_code5, zip_code4, residential, shippable,'
+			 . 'default_address FROM user_address WHERE user_id=? AND default_address=TRUE '
+			 . 'AND shippable=TRUE;';
+		return parent::getUnique($sql, array($user_id));
+	}
 }

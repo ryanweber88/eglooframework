@@ -157,6 +157,13 @@ class User {
 		//$this->user_addresses;
 		return $this;
 	}
+	
+	public function loadPrimaryAddresses () {
+		$result = array();
+		$result['billing']	= UserDataAccess::fetch()->loadBillingAddress($this->user_id);
+		$result['shipping']	= UserDataAccess::fetch()->loadShippingAddress($this->user_id);
+		return $result;
+	}
 
 	public function loadPaymentOptions () {
 		if (empty ($this->payment_options)) {
