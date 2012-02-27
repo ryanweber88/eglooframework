@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Slug;
-use \eGloo\Commerce\Slug\SlugDataAccess;
+
+use \eGloo\Commerce\Slug\SlugDataAccess,
+    \eGloo\Domain;
 
 /**
  * Slug Class File
@@ -36,7 +38,7 @@ use \eGloo\Commerce\Slug\SlugDataAccess;
  * @package Plugins
  * @subpackage Commerce
  */
-class Slug {
+class Slug extends Domain\Model {
 	
 	public static function loadBrandSlugs() {
 		return SlugDataAccess::fetch()->loadBrandSlugs();

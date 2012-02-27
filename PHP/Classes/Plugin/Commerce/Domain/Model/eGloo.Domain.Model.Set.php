@@ -40,8 +40,13 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			);
 		}
 		
-
 	}
+	
+	
+	public function isEmpty() {
+		return count($this) === 0;	
+	}
+	
 	
 	/**
 	 * Find is similar in scope to each, but returns boolean false if

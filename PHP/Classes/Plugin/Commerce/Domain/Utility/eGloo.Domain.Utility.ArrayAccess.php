@@ -47,8 +47,17 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 */
 	public function __toString() {
 		if (method_exists($this->delegated, '__toString')) {
-			return $this->delegated->__toString();
+			try {
+				return $this->delegated->__toString();
+			}
+			catch(\Exception $ignore) {
+				echo get_class($this->delegated); exit;
+			}
 		}
+		
+		// unfortunately we have to do a return of the exception, because a raised
+		// exception in __toString does not return the 
+		return 'Failed to stringify ArrayAccess representation of model ' . get_class($this->delegated);
 		
 		throw new \Exception(
 			'Failed to stringify ArrayAccess representation of model ' . get_class($this->delegated)		

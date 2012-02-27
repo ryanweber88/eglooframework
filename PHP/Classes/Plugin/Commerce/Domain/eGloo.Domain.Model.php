@@ -451,7 +451,7 @@ abstract class Model extends Delegator
 	
 	public function save() {
 		
-
+		
 		// we ask the question again, if valid, after performing
 		// our validation routines
 		if ($this->valid()) { 
@@ -725,6 +725,17 @@ abstract class Model extends Delegator
 		
 	}	
 	
+	public function __toString() {
+		if (($field = static::constGet('NATURAL_KEY'))) {
+			try { 
+				return $this->$field;
+			}
+			
+			catch(\Exception $ignore) { }
+		}
+		
+		return parent::__toString();
+	}
 	
 	
 	

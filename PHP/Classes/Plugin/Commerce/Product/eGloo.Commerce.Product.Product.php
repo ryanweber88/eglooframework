@@ -238,7 +238,6 @@ class Product extends Domain\Model {
 	}
 	
 	public static function loadProductById($product_id) {
-		exit('in load product');
 		if ((int)$product_id <= 0) {
 			throw new \InvalidArgumentException();
 		}

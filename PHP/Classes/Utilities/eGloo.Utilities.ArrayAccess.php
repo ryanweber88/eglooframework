@@ -56,8 +56,10 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		// throw result into an "instance" cache - this way, multiple calls
 		// made to the same member property/method within a template for
 		// example will only have to execute an expensive routine once
+		//echo "caching for $member<br />";
 		
 		return $this->cache($member, function() use ($self, $member) {
+			//echo "in cache for $member"; 
 			$delegated = &$self->reference('delegated');
 			
 			// first lets check if the member is indeed valid
@@ -130,7 +132,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				// creating "recursive" access to object space - this allows for treating
 				// multiple-objects as multi-dimensional arrays
 				return is_object($result) 
-					? new static($result)
+					? new $self($result)
 					: $result;
 				
 				

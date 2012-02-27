@@ -76,6 +76,7 @@ abstract class ObjectSafe {
 		$this->defineMethod('cache', function($mixed, $lambda = null) use ($self) { 
 			$key = $mixed;
 			
+			
 			if (is_callable($mixed)) {
 				$reflection = new \ReflectionFunction($mixed);
 				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
@@ -84,13 +85,13 @@ abstract class ObjectSafe {
 			
 			// we are going to tack the object hash id on the end for 
 			// good effect
-			$key   += "::" + spl_object_hash($self);
+			$key   .= "::" . spl_object_hash($self);
 			$cache = &$self->reference('_cache'); 
 			
 			if (!isset($cache[$key])) {
 				$cache[$key] = $lambda();
 			}
-			
+						
 			return $cache[$key];
 		});
 
@@ -344,13 +345,13 @@ abstract class ObjectSafe {
 		return new \eGloo\Utilities\Caller(debug_backtrace());
 	}	
 	
+	
 
 	
 	/**
 	 * Here we provide our catchall and dynamic property meta functionality
 	 */
 	public function __get($name) {
-		
 		// here we provide an "existence" operator for determining if 
 		// property exists in receiver - this is similar to obj.name?
 		// convention used in rails
@@ -467,9 +468,6 @@ abstract class ObjectSafe {
 			return static::__callstatic($name, $arguments);
 		}
 		
-		if ($name == 'find') {
-			exit('asdf');
-		}
 		
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {

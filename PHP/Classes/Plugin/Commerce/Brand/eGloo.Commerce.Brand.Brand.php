@@ -89,15 +89,7 @@ class Brand extends Domain\Model {
 	}
 
 
-	
-	/**
-	 *
-	 * @return Brand 
-	 */
-	public function __toString(){
-		return $this->name;
-	}
-	
+
 	/**
 	 * Get list of published brand
 	 * 
@@ -119,7 +111,7 @@ class Brand extends Domain\Model {
 		$result = array();
 		$rows = BrandDataAccess::fetch()->loadBrandList();
 		foreach ($rows as $row) {
-			$result[] = new Brand($row);
+			$result[] = new static($row);
 		}
 		return $result;
 	}

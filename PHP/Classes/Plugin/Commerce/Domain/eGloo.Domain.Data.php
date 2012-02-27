@@ -29,7 +29,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	
 	/**
 	 * Used as dynamic/shorthand method to build array 
-	 * 
+	 *  @Note not using this idea right now
 	 */
 	public static function __callstatic($name, $arguments) {
 
@@ -134,21 +134,37 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// work so use with caution
 		
 		if (isset($arguments[0]) && 
-				($model = $arguments[0]) instanceof Model && 
-				$match == 'insert' ) {
+				($model = $arguments[0]) instanceof Model) { 
 			
-			// for this to work, you must specify the fields
-			if (preg_match('/\((.+?)\)/', $statement, $match)) {
-				$arguments = array();
+			// lets reset our arguments list with those arguments gleaned
+			// from statement itself
+			$arguments = array(); 
+			
+			if ($match == 'update') {
+				preg_match_all('/([^\s\.]+)\s+?\=/is', $statement, $matches, PREG_SET_ORDER);
+
+				foreach($matches as $pair) {
+					$fields[] = $pair[1];
+				}
+			}
 				
-				foreach(explode(',', $match[1]) as $field) {
-					
+			else if ($match == 'insert' ) {
+				preg_match('/\((.+?)\)/', $statement, $match);
+				$fields = explode(',', $match[1]);
+				
+			}
+
+			if (is_array($fields)) { 
+				
+				foreach($fields as $field) { 
 					try { 
 						$arguments[$field = trim($field)] = $model->$field;	
 					}
 									
 					catch(\Exception $passthrough) {
 						// @TODO this is an instancer where I'd like to have a StackException
+						
+						echo $field;
 						
 						throw new \Exception(
 							"Could not find attribute $field on receiver " . get_class($this) . 
@@ -158,11 +174,16 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						
 						//throw $passthrough;
 					}
-					
 				}
-				
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed to automatically detect fields from statement $statement"		
+				);
 			}
 		}
+				
 			
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
