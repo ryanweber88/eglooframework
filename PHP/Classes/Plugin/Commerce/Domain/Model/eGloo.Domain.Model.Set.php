@@ -4,7 +4,7 @@ namespace eGloo\Domain\Model;
 use eGloo\Domain;
 
 class Set extends \eGloo\Dialect\ObjectSafe
-	implements \ArrayAccess, \IteratorAggregate {
+	implements \ArrayAccess, \IteratorAggregate, \Countable {
 	
 	
 	/**
@@ -12,11 +12,35 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 * is used as template of sorts of initialization
 	 * @param String $model
 	 */
-	function __construct($model) {
+	function __construct($mixed) {
+		
 		// set our model type; think of this as templated collection
 		// in c++, where array values may only be of passed
 		// in type
-		$this->model = $model;
+		if ($mixed instanceof Domain\Model) {
+			$this->model = $mixed;
+		}
+		
+		// if mixed is an array with 1+ elements, then we wrapping at collection
+		// with the functionality provided by set
+		else if (is_array($mixed) && count($mixed)) {
+			$this->collection = $mixed;
+			$this->model      = get_class($mixed[0]);
+		}
+		
+		// in this case, our model is passsed/identified as fully qualified string
+		// and our set is currently empty
+		else if (is_string($mixed) && class_exists($mixed)) {
+			$this->model = new $mixed;
+		}
+		
+		else { 
+			throw new \Exception(
+				"Failed constructing set because argument '$mixed' is invalid"
+			);
+		}
+		
+
 	}
 	
 	/**
@@ -25,7 +49,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 */
 	public function find($lambda) {
 		if (is_callable($lambda)) {
-			foreach($this->container as $model) {
+			foreach($this->collection as $model) {
 				if (($model = $lambda($model)) !== false) {
 					return $model;
 				}
@@ -47,7 +71,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function offsetExists($offset) {
-		return isset($this->container[$offset]);
+		return isset($this->collection[$offset]);
 	}
 	
 	public function offsetGet($offset) {
@@ -72,21 +96,25 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		}
 
 		// otherwise attempt to return model at $offset value
-		return $this->container[$offset];
+		return $this->collection[$offset];
 	}
 	
 	public function offsetSet($offset, $value) {
-		$this->container[$offset] = $value;
+		$this->collection[$offset] = $value;
 	}
 	
 	public function offsetUnset($offset) {
-		unset($this->container);
+		unset($this->collection);
 	}
 	
 	public function getIterator() {
-		return new \ArrayIterator($this->container);
+		return new \ArrayIterator($this->collection);
+	}
+	
+	public function count() {
+		return count($this->collection);
 	}
 	
 	protected $model;
-	protected $container = array();	
+	protected $collection = array();	
 }

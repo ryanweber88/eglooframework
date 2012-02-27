@@ -204,7 +204,8 @@ class Product extends Domain\Model {
 		if (empty ($this->product_sizes)) {
 			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_id);
 		}
-		$this->product_sizes;
+		
+		//$this->product_sizes;
 		return $this;
 	}
 
@@ -237,6 +238,7 @@ class Product extends Domain\Model {
 	}
 	
 	public static function loadProductById($product_id) {
+		exit('in load product');
 		if ((int)$product_id <= 0) {
 			throw new \InvalidArgumentException();
 		}

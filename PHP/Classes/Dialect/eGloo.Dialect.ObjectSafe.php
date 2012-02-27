@@ -467,6 +467,9 @@ abstract class ObjectSafe {
 			return static::__callstatic($name, $arguments);
 		}
 		
+		if ($name == 'find') {
+			exit('asdf');
+		}
 		
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
@@ -487,6 +490,8 @@ abstract class ObjectSafe {
 	
 	public static function __callstatic($name, $arguments) { 
 		
+		//echo "calling static $name on receiver " . get_called_class() . "<br />";
+		
 		// check against dynamically defined methods - since we
 		// are working class scope, we want to mimic the idea of
 		// inheritence; to do this, we move up class hierarchy,
@@ -497,6 +502,7 @@ abstract class ObjectSafe {
 		// @TODO this needs to be profiled
 		$class   = get_called_class();
 		$current = get_called_class();
+		
 		
 		
 		// if our method dump recieves a method being defined
@@ -550,6 +556,7 @@ abstract class ObjectSafe {
 	protected static $ns;
 	protected        $_methods        = array();
 	protected        $_cache          = array();
+	protected        $_properties     = array();
 	
 	
 }

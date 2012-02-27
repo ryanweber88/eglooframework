@@ -15,9 +15,9 @@ class EmptySet extends Domain\Model\Set {
 		}
 		
 		catch (\Exception $ignore) { 
-			$this->container[$offset] = new $this->model;
+			$this->collection[$offset] = new $this->model;
 		}
 	
-		return $this->container[$offset];
+		return $this->collection[$offset];
 	}
 }

@@ -16,7 +16,8 @@ class Collection extends \eGloo\Dialect\ObjectSafe {
 	 * @param Collection $collection
 	 */
 	public static function isHash($collection) {
-		return array_keys($collection) !== range(0, count($collection) - 1);
+		//return array_keys($collection) !== range(0, count($collection) - 1);
+		return count(preg_grep('/[^0-9]/', array_keys($collection))) > 0;
 	}
 
 	/**

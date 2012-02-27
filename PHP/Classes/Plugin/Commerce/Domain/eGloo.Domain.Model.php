@@ -37,6 +37,7 @@ abstract class Model extends Delegator
 		// to the names of our relationships
 		$this->__relationships();
 		$this->__callbacks();
+		$this->__attributes();
 		
 		
 
@@ -49,6 +50,7 @@ abstract class Model extends Delegator
 		// assign static delegation 
 		Delegator::delegate(get_called_class(), get_class(static::data()));
 		
+
 		// provide reg exp list to check methods against
 		$lookFor = array(
 			'/loadByI(D|d)/'                   => 'find',
@@ -70,7 +72,7 @@ abstract class Model extends Delegator
 		foreach($lookFor as $pattern => $alias) {
 			foreach($methods as $method) {
 				if (preg_match($pattern, $method->getName(), $match)) {
-
+					
 					try {
 						static::aliasMethod(strtolower(preg_replace(
 							$pattern, $alias, $method->getName()
@@ -97,6 +99,7 @@ abstract class Model extends Delegator
 		
 		static::defineMethod('find', function($__mixed) use ($class) {
 
+			
 			// expand on parameter matching, but for, just match on primary
 			// and tablename_id pattern
 			$arguments = func_get_args();
@@ -106,10 +109,17 @@ abstract class Model extends Delegator
 			
 			// we're GAURENTEED to throw an exception here if our by-conventions guess
 			// does not pan out; so callers will be explicitly aware
-			return new $class($class::statement("
-				SELECT * FROM $table WHERE $field = ?
-					
-			", $key));
+			try { 
+				return new $class($class::statement("
+					SELECT * FROM $table WHERE $field = ?
+						
+				", $key));
+				
+			}
+			
+			catch(\Exception $ignore) {
+				var_export($ignore); exit;
+			}
 			
 			
 		});
@@ -128,18 +138,17 @@ abstract class Model extends Delegator
 	 */
 	protected function initialize(array $arguments) {
 
-		foreach($arguments as $name => $value) { 
-			$this->$name = $value;
-		}
-				
-		// call __relationships - the idea is that child classes should
-		// use method as area to concretely draw all domain based relationships;
-		// this method should be seen as a constructor for relationships
-		$this->__properties();
-
+		$self = $this;
 		
-		// finally set flag 'initialized' to true
+		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) { 
+			foreach($arguments as $name => $value) { 
+				$self->$name = $value;
+			}
+		});
+				
+		// set flag 'initialized' to true
 		$this->initialized = true;
+		
 	}
 	
 	/**
@@ -175,20 +184,35 @@ abstract class Model extends Delegator
 		$self             = $this;
 				
 		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
-			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName) {
+			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda) {
 				
 				
 				// check if the model exists in the database to ensure we are
-				// not running queries against an empty/shallow model
+				// not running queries against an empty/shallow model - because
+				// there is nothing to match against here
 				if ($self->exists()) {
 					$result = $lambda($model);
-					
-					// check if singular result or hash
+
+					// check if singular result or hash (which would indicate
+					// a single record being returned); if an array is returned
+					// then it should contain 1+ elements as this is-a required
+					// contract of the defineRelationship method
 					if (is_array($result)) {
+						
 						if (\eGloo\Utilities\Collection::isHash($result)) {
 							$result = new $model($result);
 						}
 						
+						// otherwise we have a set return; check if elements are
+						// model instances, in which case we can simply wrap
+						// reset in set instance
+						else if ($result[0] instanceof Model) {
+
+							$result = new Model\Set($result);
+						
+						}
+						
+						// otherwise, we manually build set with model instances
 						else {
 							
 							foreach($result as $record) {
@@ -196,25 +220,29 @@ abstract class Model extends Delegator
 							}
 							
 							// replace result with temporary
-							$result = $temporary;
+							$result = new Model\Set($temporary);
 						}
+						
+						return $result;
 					}
-				
-					return $result;
-				}
-				
-				// if the model doesn't exist, or this is a case where we have a "shallow"
-				// model, we return a shallow copy of our relationship(s)
-				else {
 
-					return \eGloo\Utilities\InflectionsSafe::isSingular($relationshipName)
-						
-						// return an empty instance of model
-						? new $model
-						
-						// @TODO maybe 'EmptySet' here?
-						: new Utility\EmptySet($model);
 				}
+				
+				
+				// if the model doesn't exist (the case where we have a "shallow"
+				// model) or our return result from lambda is false (which indicates 
+				// an empty result or a failure to find data), 
+				// we return a shallow copy of our relationship(s), either as an instance
+				// of model or emptyset, based on plurality rules
+
+				return \eGloo\Utilities\InflectionsSafe::isSingular($relationshipName)
+					
+					// return an empty instance of model
+					? new $model
+					
+					// @TODO maybe 'EmptySet' here?
+					: new Utility\EmptySet($model);
+				
 			});
 		}
 		
@@ -337,10 +365,10 @@ abstract class Model extends Delegator
 	}	
 
 	
-	protected function __properties() {
+	protected function __attributes() {
 		// call our parent method to ensure any property work is done
 		// up hierarchy chain
-		parent::__properties();
+		//parent::__properties();
 		
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = strtolower(preg_replace(
@@ -491,7 +519,7 @@ abstract class Model extends Delegator
 	
 	}
 		
-	protected function runCallbacks($event) {
+	protected function runCallbacks($event, $lambda = null) {
 		
 		// we use inject idea to pass values between callbacks,
 		// if needed; if any callback returns false, then
@@ -507,6 +535,13 @@ abstract class Model extends Delegator
 					}
 				}
 			}		
+		}
+		
+		// if we have wrapped functionality into our lambda
+		// parameter; the intention is to run in between our before
+		// and after callback events
+		if (is_callable($lambda)) {
+			$lambda();
 		}
 		
 		// run our after callbacks in reverse order
