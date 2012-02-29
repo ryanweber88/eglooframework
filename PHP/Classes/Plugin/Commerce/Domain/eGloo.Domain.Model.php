@@ -22,7 +22,9 @@ abstract class Model extends Delegator
 		
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
-		if (is_array($__mixed) && \eGloo\Utilities\Collection::isHash($__mixed)) {
+		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
+				\eGloo\Utilities\Collection::isHash($__mixed)) {
+			
 			$this->initialize($__mixed);
 		}
 		
@@ -171,8 +173,10 @@ abstract class Model extends Delegator
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
 	 * idiomatic reasons only
+	 * @type experimental the moment - will be used to indicate relationship
+	 * type if plurality rules are ineffective
 	 */
-	protected function defineRelationship($name, $lambda) {
+	protected function defineRelationship($name, $lambda, $type = null) {
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
@@ -240,8 +244,8 @@ abstract class Model extends Delegator
 					// return an empty instance of model
 					? new $model
 					
-					// @TODO maybe 'EmptySet' here?
-					: new Utility\EmptySet($model);
+					
+					: new Model\Set($model);
 				
 			});
 		}
@@ -351,7 +355,7 @@ abstract class Model extends Delegator
 	
 	
 	/**
-	 * Provides an array representation of model
+	 * Provides an array representation of modelphp 
 	 */
 	public function __toArray() {
 		
@@ -363,6 +367,21 @@ abstract class Model extends Delegator
 		);
 		
 	}	
+	
+	/**
+	 * Alias to __toArray; this is meant to be called explicitly
+	 * wherein __toArray satisfies the conditions of our ToArrayInterface;
+	 * also, there are conditions where we simply cannot accept an
+	 * object, even one that caters to array notation, so thus
+	 * 
+	 */
+	public function toArray($native = false) {
+		if ($native) {
+			return $this->properties;
+		}
+		
+		return $this->__toArray();
+	}
 
 	
 	protected function __attributes() {

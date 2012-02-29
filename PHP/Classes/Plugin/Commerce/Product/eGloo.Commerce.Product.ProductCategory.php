@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Product;
 
+use \eGloo\Domain;
+
 /**
  * ProductCategory Class File
  * 
@@ -35,7 +37,7 @@ namespace eGloo\Commerce\Product;
  * @package Plugins
  * @subpackage Commerce
  */
-class ProductCategory {
+class ProductCategory extends Domain\Model {
 	
 	const SPECIES		= 10;
 	const AGE			= 20;

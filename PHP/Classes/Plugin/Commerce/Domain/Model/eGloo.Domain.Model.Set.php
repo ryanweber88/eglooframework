@@ -3,6 +3,10 @@ namespace eGloo\Domain\Model;
 
 use eGloo\Domain;
 
+/**
+ * Represents a returned set of data - can be accessed as array and is iterable over
+ * foreach 
+ */
 class Set extends \eGloo\Dialect\ObjectSafe
 	implements \ArrayAccess, \IteratorAggregate, \Countable {
 	
@@ -47,6 +51,121 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return count($this) === 0;	
 	}
 	
+	/**
+	 * Simply empties out our collection
+	 */
+	public function clear() {
+		$this->collection = array();
+	}
+	
+	/**
+	 * Returns filtered set - not that this returns a new instance of
+	 * set and not a modified version of the old set
+	 * @TODO move this to Collection and override
+	 */
+	public function collect($__mixed) {
+		
+		// filters will only work if natural key has been specified
+		
+		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
+			
+			$arguments = func_get_args();
+			$set       = new static($this->model);
+			
+			// if our first, and only argument is a lambda, then run
+			// against collection; an a return of absolute TRUE
+			// will result in instance being added to new set
+			if (is_callable($lambda = $arguments[0])) {
+				foreach($this as $model) {
+					if ($lambda($model) === true) {
+						$set[] = $lambda($model);
+					}
+				}
+			}
+			
+			else { 
+				// otherwise, it is assumed that array of collect
+				// value been passed
+				if (is_array($arguments[0])) {
+					$arguments = $arguments[0];
+				}
+					
+				foreach($this as $model) {
+					foreach($arguments as $value) {
+						if ($this->$field === $value) { 
+							$set[] = $model;
+							break ;
+						}
+					}
+				}
+			}
+			
+			return $set;
+		}
+		
+		$class = get_class($this);
+		
+		throw new \Exception(
+			"Cannot apply collect to set<$class> because '$class::NATURAL_KEY' is not defined"
+		);
+	}
+	
+	/**
+	 * Does the opposite of collect - since these are so similar, they should 
+	 * probably be composed of similar meta methods
+	 */
+	function reject	($__mixed) {
+		
+		// filters will only work if natural key has been specified
+		
+		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
+			
+			$arguments = func_get_args();
+			$set       = new static($this->model);
+			
+			// if our first, and only argument is a lambda, then run
+			// against collection; an a return of absolute FALSE
+			// will result in instance being added to new set
+			if (is_callable($lambda = $arguments[0])) {
+				foreach($this as $model) {
+					if ($lambda($model) === false) {
+						$set[] = $lambda($model);
+					}
+				}
+			}
+			
+			else { 
+				// otherwise, it is assumed that array of collect
+				// value been passed
+				if (is_array($arguments[0])) {
+					$arguments = $arguments[0];
+				}
+					
+				foreach($this as $model) {
+					$found = false;
+					
+					foreach($arguments as $value) {
+						if ($this->$field === $value) { 
+							$found = true;
+							break ;		
+						}
+					}
+				}
+				
+				
+			}
+			
+			return $set;
+		}
+		
+		$class = get_class($this);
+		
+		throw new \Exception(
+			"Cannot apply collect to $this because '$class::NATURAL_KEY' is not defined"
+		);
+	}
+
+	
 	
 	/**
 	 * Find is similar in scope to each, but returns boolean false if
@@ -85,27 +204,71 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// collection
 		$model = $this->model;
 		
-		if (is_string($offset) && 
-				!is_numeric($offset) &&
-				!is_null($field = $model::constant('NATURAL_KEY')) ) { 
-		
-
-			// if our natural field exist, iterate through collection and 
+		// make sure offset is a string and not some '19' fuckery
+		if (is_string($offset) && !is_numeric($offset)) {
+			
+			
+			// if our natural field exist, iterate through collection and
 			// determine if we can field a match to offset
-			foreach($this as $model) {
-				if ($model->$field == $offset) {
-					return $model; 
+			if (!is_null($field = $model::constant('NATURAL_KEY'))) { 
+		
+				// since we allow regular expression filtering, determine
+				// if offset is valid regular expression (this is still a bit
+				// dicey since preg_last_error seems to not fucking work, so
+				// regular expression have to be delimited by '/'; if you are
+				// using the '/' character and you don't intend it as a regular
+				// expression, then please shoot yourself
+				if (\eGloo\Primitives\RegExp::valid($regexp = $offset)) {
+					
+					$set = new static($this->model);
+					
+					foreach($this as $model) {
+						if (preg_match($regexp, $model->$field)) {
+							$set[] = $model;
+						}
+					}
+						
+					return $set;
+				}
+				
+				else {
+		
+					foreach($this as $model) {
+						if ($model->$field == $offset) {
+							return $model; 
+						}
+					}
+					
+					return false;
 				}
 			}
 			
+			$class = get_class($this);
+			
+			throw new \Exception(
+					"Cannot apply reject to $this because '$class::NATURAL_KEY' is not defined"	
+			);				
+			
+			
+			
 		}
 
-		// otherwise attempt to return model at $offset value
+		// otherwise we create an instance of templated model and push
+		// onto queue
+		if (!isset($this->collection[$offset])) {
+			$this->collection[$offset] = new $this->model;
+		}
+		
 		return $this->collection[$offset];
 	}
 	
 	public function offsetSet($offset, $value) {
-		$this->collection[$offset] = $value;
+		
+		$index = empty($offset)
+			? count($this->collection)
+			: $offset;
+		
+		$this->collection[$index] = $value;
 	}
 	
 	public function offsetUnset($offset) {

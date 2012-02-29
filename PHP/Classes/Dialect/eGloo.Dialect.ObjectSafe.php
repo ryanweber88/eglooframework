@@ -547,6 +547,7 @@ abstract class ObjectSafe {
 		return $tokens[count($tokens)-1];
 	}
 	
+
 	
 	protected static $_singleton;
 	protected static $_scache         = array();
