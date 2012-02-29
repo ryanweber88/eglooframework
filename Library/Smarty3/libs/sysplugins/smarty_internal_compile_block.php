@@ -51,7 +51,7 @@ class Smarty_Internal_Compile_Block extends Smarty_Internal_CompileBase {
 
         if (0 == preg_match("!({$_ldl}block\s+)(name=)?(\w+|'.*'|\".*\")(\s*?)?((append|prepend|nocache)(=true)?)?(\s*{$_rdl})!", $block_tag, $_match)) {
             $error_text = 'Syntax Error in template "' . $template->getTemplateFilepath() . '"   "' . htmlspecialchars($block_tag) . '" illegal options';
-            throw new SmartyCompilerException($error_text);
+            //throw new SmartyCompilerException($error_text);
         } else {
             $_name = trim($_match[3], '\'"'); 
             // replace {$smarty.block.child}

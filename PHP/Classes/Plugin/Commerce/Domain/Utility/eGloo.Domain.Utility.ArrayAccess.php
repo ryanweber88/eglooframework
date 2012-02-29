@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Domain\Utility;
 
+use \eGloo\Dialect\Nil;
+
 /**
  * ArrayAccess allows Domain\Model to be accessed as array
  * @TODO namespace is fine, but location needs to changed as it isn't reflective
@@ -12,6 +14,20 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	const EMPTY_STRING = "";
 	
 	/**
+	 * Override parent constructor to provide backward referencing in the
+	 * event that we need ask questions in regards to a previous (in
+	 * the recursion chain) ArrayAccess. 
+	 */
+	function __construct($object, ArrayAccess $reference = null) {
+		parent::__construct($object);
+		
+		// capture reference - beware the cyclical implications
+		if (!is_null($reference)) { 
+			$this->reference = $reference;
+		}
+	}
+	
+	/**
 	 * Overrides utility arrayaccess to return empty string - this
 	 * is done because the primary use of this class is to be used 
 	 * in smarty templates - the absence of value will simply return
@@ -19,6 +35,19 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 * does not exist
 	 */
 	public function offsetGet($offset) {
+		
+		// manage exceptions to delegation - there should be very few
+		// of they could potentially produce unexpected results that
+		// are very difficult to track
+		//$exceptions = array();
+		
+		// in the case of evaluate, we want to to look at our reference, 
+		// should it exist and determine if what its value should be
+		if ($offset == 'evaluate' && !is_null($this->reference)) {
+			return $this->reference->evaluate();
+		}
+		
+
 		try {
 			$result = parent::offsetGet($offset);
 		}
@@ -31,15 +60,29 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			$result = null;
 		}
 		
+		// set a backward reference for any needed 'backward' evaluations
+		if ($result instanceof static) {
+			$result->reference = $this;
+		}
+		
+		
 		// if our result is null, we return an ArrayAccess instance, which
 		// delegates to a Nil class instance - we do this because there
 		// are many instances where simply returning null will cause
 		// an exception to be thrown - in this case, we are returning
 		// an object that will produce an empty result when stringified
-		return is_null($result) 
-			? new static(new \eGloo\Dialect\Nil)
+		
+		//return is_null($result) && !preg_match('/\_eval/', $offset)
+		return is_null($result)
+		
+			? new static(new Nil, $this)
+		
+			// otherwise we return result as is
 			: $result;
+			
 	}
+	
+
 	
 	/**
 	 * This is our catch/exit to the idea of recursion through continuously
@@ -55,6 +98,8 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			}
 		}
 		
+		return false;
+		
 		// unfortunately we have to do a return of the exception, because a raised
 		// exception in __toString does not return the 
 		return 'Failed to stringify ArrayAccess representation of model ' . get_class($this->delegated);
@@ -67,4 +112,21 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	public function offsetExists($offset) {
 		return true;
 	}
+	
+	/**
+	 * Responsible for evaluating the value of current delegated object;
+	 * wherein using instance of type Nil is fine for areas of template
+	 * where automatic string cast is done, it is done for evaluation
+	 * sections like if statements; this is meant to provide a bridge
+	 * to exactly that problem
+	 */
+	protected function evaluate() {
+		
+		if ($this->delegated instanceof Nil) {
+			return null;
+		}
+		
+	}	
+	
+	private $reference;
 }

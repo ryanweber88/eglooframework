@@ -476,6 +476,20 @@ abstract class ObjectSafe {
 			);
 		}
 		
+		// next we check on dynamic properties
+		
+		// patterns in the form has_fieldname will check to
+		// determine that fieldname isset on class
+		if (preg_match('/^has_(.+)^/', $name, match)) {
+			
+			// return isset on field - this asks the question whether
+			// the field is available on receiver, NOT what its value
+			// is
+			$field = $matchp[1];
+			return isset($this->$field);
+			
+		}
+		
 			
 		
 		// this will die UNGRACEFULLY if method does not exist

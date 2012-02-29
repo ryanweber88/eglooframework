@@ -12,5 +12,6 @@ class Nil extends ObjectSafe {
 	
 	public function __toString() {
 		return '';
+		//return false;
 	}
 }
