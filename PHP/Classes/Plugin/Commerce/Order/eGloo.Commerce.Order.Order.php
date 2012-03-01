@@ -36,28 +36,7 @@ use eGloo\Plugin\Commerce;
  * @package Plugins
  * @subpackage Commerce
  */
-class Order {
-
-	/** @var integer Order id */
-	public $order_id;
-
-	/** @var string Order email address */
-	public $order_email;
-
-	/** @var integer 1/0 for active Order */
-	public $is_active = 1;
-
-	/** @var integer 1/0 for deleted Order */
-	public $is_deleted = 0;
-
-	/** @var string created date */
-	public $created_date;
-
-	/** @var string deleted date */
-	public $deleted_date;
-
-	/** @var string updated date */
-	public $updated_date;
+class Order extends Domain\Model {
 
 
 

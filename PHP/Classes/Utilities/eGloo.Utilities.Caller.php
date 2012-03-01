@@ -53,6 +53,10 @@ class Caller extends Object {
 		
 		$trace = $this->trace[self::CALLER_INDEX];
 		
+		if ($trace['function'] == '__call') {
+			return false;
+		}
+		
 		
 		if (isset($trace['file'])) {		
 		
@@ -87,7 +91,7 @@ class Caller extends Object {
 				// reciever context operator (eg reciever :: method)
 				if (!isset($cache[$method]['static'])) { 
 					throw new \Exception(
-						"Failed to locate call to $method in {$trace['file']} @ #{$trace['line']}"
+						"Failed to locate call to '$method' in {$trace['file']} @ #{$trace['line']}"
 					);
 				}
 			}

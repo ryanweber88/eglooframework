@@ -36,9 +36,8 @@ use eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class OrderDataAccess extends Connection\PostgreSQLDBConnection{
+class OrderDataAccess extends Model\Data {
 
-	protected static $instance = null;
 
 	/**
 	 * Pass Connection resource to parent constructor
