@@ -39,23 +39,77 @@ class Program {
 	
 	public		$program_id;
 	
-	public		$program_title;
+	public		$title;
 	
 	public		$user_id;
 	
-	public		$interval;
+	public		$program_status_id;
 	
-	public		$interval_type;
+	public		$shipping_address_id;
 	
-	public		$start_date;
+	public		$payment_option_id;
 	
-	public		$end_date;
+	public		$start_timestamp;
 	
+	public		$recurring_interval;
 
-	function __construct() {
-		
+	public		$next_order_process_date;
+	
+	public		$next_order_shipping_date;
+	
+	public		$pre_authorization_number;
+	
+	protected	$program_products = array();
+
+	protected	$properties;
+	
+	const		PROGRAM_STATUS_INACTIVE		= 0,
+				PROGRAM_STATUS_ACTIVE		= 1,
+				PROGRAM_STATUS_ON_HOLD		= 2,
+				PROGRAM_STATUS_DELETED		= 3,
+				PROGRAM_STATUS_NEED_ACTION	= 4;
+
+	public function __construct($args) {
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
 	}
 	
+	/**
+	 * Populate data int the Product object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */	
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the Product Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from Product
+	 */
+	public function __get($key) {
+		if (property_exists($this, $key)) {
+			if (method_exists($this, 'load_'. $key)) {
+				return call_user_func(array($this, 'load_' . $key));
+			}
+		} elseif ( isset($this->properties[$key] )) {
+			return $this->properties[$key];
+		} 
+		return false;
+	}
+	
+	//public static function create() { }
+	
+	public static function loadByID($id) {
+
+	}
+
+
 	public function updateProgram() {
 		
 	}
