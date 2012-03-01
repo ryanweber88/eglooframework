@@ -174,4 +174,17 @@ class Brand extends Domain\Model {
 		}
 		return $result;
 	}
+
+	public static function getLandingPageBrand() {
+		$result = array();
+		$rows = BrandDataAccess::fetch()->loadBrandList();
+		foreach ($rows as $row) {
+			$brand = new Brand($row);
+			$brand->friendly_url	=  BrandDataAccess::fetch()->loadBrandSlugDestination();
+			$result[] = $brand;
+		}
+		//return $result;
+		var_dump($result);
+	}
 }
+

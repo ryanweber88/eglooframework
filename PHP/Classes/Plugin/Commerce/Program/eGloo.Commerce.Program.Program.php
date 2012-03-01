@@ -38,7 +38,13 @@ use \eGloo\Domain;
  * @subpackage Commerce
  */
 class Program extends Domain\Model {
-	
+
+	const		PROGRAM_STATUS_INACTIVE		= 0,
+				PROGRAM_STATUS_ACTIVE		= 1,
+				PROGRAM_STATUS_ON_HOLD		= 2,
+				PROGRAM_STATUS_DELETED		= 3,
+				PROGRAM_STATUS_NEED_ACTION	= 4;
+
 	/**
 	 * Retrieve model based on primary id - our argument list is fluid and
 	 * can accept multiple primary
@@ -76,20 +82,33 @@ class Program extends Domain\Model {
 			: false;
 	
 	}
-	
-	/*
-	public function updateProgram() {
-		
+
+	/**
+	 * Populate data int the Product object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */	
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+		return $this;
 	}
 
-
-	public static function createProgram() {
-		
+	/**
+	 * Getter for the Product Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from Product
+	 */
+	public function __get($key) {
+		if (property_exists($this, $key)) {
+			if (method_exists($this, 'load_'. $key)) {
+				return call_user_func(array($this, 'load_' . $key));
+			}
+		} elseif ( isset($this->properties[$key] )) {
+			return $this->properties[$key];
+		} 
+		return false;
 	}
-	
-	public static function deleteProgram($program_id) {
-		
-	}
-	*/
 
 }

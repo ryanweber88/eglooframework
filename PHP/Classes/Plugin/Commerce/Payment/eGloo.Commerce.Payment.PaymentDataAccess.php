@@ -1,10 +1,9 @@
 <?php
-namespace eGloo\Commerce\User;
-use \eGloo\DataProcessing\Connection,
-	\eGloo\Utility;
+namespace eGloo\Commerce\Payment;
+use eGloo\DataProcessing\Connection;
 
 /**
- * UserDataAccess Class File
+ * PaymentDataAccess Class File
  *
  * Copyright 2011 eGloo, LLC
  *
@@ -29,15 +28,15 @@ use \eGloo\DataProcessing\Connection,
  */
 
 /**
- * Description of UserDataAccess
+ * Description of PaymentDataAccess
  *
- * Representation of User Entity
+ * Representation of Order Entity
  *
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class UserDataAccess extends Connection\PostgreSQLDBConnection{
+class PaymentDataAccess extends Connection\PostgreSQLDBConnection{
 
 	protected static $instance = null;
 
@@ -46,7 +45,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	 * if needed
 	 * @return void
 	 */
-	public function __construct() { }
+	protected function __construct() { }
 
 	/**
 	 * Generate an instance of this class
@@ -54,7 +53,7 @@ class UserDataAccess extends Connection\PostgreSQLDBConnection{
 	 */
 	public static function fetch () {
 		if (static::$instance === null) {
-			static::$instance = new self();
+			static::$instance = new self;
 		}
 		return static::$instance;
 	}

@@ -303,7 +303,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	protected function rollbackTransaction () {
 		!is_null ($this->link) ?: $this->getConnection();
 		
-		pg_qery($this->link, 'ROLLBACK TRANSACTION');
+		@pg_qery($this->link, 'ROLLBACK TRANSACTION');
 		if (pg_last_error($this->link) != false) {
 			throw  new \DatabaseErrorException();
 		}

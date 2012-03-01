@@ -38,8 +38,6 @@ use eGloo\Plugin\Commerce;
  */
 class Order extends Domain\Model {
 
-
-
 	public static function loadOrderByZipCode($zip_code) {
 		$result = array();
 		if ((int) $zip_code == '') {
@@ -102,17 +100,17 @@ class Order extends Domain\Model {
 	}
 
 
-	public static function loadOrderByOrderId($order_id) {
-		$result = array();
-		if ((int) $order_id == '') {
-			throw new \InvalidArgumentException();
-		}
-		$orders = Commerce\Order\OrderDataAccess::loadOrderByOrderId($order_id);
-		foreach ($rders as $order) {
-			$result[] = new Order($order);
-		}
-		return $result;
-	}
+//	public static function loadByID($order_id) {
+//		$result = array();
+//		if ($order_id == '') {
+//			throw new \InvalidArgumentException();
+//		}
+//		$orders = OrderDataAccess::loadOrderByOrderId($order_id);
+//		foreach ($rders as $order) {
+//			$result[] = new Order($order);
+//		}
+//		return $result;
+//	}
 
 
 	public static function createOrderFromArray(array $args) {
