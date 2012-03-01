@@ -1223,6 +1223,25 @@ then
 		--UseSmarty="true" \
 		--WriteLocalizationPaths="true"
 	chmod -R 755 "$CACHE_PATH"
+fi
+
+if [ $DETECTED_PLATFORM -eq $OS_UBUNTU ]
+then
+	./Configure.Ubuntu.php \
+		--ApplicationsPath="$APPLICATIONS_PATH" \
+		--CachePath="$CACHE_PATH" \
+		--ConfigurationPath="$CONFIG_PATH" \
+		--CubesPath="$CUBES_PATH" \
+		--DataStorePath="$DATA_STORE_PATH" \
+		--DoctrinePath="$DOCTRINE_PATH" \
+		--DocumentationPath="$DOCUMENTATION_PATH" \
+		--DocumentRoot="$DOCUMENT_ROOT" \
+		--FrameworkRootPath="$FRAMEWORK_PATH" \
+		--LoggingPath="$LOGPATH" \
+		--SmartyPath="$SMARTY_PATH" \
+		--UseDoctrine="false" \
+		--UseSmarty="true" \
+		--WriteLocalizationPaths="true"
 else
 	./Configure.php \
 		--ApplicationsPath="$APPLICATIONS_PATH" \
