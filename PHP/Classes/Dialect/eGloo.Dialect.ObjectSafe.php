@@ -8,7 +8,7 @@ namespace eGloo\Dialect;
  */
 abstract class ObjectSafe {
 	
-	function __construct() {
+	public function __construct() {
 		
 		// fire our alias properties and methods
 		//$this->aliasMethods();
@@ -21,18 +21,16 @@ abstract class ObjectSafe {
 	 * Provides an idea of a static constructor - will have to be explicitly called from
 	 * autoloader and overriden in descendant classes
 	 */
-	static function __constructStatic() { 
+	public static function __constructStatic() { 
 		static::__methodsStatic();
 	}
-	
-	
-	
+
 	/**
 	 * Alias to __constructStatic - I think it's a little neater and carries
 	 * the idea of a static constructor without have to explicitly spell
 	 * it out
 	 */
-	static function __static() {
+	public static function __static() {
 		static::__constructStatic();
 	}
 	
@@ -44,9 +42,9 @@ abstract class ObjectSafe {
 	
 	// These are stubs but called by the constructor - so as they
 	// can be used inherited classes
-	protected function  aliasProperties() { }
+	protected function aliasProperties() { }
 	
-	protected function  aliasMethods() {
+	protected function aliasMethods() {
 		
 		$self = $this;
 
@@ -205,7 +203,7 @@ abstract class ObjectSafe {
 				$cache[$class][$key] = $lambda();
 			}
 			
-			return $cache[$class][$key];		
+			return $cache[$class][$key];
 		});
 		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
@@ -487,7 +485,7 @@ abstract class ObjectSafe {
 	public function methodMissing($name, $arguments, $static = false) {
 		
 	}
-	
+
 	/**
 	 * Stub call - needed because it assumed all classes on Objet hierarchy
 	 * have a fallback to method missing
@@ -503,8 +501,13 @@ abstract class ObjectSafe {
 		// since php cannot make a determination between instance/static 
 		// receiver when called from an instance context, we have
 		// to manually pass call to our callstatic dump
-		if ($caller->isReceivedStatically()) {
-			return static::__callstatic($name, $arguments);
+		try {
+			if ($caller->isReceivedStatically()) {
+				return static::__callstatic($name, $arguments);
+			}
+			
+		} catch (\Exception $e) {
+			die_r($caller);
 		}
 		
 		
@@ -544,17 +547,14 @@ abstract class ObjectSafe {
 		// @TODO this needs to be profiled
 		$class   = get_called_class();
 		$current = get_called_class();
-		
-		
-		
+
 		// if our method dump recieves a method being defined
 		// by define method, we need to inject our current
 		// context into the method definition
 		//if ($name == 'defineMethod' && is_callable($arguments[1])) {
 		array_push($arguments, $class);
 		//}
-		
-		
+
 		do {
 			if (isset(static::$_methodsStatic[$current][$name])) {
 				
@@ -564,12 +564,8 @@ abstract class ObjectSafe {
 				);
 			}
 			
-		} while (($current = get_parent_class($current)));
-		
+		} while ( ($current = get_parent_class($current) ) );
 
-		
-		
-		
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)		
 		throw new \Exception(
