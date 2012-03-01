@@ -83,11 +83,11 @@ class User {
 	/** @var string last logged in date */
 	public		$action_taken;
 
-	public		$user_roles		= array();
+	public		$user_roles			= array();
 
-	public		$user_addresses	= array();
+	public		$user_addresses		= array();
 
-	public		$payment_options = array();
+	public		$payment_options	= array();
 
 	public		$phone_numbers		= array();
 
@@ -98,7 +98,9 @@ class User {
 	public static $active_user_id = 0;
 
 	/** @var array/Mix properties of Brands */
-	public		$properties;
+	protected $properties;
+	
+	protected $default_shipping_rate;
 
 	const	USER_TYPE_NORMAL		= 1,
 			USER_TYPE_EMPLOYEE		= 2,
@@ -123,81 +125,6 @@ class User {
 			self::$active_user_id = $this->user_id;
 		}
 		//isset($this->user_id) ? self::$active_user_id = $this->user_id : 0;
-	}
-
-	/**
-	 * Validate User password
-	 *
-	 * @param type $password
-	 * @return boolean true/false
-	 */
-	public function validatePassword ($password) {
-		return $password == $this->password_hash ?: false;
-	}
-
-	public function updateUserProfileByID($fname, $lname) {
-		return UserDataAccess::fetch()->updateUserProfileByID($fname, $lname, $this->user_id);
-	}
-
-	public function savePhoneNumber($number) {
-		if (!UserDataAccess::fetch()->savePhoneNumber($number, $this->user_id)) {
-			if (UserDataAccess::fetch()->updatePhoneNumber($number, $this->user_id)) {
-				return true;
-			}
-			return false;
-		}
-		return true;
-	}
-
-
-	public function loadAddresses () {
-		if (empty ($this->user_addresses)) {
-			$this->user_addresses = UserDataAccess::fetch()->loadAddressByID($this->user_id);
-		}
-		//$this->user_addresses;
-		return $this;
-	}
-	
-	public function loadPrimaryAddresses () {
-		$result = array();
-		$result['billing']	= UserDataAccess::fetch()->loadBillingAddress($this->user_id);
-		$result['shipping']	= UserDataAccess::fetch()->loadShippingAddress($this->user_id);
-		return $result;
-	}
-
-	public function loadPaymentOptions () {
-		if (empty ($this->payment_options)) {
-			$this->payment_options = UserDataAccess::fetch()->loadPaymentsByID($this->user_id);
-		}
-		return $this;
-	}
-
-	public function loadPhoneNumbers () {
-		if (empty ($this->phone_numbers)) {
-			//$this->phone_numbers = UserDataAccess::fetch()->loadPhoneNumbers($this->user_id);
-		}
-		//$this->phone_numbers;
-		return $this;
-	}
-
-	public function loadRoles () {
-		if (empty ($this->user_roles)) {
-			//$this->user_roles = UserDataAccess::fetch()->loadPaymentsByID($this->user_id);
-		}
-		return $this;
-	}
-
-	/**
-	 * Check for valid User
-	 *
-	 * @return boolean static true/false
-	 */
-	public static function isLoggedIn() {
-		return self::$logged_in;
-	}
-
-	public static function getActiveUserID() {
-		return self::$active_user_id;
 	}
 
 	/**
@@ -270,188 +197,4 @@ class User {
 		}
 		// @TODO delegate to EPA
 	}
-
-	/**
-	 *
-	 * Returns user logged in status
-	 */
-	public static function loggedIn() {
-		return static::$loggedIn;
-	}
-
-	/**
-	 * Login Method
-	 *
-	 * @param type $email
-	 * @param type $passwd
-	 * @return type
-	 * @throws \InvalidArgumentException
-	 */
-	public static function login ($email, $passwd) {
-		if ($email == '' || $passwd == '') {
-			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
-		}
-
-		$result = UserDataAccess::fetch()->login($email, $passwd);
-		return is_array($result) ? new User($result) : false;
-	}
-
-	/**
-	 *
-	 * @param type $hash
-	 * @return type
-	 * @throws \InvalidArgumentException
-	 */
-	public static function validateCommunicationKey($hash) {
-		if ($hash == '' ) {
-			throw new \InvalidArgumentException('Hash key needed');
-		}
-		$key = UserDataAccess::fetch()->getCommunicationKey($hash);
-		return !empty($key) ? $key : false;
-	}
-
-	/**
-	 * Create User Object
-	 *
-	 * @param type $uname
-	 * @param type $pwd
-	 * @param type $priv
-	 * @return type
-	 * @throws \InvalidArgumentException
-	 */
-	public static function register($email, $passwd, $user_type = self::USER_TYPE_NORMAL) {
-		if ($email == '' || $passwd == '') {
-			throw new \InvalidArgumentException("Invalid User Data Exception: Username or Password is invalid");
-		}
-		$id = UserDataAccess::fetch()->createUserAccount($email, $passwd, $user_type);
-
-		return ($id > 0) ? self::loadByID($id) : false;
-	}
-
-	/**
-	 *
-	 * @param type $user_id
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadByID($user_id) {
-		if ($user_id === '') {
-			throw new \InvalidArgumentException();
-		}
-		$user = UserDataAccess::fetch()->loadUserByID($user_id);
-		return !empty($user) ? new User($user) : false;
-	}
-
-	public static function loadByPassword($passwd) {
-		if ($passwd == '') {
-			throw new \InvalidArgumentException();
-		}
-		$user = UserDataAccess::fetch()->loadUserByPassword($passwd);
-		return !empty($user) ? new User($user) : false;
-	}
-
-	/**
-	 *
-	 * @param type $zip_code
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByZipCode($zip_code) {
-		$result = array();
-		if ((int) $zip_code == '') {
-			throw new \InvalidArgumentException();
-		}
-		$users = UserDataAccess::fetch()->loadUserByZipCode($zip_code);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
-	}
-
-	/**
-	 *
-	 * @param type $email
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByEmail($email) {
-		if ($email == '') {
-			throw new \InvalidArgumentException();
-		}
-		$user = UserDataAccess::fetch()->loadUserByEmail($email);
-		return !empty($user) ? new User($user) : false;
-	}
-
-	/**
-	 *
-	 * @param type $cc_code
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByCreditCardCode($cc_code) {
-		$result = array();
-		if ((int) $cc_code == '') {
-			throw new \InvalidArgumentException();
-		}
-		$users = UserDataAccess::fetch()->loadUserByCCCode($cc_code);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
-	}
-
-	/**
-	 *
-	 * @param type $state
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByState($state) {
-		$result = array();
-		if ((int) $state == '') {
-			throw new \InvalidArgumentException();
-		}
-		$users = UserDataAccess::fetch()->loadUserByState($state);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
-	}
-
-	/**
-	 *
-	 * @param type $program_id
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByProgramId($program_id) {
-		$result = array();
-		if ((int) $program_id == '') {
-			throw new \InvalidArgumentException();
-		}
-		$users = UserDataAccess::fetch()->loadUserProgramId($program_id);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
-	}
-
-	/**
-	 *
-	 * @param type $order_id
-	 * @return \eGloo\Commerce\User\User
-	 * @throws \InvalidArgumentException
-	 */
-	public static function loadUserByOrderId($order_id) {
-		$result = array();
-		if ((int) $order_id == '') {
-			throw new \InvalidArgumentException();
-		}
-		$users = UserDataAccess::fetch()->loadUserByOrderId($order_id);
-		foreach ($users as $user) {
-			$result[] = new User($user);
-		}
-		return $result;
-	}
 }
-
