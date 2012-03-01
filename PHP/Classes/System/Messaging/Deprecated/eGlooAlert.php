@@ -89,4 +89,6 @@ class eGlooAlert {
 
 }
 
-deprecate( __FILE__, '\eGloo\Messaging\Alert' );
+if ( !defined('STDIN') && class_exists('\eGloo\Messaging\Alert', false) )  {
+	deprecate( __FILE__, '\eGloo\Messaging\Alert' );
+}
