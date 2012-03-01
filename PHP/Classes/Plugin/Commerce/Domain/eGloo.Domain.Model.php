@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Domain;
 
-use \eGloo\Utilities\Delegator;
+use \eGloo\Utilities\Delegator as Delegator;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -9,12 +9,12 @@ use \eGloo\Utilities\Delegator;
  */
 abstract class Model extends Delegator 
 	implements \eGloo\Utilities\ToArrayInterface {
-	
+
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
 	// in the future
 	protected $properties = array();
-	
+
 	/**
 	 * @param variable-length $__mixed
 	 */
@@ -31,27 +31,20 @@ abstract class Model extends Delegator
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
-		
 
-		
-		
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
 		$this->__relationships();
 		$this->__callbacks();
 		$this->__attributes();
-		
-		
-
 	}
-	
+
 	/** @Polymorphic */
-	static function __static() {
+	public static function __static() {
 		$class = static::className();
-		
+
 		// assign static delegation 
 		Delegator::delegate(get_called_class(), get_class(static::data()));
-		
 
 		// provide reg exp list to check methods against
 		$lookFor = array(
@@ -61,13 +54,10 @@ abstract class Model extends Delegator
 			"/load{$class}List/"               => 'all',
 			"/create{$class}/"                 => 'create'
 		);
-		
 
-			
 		// retrieve list of methods from class
 		$reflection = new \ReflectionClass(get_called_class());
 		$methods    = $reflection->getMethods();
-		
 
 		// iterate through patterns and check against our static methods
 		// drawing up aliases where patterns match
@@ -125,16 +115,8 @@ abstract class Model extends Delegator
 			
 			
 		});
-		
-		
 	}
-	
 
-	
-
-
-	
-	
 	/**
 	 * Responsible for initialize of model attributes
 	 */
@@ -152,14 +134,14 @@ abstract class Model extends Delegator
 		$this->initialized = true;
 		
 	}
-	
+
 	/**
 	 * Makes a determination if model has been initialized
 	 */
 	public function initialized() {
 		return $this->initialized;
 	}
-	
+
 	/**
 	 * Determines if model exists as record in underlying database; 
 	 */
@@ -168,7 +150,7 @@ abstract class Model extends Delegator
 		// set
 		return !is_null($this->id);
 	}
-	
+
 	/**
 	 * Overrides Object::aliasProperty to place property
 	 * in properties member as well
@@ -357,9 +339,8 @@ abstract class Model extends Delegator
 	 */
 	static function __constructStatic($__mixed = null) {
 		static::defineMethod('columns', function() {
-			throw new \Exception('columns not implemented - because it sucks'); 	
+			throw new \Exception('columns not implemented - because it sucks');
 		});
-		
 	}
 	
 	
@@ -818,13 +799,9 @@ abstract class Model extends Delegator
 				"Failed to create model $class becfause it does not exist"
 		);
 	}	
-	
-	
-	
-	
-	
+
 	protected $validates   = array();
 	protected $callbacks   = array();
 	private   $initialized = false;
-	
 }
+
