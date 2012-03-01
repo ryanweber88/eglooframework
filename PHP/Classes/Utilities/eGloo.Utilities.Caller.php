@@ -14,16 +14,12 @@ class Caller extends Object {
 	
 	function __construct(array $hash) {
 		if (count($hash) >= self::CALLER_INDEX) {
-		//if (1) { 
 			$this->trace = $hash;
-		}
-		
-		else { 
-		
+
+		} else { 
 			throw new \Exception(
 				'Cannot identify a caller from current position'		
 			);
-			
 		}
 	}
 	
@@ -50,22 +46,23 @@ class Caller extends Object {
 		// a static cache so we don't have to
 		// open a file on every single fucking
 		// method call
-		
+
 		$trace = $this->trace[self::CALLER_INDEX];
-		
-		
-		if (isset($trace['file'])) {		
+
+		if ($trace['function'] == '__call') {
+			return false;
+		}
+
+		if (isset($trace['file'])) {
 		
 			// first check file against cache; we only want to read from
 			// file once - this cache is going to work, but its going
 			// be done sloppily, because this is NOT a permanent solution
 			if (!isset(static::$cache[$file = $trace['file']])) {
-				
 				// read contents of file and split by newline
 				static::$cache[$file]['tokens'] = preg_split('/\n/', file_get_contents(
 					$file		
 				));
-				
 			}
 			
 			// now check line against cache; if it is not available, then match against
