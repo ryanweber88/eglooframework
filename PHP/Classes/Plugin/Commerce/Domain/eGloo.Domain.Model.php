@@ -678,18 +678,43 @@ abstract class Model extends Delegator
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
-		// because we rely on certain instance fields being set
-		// during class definition (or when class is self) we
-		// also set field on public
-		// @TODO remove and place into properties when we
-		// have figured out succesful toArray implementation
-		// on our classes
-		$this->$key = $value;
 		
-		// we also set on properties to maintain backwards 
-		// compatibility on anything that is explicitly 
-		// setting/getting on properties
-		$this->properties[$key] = $value;
+		//echo "attempting set on $key\n";
+		
+		// we first attempt to resolve set within parent, which
+		// is responsible for evaluating meta patterns. If they
+		// do not exist, and property does not exist, then an 
+		// exception will be thrown, which in this case is ignored
+		// because we DO want dynamic properties/attributes added
+		// to our receiver
+		$failed = true;
+		
+		try {
+			parent::__set($key, $value);
+		}
+		
+		catch(\Exception $ignore)  { 
+			$failed = true;
+		}
+		
+		// if parent has thrown an exception, then meta tests have
+		// failed and we intentionally wish to defined a dynamic 
+		// property
+		
+		if ($failed) { 
+			// because we rely on certain instance fields being set
+			// during class definition (or when class is self) we
+			// also set field on public
+			// @TODO remove and place into properties when we
+			// have figured out succesful toArray implementation
+			// on our classes
+			$this->$key = $value;
+			
+			// we also set on properties to maintain backwards 
+			// compatibility on anything that is explicitly 
+			// setting/getting on properties
+			$this->properties[$key] = $value;
+		}
 		
 		return $this;
 	}
@@ -706,6 +731,7 @@ abstract class Model extends Delegator
 	 */
 	public function __get($name) {
 		
+		//echo "attempting get on $name\n";
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}

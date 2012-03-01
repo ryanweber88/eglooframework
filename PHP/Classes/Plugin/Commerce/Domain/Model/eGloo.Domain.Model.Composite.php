@@ -37,6 +37,11 @@ abstract class Composite extends Domain\Model {
 					$this->aliasProperty('id', $field);
 				}
 				
+				// lets keep track of the class this composite
+				// type is composed of
+				$this->composedOf = get_class($mixed);
+				
+				
 				// finally convert mixed to array representation so that
 				// it can be passed to parent constructor
 				$mixed = $mixed->toArray(true);
@@ -59,5 +64,7 @@ abstract class Composite extends Domain\Model {
 		
 		parent::__construct($mixed);
 	}
+	
+	protected $composedOf;
 			
 } 

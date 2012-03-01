@@ -92,7 +92,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					
 				foreach($this as $model) {
 					foreach($arguments as $value) {
-						if ($this->$field === $value) { 
+						if ($model->$field === $value) { 
 							$set[] = $model;
 							break ;
 						}
@@ -117,11 +117,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	function reject	($__mixed) {
 		
 		// filters will only work if natural key has been specified
+		$model = $this->model;
 		
 		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
-			
 			$arguments = func_get_args();
-			$set       = new static($this->model);
+			$set       = new static($model);
 			
 			// if our first, and only argument is a lambda, then run
 			// against collection; an a return of absolute FALSE
@@ -144,11 +144,19 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				foreach($this as $model) {
 					$found = false;
 					
+					// if key is equal to reject value, then 
+					// flag found as true and break loop as
+					// we no longer need to inspect
 					foreach($arguments as $value) {
-						if ($this->$field === $value) { 
+						if ($model->$field === $value) { 
 							$found = true;
 							break ;		
 						}
+					}
+					
+					// if reject value was not matched, then add to set
+					if (!$found) {
+						$set[] = $model;
 					}
 				}
 				
@@ -158,10 +166,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			return $set;
 		}
 		
-		$class = get_class($this);
 		
 		throw new \Exception(
-			"Cannot apply collect to $this because '$class::NATURAL_KEY' is not defined"
+			"Cannot apply collect to $this because '$model::NATURAL_KEY' is not defined"
 		);
 	}
 
@@ -264,11 +271,19 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	
 	public function offsetSet($offset, $value) {
 		
-		$index = empty($offset)
-			? count($this->collection)
-			: $offset;
+		if ($value instanceof $this->model) { 
+			$index = empty($offset)
+				? count($this->collection)
+				: $offset;
+			
+			$this->collection[$index] = $value;
+		}
 		
-		$this->collection[$index] = $value;
+		else { 
+			throw new \Exception (
+				"Collection $this can only accept instance of type " . get_class($this->model)	
+			);
+		}
 	}
 	
 	public function offsetUnset($offset) {
