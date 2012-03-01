@@ -148,7 +148,7 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return !is_null($this->id);
+		return isset($this->id);
 	}
 
 	/**

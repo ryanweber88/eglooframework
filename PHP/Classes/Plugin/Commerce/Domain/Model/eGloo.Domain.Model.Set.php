@@ -202,7 +202,16 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function offsetExists($offset) {
-		return isset($this->collection[$offset]);
+		// @TODO cache these results
+		try {
+			$result = $this[$offset];
+		}
+		
+		catch(\Exception $ignore) { 
+			return false;
+		}
+		
+		return !is_null($result);
 	}
 	
 	public function offsetGet($offset) {

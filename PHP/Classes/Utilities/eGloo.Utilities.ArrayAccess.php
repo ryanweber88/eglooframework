@@ -87,6 +87,15 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				
 				
 			}
+			
+			// check if we are dealing with an object that uses array notation;
+			// if this is the case, we'll have to check against its offsetGet
+			// method for a result
+			else if ($delegated instanceof \ArrayAccess) {
+				if (isset($delegated[$member])) {
+					$result = $delegated[$member];
+				}
+			}
 	
 			// else we check our magic calls, if any - any exceptions will be caught 
 			// and ignored, as we can safely conclude that those were failures 
