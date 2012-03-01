@@ -2,12 +2,14 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain;
+use \eGloo\Domain\Model as Model;
 
 /**
  * Represents a model that can be comprised of many different model
  * types
  */
-abstract class Composite extends Domain\Model {
+abstract class Composite extends Model {
+	// abstract class Composite {
 
 	/**
 	 * Because attribute is comprised of data from different
@@ -21,7 +23,6 @@ abstract class Composite extends Domain\Model {
 		// if mixed is a model, then set type, alias primary key and
 		// initialize attribute with data provided by model
 		if ($mixed instanceof Domain\Model) {
-				
 			// make sure the model instance has been initialized - if not,
 			// we are creating an empty composite
 			if ($mixed->initialized()) {	
@@ -33,11 +34,7 @@ abstract class Composite extends Domain\Model {
 				// finally convert mixed to array representation so that
 				// it can be passed to parent constructor
 				$mixed = $mixed->toArray(true);
-								
-			}
-				
-			else {
-				
+			} else {
 				throw new \Exception(
 					'Failed to initialize composite model ' . 
 					get_class($this) . 
@@ -46,16 +43,11 @@ abstract class Composite extends Domain\Model {
 				);
 	
 			}
-			
-	
 		}
-		
-		parent::__construct($mixed);
-				
-	}
-	
 
-	
+		parent::__construct($mixed);
+	}
+
 	protected $composedOf;
-			
-} 
+}
+
