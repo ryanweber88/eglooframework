@@ -24,28 +24,16 @@ abstract class Composite extends Domain\Model {
 				
 			// make sure the model instance has been initialized - if not,
 			// we are creating an empty composite
-			if ($mixed->initialized()) {
-				$class = strtolower(preg_replace(
-					'/([a-z])([A-Z])/', '$1_$2', static::classname()
-				));
-				
-				$field = "{$class}_id";
-				
-				// check if primary key pattern exists - if
-				// so, alias it to generic id
-				if (isset($mixed->$field)) {
-					$this->aliasProperty('id', $field);
-				}
-				
+			if ($mixed->initialized()) {	
+
 				// lets keep track of the class this composite
 				// type is composed of
-				$this->composedOf = get_class($mixed);
-				
+				$this->composedOf = $mixed;
 				
 				// finally convert mixed to array representation so that
 				// it can be passed to parent constructor
 				$mixed = $mixed->toArray(true);
-				
+								
 			}
 				
 			else {
@@ -63,7 +51,10 @@ abstract class Composite extends Domain\Model {
 		}
 		
 		parent::__construct($mixed);
+				
 	}
+	
+
 	
 	protected $composedOf;
 			

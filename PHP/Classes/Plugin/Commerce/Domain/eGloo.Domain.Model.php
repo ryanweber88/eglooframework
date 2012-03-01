@@ -168,6 +168,16 @@ abstract class Model extends Delegator
 		// set
 		return !is_null($this->id);
 	}
+	
+	/**
+	 * Overrides Object::aliasProperty to place property
+	 * in properties member as well
+	 */
+	protected function aliasProperty($alias, &$from) {
+		parent::aliasProperty($alias, $from);
+		
+		$this->properties[$alias] = &$this->properties[$from];
+	}
 
 	
 	/**
