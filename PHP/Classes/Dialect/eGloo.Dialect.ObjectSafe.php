@@ -294,7 +294,7 @@ abstract class ObjectSafe {
 	 * Aliases a property using reference; does not check on property existence
 	 * and will be affected by get/set definition
 	 */
-	protected function aliasProperty($alias, $from) {
+	protected function aliasProperty($alias, &$from) {
 		if (!\property_exists($this, $alias)) { 
 
 			// this is a wtfphp issue; when assigning by reference, the __get
@@ -352,23 +352,62 @@ abstract class ObjectSafe {
 	 * Here we provide our catchall and dynamic property meta functionality
 	 */
 	public function __get($name) {
-		// here we provide an "existence" operator for determining if 
-		// property exists in receiver - this is similar to obj.name?
-		// convention used in rails
-		if (preg_match('/has_?(.+)/', $name, $match)) {
-			$property = (strpos($name, 'has_') !== false)
-				? $match[1]
-				: lcfirst($match[1]);
+
+		// specify our meta properties; these are properties that follow
+		// specific patterns to allow for returning meta/descriptive
+		// information in regards to product
+		//echo "attempting get on $name\n";
 		
+		// patterns in the form has_fieldname will check to
+		// determine that fieldname isset on class
+		// @TODO cache results as singleton (available to instance) methods
+		// on instance receiver
+		if (preg_match('/^has_(.+)$/', $name, $match)) {
+
 			
-			// now simply return whehter proeprty exists or not
-			return \property_exists($this, $property);
-		}
+			// return isset on field - this asks the question whether
+			// the field is available on receiver, NOT what its value
+			// is
+			$field = $match[1];
+			return isset($this->$field);
+				
+		}		
+		
+	
 		
 		// if we have reached this point, all dynamic get options have been
 		// exhausted and we trigger an error
 		throw new \Exception(
-			"Instance property $name does not exist in receiver " . get_called_class()		
+			"Instance property '$name' does not exist in receiver " . get_called_class()		
+		);
+		
+	}
+	
+	
+	public function __set($name, $value) {
+
+		// if property follows pattern name__ we are attempting conditional
+		// assignment; conditional assignment is equivalent to ruby's ||=
+		// method and will only set the property if it has not yet been set
+		
+		if (preg_match('/^(.+)\__$/', $name, $match)) {
+			$field = $match[1];
+			
+			if (!isset($this->$field)) {
+				$this->$field = $value;
+			}
+			
+			
+			return $this;
+		}
+
+
+		// otherweise throw exception, because arbitrarily setting instance
+		// properties is a bad fucking idea
+		$class = get_called_class();
+		
+		throw new \Exception(
+			"Failed setting instance property '$name' in receiver '$class' because it does not exist "		
 		);
 	}
 	
@@ -475,6 +514,11 @@ abstract class ObjectSafe {
 				$this->_methods[$name], $arguments	
 			);
 		}
+		
+		
+
+		
+
 		
 			
 		

@@ -7,7 +7,7 @@ namespace eGloo\Primitives;
  * @author Christian Calloway
  *
  */
-class RegExp extends \eGloo\Dialect\Object { 
+class RegExp extends \eGloo\Dialect\ObjectSafe { 
 	// pass	
 	
 	function __construct($expression) { 
