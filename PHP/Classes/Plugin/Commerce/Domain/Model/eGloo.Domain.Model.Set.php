@@ -307,6 +307,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return count($this->collection);
 	}
 	
+	public function toArray() {
+		return $this->collection;
+	}
+	
 	protected $model;
 	protected $collection = array();	
 }

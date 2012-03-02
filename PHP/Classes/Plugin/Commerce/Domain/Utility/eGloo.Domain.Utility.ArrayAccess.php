@@ -35,7 +35,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 * does not exist
 	 */
 	public function offsetGet($offset) {
-		
 		// manage exceptions to delegation - there should be very few
 		// of they could potentially produce unexpected results that
 		// are very difficult to track
@@ -56,7 +55,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// result is absolute false
 		catch(\Exception $ignore) {
 			//echo $ignore->getMessage();exit;
-			
 			$result = null;
 		}
 		

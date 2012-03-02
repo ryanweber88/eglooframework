@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Order;
-use eGloo\DataProcessing\Connection;
+
+use \eGloo\DataProcessing\Connection;
+use \eGloo\Domain;
 
 /**
  * OrderDataAccess Class File
@@ -36,26 +38,10 @@ use eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class OrderDataAccess extends Model\Data {
+class OrderDataAccess extends Domain\Data {
 
 
-	/**
-	 * Pass Connection resource to parent constructor
-	 * if needed
-	 * @return void
-	 */
-	public function __construct() { }
 
-	/**
-	 * Generate an instance of this class
-	 * @return object of this class
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new Order\OrderDataAccess();
-		}
-		return static::$instance;
-	}
 
 	/*public function createOrder ($uname, $pwd, $priv) {
 		if ($uname == '' || $password == '' || $priv == '') {

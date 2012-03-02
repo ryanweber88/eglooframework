@@ -83,15 +83,9 @@ class Caller extends Object {
 			
 				// the only case where we should throw an exception is methodcall is seperate from
 				// reciever context operator (eg reciever :: method)
-<<<<<<< HEAD
 				if (!isset($cache[$method]['static'])) { 
 					throw new \Exception(
 						"Failed to locate call to '$method' in {$trace['file']} @ #{$trace['line']}"
-=======
-				if (!isset($cache[$method]['static'])) { 
-					throw new \Exception(
-						"Failed to locate call to $method in {$trace['file']} @ #{$trace['line']}"
->>>>>>> b18f07040c21af062302080eca4a9fdbcfdfef8c
 					);
 				}
 			}

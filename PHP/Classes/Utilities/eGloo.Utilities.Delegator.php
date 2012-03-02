@@ -27,10 +27,10 @@ abstract class Delegator extends Object {
 		try {
 			return parent::__call($name, $arguments);
 		}
-
+		
 		// we will hold our exception for usage later
 		catch(\Exception $hold) { }
-
+		
 		// create an instancer of Caller so we can determine
 		// origin or caller context
 		$caller = static::caller();
@@ -42,6 +42,7 @@ abstract class Delegator extends Object {
 			return static::__callstatic($name, $arguments);
 		}
 
+		
 		if (!is_null($this->delegated) && method_exists($this->delegated, $name)) {
 
 			return call_user_func_array(
@@ -91,7 +92,9 @@ abstract class Delegator extends Object {
 	public static function delegate($from, $to) {
 		static::$associated[$from] = $to;
 	}
-
+	
+	
+	
 	protected $delegated;
 	protected static $associated = array();
 }

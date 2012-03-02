@@ -57,7 +57,6 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		// made to the same member property/method within a template for
 		// example will only have to execute an expensive routine once
 		//echo "caching for $member<br />";
-		
 		return $this->cache($member, function() use ($self, $member) {
 			//echo "in cache for $member"; 
 			$delegated = &$self->reference('delegated');
@@ -112,15 +111,17 @@ class ArrayAccess extends Object implements \ArrayAccess {
 					}
 				}
 				
+				
 				if (!$result && \method_exists($delegated, '__call')) {
 					try {
+						echo $delegated->title();
 						$result = $delegated->$member();
 					}
 					catch (\Exception $ignore) {
 						$result = null;
 					}
 				}
-				
+								
 				if (!$result && \method_exists($delegated, '__callstatic')) {
 					try {
 						$result = $delegated::$$member();
@@ -136,6 +137,8 @@ class ArrayAccess extends Object implements \ArrayAccess {
 			// determined ONLY if result is NOT null - false is a 
 			// valid value, as that may be the result we are looking for
 			if (!is_null($result)) {
+				
+				//exit('here');
 
 				// if result is an object, wrap within ArrayAccess (or a class that extends)
 				// creating "recursive" access to object space - this allows for treating

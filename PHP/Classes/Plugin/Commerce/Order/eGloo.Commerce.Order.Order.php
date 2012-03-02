@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Order;
-use eGloo\Plugin\Commerce;
+
+use \eGloo\Commerce,
+    \eGloo\Domain;
 
 /**
  * Order Class File
