@@ -45,11 +45,10 @@ abstract class ObjectSafe {
 	protected function aliasProperties() { }
 	
 	protected function aliasMethods() {
-		
 		$self = $this;
 
 		//echo "creating define method on receiver " . get_called_class() . "<br />"; 
-		
+
 		// we need to immediately call define method, this will be the basis for
 		// all runtime defined methods
 		$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
@@ -60,7 +59,7 @@ abstract class ObjectSafe {
 			$methods[$name] = $lambda;
 				
 			return $self;
-		};		
+		};
 		
 		$this->defineMethod('namespace', function() use ($self) {
 			//return $self->cache(function() use ($self) {
