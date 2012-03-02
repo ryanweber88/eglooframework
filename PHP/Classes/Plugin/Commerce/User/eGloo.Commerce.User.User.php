@@ -134,7 +134,7 @@ class User {
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
-		if (property_exists($key, $this)) {
+		if (property_exists($this, $key)) {
 			$this->$key = $value;
 		}
 		$this->properties[$key] = $value;

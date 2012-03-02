@@ -236,25 +236,36 @@ class Product {
 	}
 	
 	/**
-	 * Populate data int the Product object
-	 * 
+	 * Populate data int the Setter
+	 *
 	 * @param type $key
-	 * @param type $value 
-	 */	
+	 * @param type $value
+	 */
 	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
+		if ( property_exists($this, $key) ) {
+			$this->$key = $value;
+			
+		} else {
+			$this->$key = $value;
+			
+		}
+		return true;
 	}
+
 	/**
-	 * Getter for the Product Object
+	 * Getter for the
 	 * @param type $key
-	 * 
-	 * @return mix type object retrieved from Product
+	 *
+	 * @return mix type object retrieved from 
 	 */
 	public function __get( $key ) {
-		if ( isset($this->properties[$key] )) {
+		if ( property_exists($this, $key) ) {
+			return $this->$key;
+			
+		} elseif ( isset($this->properties[$key] )) {
 			return $this->properties[$key];
-		}
+			
+		} 
 		return false;
 	}
 	
