@@ -207,10 +207,15 @@ class RequestInfoBean implements \ArrayAccess {
 		return false;
 	}
 
+
 	/**
 	 * (non-PHPdoc)
 	 * @see ArrayAccess::offsetGet()
 	 */
+ /**
+     * (non-PHPdoc)
+     * @see ArrayAccess::offsetGet()
+     */
 	public function offsetGet($offset) {
 		
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
@@ -222,7 +227,6 @@ class RequestInfoBean implements \ArrayAccess {
 				return $property[$offset];
 			}
 			// lets check for $name_get|post pattern and apply into offset
-			
 			else { 
 				foreach(array('post', 'get') as $method) {
 					if (isset($this["{$offset}_$method"])) {

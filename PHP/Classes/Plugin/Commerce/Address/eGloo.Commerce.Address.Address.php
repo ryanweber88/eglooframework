@@ -45,7 +45,7 @@ use \eGloo\Commerce,
 class Address {
 
 	/*** @var Integer address ID  */
-	public		$address_id;
+	public		$user_address_id;
 	
 	/*** @var Integer User ID */
 	public		$user_id;
@@ -57,10 +57,10 @@ class Address {
 	public		$last_name;
 	
 	/*** @var String Address 1	 */
-	public		$address_1;
+	public		$address_line_1;
 	
 	/*** @var String Address 2	 */
-	public		$address_2;
+	public		$address_line_2;
 	
 	/*** @var String City 	*/
 	public		$city;
@@ -69,7 +69,16 @@ class Address {
 	public		$state;
 	
 	/*** @var Integer Zip Code 	 */
-	public		$postal_code;
+	public		$zip_code5;
+	
+	/*** @var Integer Zip Code 	 */
+	public		$zip_code4;
+	
+	/*** @var boolean residential 	 */
+	public		$residential = true;
+	
+	/*** @var boolean shippable 	 */
+	public		$shippable = true;
 	
 	/*** @var String County  */
 	public		$county;
@@ -84,27 +93,58 @@ class Address {
 	public		$label;
 	
 	public		$validated = false;
-
-
 	
-	const		ADDRESS_TYPE_RESIDENTIAL	= 1,
-				ADDRESS_TYPE_COMMERCIAL		= 0;
+	/** @var array/Mix properties of Brands */
+	public		$properties;
 	
-	const		ADDRESS_ALLOW_PO			= 0;
+	const		TYPE_RESIDENTIAL	= 1,
+				TYPE_COMMERCIAL		= 0;
 	
-	public function __construct($user_id) {
-		
+	public function __construct($args) {
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
 	}
 	
-	public function toArray() {
-		
+	/**
+	 * Populate data int the User object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */
+	public function __set($key, $value) {
+		if (property_exists($key, $this)) {
+			$this->$key = $value;
+		}
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the User Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from user
+	 */
+	public function __get( $key ) {
+		if (isset($this->properties[$key])) {
+			return $this->properties[$key];
+		}
+		return false;
 	}
 	
 	public function __toString() {
+		return serialize($this);
+	}
+	
+	public static function loadByID($address_id) {
 		
 	}
 	
-	public static function load() {
-		
+	public static function saveAddress($label, $fname, $lname, $user_id, $address, $address2, 
+			$city, $state, $postal, $phone, $default, $residential = Address::TYPE_RESIDENTIAL, 
+			$shippable = Address::TYPE_RESIDENTIAL) {
+		return AddressDataAccess::fetch()->insertAddress($label, $fname, $lname, $user_id, $address,
+				$address2, $city, $state, $postal, $phone, $default, $residential, $shippable );
 	}
 }

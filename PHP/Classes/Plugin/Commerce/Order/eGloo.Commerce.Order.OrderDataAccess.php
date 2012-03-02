@@ -45,7 +45,7 @@ class OrderDataAccess extends Connection\PostgreSQLDBConnection{
 	 * if needed
 	 * @return void
 	 */
-	protected function __construct() { }
+	public function __construct() { }
 
 	/**
 	 * Generate an instance of this class
@@ -58,7 +58,7 @@ class OrderDataAccess extends Connection\PostgreSQLDBConnection{
 		return static::$instance;
 	}
 
-	public function createOrder ($uname, $pwd, $priv) {
+	/*public function createOrder ($uname, $pwd, $priv) {
 		if ($uname == '' || $password == '' || $priv == '') {
 			throw new \InvalidArgumentException();
 		}
@@ -105,4 +105,6 @@ class OrderDataAccess extends Connection\PostgreSQLDBConnection{
 		}
 
 	}
+	 * 
+	 */
 }

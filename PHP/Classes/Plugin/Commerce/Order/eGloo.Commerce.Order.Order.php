@@ -39,28 +39,89 @@ use eGloo\Plugin\Commerce;
 class Order {
 
 	/** @var integer Order id */
-	public $order_id;
+	public		$order_id;
 
 	/** @var string Order email address */
-	public $order_email;
+	public		$user_id;
 
 	/** @var integer 1/0 for active Order */
-	public $is_active = 1;
+	public		$order_status_id;
 
 	/** @var integer 1/0 for deleted Order */
-	public $is_deleted = 0;
+	public		$program_id;
 
 	/** @var string created date */
-	public $created_date;
+	public		$process_date;
+	
+	/** @var string created date */
+	public		$estimated_ship_date;
+	
+	/** @var integer Payment */
+	public		$payment_option_id;
+	
+	public		$shipping_address_id;
 
 	/** @var string deleted date */
-	public $deleted_date;
+	public		$deleted_date;
 
 	/** @var string updated date */
-	public $updated_date;
+	public		$updated_date;
+	
+	protected	$order_products = array();
 
 
+	protected	$properties;
+	
+	const	_STATUS_NEED_ACTION		= 1,
+			_STATUS_ASSEMBLY		= 2,
+			_STATUS_BACKORDER		= 3,
+			_STATUS_CANCELED		= 4,
+			_STATUS_CC_EXPIRED		= 5,
+			_STATUS_CC_FAILED		= 6,
+			_STATUS_PROCESSING		= 7,
+			_STATUS_SCHEDULED		= 8,
+			_STATUS_SHIPPED			= 9,
+			_STATUS_WAREHOUSE_ISSUE = 10,
+			_STATUS_WAREHOUSE_QUEUE = 11,
+			_STATUS_SUSPECT			= 12;
 
+	public function __construct($args) {
+		foreach ( $args as $key => $value ){
+			$this->{$key} = $value;
+		}
+	}
+	
+	
+
+	/**
+	 * Populate data int the Product object
+	 * 
+	 * @param type $key
+	 * @param type $value 
+	 */	
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+		return $this;
+	}
+	
+	/**
+	 * Getter for the Product Object
+	 * @param type $key
+	 * 
+	 * @return mix type object retrieved from Product
+	 */
+	public function __get($key) {
+		if (property_exists($this, $key)) {
+			if (method_exists($this, 'load_'. $key)) {
+				return call_user_func(array($this, 'load_' . $key));
+			}
+		} elseif ( isset($this->properties[$key] )) {
+			return $this->properties[$key];
+		} 
+		return false;
+	}
+	
+	
 	public static function loadOrderByZipCode($zip_code) {
 		$result = array();
 		if ((int) $zip_code == '') {
@@ -123,17 +184,17 @@ class Order {
 	}
 
 
-	public static function loadOrderByOrderId($order_id) {
-		$result = array();
-		if ((int) $order_id == '') {
-			throw new \InvalidArgumentException();
-		}
-		$orders = Commerce\Order\OrderDataAccess::loadOrderByOrderId($order_id);
-		foreach ($rders as $order) {
-			$result[] = new Order($order);
-		}
-		return $result;
-	}
+//	public static function loadByID($order_id) {
+//		$result = array();
+//		if ($order_id == '') {
+//			throw new \InvalidArgumentException();
+//		}
+//		$orders = OrderDataAccess::loadOrderByOrderId($order_id);
+//		foreach ($rders as $order) {
+//			$result[] = new Order($order);
+//		}
+//		return $result;
+//	}
 
 
 	public static function createOrderFromArray(array $args) {
