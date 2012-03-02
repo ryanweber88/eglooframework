@@ -178,11 +178,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @throws DatabaseErrorException 
 	 */
 	public function executeInsert($sql, array $params) {
-
 		if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
 			// parse sql for table name - this isn't a perfect solution and will not work
 			// for all cases, but will work for the majority of them
-			if (!preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql)) { 
+			if ( !preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql) ) { 
 				preg_match(						
 					'/insert\s+?into\s+?(\S+)/is', $sql, $match
 				);
@@ -192,7 +191,7 @@ class PostgreSQLDBConnection extends DBConnection {
 
 			$pg_result = self::execute($sql, $params);
 
-			if( pg_affected_rows($pg_result) !== 0 ) {
+			if ( pg_affected_rows($pg_result) !== 0 ) {
 				$insert_row = pg_fetch_assoc($pg_result);
 				
 				// find the table name, and from this, find the 
@@ -200,26 +199,13 @@ class PostgreSQLDBConnection extends DBConnection {
 				preg_match('/insert\s+?into\s+?(\S+)/i', $sql, $match);
 				$primaryKey = "{$match[1]}_id";
 				
-				if (isset($insert_row[$primaryKey])) {
+				if ( isset($insert_row[$primaryKey]) ) {
 					return $insert_row[$primaryKey];
 				}
-				
-				//throw new \Exception(
-				//	"RETURNING failed because primary key '$primaryKey' could not be found"		
-				//);
-				
-				
-				
-//				if (!is_array($insert_row)) {
-//					$result = $this->execute('SELECT lastval();');
-//					$insert_row = pg_fetch_row($result);
-//				}
-				//return is_array($insert_row) ? array_shift($insert_row) : true;
 			}
-			
-		//} else {
-		//	throw new DatabaseErrorException('Unable to execute insert Statement', $sql);
-		//}
+		} else {
+			throw new DatabaseErrorException('Unable to execute insert Statement', $sql);
+		}
 	}
 	
 	/**
