@@ -1,7 +1,10 @@
 <?php
 namespace eGloo\DataProcessing\Connection;
+
 use \eGloo\DataProcessing\ConnectionManagement\DBConnectionManager;
 use \eGloo\DataProcessing\Connection\DatabaseErrorException;
+// use \eGloo\Utility\Logger     as Logger;
+
 /**
  * PostgreSQLDBConnection Class File
  *
@@ -43,7 +46,8 @@ use \eGloo\DataProcessing\Connection\DatabaseErrorException;
 class PostgreSQLDBConnection extends DBConnection {
 	
 	/** @var resource connection oobject */
-	protected	$link = null;
+	// protected $link = null;
+	protected static $link = null;
 	
 	/**
 	 * Database connection method
@@ -53,10 +57,12 @@ class PostgreSQLDBConnection extends DBConnection {
 	public function __construct( $rawConnectionResource = null ) {
 		$this->setConnectionDialect( \DialectLibrary::POSTGRESQL );
 
-		if (is_null ($rawConnectionResource)) {
+		if ( is_null($rawConnectionResource) && self::$link === null ) {
 			\DBConnectionManager::resetConnections();
-			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
-			if (null == $this->link) {
+
+			self::$link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+
+			if ( null === self::$link ) {
 				throw new DatabaseErrorException('Can\'t connect to database server.');
 			}
 		} else {
@@ -70,10 +76,11 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return resource DB connection resource
 	 */
 	public function getConnection () {
-		if ($this->link === null) {
-			$this->link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+		if (self::$link === null) {
+			self::$link = \DBConnectionManager::getConnection()->getRawConnectionResource();
 		}
-		return $this->link;
+
+		return self::$link;
 	}
 	
 	/**
@@ -113,22 +120,26 @@ class PostgreSQLDBConnection extends DBConnection {
 	 */
 	protected function execute ($sql, array $params = array(), $callback = null) {
 		$this->prepareStatment($sql, $params);
-		isset($this->link) ?: $this->getConnection();
-		
-		if (false !== ($result = pg_query_params($this->link, $sql, $params))) {
+
+		if ( !isset(self::$link) ) {
+			self::$link = $this->getConnection();
+		}
+
+		if (false !== ($result = pg_query_params(self::$link, $sql, $params))) {
 			return is_callable($callback)
-				? $callback($result, $this->link)
+				? $callback($result, self::$link)
 				: $result;
 		}
-		throw new DatabaseErrorException(pg_last_error($this->link), $sql);
+
+		throw new DatabaseErrorException(pg_last_error(self::$link), $sql);
 	}
 	
 	public function executeArbitrary ($sql, array $params = array()) {
 		$this->prepareStatment($sql, $params);
-		isset($this->link) ?: $this->getConnection();
+		isset(self::$link) ?: $this->getConnection();
 
 		try {
-			return pg_query_params($this->link, $sql, $params);
+			return pg_query_params(self::$link, $sql, $params);
 		} catch (Exception $exc) {
 			throw $exc;
 		}
@@ -163,12 +174,24 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @param type $sql
 	 * @param array $params
 	 * @return Integer Last Insert ID or true to indicate successful insert
-	 *			Failed insert already thow an exception
+	 *			Failed insert already throw an exception
 	 * @throws DatabaseErrorException 
 	 */
 	public function executeInsert($sql, array $params) {
+
 		if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
+			// parse sql for table name - this isn't a perfect solution and will not work
+			// for all cases, but will work for the majority of them
+			if (!preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql)) { 
+				preg_match(						
+					'/insert\s+?into\s+?(\S+)/is', $sql, $match
+				);
+				
+				$sql .= " RETURNING {$match[1]}.* ";
+			}
+
 			$pg_result = self::execute($sql, $params);
+
 			if( pg_affected_rows($pg_result) !== 0 ) {
 				$insert_row = pg_fetch_row($pg_result);
 //				if (!is_array($insert_row)) {
@@ -232,6 +255,7 @@ class PostgreSQLDBConnection extends DBConnection {
 				return $object;
 			});
 		}
+
 		$pg_result = $this->execute($sql, $params);
 		return pg_fetch_assoc($pg_result);
 	}
@@ -240,10 +264,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	public function beginTransaction() {
-		!is_null ($this->link) ?: $this->getConnection();
+		!is_null (self::$link) ?: $this->getConnection();
 		
-		pg_query($this->link, 'BEGIN TRANSACTION');
-		if (pg_last_error($this->link) != false) {
+		pg_query(self::$link, 'BEGIN TRANSACTION');
+		if (pg_last_error(self::$link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
@@ -252,10 +276,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	protected function commitTransaction () {
-		!is_null ($this->link) ?: $this->getConnection();
+		!is_null (self::$link) ?: $this->getConnection();
 		
-		pg_query($this->link, 'COMMIT TRANSACTION');
-		if (pg_last_error($this->link) != false) {
+		pg_query(self::$link, 'COMMIT TRANSACTION');
+		if (pg_last_error(self::$link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
@@ -264,10 +288,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	protected function rollbackTransaction () {
-		!is_null ($this->link) ?: $this->getConnection();
+		!is_null (self::$link) ?: $this->getConnection();
 		
-		@pg_qery($this->link, 'ROLLBACK TRANSACTION');
-		if (pg_last_error($this->link) != false) {
+		@pg_qery(self::$link, 'ROLLBACK TRANSACTION');
+		if (pg_last_error(self::$link) != false) {
 			throw  new \DatabaseErrorException();
 		}
 	}
@@ -278,6 +302,10 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return void
 	 */
 	public function __destruct() {
-		is_resource($this->link) ? pg_close($this->link) : $this->link = null;
+		// if ( is_resource(self::$link) ) {
+		// 	pg_close(self::$link);
+		// } else {
+		// 	self::$link = null;
+		// }
 	}
 }

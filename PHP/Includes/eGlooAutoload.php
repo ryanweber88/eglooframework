@@ -131,6 +131,22 @@ function eglooAutoload( $class_name ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
 				include_once( $autoload_hash[$class_name] );
+
+				// attempt a construct static; this will be ignored if class
+				// does not fall in \eGloo\Dialect\Object class
+				// hierarchy
+				try {
+					__constructStatic($class_name);
+				} catch ( \Exception $e ) {
+					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
+					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
+
+					// In case you want to know why we do this, it's because exceptions in a PHP autoloader
+					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
+					// to the global exception handler, just as if it was thrown.  Voila!
+					$errorException = new ErrorException( $errorMessage );
+					eGlooLogger::global_exception_handler( $errorException );
+				}
 			}
 
 			return;
@@ -188,14 +204,12 @@ function eglooAutoload( $class_name ) {
 		$instances = array();
 	}
 
-	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();
 		}
 
 		if ( file_exists( $directory ) && is_dir( $directory ) ) {
-
 			$it = new RecursiveDirectoryIterator( $directory );
 
 			foreach ( new RecursiveIteratorIterator( $it ) as $currentNode ) {
@@ -265,6 +279,22 @@ function eglooAutoload( $class_name ) {
 				}
 
 				include_once( $realPath );
+
+				// attempt a construct static; this will be ignored if class
+				// does not fall in \eGloo\Dialect\Object class
+				// hierarchy
+				try {
+					__constructStatic($class_name);
+				} catch ( \Exception $e ) {
+					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
+					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
+
+					// In case you want to know why we do this, it's because exceptions in a PHP autoloader
+					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
+					// to the global exception handler, just as if it was thrown.  Voila!
+					$errorException = new ErrorException( $errorMessage );
+					eGlooLogger::global_exception_handler( $errorException );
+				}
 
 				$autoload_hash[$class_name] = realpath( $realPath );
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
@@ -347,6 +377,23 @@ function eglooAutoload( $class_name ) {
 			include_once ( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+
+			// attempt a construct static; this will be ignored if class
+			// does not fall in \eGloo\Dialect\Object class
+			// hierarchy
+			try {
+				__constructStatic( $class_name );
+			} catch ( \Exception $e ) {
+				$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
+				$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
+
+				// In case you want to know why we do this, it's because exceptions in a PHP autoloader
+				// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
+				// to the global exception handler, just as if it was thrown.  Voila!
+				$errorException = new ErrorException( $errorMessage );
+				eGlooLogger::global_exception_handler( $errorException );
+			}
+
 		}
 	}
 
@@ -686,5 +733,43 @@ function almost_empty($in, $trim = false) {
 		return true;
 	} else {
 		return false;
+	}
+}
+
+/**
+ *  Attempts to fire object::__constructStatic - the object parameter
+ *  or argument must be in instance of global object; the purpose is
+ *  to provide static constructor functionality on class load
+ */
+function __constructStatic($name) {
+	// make sure object is instanceof of global Object 
+	// - if the case, then we are assured that we have
+	// a __statuc method, whether a stubb or
+	// actualy definition - since we are checking
+	// on a string, we need to call methodExists
+	// over 
+	
+	if ( method_exists($name, '__static') ) {
+
+		// because method exists will return true for inherited methods that
+		// are NOT explicitly defined in class - we need to determine that
+		// __static is in fact defined in loaded classes, otherwise we will
+		// constantly call the Object::__static for all of its descendants;
+		// to do this, we use reflection and check the declaring class against
+		// our passed name parameter
+		$reflection = new \ReflectionMethod($name, '__static');
+
+		// since our static constructors do share the same concept of inheritence
+		// as do regular constructors, we use the 'Polymorphic' annotation to
+		// describe any static constructor that should be called in the 
+		// children of 
+		if (strpos($reflection->getDocComment(), '@Polymorphic') !== false || 
+
+		// check if __static is in declaring class, as opposed to simply available
+		// through inheritence
+				$reflection->getDeclaringClass()->getName() == $name) { 
+
+			$name::__static();
+		}
 	}
 }
