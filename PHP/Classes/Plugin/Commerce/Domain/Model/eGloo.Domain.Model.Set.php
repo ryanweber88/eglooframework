@@ -8,7 +8,7 @@ use eGloo\Domain;
  * foreach 
  */
 class Set extends \eGloo\Dialect\ObjectSafe
-	implements \ArrayAccess, \IteratorAggregate, \Countable {
+	implements \ArrayAccess, \IteratorAggregate, \Countable, \eGloo\Utilities\ToArrayInterface {
 	
 	
 	/**
@@ -262,9 +262,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$class = get_class($this);
 			
 			throw new \Exception(
-					"Cannot apply reject to $this because '$class::NATURAL_KEY' is not defined"	
+					"Cannot get offset '$offset' to '$this' because '$class::NATURAL_KEY' is not defined"	
 			);				
-			
 			
 			
 		}
@@ -307,7 +306,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return count($this->collection);
 	}
 	
-	public function toArray() {
+	public function __toArray() {
 		return $this->collection;
 	}
 	

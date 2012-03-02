@@ -52,6 +52,8 @@ class ArrayAccess extends Object implements \ArrayAccess {
 	}
 	
 	public function offsetGet($member) {
+		
+		
 		$self = $this;
 		// throw result into an "instance" cache - this way, multiple calls
 		// made to the same member property/method within a template for
@@ -90,7 +92,11 @@ class ArrayAccess extends Object implements \ArrayAccess {
 			// check if we are dealing with an object that uses array notation;
 			// if this is the case, we'll have to check against its offsetGet
 			// method for a result
-			else if ($delegated instanceof \ArrayAccess) {
+			else if ( $delegated instanceof \ArrayAccess ) {
+				
+				// ask if 
+				//exit('there');
+				
 				if (isset($delegated[$member])) {
 					$result = $delegated[$member];
 				}

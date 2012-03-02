@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Domain\Utility;
 
-use \eGloo\Dialect\Nil;
+use \eGloo\Dialect\Nil,
+    \eGloo\Domain;
+
 
 /**
  * ArrayAccess allows Domain\Model to be accessed as array
@@ -58,25 +60,44 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			$result = null;
 		}
 		
-		// set a backward reference for any needed 'backward' evaluations
-		if ($result instanceof static) {
-			$result->reference = $this;
-		}
+		if ( !is_null($result) ) {
+			
 		
+			// check if result delegate is instanceof of set; in which case
+			// we directly return the set, because we want to work directly
+			// on it in most cases
+			if ( is_object($result) &&  
+					 $result->delegated instanceof Domain\Model\Set ) {
+				
+				// since this will be used in the context of template, we iterate
+				// through set, and wrap each model with arrayaccess, so it can
+				// be used with array notation (in smarty)
+				$set = array();
+				
+				foreach( $result->delegated as $key => $value ) {
+					$set[] = new static($result->delegated[$key]);
+				}
+				
+				return $set;
+			}
+			
+			// set a backward reference for any needed 'backward' evaluations
+			if ( $result instanceof static ) {
+				$result->reference = $this;
+			}
+		
+		
+			return $result;
+		}
 		
 		// if our result is null, we return an ArrayAccess instance, which
 		// delegates to a Nil class instance - we do this because there
 		// are many instances where simply returning null will cause
 		// an exception to be thrown - in this case, we are returning
 		// an object that will produce an empty result when stringified
-		
-		//return is_null($result) && !preg_match('/\_eval/', $offset)
-		return is_null($result)
-		
-			? new static(new Nil, $this)
-		
-			// otherwise we return result as is
-			: $result;
+				
+		return new static(new Nil, $this);
+
 			
 	}
 	
@@ -120,10 +141,17 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 */
 	protected function evaluate() {
 		
+		// if delegated is of type Nil, it means that ArrayAccess is purposefully wrapping
+		// a null value, in which case, our evaluation is null
 		if ($this->delegated instanceof Nil) {
 			return null;
 		}
 		
+		if ( $this->delegated instanceof \ArrayAccess && count($this->delegated) === 0 ) {
+			return null;
+		}
+		
+		return true;
 	}	
 	
 	private $reference;
