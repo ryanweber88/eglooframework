@@ -297,7 +297,14 @@ abstract class ObjectSafe {
 	 * and will be affected by get/set definition
 	 */
 	protected function aliasProperty($alias, &$from) {
-		if (!\property_exists($this, $alias)) { 
+		if (!\property_exists($this, $alias)) {
+			
+			// in the case that our from property doesn't exist, we
+			// force it into existense - it is upon the onus of the
+			// developer to not absuse this principle
+			if (!\property_exists($this, $from)) {
+				$this->from = null;
+			} 
 
 			// this is a wtfphp issue; when assigning by reference, the __get
 			// dump is called, which throws an exception at this level; to get
@@ -305,7 +312,6 @@ abstract class ObjectSafe {
 			// has the effect of calling __set, which then officially adds
 			// property to instance
 			$this->$alias = null;
-			
 			$this->$alias = &$this->$from;
 			return $this;
 		}
@@ -315,7 +321,7 @@ abstract class ObjectSafe {
 			"Attempted alias '$alias' on property '$from' failed because it already exists as a property on receiver " . get_class($this)		
 		);
 	}
-	
+		
 	/**
 	 * Aliases to Singleton trait - will be replaced with 5.4
 	 */

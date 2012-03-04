@@ -751,6 +751,21 @@ abstract class Model extends Delegator
 			
 		}
 		
+		// if this is a new instance, and aliases have not been defined (since
+		// we have not initialized; check to see if name is a match to class_name_property)
+		// this has the danger of presenting very hard to track bugs, so we need to think
+		// about legitimacy
+		$class = strtolower(preg_replace(
+			'/([a-z])([A-Z])/', '$1_$2', static::className()
+		));
+		
+		if (property_exists($this, $field = "{$class}_$name")) {
+			// @TODO having issues with alias property - doing it old fashioned way for now
+			//$this->aliasProperty($name, "{$class}_$name");
+			$this->$name = &$this->$field;
+			return $this->$name;
+		}
+		
 		// otherwise pass to parent __get handler for higher level
 		// processing
 
