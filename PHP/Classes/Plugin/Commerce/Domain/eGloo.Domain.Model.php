@@ -89,32 +89,37 @@ abstract class Model extends Delegator
 		// with aliases, which for the time being are more correct (specific)
 		$class = get_called_class();
 		
-		static::defineMethod('find', function($__mixed) use ($class) {
+		if ( !static::respondTo('find') ) {
+		//if (1) {
 
-			
-			// expand on parameter matching, but for, just match on primary
-			// and tablename_id pattern
-			$arguments = func_get_args();
-			$table     = strtolower($class::className());
-			$field     = "{$table}_id";
-			$key       = $arguments[0]; 
-			
-			// we're GAURENTEED to throw an exception here if our by-conventions guess
-			// does not pan out; so callers will be explicitly aware
-			try { 
-				return new $class($class::statement("
-					SELECT * FROM $table WHERE $field = ?
-						
-				", $key));
+			static::defineMethod('find', function($__mixed) use ($class) {
+	
 				
-			}
+				// expand on parameter matching, but for, just match on primary
+				// and tablename_id pattern
+				$arguments = func_get_args();
+				$table     = strtolower($class::className());
+				$field     = "{$table}_id";
+				$key       = $arguments[0]; 
+				
+				// we're GAURENTEED to throw an exception here if our by-conventions guess
+				// does not pan out; so callers will be explicitly aware
+				try { 
+					return new $class($class::statement("
+						SELECT * FROM $table WHERE $field = ?
+							
+					", $key));
+					
+				}
+				
+				catch(\Exception $passthrough) {
+					throw $passthrough;
+				}
+				
+				
+			});
 			
-			catch(\Exception $passthrough) {
-				throw $passthrough;
-			}
-			
-			
-		});
+		}
 	}
 
 	/**

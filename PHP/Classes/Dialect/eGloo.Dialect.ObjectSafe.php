@@ -65,6 +65,10 @@ abstract class ObjectSafe {
 			return $self;
 		};		
 
+		$this->defineMethod('respondTo', function($method) use ($self) {
+			$methods = &$self->reference('_methods');
+			return method_exists($self, $method) || isset($methods[$method]);
+		});
 		
 		$this->defineMethod('namespace', function() use ($self) {
 			//return $self->cache(function() use ($self) {
@@ -158,10 +162,10 @@ abstract class ObjectSafe {
 		
 		static::defineMethod('respondTo', function($method, $class) { 
 			$current = $class;
-			
+			$methods = &$class::referenceStatic('_methodsStatic');
 
 			do {
-				if (isset(static::$_methodsStatic[$current][$name])) {
+				if (isset($methods[$current][$method])) {
 			
 					return true;
 				}
@@ -288,9 +292,9 @@ abstract class ObjectSafe {
 	 * Checks both method_exists and our runtime defined
 	 * methods
 	 */
-	public function respondTo($name) {
-		return method_exists($this, $name) || isset($this->_methods[$name]);
-	}
+	//public function respondTo($name) {
+		//return method_exists($this, $name) || isset($this->_methods[$name]);
+	//}
 	
 	/**
 	 * Aliases a property using reference; does not check on property existence
