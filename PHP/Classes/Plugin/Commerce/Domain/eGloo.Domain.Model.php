@@ -89,9 +89,10 @@ abstract class Model extends Delegator
 		// with aliases, which for the time being are more correct (specific)
 		$class = get_called_class();
 		
-		if ( !static::respondTo('find') ) {
+		if ( !$class::respondTo('find') ) {
+			
 
-			static::defineMethod('find', function($__mixed) use ($class) {
+			static::defineMethod('find', function($__mixed, $class) {
 	
 				
 				// expand on parameter matching, but for, just match on primary
