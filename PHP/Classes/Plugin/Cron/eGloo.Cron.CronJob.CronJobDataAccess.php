@@ -1,14 +1,16 @@
 <?php
-namespace eGloo\Commerce\Product;
+namespace eGloo\Cron\CronJob;
 
-use \eGloo\Commerce;
+use \eGloo\Cron;
 use \eGloo\DataProcessing\Connection\PostgreSQLDBConnection;
 use \eGloo\Domain;
 
 /**
- * ProductDataAccess Class File
+ * eGloo\Cron\CronJob\CronJobDataAccess Class File
+ *
+ * Contains the class definition for the eGloo\Cron\CronJob\CronJobDataAccess
  * 
- * Copyright 2011 eGloo, LLC
+ * Copyright 2012 eGloo LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +24,25 @@ use \eGloo\Domain;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- * @author Gilbert Sewovoe-Ekoue
- * @copyright 2011 eGloo, LLC
+ * @author George Cooper
+ * @copyright 2012 eGloo LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @package package
- * @subpackage subpackage
+ * @category Plugins
+ * @package Cron
+ * @subpackage CronJob
  * @version 1.0
  */
 
 /**
- * Description of ProductDataAccess
- * 
- * Representation of ProductDataAccess Entity
- * Hold CRUD functionalities and ProductDataAccess related method
+ * eGloo\Cron\CronJob\CronJobDataAccess
  *
- * @package Plugins
- * @subpackage Commerce
+ * Representation of ProductDataAccess Entity
+ *
+ * @category Plugins
+ * @package Cron
+ * @subpackage CronJob
  */
-class ProductDataAccess extends Domain\Data {
+class CronJobDataAccess extends Domain\Data {
 
 	public function loadProductById($product_id) {
 		if ($product_id == '') {

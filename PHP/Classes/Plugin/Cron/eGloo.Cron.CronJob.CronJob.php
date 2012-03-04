@@ -1,13 +1,15 @@
 <?php
-namespace eGloo\Commerce\Product;
+namespace eGloo\Cron\CronJob;
 
-use \eGloo\Commerce;
+use \eGloo\Cron;
 use \eGloo\Domain;
 
 /**
- * Product Class File
+ * eGloo\Cron\CronJob\CronJob Class File
+ *
+ * Contains the class definition for the eGloo\Cron\CronJob\CronJob
  * 
- * Copyright 2011 eGloo, LLC
+ * Copyright 2012 eGloo LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +23,26 @@ use \eGloo\Domain;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- * @author Gilbert Sewovoe-Ekoue
- * @copyright 2011 eGloo, LLC
+ * @author George Cooper
+ * @copyright 2012 eGloo LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @package Plugin
- * @subpackage Commerce
+ * @category Plugins
+ * @package Cron
+ * @subpackage CronJob
  * @version 1.0
  */
 
 /**
- * Description of Product
- * 
- * Representation of Product Entity
- * Hold CRUD functionalities and Product related method
+ * eGloo\Cron\CronJob\CronJob
  *
- * @package Plugin
- * @subpackage Commerce
+ * Representation of CronJob Entity
+ *
+ * @category Plugins
+ * @package Cron
+ * @subpackage CronJob
  */
+class CronJob extends Domain\Model {
 
-class Product extends Domain\Model {
-
-
-	
 	public function loadProductImages() {
 		if (empty ($this->product_images)) {
 			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_id);
@@ -58,48 +58,10 @@ class Product extends Domain\Model {
 		$this->ingredients;
 		return $this;
 	}
-	
-	public function loadProductDescription() {
-		if (empty ($this->description)) {
-			$this->description = ProductDataAccess::fetch()->loadProductDescription($this->product_id);
-		}
-		$this->description;
-		return $this;
-	}
-	
-	public function loadSlugDestination() {
-		if (empty ($this->friendly_url)) {
-			$this->friendly_url = ProductDataAccess::fetch()->loadSlugDestination($this->product_id);
-		}
-		$this->friendly_url;
-		return $this;
-	}
-
-	public function loadProductLineProducts() {
-		if (empty ($this->product_images)) {
-			$this->loadProductSizes();
-		}
-		return $this->product_sizes;
-	}
-	
-	public function loadProductSizes() {
-		if (empty ($this->product_sizes)) {
-			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_id);
-		}
-		
-		//$this->product_sizes;
-		return $this;
-	}
-
 
 	public function getSizes() {
 		return $this->__get('sizes');
 	}
-
-
-	/*protected function getBrandImages = function ( $this->brand_id ) {
-		
-	}*/ 
 
 	/**
 	 * Extract Product property out for clean UI display
@@ -110,8 +72,6 @@ class Product extends Domain\Model {
 		return (array) $this->properties;
 	}
 
-	
-	
 	public static function loadProductById($product_id) {
 		if ((int)$product_id <= 0) {
 			throw new \InvalidArgumentException();
@@ -120,12 +80,5 @@ class Product extends Domain\Model {
 		//echo $product_id; exit;
 		return new static($rows);
 	}
-	
-	public static function loadProductBySlug($slug) {
-		if ($slug == '') {
-			throw new \InvalidArgumentException();
-		}
-		$row = ProductDataAccess::fetch()->loadProductBySlug($slug);
-		return new Product($row);
-	}
+
 }
