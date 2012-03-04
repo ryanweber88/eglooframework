@@ -90,7 +90,6 @@ abstract class Model extends Delegator
 		$class = get_called_class();
 		
 		if ( !static::respondTo('find') ) {
-		//if (1) {
 
 			static::defineMethod('find', function($__mixed) use ($class) {
 	
@@ -98,7 +97,7 @@ abstract class Model extends Delegator
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
-				$table     = strtolower($class::className());
+				$table     = strtolower( \eGlooString::toUnderscores($class::className()) );
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
 				
