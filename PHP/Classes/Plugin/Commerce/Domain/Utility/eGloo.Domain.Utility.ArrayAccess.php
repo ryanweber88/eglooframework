@@ -88,7 +88,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				}
 				
 				else {
-					foreach ($result as $key => $ignore) {
+					foreach ($result->delegated as $key => $ignore) {
 						$set[] = new static($result->delegated[$key]);
 					}
 				}
