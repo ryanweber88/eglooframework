@@ -398,7 +398,7 @@ final class DBConnectionManager extends ConnectionManager {
 							' dbname=' . $connection_info['database'] .
 							' port=' . $connection_info['port'];
 
-		$db_handle = pg_pconnect( $connection_string );
+		$db_handle = pg_connect( $connection_string );
 
 		if (!$db_handle) {
 			$exception_message = 'DBConnectionManager: Cannot connect to PostgreSQL server via getPostgreSQLConnection.  Error: ' . pg_last_error($db_handle);

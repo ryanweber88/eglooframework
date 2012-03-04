@@ -41,11 +41,11 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// of they could potentially produce unexpected results that
 		// are very difficult to track
 		//$exceptions = array();
-		
+				
 		// in the case of evaluate, we want to to look at our reference, 
 		// should it exist and determine if what its value should be
 		if ($offset == 'evaluate' && !is_null($this->reference)) {
-			return $this->reference->evaluate();
+			return $this->evaluate();
 		}
 		
 
@@ -61,17 +61,20 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		}
 		
 		if ( !is_null($result) ) {
-			
+						
 		
 			// check if result delegate is instanceof of set; in which case
 			// we directly return the set, because we want to work directly
 			// on it in most cases
 			if ( is_object($result) &&  
-					 $result->delegated instanceof Domain\Model\Set ) {
+					 $result->delegated instanceof Domain\Model\Set &&
+					 !$result->delegated->isEmpty()) {
 				
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
+				
+				
 				$set = array();
 				
 				foreach( $result->delegated as $key => $value ) {
@@ -89,6 +92,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		
 			return $result;
 		}
+		
 		
 		// if our result is null, we return an ArrayAccess instance, which
 		// delegates to a Nil class instance - we do this because there
@@ -141,15 +145,18 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 */
 	protected function evaluate() {
 		
+		
 		// if delegated is of type Nil, it means that ArrayAccess is purposefully wrapping
 		// a null value, in which case, our evaluation is null
 		if ($this->delegated instanceof Nil) {
 			return null;
 		}
 		
-		if ( $this->delegated instanceof \ArrayAccess && count($this->delegated) === 0 ) {
+		// haven't decided what to do here yet
+		if ( $this->delegated instanceof \ArrayAccess ) {
 			return null;
 		}
+		
 		
 		return true;
 	}	

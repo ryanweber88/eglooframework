@@ -174,8 +174,8 @@ abstract class Model extends Delegator
 		// belong here
 		//echo static::namespaceName(); exit;
 		$relationshipName = $name;
-		$name             = \eGloo\Utilities\InflectionsSafe::instance()
-						          ->singularize($name);
+		$name             = ucfirst(\eGloo\Utilities\InflectionsSafe::instance()
+						          ->singularize($name));
 		$ns               = $this->namespace();
 		$self             = $this;
 				
