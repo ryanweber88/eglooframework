@@ -109,8 +109,8 @@ abstract class Model extends Delegator
 				
 			}
 			
-			catch(\Exception $ignore) {
-				var_export($ignore); exit;
+			catch(\Exception $passthrough) {
+				throw $passthrough;
 			}
 			
 			
@@ -425,6 +425,8 @@ abstract class Model extends Delegator
 	 */
 	public static function create($__mixed = null) {
 		
+		//echo "in create <br />";
+		
 		// because create can be sent to both instance and class
 		// receivers, we have to explicitly check to determine 
 		// who are reciever is; in the former case, receiver is
@@ -539,8 +541,8 @@ abstract class Model extends Delegator
 		// run our before/around callbacks
 		foreach(array('before', 'around') as $point) {
 			if (isset($this->callbacks[$event][$point])) {
-				foreach($this->callbacks[$event][$point] as $lambda) {
-					if (($inject = $lambda($inject)) === false) {
+				foreach($this->callbacks[$event][$point] as $callback) {
+					if (($inject = $callback($inject)) === false) {
 						return ;
 					}
 				}
@@ -556,8 +558,8 @@ abstract class Model extends Delegator
 		
 		// run our after callbacks in reverse order
 		if (isset($this->callbacks[$event]['after'])) { 
-			foreach(array_reverse($this->callbacks[$event]['after']) as $lambda) {
-				if (($inject = $lambda($inject)) === false) {
+			foreach(array_reverse($this->callbacks[$event]['after']) as $callback) {
+				if (($inject = $callback($inject)) === false) {
 					return ;
 				}
 			}
