@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Commerce\Cart;
+
 use \eGloo\Commerce,
-	\eGloo\Utility;
+    \eGloo\Utility,
+    \eGloo\Domain; 
 
 
 /**
@@ -43,7 +45,7 @@ use \eGloo\Commerce,
  * @subpackage	Subpackage
  * @version		Release: 1.0
  */
-class Cart {
+class Cart extends Domain\Model {
 
 	protected $user_id		= 0;
 	
@@ -72,8 +74,7 @@ class Cart {
 	
 	protected $shipping_line_id			= 0;
 
-	private function __construct() {
-	}
+
 	
 	public static function setCartID($cart_id = null) {
 		if (!is_null($cart_id) && $cart_id > 0) {

@@ -44,7 +44,7 @@ class User extends Domain\Model {
 	protected static $logged_in = false;
 
 	/** * @var type Anonymous	 */
-	protected static $active_user_id;
+	protected static $active_user_id = 0;
 
 	const USER_TYPE_NORMAL			= 1,
 	      USER_TYPE_EMPLOYEE		= 2,
@@ -84,29 +84,6 @@ class User extends Domain\Model {
 		return static::$active_user_id;
 	}
 
-	/**
-	 * Populate data int the User object
-	 *
-	 * @param type $key
-	 * @param type $value
-	 */
-	public function __set($key, $value) {
-		$this->$key = $value;
-		return true;
-	}
-
-	/**
-	 * Getter for the User Object
-	 * @param type $key
-	 *
-	 * @return mix type object retrieved from user
-	 */
-	public function __get( $key ) {
-		if ( property_exists($this, $key) ) {
-			return $this->$key;
-		}
-		return false;
-	}
 
 	/**
 	 * Return String version of this object
