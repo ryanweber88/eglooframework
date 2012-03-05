@@ -131,6 +131,7 @@ class eGlooString {
 		return implode( '', $chunks );
 	}
 
+
 	public static function toPrettyPrint( $string, $separator = '_', $ucfirst = false, $title_case = true ) {
 		$chunks = explode( $separator, $string );
 
@@ -145,6 +146,18 @@ class eGlooString {
 
 	public static function toPrettyPrintFromCamelCase( $string, $separator = '_', $ucfirst = false ) {
 		// TODO
+	}
+
+	public static function toSeparator( $string, $separator = '_' ) {
+		$retVal = null;
+
+		$retVal = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1' . $separator . '$2', $string ) );
+
+		return $retVal;
+	}
+
+	public static function toUnderscores( $string ) {
+		return static::toSeparator( $string );
 	}
 
 }
