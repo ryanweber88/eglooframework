@@ -213,7 +213,7 @@ abstract class Model extends Delegator
 		
 		// @TODO this has to be determined dynamically, but for the time being
 		// will ensure that proper model is instantiated if attempting an alias
-		// call on \Model classes
+		// call on \Model will return \Common\Domain\Model\*
 		$ns               = '\\Common\\Domain\\Model';
 		$self             = $this;
 				

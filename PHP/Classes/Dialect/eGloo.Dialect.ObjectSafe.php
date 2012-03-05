@@ -181,6 +181,34 @@ abstract class ObjectSafe {
 			
 		});
 		
+		// returns a closure representing a member method
+		static::defineMethod('closure', function($method, $class) { 
+			$current = $class;
+			
+			// first we check statically linked methods 
+			if (method_exists($class, $method)) {
+				
+			// 	otherwise, we check up method hierarchy chain
+			// for dynamic method
+			} else { 
+			
+				$methods = &$class::referenceStatic('_methodsStatic');
+	
+				do {
+					if (isset($methods[$current][$method])) {
+				
+						return $methods[$current][$method];
+					}
+						
+				} while (($current = get_parent_class($current)));
+			
+			}
+			
+			throw new \Exception(
+				"Failed to return closure of '$method' because it does not exist"
+			);
+			
+		});		
 				
 		
 		static::defineMethod('namespaceName', function($class) {
@@ -219,13 +247,15 @@ abstract class ObjectSafe {
 			return $cache[$class][$key];		
 		});
 		
+	
+		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
 				
 			//echo "alias $alias to $from for class $class <br/>";exit;
 				
 			if (\method_exists($class, $from)) {
 					
-				if (!\method_exists($class, $alias)) {
+				if (!($nativeMethod = \method_exists($class, $alias)) || $class::respondTo($from)) {
 					
 					
 					// use lambda/block to place method alias method definition into
@@ -237,10 +267,24 @@ abstract class ObjectSafe {
 							$__mixed = array($__mixed);
 						}
 
-						// call original method
-						return call_user_func_array(array(
-								$class, $from
-						),  $__mixed);
+						// call original method - we need to check if running
+						// a native method or dynamic
+						if ( $nativeMethod ) {
+							return call_user_func_array(array(
+									$class, $from
+							),  $__mixed);
+							
+						
+						// otherwise run from dynamic lookup
+						// @TODO we need to add closure() method
+						} else {
+							
+							return call_user_func_array(
+								$class::closure($from), $param_arr
+							);
+						}
+						
+						
 						
 					});
 				}

@@ -202,7 +202,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function offsetExists($offset) {
-		// @TODO cache these results
+		// @TODO cache these results and below is lazy - 
+		// we should do a true check on exists
 		try {
 			$result = $this[$offset];
 		}
@@ -260,12 +261,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					// can add models to a new set or model that doesnt yet exist;
 					// please note though, there are no constraints in regards to
 					// the domain of model->natural_key values
-					$reference = new $this->model;
-					$reference->$field = $offset; 
-					$this[] = $reference;
+					// @TODO this doesn't fucking work right now
+					//$this[] = new $this->model(array($field => $offset));
 					
-					return $reference;
-					//return false;
+					return false;
 				}
 			}
 			
@@ -293,6 +292,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$index = empty($offset)
 				? count($this->collection)
 				: $offset;
+				
+			echo "index is $index";
 			
 			$this->collection[$index] = $value;
 		}

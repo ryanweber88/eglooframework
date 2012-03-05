@@ -28,6 +28,15 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			$this->reference = $reference;
 		}
 	}
+
+	/**
+	 * Invoke provides a somewhat more idiomatic means of
+	 * calling evaluate on an ArrayAccess instance within
+	 * template context
+	 */
+	public function __invoke() {
+		return $this->evaluate();
+	}
 	
 	/**
 	 * Overrides utility arrayaccess to return empty string - this
@@ -41,13 +50,25 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// of they could potentially produce unexpected results that
 		// are very difficult to track
 		//$exceptions = array();
-				
-		// in the case of evaluate, we want to to look at our reference, 
-		// should it exist and determine if what its value should be
-		if ($offset == 'evaluate' && !is_null($this->reference)) {
-			return $this->evaluate();
-		}
 		
+		
+		
+				
+		// our evaluation methods are special and stop processing to determine
+		// the value of delegated within the context of a template
+		if (in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b'))) {
+				
+			// first evaluate our result and then apply conversions if
+			// necessary
+			if (!is_null($result = $this->evaluate())) {
+				
+			}
+						
+			return $result;
+			
+		}
+				
+
 
 		try {
 			$result = parent::offsetGet($offset);
@@ -63,18 +84,19 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		if ( !is_null($result) ) {
 						
 		
+			
 			// check if result delegate is instanceof of set; in which case
 			// we directly return the set, because we want to work directly
 			// on it in most cases
 			if ( is_object($result) &&  
 					 $result->delegated instanceof Domain\Model\Set &&
-					 !$result->delegated->isEmpty()) {
+					 1) {
 
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
 				$set = array();
-								
+						
 				// check if model has a natural key defined; in these cases
 				// the model->key value will servce as our index for the
 				// returned set
@@ -92,20 +114,22 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 						$set[] = new static($result->delegated[$key]);
 					}
 				}
-								
+			
+				var_export($set); exit;					
 												
-				return $set;
+				$result = $set;
 			}
 			
 			// set a backward reference for any needed 'backward' evaluations
-			if ( $result instanceof static ) {
+			else if ( $result instanceof static ) {
 				$result->reference = $this;
 			}
-		
+					
 		
 			return $result;
 		}
-		
+
+
 		
 		// if our result is null, we return an ArrayAccess instance, which
 		// delegates to a Nil class instance - we do this because there
@@ -148,6 +172,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	public function offsetExists($offset) {
 		return true;
 	}
+	
 	
 	/**
 	 * Responsible for evaluating the value of current delegated object;
