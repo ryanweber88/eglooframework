@@ -50,7 +50,6 @@ class User extends Domain\Model {
 	      USER_TYPE_EMPLOYEE		= 2,
 	      USER_TYPE_AFFILIATE		= 3;
 
-	protected $default_shipping_rate;
 
 	/**
 	 * Construct User Object
@@ -127,32 +126,5 @@ class User extends Domain\Model {
 		return $user_data;
 	}
 
-	/**
-	 * Magic method __Call
-	 * @param type $name
-	 * @param type $arguments
-	 * @return type
-	 */
-	public function __call($name, $arguments) {
-		if ($name == 'logout') {
-			return $this->logout();
-		}
-		// @TODO delegate to EPA
-	}
-
-	/**
-	 * Magic Method
-	 *
-	 * @param type $name
-	 * @param type $arguments
-	 */
-	public static function __callstatic($name, $arguments) {
-		if ($name == 'logout' && isset($arguments[0])) {
-			// @TODO perform needed actions for a static user logout
-			// this should be possible if the user has logged in
-			// since we should be statically storing our user login
-			// information
-		}
-	}
 
 }

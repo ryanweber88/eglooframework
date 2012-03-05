@@ -216,9 +216,13 @@ abstract class ObjectSafe {
 		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
 				
+			//echo "alias $alias to $from for class $class <br/>";exit;
+				
 			if (\method_exists($class, $from)) {
 					
 				if (!\method_exists($class, $alias)) {
+					
+					
 					// use lambda/block to place method alias method definition into
 					// this instance "singleton" or eigenclass
 					$class::defineMethod($alias, function($__mixed = nulll) use ($from, $class) {
@@ -227,7 +231,7 @@ abstract class ObjectSafe {
 						if (!is_array($__mixed)) {
 							$__mixed = array($__mixed);
 						}
-						
+
 						// call original method
 						return call_user_func_array(array(
 								$class, $from
@@ -506,7 +510,7 @@ abstract class ObjectSafe {
 	 */
 	public function __call($name, $arguments) { 
 		
-		//echo "calling $name on receiver " . get_called_class() . "<br />";
+		//echo "calling $name on receiver " . get_called_class() . "<br />";exit;
 		
 		// create an instancer of Caller so we can determine
 		// origin or caller context
@@ -541,7 +545,7 @@ abstract class ObjectSafe {
 	
 	public static function __callstatic($name, $arguments) { 
 		
-		//echo "calling static $name on receiver " . get_called_class() . "<br />";
+		//echo "calling static $name on receiver " . get_called_class() . "\n";
 		
 		// check against dynamically defined methods - since we
 		// are working class scope, we want to mimic the idea of

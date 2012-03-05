@@ -41,31 +41,48 @@ abstract class Model extends Delegator
 
 	/** @Polymorphic */
 	public static function __static() {
-		$class = static::className();
-
+	
+		$class          = get_called_class();
+		$formattedClass = strtolower(\eGlooString::toUnderscores(static::classname()));
+			
 		// assign static delegation 
-		Delegator::delegate(get_called_class(), get_class(static::data()));
+		Delegator::delegate($class, get_class(static::data()));
 
 		// provide reg exp list to check methods against
 		$lookFor = array(
-			'/loadByI(D|d)/'                   => 'find',
-			"/load{$class}ByI(D|d)/"           => 'find',
-			'/load([A-Z][a-z]+?)By([a-zA-Z])/' => 'find_by_$1_$2',
-			"/load{$class}List/"               => 'all',
-			"/create{$class}/"                 => 'create'
+			'/^loadByI(D|d)$/'                    => 'find',
+			"/^load{$formattedClass}ByI(D|d)$/"   => 'find',
+			'/^load([A-Z][a-z]+?)By([a-zA-Z]+)$/' => 'find_by_$1_$2',
+			"/^load{$formattedClass}List$/"       => 'all',
+			"/^create{$formattedClass}$/"         => 'create'
 		);
 
 		// retrieve list of methods from class
-		$reflection = new \ReflectionClass(get_called_class());
+		$reflection = new \ReflectionClass($class);
 		$methods    = $reflection->getMethods();
-
+		
+				
+		
 		// iterate through patterns and check against our static methods
 		// drawing up aliases where patterns match
-		foreach($lookFor as $pattern => $alias) {
-			foreach($methods as $method) {
+		foreach($methods as $method) {			
+			foreach($lookFor as $pattern => $alias) {				
 				if (preg_match($pattern, $method->getName(), $match)) {
 					
+					// perform regexp replace on pattern, if applicable and
+					// replace class name ( again, if applicable ) - these are
+					// placed on two lines for readability 
+					$alias = strtolower(preg_replace(
+						$pattern, $alias, $method->getName()
+					));
+					
+					$alias = str_replace("{$class}_", null, $alias);
+								
+					
 					try {
+						
+						// get fully qualified class name and call alias method - 
+						// 'static' should work here, but it doesn't??
 						static::aliasMethod(strtolower(preg_replace(
 							$pattern, $alias, $method->getName()
 						
@@ -78,8 +95,10 @@ abstract class Model extends Delegator
 					// method does not exist - the only caveat here is
 					// that
 					catch(\Exception $ignore) {
-						//echo $ignore->getMessage();
+						//exit('bizarre');
+						//echo $ignore->getMessage(); exit;
 					}
+					
 				}
 			}
 		}
@@ -87,14 +106,11 @@ abstract class Model extends Delegator
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
 		// with aliases, which for the time being are more correct (specific)
-		$class = get_called_class();
 		
-		if ( !$class::respondTo('find') ) {
-			
-
+		if ( !static::respondTo('find') ) {
+						
 			static::defineMethod('find', function($__mixed, $class) {
-	
-				
+					
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
@@ -104,7 +120,8 @@ abstract class Model extends Delegator
 				
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
-				try { 
+				try {
+					
 					return new $class($class::statement("
 						SELECT * FROM $table WHERE $field = ?
 							

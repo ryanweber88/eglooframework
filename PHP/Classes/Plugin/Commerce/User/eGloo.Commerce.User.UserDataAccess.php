@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Commerce\User;
+
 use \eGloo\DataProcessing\Connection,
-	\eGloo\Utility;
+	  \eGloo\Utility,
+	  \eGloo\Domain;
 
 /**
  * UserDataAccess Class File
@@ -37,25 +39,4 @@ use \eGloo\DataProcessing\Connection,
  * @package Plugins
  * @subpackage Commerce
  */
-class UserDataAccess extends Connection\PostgreSQLDBConnection{
-
-	protected static $instance = null;
-
-	/**
-	 * Pass Connection resource to parent constructor
-	 * if needed
-	 * @return void
-	 */
-	public function __construct() { }
-
-	/**
-	 * Generate an instance of this class
-	 * @return object of this class
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self();
-		}
-		return static::$instance;
-	}
-}
+class UserDataAccess extends Domain\Data { }
