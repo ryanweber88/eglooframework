@@ -1,9 +1,9 @@
 <?php
-namespace eGloo\Commerce\Tax;
-use \eGloo\Commerce\Slug\TaxDataAccess;
+namespace eGloo\Commerce\Invoice;
+use \eGloo\DataProcessing\Connection;
 
 /**
- * Tax Class File
+ * InvoiceDataAccess Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -28,60 +28,36 @@ use \eGloo\Commerce\Slug\TaxDataAccess;
  */
 
 /**
- * Description of Tax
+ * Description of InvoiceDataAccess
  * 
- * Representation of Tax Entity
+ * Representation of InvoiceDataAccess Entity
  * Hold CRUD functionalities and Slug related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class Tax {
+class InvoiceDataAccess {
+	/** @var resource Object */
+	protected static $instance = null;
 	
-	public		$zip_code;
-	
-	public		$tax_rate;
-	
-	protected	$properties;
-
 	/**
-	 * Create a new Product object
+	 * Overwrite $rawConnectionResource setting in connection file
 	 * 
-	 * @param array $args optional
+	 * @param resource $rawConnectionResource = null
+	 * @return void
 	 */
-	public function __construct (array $args) {
-		foreach ($args as $key => $value){
-			$this->{$key} = $value;
-		}
-	}
+	public function __construct() {}
 	
 	/**
-	 * Populate data int the Setter
-	 *
-	 * @param type $key
-	 * @param type $value
+	 * Create an instance of the class
+	 * Delegate class to access Database layer
+	 * 
+	 * @return $this class object
 	 */
-	public function __set($key, $value) {
-		if (property_exists($this, $key)) {
-			$this->$key = $value;
-		} else {
-			$this->$key = $value;
+	public static function fetch () {
+		if (static::$instance === null) {
+			static::$instance = new self();
 		}
-		return true;
-	}
-
-	/**
-	 * Getter for the
-	 * @param type $key
-	 *
-	 * @return mix type object retrieved from 
-	 */
-	public function __get( $key ) {
-		if (property_exists($this, $key)) {
-			return $this->$key;
-		} elseif ( isset($this->properties[$key] )) {
-			return $this->properties[$key];
-		} 
-		return false;
+		return static::$instance;
 	}
 }

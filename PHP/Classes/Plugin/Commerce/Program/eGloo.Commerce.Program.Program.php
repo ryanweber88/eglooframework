@@ -95,7 +95,7 @@ class Program extends Domain\Model {
 	}
 
 	/**
-	 * Getter for the Product Object
+	 * Getter 
 	 * @param type $key
 	 * 
 	 * @return mix type object retrieved from Product

@@ -41,7 +41,7 @@ use \eGloo\Commerce\User\UserDataAccess;
 class User extends Domain\Model {
 
 	/** @var string is user logged in */
-	protected static $logged_in;
+	protected static $logged_in = false;
 
 	/** * @var type Anonymous	 */
 	protected static $active_user_id;
@@ -91,11 +91,8 @@ class User extends Domain\Model {
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
-		if (property_exists($key, $this)) {
-			$this->$key = $value;
-		}
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 
 	/**
@@ -105,8 +102,8 @@ class User extends Domain\Model {
 	 * @return mix type object retrieved from user
 	 */
 	public function __get( $key ) {
-		if (isset($this->properties[$key])) {
-			return $this->properties[$key];
+		if ( property_exists($this, $key) ) {
+			return $this->$key;
 		}
 		return false;
 	}

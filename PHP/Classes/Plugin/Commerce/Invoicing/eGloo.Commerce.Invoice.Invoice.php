@@ -1,9 +1,9 @@
 <?php
-namespace eGloo\Commerce\Tax;
-use \eGloo\Commerce\Slug\TaxDataAccess;
+namespace eGloo\Commerce\Invoice;
+use \eGloo\Commerce\Slug\InvoiceDataAccess;
 
 /**
- * Tax Class File
+ * Invoice Class File
  * 
  * Copyright 2011 eGloo, LLC
  * 
@@ -28,22 +28,16 @@ use \eGloo\Commerce\Slug\TaxDataAccess;
  */
 
 /**
- * Description of Tax
+ * Description of Invoice
  * 
- * Representation of Tax Entity
+ * Representation of Invoice Entity
  * Hold CRUD functionalities and Slug related method
  *
  * @package Plugins
  * @subpackage Commerce
  */
-class Tax {
+class Invoice {
 	
-	public		$zip_code;
-	
-	public		$tax_rate;
-	
-	protected	$properties;
-
 	/**
 	 * Create a new Product object
 	 * 
@@ -63,9 +57,9 @@ class Tax {
 	 */
 	public function __set($key, $value) {
 		if (property_exists($this, $key)) {
-			$this->$key = $value;
+			$this->{$key} = $value;
 		} else {
-			$this->$key = $value;
+			$this->{$key} = $value;
 		}
 		return true;
 	}

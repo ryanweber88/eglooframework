@@ -109,8 +109,6 @@ class Product extends Domain\Model {
 	public function getProductArray(){
 		return (array) $this->properties;
 	}
-
-	
 	
 	public static function loadProductById($product_id) {
 		if ((int)$product_id <= 0) {
