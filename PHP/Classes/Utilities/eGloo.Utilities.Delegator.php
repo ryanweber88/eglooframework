@@ -64,7 +64,7 @@ abstract class Delegator extends Object {
 	 */
 	public static function __callstatic($name, $arguments) {
 		
-		echo "calling $name on delegator\n";
+		//echo "calling $name on delegator\n";
 		
 		try { 
 			return parent::__callstatic($name, $arguments);
