@@ -151,7 +151,7 @@ class eGlooString {
 	public static function toSeparator( $string, $separator = '_' ) {
 		$retVal = null;
 
-		$retVal = strtolower( preg_replace( '/([a-z])([A-Z])/', '$1' . $separator . '$2', $string ) );
+		$retVal = strtolower( preg_replace( '~([a-z])([A-Z])~', '$1' . $separator . '$2', $string ) );
 
 		return $retVal;
 	}
