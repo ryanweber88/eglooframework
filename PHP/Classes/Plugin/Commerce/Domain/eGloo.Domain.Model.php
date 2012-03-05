@@ -1,7 +1,8 @@
 <?php
 namespace eGloo\Domain;
 
-use \eGloo\Utilities\Delegator as Delegator;
+use \eGloo\Utilities\Delegator;
+use \eGloo\Utilities\InflectionsSafe;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -208,7 +209,12 @@ abstract class Model extends Delegator
 		$relationshipName = $name;
 		$name             = ucfirst(\eGloo\Utilities\InflectionsSafe::instance()
 						          ->singularize($name));
-		$ns               = $this->namespace();
+		//$ns               = $this->namespace();
+		
+		// @TODO this has to be determined dynamically, but for the time being
+		// will ensure that proper model is instantiated if attempting an alias
+		// call on \Model classes
+		$ns               = '\\Common\\Domain\\Model';
 		$self             = $this;
 				
 		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
@@ -227,8 +233,18 @@ abstract class Model extends Delegator
 					// contract of the defineRelationship method
 					if (is_array($result)) {
 						
+						
+						
 						if (\eGloo\Utilities\Collection::isHash($result)) {
 							$result = new $model($result);
+							
+							// @TODO this is a shortcut to we establish a better rule
+							// in terms of convetion around singular vs set
+							
+							if (InflectionsSafe::isPlural($relationshipName)) {
+								$result = new Model\Set(array($result));
+							}	
+							
 						}
 						
 						// otherwise we have a set return; check if elements are

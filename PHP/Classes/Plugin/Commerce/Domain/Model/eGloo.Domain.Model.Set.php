@@ -255,7 +255,17 @@ class Set extends \eGloo\Dialect\ObjectSafe
 						}
 					}
 					
-					return false;
+					// instead of returning false here, we are going to return an
+					// empty instance of model, that can be populated; this way we
+					// can add models to a new set or model that doesnt yet exist;
+					// please note though, there are no constraints in regards to
+					// the domain of model->natural_key values
+					$reference = new $this->model;
+					$reference->$field = $offset; 
+					$this[] = $reference;
+					
+					return $reference;
+					//return false;
 				}
 			}
 			
