@@ -38,7 +38,6 @@ use \eGloo\Domain;
  * @package Plugin
  * @subpackage Commerce
  */
-
 class Product extends Domain\Model {
 
 
@@ -124,6 +123,12 @@ class Product extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$row = ProductDataAccess::fetch()->loadProductBySlug($slug);
-		return new Product($row);
+
+		// Return values seem to variable, so we simply ask if it evals
+		// to not null/false value
+		return $row 
+			? new Product($row)
+			: false;
+			
 	}
 }

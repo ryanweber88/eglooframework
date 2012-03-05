@@ -73,7 +73,7 @@ class Brand extends Domain\Model {
 	}
 	
 	public function loadBrandSlug() {
-		if ($this->friendly_url == '') {
+		if (!isset($this->friendly_url) || $this->friendly_url == '') {
 			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlugByID($this->brand_id);
 		}
 		$this->friendly_url;
@@ -81,7 +81,7 @@ class Brand extends Domain\Model {
 	}
 	
 	public function loadBrandSlugDestination() {
-		if ($this->friendly_url == '') {
+		if (!isset($this->friendly_url) || $this->friendly_url == '') {
 			$this->friendly_url = BrandDataAccess::fetch()->loadBrandSlugDestination($this->brand_id);
 		}
 		$this->friendly_url;

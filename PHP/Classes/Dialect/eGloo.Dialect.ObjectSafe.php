@@ -127,10 +127,15 @@ abstract class ObjectSafe {
 						"Attempted alias on $alias failed because it already exists as method on instance"
 				);
 			}
+			
+			else { 
 		
-			throw new \Exception(
-					"Attempting an alias on method $from which does not exist"
-			);
+				throw new \Exception(
+					"Failed attempting an instance alias on method '$from' because it does not exist on receiver " . get_class($self)
+				);
+			
+			}
+			
 		});
 				
 	}
@@ -246,10 +251,14 @@ abstract class ObjectSafe {
 					);
 				}
 			}
+			
+			else { 
 				
-			throw new \Exception(
-					"Attempting an alias on method $from which does not exist"
-			);
+				throw new \Exception(
+						"Failed attempting a static alias on method '$from' because it does not exist on receiver $class"
+				);
+				
+			}
 				
 		});
 		
