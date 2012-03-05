@@ -264,7 +264,9 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	public function beginTransaction() {
-		!is_null (self::$link) ?: $this->getConnection();
+		if ( !isset(self::$link) ) {
+			self::$link = $this->getConnection();
+		}
 		
 		pg_query(self::$link, 'BEGIN TRANSACTION');
 		if (pg_last_error(self::$link) != false) {
@@ -276,7 +278,9 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	protected function commitTransaction () {
-		!is_null (self::$link) ?: $this->getConnection();
+		if ( !isset(self::$link) ) {
+			self::$link = $this->getConnection();
+		}
 		
 		pg_query(self::$link, 'COMMIT TRANSACTION');
 		if (pg_last_error(self::$link) != false) {
@@ -288,7 +292,9 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * 
 	 */
 	protected function rollbackTransaction () {
-		!is_null (self::$link) ?: $this->getConnection();
+		if ( !isset(self::$link) ) {
+			self::$link = $this->getConnection();
+		}
 		
 		@pg_qery(self::$link, 'ROLLBACK TRANSACTION');
 		if (pg_last_error(self::$link) != false) {
