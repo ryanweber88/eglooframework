@@ -48,7 +48,7 @@ class Program extends Domain\Model {
 	/**
 	 * Retrieve model based on primary id - our argument list is fluid and
 	 * can accept multiple primary
-	 */
+	
 	public static function find($__mixed) {
 		$models    = array();
 		$arguments = \eGloo\Utilities\Collection::flatten(
@@ -82,6 +82,7 @@ class Program extends Domain\Model {
 			: false;
 	
 	}
+	 */
 
 	/**
 	 * Populate data int the Product object

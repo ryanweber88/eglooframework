@@ -260,7 +260,7 @@ abstract class ObjectSafe {
 					
 					// use lambda/block to place method alias method definition into
 					// this instance "singleton" or eigenclass
-					$class::defineMethod($alias, function($__mixed = nulll) use ($from, $class) {
+					$class::defineMethod($alias, function($__mixed = nulll) use ($from, $class, $nativeMethod) {
 						
 						// @TODO this is an ugly hack for now
 						if (!is_array($__mixed)) {
