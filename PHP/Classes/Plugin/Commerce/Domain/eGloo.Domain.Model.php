@@ -109,8 +109,8 @@ abstract class Model extends Delegator
 				
 			}
 			
-			catch(\Exception $ignore) {
-				var_export($ignore); exit;
+			catch(\Exception $passthrough) {
+				throw $passthrough;
 			}
 			
 			
@@ -425,6 +425,8 @@ abstract class Model extends Delegator
 	 */
 	public static function create($__mixed = null) {
 		
+		//echo "in create <br />";
+		
 		// because create can be sent to both instance and class
 		// receivers, we have to explicitly check to determine 
 		// who are reciever is; in the former case, receiver is
@@ -539,8 +541,8 @@ abstract class Model extends Delegator
 		// run our before/around callbacks
 		foreach(array('before', 'around') as $point) {
 			if (isset($this->callbacks[$event][$point])) {
-				foreach($this->callbacks[$event][$point] as $lambda) {
-					if (($inject = $lambda($inject)) === false) {
+				foreach($this->callbacks[$event][$point] as $callback) {
+					if (($inject = $callback($inject)) === false) {
 						return ;
 					}
 				}
@@ -556,8 +558,8 @@ abstract class Model extends Delegator
 		
 		// run our after callbacks in reverse order
 		if (isset($this->callbacks[$event]['after'])) { 
-			foreach(array_reverse($this->callbacks[$event]['after']) as $lambda) {
-				if (($inject = $lambda($inject)) === false) {
+			foreach(array_reverse($this->callbacks[$event]['after']) as $callback) {
+				if (($inject = $callback($inject)) === false) {
 					return ;
 				}
 			}
@@ -749,6 +751,21 @@ abstract class Model extends Delegator
 				return $this->$name;
 			}
 			
+		}
+		
+		// if this is a new instance, and aliases have not been defined (since
+		// we have not initialized; check to see if name is a match to class_name_property)
+		// this has the danger of presenting very hard to track bugs, so we need to think
+		// about legitimacy
+		$class = strtolower(preg_replace(
+			'/([a-z])([A-Z])/', '$1_$2', static::className()
+		));
+		
+		if (property_exists($this, $field = "{$class}_$name")) {
+			// @TODO having issues with alias property - doing it old fashioned way for now
+			//$this->aliasProperty($name, "{$class}_$name");
+			$this->$name = &$this->$field;
+			return $this->$name;
 		}
 		
 		// otherwise pass to parent __get handler for higher level

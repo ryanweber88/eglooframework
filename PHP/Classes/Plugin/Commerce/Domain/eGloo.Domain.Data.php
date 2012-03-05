@@ -164,10 +164,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					catch(\Exception $passthrough) {
 						// @TODO this is an instancer where I'd like to have a StackException
 						
-						echo $field;
 						
 						throw new \Exception(
-							"Could not find attribute $field on receiver " . get_class($this) . 
+							"Could not find attribute $field on receiver " . get_class($model) . 
 							" when attempting to autogenerate arguments for statement"	
 							
 						);
