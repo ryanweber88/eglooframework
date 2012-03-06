@@ -464,6 +464,10 @@ abstract class Model extends Delegator
 			
 	}
 	
+	public static function all() {
+		
+	}
+	
 	
 	/**
 	 * Create method is a really wrapper to instantiate model, and then
@@ -612,6 +616,10 @@ abstract class Model extends Delegator
 				}
 			}
 		}
+		
+		// @TODO retrieving a value from a callback seems 
+		// like it is not the best idea
+		return $inject;
 	
 	}
 	
