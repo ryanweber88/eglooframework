@@ -117,6 +117,7 @@ abstract class Model extends Delegator
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
 		// with aliases, which for the time being are more correct (specific)
+		// @TODO these need to be moved to __methodStatic
 		
 		if ( !static::respondTo('find') ) {
 						
@@ -147,6 +148,37 @@ abstract class Model extends Delegator
 				
 			});
 			
+		}
+		
+		// explicitly define all, if not aliased and not explicitly defined
+		
+		if ( !static::respondTo('all') ) {
+			static::defineMethod('all', function($__mixed, $class) {
+					
+				// expand on parameter matching, but for, just match on primary
+				// and tablename_id pattern
+				$arguments = func_get_args();
+				$table     = strtolower( \eGlooString::toUnderscores($class::className()) );
+				$field     = "{$table}_id";
+				$key       = $arguments[0]; 
+				
+				// we're GAURENTEED to throw an exception here if our by-conventions guess
+				// does not pan out; so callers will be explicitly aware
+				try {
+					
+					return new $class($class::statement("
+						SELECT * FROM $table
+							
+					"));
+					
+				}
+				
+				catch(\Exception $passthrough) {
+					throw $passthrough;
+				}
+				
+				
+			});
 		}
 	}
 
@@ -618,9 +650,37 @@ abstract class Model extends Delegator
 		}
 		
 		// @TODO retrieving a value from a callback seems 
-		// like it is not the best idea
+		// like it is not the best idea, make but
 		return $inject;
 	
+	}
+
+	/**
+	 * "Shapes" a result set into either a model or
+	 * set of models; I don't know if I like the name of this
+	 * method, so it is subject to change
+	 * @return Model | Model\Set
+	 */
+	protected function shape($result) {
+		
+		if (is_array($result) && count($result)) {	
+			if (\eGloo\Utilities\Collection::isHash($result)) {
+				$result = new static($result);					
+			}
+					
+			// otherwise, we manually build set with model instances
+			else {
+				
+				foreach($result as $record) {
+					$temporary[] = new static($record);	
+				}
+				
+				// replace result with temporary
+				$result = new Model\Set($temporary);
+			}				
+		}
+		
+		return $result;
 	}
 	
 	
