@@ -72,7 +72,8 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			// on it in most cases
 			if ( is_object($result) &&  
 					 $result->delegated instanceof Domain\Model\Set &&
-					 !$result->delegated->isEmpty()) {
+					 1) {
+					 //!$result->delegated->isEmpty()) {
 
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
@@ -86,14 +87,17 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				// we do two distinct loops as means of saving 
 				if (($key = $result->delegated[0]->constGet('NATURAL_KEY'))) {
 					foreach($result->delegated as $ignore => $model) {
-						
-						$set[$index = $model->$key] = new static($result->delegated[$index]);					
+						if ($model->exists()) { 
+							$set[$index = $model->$key] = new static($model);			
+						}		
 					}
 				}
 				
 				else {
-					foreach ($result->delegated as $key => $ignore) {
-						$set[] = new static($result->delegated[$key]);
+					foreach ($result->delegated as $key => $model) {
+						if ($model->exists()) {
+							$set[] = new static($result->delegated[$key]);
+						}
 					}
 				}
 								
@@ -191,10 +195,15 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 */
 	protected function evaluate($result) {
 		
+		
 		// if delegated is of type Nil, it means that ArrayAccess is purposefully wrapping
 		// a null value, in which case, our evaluation is null
 		if ($this->delegated instanceof Nil || $this->delegated instanceof \ArrayAccess) {
 			$result = null;
+		}
+		
+		if ($this->delegated instanceof Domain\Model\Set) {
+			$result = $this->delegated;
 		}
 		
 		
@@ -203,8 +212,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// general of behavior and will cause hard to track bugs
 		if ( !is_null($result) ) {
 			
-			if ( strlower($result) == 'f' ) {
-				exit('here');
+			if ( is_string($result) && strlower($result) == 'f' ) {
 				$result = false;
 			}
 				
