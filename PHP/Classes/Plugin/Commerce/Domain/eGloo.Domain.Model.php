@@ -544,6 +544,19 @@ abstract class Model extends Delegator
 			return $model;
 		}
 	}
+
+	public static function find($__mixed) {
+		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
+		
+			
+		} else {
+			
+			// flatten arguments - this will always return an array
+			$arguments	= \eGloo\Utilities\Collection::flatten($__mixed);
+				
+		}
+		
+	}
 	
 	public function save() {
 		
@@ -661,7 +674,7 @@ abstract class Model extends Delegator
 	 * method, so it is subject to change
 	 * @return Model | Model\Set
 	 */
-	protected function shape($result) {
+	protected static function shape($result) {
 		
 		if (is_array($result) && count($result)) {	
 			if (\eGloo\Utilities\Collection::isHash($result)) {
