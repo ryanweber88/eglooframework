@@ -136,7 +136,9 @@ class PostgreSQLDBConnection extends DBConnection {
 	
 	public function executeArbitrary ($sql, array $params = array()) {
 		$this->prepareStatment($sql, $params);
-		isset(self::$link) ?: $this->getConnection();
+		if ( !isset(self::$link) ) {
+			self::$link = $this->getConnection();
+		}
 
 		try {
 			return pg_query_params(self::$link, $sql, $params);
@@ -182,13 +184,13 @@ class PostgreSQLDBConnection extends DBConnection {
 		if (preg_match('/^insert\s+?into\s+?([\w-_]+)\s+/i', $sql, $matches) !== false) {
 			// parse sql for table name - this isn't a perfect solution and will not work
 			// for all cases, but will work for the majority of them
-			if (!preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql)) { 
+			/*if (!preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql)) { 
 				preg_match(						
 					'/insert\s+?into\s+?(\S+)/is', $sql, $match
 				);
 				
-				$sql .= " RETURNING {$match[1]}.* ";
-			}
+				//$sql .= " RETURNING {$match[1]} ";
+			}*/
 
 			$pg_result = self::execute($sql, $params);
 

@@ -37,74 +37,18 @@ use eGloo\Commerce\User\UserDataAccess;
  * @subpackage Commerce
  */
 class User {
-
-	/** @var integer user id */
-	public		$user_id;
-
-	/** @var string user email address */
-	public		$email_address;
-
-	/** @var string user name */
-	public		$username;
-
-	/** @var string password */
-	public		$password_hash;
-
-	/** @var string first name */
-	public		$first_name;
-
-	/** @var string last name */
-	public		$last_name;
-
-	/** @var int Security Question ID*/
-	public		$security_question_id;
-
-	/** @var string first name */
-	public		$security_answer_hash;
-
-	/** @var integer 1/0 for user type */
-	public		$user_type_id = 0;
-
-	/** @var integer 1/0 for user status */
-	public		$user_status_id = 0;
-
-	/** @var string created date */
-	public		$registration_date;
-
-	/** @var string deleted date */
-	public		$deleted_date;
-
-	/** @var string birthday date */
-	public		$birthday;
-
-	/** @var string updated date */
-	public		$last_action;
-
-	/** @var string last logged in date */
-	public		$action_taken;
-
-	public		$user_roles			= array();
-
-	public		$user_addresses		= array();
-
-	public		$payment_options	= array();
-
-	public		$phone_numbers		= array();
-
+	
+	/** * @var type Anonymous	 */
+	public static $active_user_id;
+	
 	/** @var string is user logged in */
 	protected static $logged_in		= false;
-
-	/** * @var type Anonymous	 */
-	public static $active_user_id = 0;
-
-	/** @var array/Mix properties of Brands */
-	protected $properties;
 	
-	protected $default_shipping_rate;
-
+	
 	const	USER_TYPE_NORMAL		= 1,
 			USER_TYPE_EMPLOYEE		= 2,
 			USER_TYPE_AFFILIATE		= 3;
+	
 
 	/**
 	 * Construct User Object
@@ -134,11 +78,8 @@ class User {
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
-		if (property_exists($this, $key)) {
-			$this->$key = $value;
-		}
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 
 	/**
@@ -148,8 +89,8 @@ class User {
 	 * @return mix type object retrieved from user
 	 */
 	public function __get( $key ) {
-		if (isset($this->properties[$key])) {
-			return $this->properties[$key];
+		if ( property_exists($this, $key) ) {
+			return $this->$key;
 		}
 		return false;
 	}
