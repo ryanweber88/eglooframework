@@ -586,6 +586,19 @@ abstract class ObjectSafe {
 			);
 		}
 		
+		// lets provide conversion to underscored and camel case
+		// so George can be happy - check which case this is and
+		// perform a conversion based on that case, and see if it
+		// exists as a method; we are intentionally not providing
+		// the inverse to this, as that is simply crazy
+		if ( \eGlooString::isCamelCased($name) &&
+		     method_exists($this, $underscored = \eGlooString::toUnderscores($name))) {
+		     	
+			return call_user_func_array(array($this, $underscored), $arguments);
+		}
+				 
+		
+		
 
 		
 		// this will die UNGRACEFULLY if method does not exist

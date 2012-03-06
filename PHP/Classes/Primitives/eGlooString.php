@@ -130,6 +130,23 @@ class eGlooString {
 
 		return implode( '', $chunks );
 	}
+	
+	/**
+	 * Determines if string is "camel-cased"
+	 */
+	public static function isCamelCase($string) {
+		
+		// @TODO this is a lazy/inefficient method to do 
+		// determination, but it works damnit
+		return $string === static::toCamelCase($string);
+	}
+	
+	/**
+	 * Determines if string is "underscored"
+	 */
+	public static function isUnderscore($string) {
+		return $string === static::toUnderscores($string); 
+	}
 
 
 	public static function toPrettyPrint( $string, $separator = '_', $ucfirst = false, $title_case = true ) {
