@@ -71,7 +71,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			array( 'child',  'children' ),
 			array( 'man',	'men'	  ),
 			array( 'person', 'people'   ),
-			array( 'status', 'status' )
+			array( 'status', 'statuses' )
 		);
 		
 		$this->uncountables = array( 
@@ -82,7 +82,8 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			'money',
 			'rice',
 			'information',
-			'equipment'
+			'equipment',
+			'status'
 		);
 	}
 	

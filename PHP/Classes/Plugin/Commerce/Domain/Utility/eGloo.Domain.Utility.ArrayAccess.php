@@ -51,24 +51,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// are very difficult to track
 		//$exceptions = array();
 		
-		
-		
-				
-		// our evaluation methods are special and stop processing to determine
-		// the value of delegated within the context of a template
-		if (in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b'))) {
-				
-			// first evaluate our result and then apply conversions if
-			// necessary
-			if (!is_null($result = $this->evaluate())) {
-				
-			}
-						
-			return $result;
-			
-		}
-				
-
 
 		try {
 			$result = parent::offsetGet($offset);
@@ -90,13 +72,13 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			// on it in most cases
 			if ( is_object($result) &&  
 					 $result->delegated instanceof Domain\Model\Set &&
-					 1) {
+					 !$result->delegated->isEmpty()) {
 
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
 				$set = array();
-						
+								
 				// check if model has a natural key defined; in these cases
 				// the model->key value will servce as our index for the
 				// returned set
@@ -114,21 +96,45 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 						$set[] = new static($result->delegated[$key]);
 					}
 				}
-			
-				var_export($set); exit;					
+								
 												
 				$result = $set;
 			}
 			
 			// set a backward reference for any needed 'backward' evaluations
 			else if ( $result instanceof static ) {
-				$result->reference = $this;
+				//$result->reference = $this;
 			}
-					
-		
-			return $result;
+						
 		}
 
+		// here we provide evaluation methods on a !is_null result; make sure
+		// not to overwrite the values provided by methods already available
+		// to delegated class
+		if (!\method_exists($this->delegated, $offset) && 
+		    in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b', 'exists'))) {
+			
+			$value = $this->evaluate();
+			
+			// now switch on offset type
+			switch ($offset) {
+				
+				case 'evaluate' :
+					return $value;
+					break;
+					
+				// this is manage exists on objects that do 	
+				case 'exists'   :
+					$result = $value && is_object($result);
+					break;
+						
+				default:
+					
+					break;
+			
+			}
+		
+		}
 
 		
 		// if our result is null, we return an ArrayAccess instance, which
@@ -137,8 +143,10 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// an exception to be thrown - in this case, we are returning
 		// an object that will produce an empty result when stringified
 				
-		return new static(new Nil, $this);
-
+		return is_null($result) 
+			? new static(new Nil)
+			
+			: $result;
 			
 	}
 	

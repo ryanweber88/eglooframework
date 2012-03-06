@@ -17,7 +17,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		// make sure we are receiving an instance
 		if (is_object($object)) { 
 			parent::__construct();
-					
+			
 			// this is the object to which we are delegated TO
 			$this->delegated = $object;
 		}
@@ -177,5 +177,5 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		unset($this->delegated->$$property);
 	}
 	
-	protected $delegated;
+	public $delegated;
 }
