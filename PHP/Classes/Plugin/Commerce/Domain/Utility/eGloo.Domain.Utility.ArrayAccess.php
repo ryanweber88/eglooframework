@@ -50,7 +50,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// of they could potentially produce unexpected results that
 		// are very difficult to track
 		//$exceptions = array();
-		
+		//echo "offset is $offset\n";
 
 		try {
 			$result = parent::offsetGet($offset);
@@ -114,7 +114,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		if (!\method_exists($this->delegated, $offset) && 
 		    in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b', 'exists'))) {
 			
-			$value = $this->evaluate();
+			$value = $this->evaluate($result);
 			
 			// now switch on offset type
 			switch ($offset) {
@@ -189,22 +189,29 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 	 * sections like if statements; this is meant to provide a bridge
 	 * to exactly that problem
 	 */
-	protected function evaluate() {
-		
+	protected function evaluate($result) {
 		
 		// if delegated is of type Nil, it means that ArrayAccess is purposefully wrapping
 		// a null value, in which case, our evaluation is null
-		if ($this->delegated instanceof Nil) {
-			return null;
-		}
-		
-		// haven't decided what to do here yet
-		if ( $this->delegated instanceof \ArrayAccess ) {
-			return null;
+		if ($this->delegated instanceof Nil || $this->delegated instanceof \ArrayAccess) {
+			$result = null;
 		}
 		
 		
-		return true;
+		// check against result
+		// @TODO I don't if this belongs here - maybe to
+		// general of behavior and will cause hard to track bugs
+		if ( !is_null($result) ) {
+			
+			if ( strlower($result) == 'f' ) {
+				exit('here');
+				$result = false;
+			}
+				
+		}
+		
+		
+		return $result;
 	}	
 	
 	private $reference;

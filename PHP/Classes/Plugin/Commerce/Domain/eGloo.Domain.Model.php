@@ -241,7 +241,7 @@ abstract class Model extends Delegator
 							// @TODO this is a shortcut to we establish a better rule
 							// in terms of convetion around singular vs set
 							
-							if (InflectionsSafe::isPlural($relationshipName)) {
+							if (!InflectionsSafe::isSingular($relationshipName)) {
 								$result = new Model\Set(array($result));
 							}	
 							

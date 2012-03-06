@@ -292,9 +292,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$index = empty($offset)
 				? count($this->collection)
 				: $offset;
-				
-			echo "index is $index";
-			
+							
 			$this->collection[$index] = $value;
 		}
 		
