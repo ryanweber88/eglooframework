@@ -367,7 +367,7 @@ abstract class ObjectSafe {
 	 * Aliases a property using reference; does not check on property existence
 	 * and will be affected by get/set definition
 	 */
-	protected function aliasProperty($alias, &$from) {
+	protected function aliasProperty($alias, $from) {
 		if (!\property_exists($this, $alias)) {
 			
 			// in the case that our from property doesn't exist, we

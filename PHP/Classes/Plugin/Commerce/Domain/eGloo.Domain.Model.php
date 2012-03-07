@@ -221,7 +221,7 @@ abstract class Model extends Delegator
 	 * Overrides Object::aliasProperty to place property
 	 * in properties member as well
 	 */
-	protected function aliasProperty($alias, &$from) {
+	protected function aliasProperty($alias, $from) {
 		parent::aliasProperty($alias, $from);
 		
 		$this->properties[$alias] = &$this->properties[$from];
@@ -457,7 +457,6 @@ abstract class Model extends Delegator
 
 	
 	protected function __attributes() {
-		exit('asdf');
 		// call our parent method to ensure any property work is done
 		// up hierarchy chain
 		//parent::__properties();
@@ -753,8 +752,8 @@ abstract class Model extends Delegator
 	/**
 	 * Aliases our primary key to 'id'
 	 */
-	protected function aliasPrimaryKey($alias) {
-		$this->aliasProperty($alias, 'id');
+	protected function aliasPrimaryKey($from) {
+		$this->aliasProperty( 'id', $from );
 	}
 	
 	/**
