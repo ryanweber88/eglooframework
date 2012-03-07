@@ -99,7 +99,9 @@ class Program {
 			}
 		} elseif ( isset($this->properties[$key] )) {
 			return $this->properties[$key];
-		} 
+		} else {
+			return call_user_func(array($this, 'load_' . $key));
+		}
 		return false;
 	}
 	
