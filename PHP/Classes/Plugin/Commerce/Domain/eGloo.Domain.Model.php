@@ -457,6 +457,7 @@ abstract class Model extends Delegator
 
 	
 	protected function __attributes() {
+		exit('asdf');
 		// call our parent method to ensure any property work is done
 		// up hierarchy chain
 		//parent::__properties();
