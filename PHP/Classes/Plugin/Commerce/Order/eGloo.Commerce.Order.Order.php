@@ -111,13 +111,19 @@ class Order {
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
+		
 		if (property_exists($this, $key)) {
-			if (method_exists($this, 'load_'. $key)) {
-				return call_user_func(array($this, 'load_' . $key));
+			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
+	
+			if ( method_exists($this, 'load'. $method) ) {
+				return call_user_func(array($this, 'load' . $method));
+			} else {
+				throw new \Exception('Undefined Method '. $method . ' invoqued');
 			}
+				
 		} elseif ( isset($this->properties[$key] )) {
 			return $this->properties[$key];
-		} 
+		}
 		return false;
 	}
 	
