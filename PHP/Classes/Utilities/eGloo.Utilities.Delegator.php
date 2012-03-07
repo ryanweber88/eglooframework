@@ -70,7 +70,7 @@ abstract class Delegator extends Object {
 			return parent::__callstatic($name, $arguments);
 		}
 		
-		catch(\Exception $hold) { }
+		catch(\Exception $hold) {}
 
 		if (isset(static::$associated[$class = get_called_class()]) && 
 			 (method_exists($delegated = static::$associated[$class], $name) ||

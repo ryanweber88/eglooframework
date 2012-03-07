@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Payment;
-use eGloo\Plugin\Commerce;
+
+use \eGloo\Domain;
+use \eGloo\Plugin\Commerce;
 
 /**
  * Payment Class File
@@ -36,43 +38,43 @@ use eGloo\Plugin\Commerce;
  * @package Plugins
  * @subpackage Commerce
  */
-class Payment {
+class Payment extends Domain\Model {
 
-	/** @var type  */
-	public		$credit_debit_card_id;
-
-	/** @var type  */
-	public		$user_id;
-	
-	/** @var type  */
-	protected	$card_holder;
-
-	/** @var type  */
-	protected	$card_number_hash;
-	
-	/** @var type  */
-	public		$last_4;
-
-	/** @var type  */
-	protected	$issue_date;
-
-	/** @var type  */
-	protected	$expiration_date;
-
-	/** @var type  */
-	protected	$merchant_id;
-	
-	/** @var type  */
-	public		$billing_address_is;
-	
-	/** @var type  */
-	public		$card_status_id;
-
-	/** @var type  */
-	protected	$card_xml;
-	
-	/** @var type  */
-	protected	$is_encrypted = false;
+	// /** @var type  */
+	// public		$credit_debit_card_id;
+	// 
+	// /** @var type  */
+	// public		$user_id;
+	// 
+	// /** @var type  */
+	// protected	$card_holder;
+	// 
+	// /** @var type  */
+	// protected	$card_number_hash;
+	// 
+	// /** @var type  */
+	// public		$last_4;
+	// 
+	// /** @var type  */
+	// protected	$issue_date;
+	// 
+	// /** @var type  */
+	// protected	$expiration_date;
+	// 
+	// /** @var type  */
+	// protected	$merchant_id;
+	// 
+	// /** @var type  */
+	// public		$billing_address_is;
+	// 
+	// /** @var type  */
+	// public		$card_status_id;
+	// 
+	// /** @var type  */
+	// protected	$card_xml;
+	// 
+	// /** @var type  */
+	// protected	$is_encrypted = false;
 	
 	/** @var type  */
 	const	CARD_TYPE_UNKNOWN		= 0,
@@ -87,19 +89,6 @@ class Payment {
 			CARD_STATUS_EXPIRED		= 2,
 			CARD_STATUS_FRAUD		= 3;
 
-	/**
-	 * 
-	 */
-	public function __construct(array $args) {
-		foreach ($args as $key => $value){
-			$this->{$key} = $value;
-		} 
-	}
-	
-	public static function loadByID($payment_id) {
-		
-	}
-	
 	/**
 	 * Return credit card type.
 	 * 
@@ -124,4 +113,5 @@ class Payment {
 		}
 		return $type;
 	}
+
 }

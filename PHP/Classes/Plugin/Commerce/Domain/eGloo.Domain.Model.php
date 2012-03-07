@@ -213,7 +213,8 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return isset($this->id);
+		//return isset($this->id);
+		return $this->initialized();
 	}
 
 	/**
@@ -545,18 +546,26 @@ abstract class Model extends Delegator
 		}
 	}
 
+	/*
 	public static function find($__mixed) {
 		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
-		
+		 
 			
 		} else {
 			
 			// flatten arguments - this will always return an array
-			$arguments	= \eGloo\Utilities\Collection::flatten($__mixed);
+			$arguments = \eGloo\Utilities\Collection::flatten($__mixed);
+			$models    = array
+			// iterate through arguments, 
+			foreach($arguments as $key) {
+				
+			}
 				
 		}
 		
 	}
+	 * 
+	 */
 	
 	public function save() {
 		

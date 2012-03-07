@@ -144,8 +144,16 @@ final class eGlooLogger {
 		/*if($type == self::LOG_XML){
 			self::$logFilePath = 'error.xml';
 		}*/
-
 	 }
+
+	 /**
+	 * Get the unique log ID for this request
+	 * 
+	 * @return string	the unique ID string for this request
+	 */
+	public static function getRequestID() {
+		return self::$requestID;
+	}
 
 	/**
 	 * If the notice level of supplied message is set for the logger, prints time, notice level,
