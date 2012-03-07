@@ -15,7 +15,6 @@ abstract class ObjectSafe {
 		//$this->aliasProperties();
 		$this->__methods();
 		$this->__properties();
-		//$this->__defers();
 	}
 	
 	/**
@@ -658,6 +657,7 @@ abstract class ObjectSafe {
 				"Call to undefined class method \"$name\" on receiver " . get_called_class()
 		);		
 	}
+
 
 	
 	

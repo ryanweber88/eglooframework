@@ -705,6 +705,12 @@ abstract class Model extends Delegator
 		return $result;
 	}
 	
+	/**
+	 * Alias to shape, which sucks as a method name
+	 */
+	protected static function process($result) {
+		return static::shape($result);
+	}
 	
 	
 	
