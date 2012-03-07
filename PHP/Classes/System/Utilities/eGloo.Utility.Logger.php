@@ -117,7 +117,6 @@ final class Logger {
 	public static function setLoggingLevel( $level ) {
 		self::$loggingLevel = $level;
 
-
 		self::$logLevelStrings = array( self::EMERGENCY => "EMERGENCY", self::ALERT => "ALERT",
 										self::CRITICAL => "CRITICAL",	self::ERROR => "ERROR",
 										self::WARN => "WARNING",		self::NOTICE => "NOTICE",
@@ -135,7 +134,7 @@ final class Logger {
 	 * NOTE: DO NOT use XML yet.
 	 * 
 	 * @param $type		the type to set, either "log", "html", or "xml"
-	 * @returns null
+	 * @return null
 	 */
 	 public static function setLoggingType($type){
 		self::$loggingType = $type;
@@ -157,6 +156,15 @@ final class Logger {
 		}*/
 
 	 }
+
+	 /**
+	 * Get the unique log ID for this request
+	 * 
+	 * @return string	the unique ID string for this request
+	 */
+	public static function getRequestID() {
+		return self::$requestID;
+	}
 
 	/**
 	 * If the notice level of supplied message is set for the logger, prints time, notice level,

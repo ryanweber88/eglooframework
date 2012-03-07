@@ -661,13 +661,12 @@ abstract class Model extends Delegator
 	 * method, so it is subject to change
 	 * @return Model | Model\Set
 	 */
-	protected function shape($result) {
-		
+	protected static function shape($result) {
 		if (is_array($result) && count($result)) {	
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = new static($result);					
+				$result = new static($result);
 			}
-					
+
 			// otherwise, we manually build set with model instances
 			else {
 				
@@ -677,15 +676,12 @@ abstract class Model extends Delegator
 				
 				// replace result with temporary
 				$result = new Model\Set($temporary);
-			}				
+			}
 		}
-		
+
 		return $result;
 	}
-	
-	
-	
-	
+
 	protected static function __methodsStatic() {
 		$class = static::className();
 		
@@ -859,7 +855,7 @@ abstract class Model extends Delegator
 			// properties, where it makes sense 
 			if (count($reflection->getParameters()) == 0) {
 				$this->$name = null;
-				
+
 				$this->$name = call_user_func(
 						$this->_methods[$name]
 				);

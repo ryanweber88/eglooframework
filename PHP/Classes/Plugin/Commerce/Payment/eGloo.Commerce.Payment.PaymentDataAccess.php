@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Payment;
-use eGloo\DataProcessing\Connection;
+
+use \eGloo\DataProcessing\Connection;
+use \eGloo\Domain;
 
 /**
  * PaymentDataAccess Class File
@@ -36,25 +38,6 @@ use eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class PaymentDataAccess extends Connection\PostgreSQLDBConnection{
+class PaymentDataAccess extends Domain\Data {
 
-	protected static $instance = null;
-
-	/**
-	 * Pass Connection resource to parent constructor
-	 * if needed
-	 * @return void
-	 */
-	protected function __construct() { }
-
-	/**
-	 * Generate an instance of this class
-	 * @return object of this class
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self;
-		}
-		return static::$instance;
-	}
 }

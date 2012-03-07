@@ -330,26 +330,26 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * want to go through every single domain class and add method, an exception
 	 * has been added so user can override in calling child individualy
 	 */
-	public static function all($lamba = null) {
-		static::fakeAbstractMethod(__FUNCTION__);
-	}	
-	
-	public static function create($arguments = null) {
-		static::fakeAbstractMethod(__FUNCTION__);
-	}
-	
-	
-	public function update($arguments = null) { 
-		static::fakeAbstractMethod(__FUNCTION__);
-	}
-	
-	public function save($arguments = null)   {
-		static::fakeAbstractMethod(__FUNCTION__);
-	}
-	
-	public function delete($arguments = null) {
-		static::fakeAbstractMethod(__FUNCTION__);
-	}
+	// public static function all($lamba = null) {
+	// 	static::fakeAbstractMethod(__FUNCTION__);
+	// }	
+	// 
+	// public static function create($arguments = null) {
+	// 	static::fakeAbstractMethod(__FUNCTION__);
+	// }
+	// 
+	// 
+	// public function update($arguments = null) { 
+	// 	static::fakeAbstractMethod(__FUNCTION__);
+	// }
+	// 
+	// public function save($arguments = null)   {
+	// 	static::fakeAbstractMethod(__FUNCTION__);
+	// }
+	// 
+	// public function delete($arguments = null) {
+	// 	static::fakeAbstractMethod(__FUNCTION__);
+	// }
 	
 	private static function fakeAbstractMethod($method) {
 		// since this class and its descendants are delegated too, and
