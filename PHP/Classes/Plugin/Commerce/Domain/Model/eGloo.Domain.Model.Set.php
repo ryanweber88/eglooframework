@@ -316,7 +316,22 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function __toArray() {
-		return $this->collection;
+		$wrapped = array();
+		
+		foreach ($this->collection as $model) {
+			$wrapped[] = new Domain\Utility\ArrayAccess(
+				$model
+			);
+		}
+		
+		return $wrapped;
+	}
+	
+	public function toArray($wrapped = false) {
+		return $wrapped
+			? $this->__toArray() 
+			
+			: $this->collection;
 	}
 	
 	protected $model;

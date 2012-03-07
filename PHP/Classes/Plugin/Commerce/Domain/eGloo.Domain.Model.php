@@ -804,6 +804,75 @@ abstract class Model extends Delegator
 		
  
 	}
+
+/**
+	public function __call($name, $arguments) {
+		
+		try { 
+			return parent::__call($name, $arguments);
+		}
+		catch (\Exception $deferred) { }
+		
+		// if unable to find matching meta call within
+		// __call chain, determine if 
+		
+		throw $deferred; 
+	}
+**/
+	
+	public static function __callstatic($name, $arguments) {
+		
+		try {
+			return parent::__callstatic($name, $arguments);
+		}
+		catch(\Exception $deferred) { }
+		
+		// if unable to find matching meta call within
+		// __call chain, determine if a dynamic finder
+		
+		
+		if (preg_match('/^find_by_(.+)$/', $name, $match)) {
+			$class  = get_called_class();
+			$fields = explode('_and_', $match[1]);
+			
+			// now lets define out dynamic finder function
+			static::defineMethod($name, function($__mixed) use ($class, $fields) {
+				
+				// get table name using convetion of ModelName to model_name; this will
+				// not fit in all cases and exception will be thrown from query if this
+				// is the case
+				$table = strtolower( \eGlooString::toUnderscores($class::className()) );
+				
+				// build string representation of query coinditionals
+				$conditions = array();
+				
+				foreach($fields as $field) {
+					$conditions[] = "$field = ?";
+				}
+				
+				$conditions = implode(' and ', $conditions); 
+				
+				
+				
+				return $class::process($class::statement("
+					SELECT
+						*
+						
+					FROM
+						$table
+						
+					WHERE
+						$conditions
+						
+				", func_get_args()));
+				
+				
+			});
+		}
+		
+				
+		throw $deferred;
+	}
 	
 
 	/**
