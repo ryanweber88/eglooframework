@@ -41,7 +41,9 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	        array( '/(h|bl)ouses$/i'           , "$1ouse" ),
 	        array( '/(corpse)s$/i'             , "$1" ),
 	        array( '/(us)es$/i'                , "$1" ),
-	        array( '/s$/i'                     , "" )			
+	        array( '/.+?status/i'          ,  "$0"),	
+	        array( '/s$/i'                     , "" ),
+	        		
 		);
 		
 		$this->plurals = array(
@@ -71,7 +73,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			array( 'child',  'children' ),
 			array( 'man',	'men'	  ),
 			array( 'person', 'people'   ),
-			array( 'status', 'statuses' )
+			//array( 'status', 'status' )
 		);
 		
 		$this->uncountables = array( 
@@ -83,7 +85,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			'rice',
 			'information',
 			'equipment',
-			'status'
+			//'status'
 		);
 	}
 	
@@ -190,13 +192,14 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 		if ( in_array( strtolower( $string ), $inflections->uncountables ) ) {
 			return $string;
 		}
-		
+				
 		// check for irregular singular forms
 		foreach ( $inflections->irregulars as $noun ) {
 			if ( strtolower( $string ) == $noun[0] ) {
 				return $noun[1];
 			}
 		}
+		
 
 		// check for matches using regular expressions
 		foreach ( $inflections->singulars as $pattern ) {
