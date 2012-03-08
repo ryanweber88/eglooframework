@@ -264,7 +264,11 @@ abstract class ObjectSafe {
 				
 			if (\method_exists($class, $from)) {
 					
-				if (!($nativeMethod = \method_exists($class, $alias)) || $class::respondTo($from)) {
+				if (!($nativeMethod = \method_exists($class, $alias))) {
+					
+					// @TODO temporary measure - recursive aliases are failing miserably 
+					// at the moment
+					$nativeMethod = true;
 					
 					
 					// use lambda/block to place method alias method definition into
@@ -288,6 +292,7 @@ abstract class ObjectSafe {
 						// @TODO we need to add closure() method
 						} else {
 							
+							throw new \Exception ('not implemented');
 							return call_user_func_array(
 								$class::closure($from), $param_arr
 							);
@@ -638,6 +643,9 @@ abstract class ObjectSafe {
 		
 		do {
 			if (isset(static::$_methodsStatic[$current][$name])) {
+				
+				//echo static::$_methodsStatic[$current]['find_by_slug']; exit('here');
+				
 				
 				
 				return call_user_func_array(

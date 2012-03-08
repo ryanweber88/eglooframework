@@ -39,7 +39,8 @@ use \eGloo\Domain;
  */
 class Program extends Domain\Model {
 
-	const		PROGRAM_STATUS_INACTIVE		= 0,
+
+	const	PROGRAM_STATUS_INACTIVE		= 0,
 				PROGRAM_STATUS_ACTIVE		= 1,
 				PROGRAM_STATUS_ON_HOLD		= 2,
 				PROGRAM_STATUS_DELETED		= 3,
@@ -91,27 +92,52 @@ class Program extends Domain\Model {
 	 * @param type $value 
 	 */	
 	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 
 	/**
-	 * Getter 
+	 * Getter for the Product Object
 	 * @param type $key
 	 * 
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
-		if (property_exists($this, $key)) {
-			if (method_exists($this, 'load_'. $key)) {
-				return call_user_func(array($this, 'load_' . $key));
+
+		if ( !property_exists($this, $key) ) {
+			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
+	
+			if ( method_exists($this, 'load'. $method) ) {
+				if ( is_callable( array($this, 'load'. $method )) ) {
+					return call_user_func(array($this, 'load' . $method));
+				}
+			} else {
+				throw new \Exception('Undefined Method '. $method . ' invoqued');
 			}
-		} elseif ( isset($this->properties[$key] )) {
-			return $this->properties[$key];
+				
 		} else {
-			return call_user_func(array($this, 'load_' . $key));
+			return false;
+
 		}
-		return false;
+	}
+
+	//public static function create() { }
+	
+	public static function loadByID($id) {
+	}
+
+
+	public function updateProgram() {
+		
+	}
+
+
+	public static function createProgram() {
+		
+	}
+	
+	public static function deleteProgram($program_id) {
+		
 	}
 
 }
