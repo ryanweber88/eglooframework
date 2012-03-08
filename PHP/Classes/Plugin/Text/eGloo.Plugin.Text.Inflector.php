@@ -31,7 +31,12 @@ use \eGloo\Configuration as Configuration;
  * @version 1.0
  */
 
-include Configuration::getFrameworkRootPath() . '/Library/CakePHP/lib/Cake/Utility/Inflector.php';
+if ( class_exists('\eGlooConfiguration', false) ) {
+	include \eGlooConfiguration::getFrameworkRootPath() . '/Library/CakePHP/lib/Cake/Utility/Inflector.php';
+} else {
+	include Configuration::getFrameworkRootPath() . '/Library/CakePHP/lib/Cake/Utility/Inflector.php';
+}
+
 
 /**
  * eGloo\Plugin\Text\Inflector
@@ -55,6 +60,28 @@ class Inflector {
 	public static function pluralize( $word ) {
 		// For now
 		return \Inflector::pluralize( $word );
+	}
+
+	/**
+	 * Return $word in singular form
+	 *
+	 * @param string $word Word in plural
+	 * @return string Word in singular
+	 */
+	public static function singularize( $word ) {
+		// For now
+		return \Inflector::singularize( $word );
+	}
+
+	/**
+	 * Return $word in singular form
+	 *
+	 * @param string $word Word in plural
+	 * @return string Word in singular
+	 */
+	public static function isSingular( $word ) {
+		// For now
+		return \eGloo\Utilities\InflectionsSafe::isSingular( $word );
 	}
 
 }
