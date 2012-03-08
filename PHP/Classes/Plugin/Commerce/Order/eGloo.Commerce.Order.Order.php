@@ -100,8 +100,8 @@ class Order {
 	 * @param type $value 
 	 */	
 	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 	
 	/**

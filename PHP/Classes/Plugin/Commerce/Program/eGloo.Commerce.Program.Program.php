@@ -37,7 +37,7 @@ namespace eGloo\Commerce\Program;
  */
 class Program {
 	
-	public		$program_id;
+	/*public		$program_id;
 	
 	public		$title;
 	
@@ -61,7 +61,7 @@ class Program {
 	
 	protected	$program_products = array();
 
-	protected	$properties;
+	protected	$properties;*/
 	
 	const		PROGRAM_STATUS_INACTIVE		= 0,
 				PROGRAM_STATUS_ACTIVE		= 1,
@@ -82,33 +82,39 @@ class Program {
 	 * @param type $value 
 	 */	
 	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 	
 	/**
-	 * Getter 
+	 * Getter for the Product Object
 	 * @param type $key
 	 * 
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
-		if (property_exists($this, $key)) {
-			if (method_exists($this, 'load_'. $key)) {
-				return call_user_func(array($this, 'load_' . $key));
-			}
-		} elseif ( isset($this->properties[$key] )) {
-			return $this->properties[$key];
-		} else {
-			return call_user_func(array($this, 'load_' . $key));
-		}
-		return false;
-	}
+		die_r($key);
+
+		if ( !property_exists($this, $key) ) {
+			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
 	
+			if ( method_exists($this, 'load'. $method) ) {
+				if ( is_callable( array($this, 'load'. $method )) ) {
+					$model = call_user_func(array($this, 'load' . $method));
+					die_r($model->$key);
+				}
+			} else {
+				throw new \Exception('Undefined Method '. $method . ' invoqued');
+			}
+				
+		} else {
+			return false;
+
+		}
+	}
 	//public static function create() { }
 	
 	public static function loadByID($id) {
-
 	}
 
 
