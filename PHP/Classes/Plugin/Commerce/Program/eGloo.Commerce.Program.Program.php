@@ -99,8 +99,7 @@ class Program {
 	
 			if ( method_exists($this, 'load'. $method) ) {
 				if ( is_callable( array($this, 'load'. $method )) ) {
-					$model = call_user_func(array($this, 'load' . $method));
-					die_r($model->$key);
+					return call_user_func(array($this, 'load' . $method));
 				}
 			} else {
 				throw new \Exception('Undefined Method '. $method . ' invoqued');
