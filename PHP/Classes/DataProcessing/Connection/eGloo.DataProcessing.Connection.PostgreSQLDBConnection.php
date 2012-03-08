@@ -186,7 +186,7 @@ class PostgreSQLDBConnection extends DBConnection {
 
 			if ( !preg_match('/returning\s/is', $sql) && !preg_match('/\;$/', $sql) ) { 
 				preg_match(						
-					'/insert\s+?into\s+?(\S+)/is', $sql, $match
+					'/insert\s+?into\s+?([^\s\(]+)/is', $sql, $match
 				);
 
 				$sql .= " RETURNING {$match[1]}.* ";
@@ -203,9 +203,15 @@ class PostgreSQLDBConnection extends DBConnection {
 				preg_match('/insert\s+?into\s+?(\S+)/i', $sql, $match);
 				$primaryKey = "{$match[1]}_id";
 				
-				if ( isset($insert_row[$primaryKey]) ) {
-					return $insert_row[$primaryKey];
-				}
+				return isset($insert_row[$primaryKey])
+					? $insert_row[$primaryKey]
+					
+					// otherwise we take a stab in the dark and shift off first element
+					// but weary of this though - need to think if this will introduce
+					// more problems than solves
+					: array_shift($insert_row);
+			
+				
 			}
 		} else {
 			throw new DatabaseErrorException('Unable to execute insert Statement', $sql);

@@ -149,9 +149,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			}
 				
 			else if ($match == 'insert' ) {
-				preg_match('/\((.+?)\)/', $statement, $match);
+				preg_match('/\((.+?)\)/s', $statement, $match);
 				$fields = explode(',', $match[1]);
-				
 			}
 
 			if (is_array($fields)) { 
@@ -174,6 +173,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						//throw $passthrough;
 					}
 				}
+				
 			}
 			
 			else {

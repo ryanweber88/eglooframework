@@ -351,9 +351,9 @@ abstract class Model extends Delegator
 		
 		// explicitly check fields
 		foreach($this->validates as $attribute) {	
-			$hasAttribute = "has_$attribute";
+			//$hasAttribute = "has_$attribute";
 			
-			if (!$this->$hasAttribute) {
+			if (!isset($this->$attribute)) {
 				return false;
 			}
 		}
@@ -371,9 +371,8 @@ abstract class Model extends Delegator
 		$attributes = array();
 		
 		foreach($this->validates as $attribute) {
-			$hasAttribute = "has_$attribute";
 			
-			if (!$this->$hasAttribute) {
+			if (!isset($this->$attribute)) {
 				$attributes[] = $attribute;
 			}
 		}
@@ -509,9 +508,7 @@ abstract class Model extends Delegator
 	 * @param  variable-length[] $__mixed
 	 */
 	public static function create($__mixed = null) {
-		
-		//echo "in create <br />";
-		
+				
 		// because create can be sent to both instance and class
 		// receivers, we have to explicitly check to determine 
 		// who are reciever is; in the former case, receiver is
@@ -533,16 +530,29 @@ abstract class Model extends Delegator
 		// that a record is created as opposed to an update - the onus lies
 		// upon the developer that they do not do an explicit call on create
 				
-		else {
+		else if ( \eGloo\Utilities\Collection::isHash($arguments = $arguments[0]) ) {
 			
 			$model     = new static($arguments);
 			$model->id = null;
+						
 			
 			// saves model to underlying data layer
 			$model->save();
 			
 			// return model to caller
 			return $model;
+		}
+		
+		// otherwise we have passed an invalid argument to create and
+		// we throw an exception to that fact
+		else {
+			$class = get_called_class();
+			
+			throw new \Exception(
+				"Failed to create instance of '$model' because argument(s) are invalid " . print_r(
+					$__mixed
+				)
+			);
 		}
 	}
 
@@ -578,7 +588,7 @@ abstract class Model extends Delegator
 			
 			// based on whether model primary key is set, call the correct
 			// action method
-			return $this->exists() 
+			return $this->id
 			
 				// run update against instance if 
 				? $this->update()
