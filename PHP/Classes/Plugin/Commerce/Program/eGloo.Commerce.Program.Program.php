@@ -93,7 +93,6 @@ class Program {
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
-		die_r($key);
 
 		if ( !property_exists($this, $key) ) {
 			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
