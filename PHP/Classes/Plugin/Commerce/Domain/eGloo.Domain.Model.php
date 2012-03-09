@@ -42,6 +42,7 @@ abstract class Model extends Delegator
 
 	/** @Polymorphic */
 	public static function __static() {
+		
 	
 		$class          = get_called_class();
 		$formattedClass = strtolower(\eGlooString::toUnderscores(static::classname()));
@@ -64,11 +65,12 @@ abstract class Model extends Delegator
 		$methods    = $reflection->getMethods();
 		$found      = array();		
 		
+		
 		// iterate through patterns and check against our static methods
 		// drawing up aliases where patterns match
 		foreach($methods as $method) {
 
-			if ($method->getDeclaringClass()->getName() == $class) {
+			//if ($method->getDeclaringClass()->getName() == $class) {
 				 
 				foreach($lookFor as $pattern => $alias) {				
 					if (preg_match($pattern, $method->getName(), $match)) {
@@ -81,9 +83,6 @@ abstract class Model extends Delegator
 						));
 						
 						$alias = str_replace("{$formattedClass}_", null, $alias);
-						
-						//echo "found match {$match[0]} on $class with $alias<br />";
-									
 						
 						try {
 							
@@ -102,7 +101,7 @@ abstract class Model extends Delegator
 						// that
 						catch(\Exception $ignore) {
 							//exit('bizarre');
-							//echo $ignore->getMessage() . "<br />"; 
+							echo $ignore->getMessage() . "<br />"; 
 						}
 						
 						break ;
@@ -110,7 +109,7 @@ abstract class Model extends Delegator
 					}
 				}
 
-			}
+			//}
 		}
 
 
@@ -446,12 +445,10 @@ abstract class Model extends Delegator
 	 * object, even one that caters to array notation, so thus
 	 * 
 	 */
-	public function toArray($native = false) {
-		if ($native) {
-			return $this->properties;
-		}
-		
-		return $this->__toArray();
+	public function toArray($wrapped = false) {
+		return $wrapped 
+			? $this->__toArray() 	
+			: $this->properties;	
 	}
 
 	
@@ -462,7 +459,7 @@ abstract class Model extends Delegator
 		
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = strtolower(preg_replace(
-			'/([a-z])([A-Z])/', '$1_$2', static::className()
+			'/([a-z])([A-Z])/', '$1_$2', static::classname()
 		));
 				
 		// iterate across properties and determine if they

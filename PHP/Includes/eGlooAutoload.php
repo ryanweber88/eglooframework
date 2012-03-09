@@ -140,6 +140,7 @@ function eglooAutoload( $class_name ) {
 				// hierarchy
 				try {
 					__constructStatic($class_name);
+					
 				} catch ( \Exception $e ) {
 					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
 					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
@@ -286,7 +287,7 @@ function eglooAutoload( $class_name ) {
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
 				// hierarchy
-				__constructStatic($class_name);
+				//__constructStatic($class_name);
 
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
@@ -749,6 +750,7 @@ function almost_empty($in, $trim = false) {
  *  to provide static constructor functionality on class load
  */
 function __constructStatic($name) {
+		
 	// make sure object is instanceof of global Object 
 	// - if the case, then we are assured that we have
 	// a __statuc method, whether a stubb or
@@ -772,10 +774,9 @@ function __constructStatic($name) {
 
 		// check if __static is in declaring class, as opposed to simply available
 		// through inheritence
-				$reflection->getDeclaringClass()->getName() == $name) { 
-
+				$reflection->getDeclaringClass()->getName() == $name) {
+					 
 			$name::__static();
 		}
 	}
 }
-

@@ -262,14 +262,13 @@ abstract class ObjectSafe {
 				
 			//echo "alias $alias to $from for class $class <br/>";exit;
 				
-			if (\method_exists($class, $from)) {
+			if (($nativeMethod = \method_exists($class, $from))) {
 					
-				if (!($nativeMethod = \method_exists($class, $alias))) {
+				if (!\method_exists($class, $alias)) {
 					
 					// @TODO temporary measure - recursive aliases are failing miserably 
 					// at the moment
 					$nativeMethod = true;
-					
 					
 					// use lambda/block to place method alias method definition into
 					// this instance "singleton" or eigenclass
@@ -283,6 +282,7 @@ abstract class ObjectSafe {
 						// call original method - we need to check if running
 						// a native method or dynamic
 						if ( $nativeMethod ) {
+							
 							return call_user_func_array(array(
 									$class, $from
 							),  $__mixed);
@@ -645,9 +645,6 @@ abstract class ObjectSafe {
 			if (isset(static::$_methodsStatic[$current][$name])) {
 				
 				//echo static::$_methodsStatic[$current]['find_by_slug']; exit('here');
-				
-				
-				
 				return call_user_func_array(
 					static::$_methodsStatic[$current][$name], $arguments	
 				);

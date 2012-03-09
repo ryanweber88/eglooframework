@@ -46,55 +46,8 @@ class Program extends Domain\Model {
 				PROGRAM_STATUS_DELETED		= 3,
 				PROGRAM_STATUS_NEED_ACTION	= 4;
 
-	/**
-	 * Retrieve model based on primary id - our argument list is fluid and
-	 * can accept multiple primary
-	
-	public static function find($__mixed) {
-		$models    = array();
-		$arguments = \eGloo\Utilities\Collection::flatten(
-				func_get_args()
-		);
-		
-		foreach($arguments as $key) {
-			$singular = static::statement('
-					SELECT
-						p.*
-					FROM
-						program p
-					WHERE
-					p.program_id = ?
-						
-					', $key);
 
-			// mock singular data because inserting in the databse is goin to suck
-			$singular = array_combine(preg_split(
-				'/,\s?/', 'user_id, title, program_status_id, shipping_address_id, payment_option_id, start_timestamp, recurring_interval,next_order_process_date,next_order_shipping_date,pre_authorization_number'		
-			), array_merge(array(66691), range(1,9)));
-			
-			
-			if ($singular) {
-				$models[] = new static($singular);
-			}
-		}
-	
-		return count($models)
-			? \eGloo\Utilities\Collection::trim($models)
-			: false;
-	
-	}
-	 */
 
-	/**
-	 * Populate data int the Product object
-	 * 
-	 * @param type $key
-	 * @param type $value 
-	 */	
-	public function __set($key, $value) {
-		$this->$key = $value;
-		return true;
-	}
 
 	/**
 	 * Getter for the Product Object
@@ -104,9 +57,8 @@ class Program extends Domain\Model {
 	 */
 	public function __get($key) {
 
-		if ( !property_exists($this, $key) ) {
-			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
-	
+		if (($method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key))) {
+
 			if ( method_exists($this, 'load'. $method) ) {
 				if ( is_callable( array($this, 'load'. $method )) ) {
 					return call_user_func(array($this, 'load' . $method));
@@ -115,10 +67,12 @@ class Program extends Domain\Model {
 				throw new \Exception('Undefined Method '. $method . ' invoqued');
 			}
 				
-		} else {
-			return false;
-
 		}
+		
+		// pass our meta lookup to parent
+		return parent::__get($key);
+		
+		
 	}
 
 	//public static function create() { }
