@@ -78,13 +78,16 @@ abstract class Model extends Delegator
 						// perform regexp replace on pattern, if applicable and
 						// replace class name ( again, if applicable ) - these are
 						// placed on two lines for readability 
-						$alias = strtolower(preg_replace(
+						$alias = strtolower(\eGlooString::toUnderscores(preg_replace(
 							$pattern, $alias, $method->getName()
-						));
+						)));
 						
 						$alias = str_replace("{$formattedClass}_", null, $alias);
 						
 						try {
+							
+							//echo "$alias to {$method->getName()} on $class<br />";
+							//echo "found alias $alias for $from on class $class<br />"; exit;
 							
 							// get fully qualified class name and call alias method - 
 							// 'static' should work here, but it doesn't??
@@ -101,7 +104,7 @@ abstract class Model extends Delegator
 						// that
 						catch(\Exception $ignore) {
 							//exit('bizarre');
-							echo $ignore->getMessage() . "<br />"; 
+							//echo $ignore->getMessage() . "<br />"; 
 						}
 						
 						break ;
@@ -119,7 +122,7 @@ abstract class Model extends Delegator
 		// @TODO these need to be moved to __methodStatic
 		
 		if ( !static::respondTo('find') ) {
-						
+										
 			static::defineMethod('find', function($__mixed, $class) {
 					
 				// expand on parameter matching, but for, just match on primary
@@ -226,6 +229,29 @@ abstract class Model extends Delegator
 		$this->properties[$alias] = &$this->properties[$from];
 	}
 
+	/**
+	 * Convenience method to specify 1 - 1 relationships; note that you
+	 * must still follow plurality conventions
+	 */
+	protected function hasOne($name, $lambda) {
+		if (InflectionsSafe::isSingular($name)) {
+			return $this->defineRelationship($name, $lambda, true);
+		}
+		
+		throw new \Exception(
+			"Failed to create relationship '$name' because it does not follow singularity convention"
+		);
+	}
+	
+	protected function hasMany($name, $lambda) {
+		if (InflectionsSafe::isPlural($name)) {
+			return $this->defineRelationship($name, $lambda, false);
+		}
+		
+		throw new \Exception(
+			"Failed to create relationship '$name' because it does not follow plurality convention"
+		);
+	}
 	
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
@@ -233,7 +259,7 @@ abstract class Model extends Delegator
 	 * @type experimental the moment - will be used to indicate relationship
 	 * type if plurality rules are ineffective
 	 */
-	protected function defineRelationship($name, $lambda, $type = null) {
+	protected function defineRelationship($name, $lambda, $singular = null) {
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
@@ -248,9 +274,16 @@ abstract class Model extends Delegator
 		// call on \Model will return \Common\Domain\Model\*
 		$ns               = '\\Common\\Domain\\Model';
 		$self             = $this;
+		
+		// determine relationship type based on either $singular parameter, 
+		// which takes prescedence, or looks at plurality using inflections
+		$singular = $singular === true
+			? $singular
+			: InflectionsSafe::isSingular($relationshipName);
+			
 				
 		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
-			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda) {
+			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 				
 				
 				// check if the model exists in the database to ensure we are
@@ -273,7 +306,7 @@ abstract class Model extends Delegator
 							// @TODO this is a shortcut to we establish a better rule
 							// in terms of convetion around singular vs set
 							
-							if (!InflectionsSafe::isSingular($relationshipName)) {
+							if (!$singular) {
 								$result = new Model\Set(array($result));
 							}	
 							
@@ -311,7 +344,7 @@ abstract class Model extends Delegator
 				// we return a shallow copy of our relationship(s), either as an instance
 				// of model or emptyset, based on plurality rules
 
-				return \eGloo\Utilities\InflectionsSafe::isSingular($relationshipName)
+				return $singular
 					
 					// return an empty instance of model
 					? new $model

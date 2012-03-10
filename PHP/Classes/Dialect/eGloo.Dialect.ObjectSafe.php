@@ -644,10 +644,16 @@ abstract class ObjectSafe {
 		do {
 			if (isset(static::$_methodsStatic[$current][$name])) {
 				
-				//echo static::$_methodsStatic[$current]['find_by_slug']; exit('here');
-				return call_user_func_array(
-					static::$_methodsStatic[$current][$name], $arguments	
-				);
+				try { 
+					return call_user_func_array(
+						static::$_methodsStatic[$current][$name], $arguments	
+					);
+				}
+				
+				// otherwise pass exception to caller to handle as appropriate
+				catch(\Exception $passthrough) {
+					throw $passthrough;
+				}
 			}
 			
 		} while (($current = get_parent_class($current)));

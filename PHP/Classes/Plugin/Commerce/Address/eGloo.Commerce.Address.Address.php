@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Commerce\Address;
+
 use \eGloo\Commerce,
-	\eGloo\Utility;
+    \eGloo\Utility,
+    \egloo\Domain;
 
 /**
  * Address Class File
@@ -42,104 +44,14 @@ use \eGloo\Commerce,
  * @subpackage	Subpackage
  * @version		Release: 1.0
  */
-class Address {
+class Address extends Domain\Model {
 
-	/*** @var Integer address ID  */
-	public		$user_address_id;
+
 	
-	/*** @var Integer User ID */
-	public		$user_id;
+	const	TYPE_RESIDENTIAL	= 1,
+        TYPE_COMMERCIAL		= 0;
 	
-	/*** @var String Name 	*/
-	public		$first_name;
-	
-	/*** @var String Name  */
-	public		$last_name;
-	
-	/*** @var String Address 1	 */
-	public		$address_line_1;
-	
-	/*** @var String Address 2	 */
-	public		$address_line_2;
-	
-	/*** @var String City 	*/
-	public		$city;
-	
-	/*** @var String State Code 2 */
-	public		$state;
-	
-	/*** @var Integer Zip Code 	 */
-	public		$zip_code5;
-	
-	/*** @var Integer Zip Code 	 */
-	public		$zip_code4;
-	
-	/*** @var boolean residential 	 */
-	public		$residential = true;
-	
-	/*** @var boolean shippable 	 */
-	public		$shippable = true;
-	
-	/*** @var String County  */
-	public		$county;
-	
-	/*** @var String Shipping Region  */
-	public		$shipping_region;
-	
-	/*** @var String Country code 2	 */
-	public		$country;
-	
-	/*** @var string address label 	 */
-	public		$label;
-	
-	public		$validated = false;
-	
-	/** @var array/Mix properties of Brands */
-	public		$properties;
-	
-	const		TYPE_RESIDENTIAL	= 1,
-				TYPE_COMMERCIAL		= 0;
-	
-	public function __construct($args) {
-		foreach ( $args as $key => $value ){
-			$this->{$key} = $value;
-		}
-	}
-	
-	/**
-	 * Populate data int the User object
-	 * 
-	 * @param type $key
-	 * @param type $value 
-	 */
-	public function __set($key, $value) {
-		if (property_exists($key, $this)) {
-			$this->$key = $value;
-		}
-		$this->properties[$key] = $value;
-		return $this;
-	}
-	
-	/**
-	 * Getter for the User Object
-	 * @param type $key
-	 * 
-	 * @return mix type object retrieved from user
-	 */
-	public function __get( $key ) {
-		if (isset($this->properties[$key])) {
-			return $this->properties[$key];
-		}
-		return false;
-	}
-	
-	public function __toString() {
-		return serialize($this);
-	}
-	
-	public static function loadByID($address_id) {
-		
-	}
+
 	
 	public static function saveAddress($label, $fname, $lname, $user_id, $address, $address2, 
 			$city, $state, $postal, $phone, $default, $residential = Address::TYPE_RESIDENTIAL, 
