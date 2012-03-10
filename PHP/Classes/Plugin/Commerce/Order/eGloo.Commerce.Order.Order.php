@@ -37,40 +37,6 @@ use eGloo\Plugin\Commerce;
  * @subpackage Commerce
  */
 class Order {
-
-	/** @var integer Order id */
-	public		$order_id;
-
-	/** @var string Order email address */
-	public		$user_id;
-
-	/** @var integer 1/0 for active Order */
-	public		$order_status_id;
-
-	/** @var integer 1/0 for deleted Order */
-	public		$program_id;
-
-	/** @var string created date */
-	public		$process_date;
-	
-	/** @var string created date */
-	public		$estimated_ship_date;
-	
-	/** @var integer Payment */
-	public		$payment_option_id;
-	
-	public		$shipping_address_id;
-
-	/** @var string deleted date */
-	public		$deleted_date;
-
-	/** @var string updated date */
-	public		$updated_date;
-	
-	protected	$order_products = array();
-
-
-	protected	$properties;
 	
 	const	_STATUS_NEED_ACTION		= 1,
 			_STATUS_ASSEMBLY		= 2,
@@ -90,8 +56,6 @@ class Order {
 			$this->{$key} = $value;
 		}
 	}
-	
-	
 
 	/**
 	 * Populate data int the Product object
