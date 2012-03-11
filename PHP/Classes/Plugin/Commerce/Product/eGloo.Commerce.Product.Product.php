@@ -118,17 +118,5 @@ class Product extends Domain\Model {
 		return new static($rows);
 	}
 	
-	public static function loadProductBySlug($slug) {
-		if ($slug == '') {
-			throw new \InvalidArgumentException();
-		}
-		$row = ProductDataAccess::fetch()->loadProductBySlug($slug);
 
-		// Return values seem to variable, so we simply ask if it evals
-		// to not null/false value
-		return $row 
-			? new Product($row)
-			: false;
-			
-	}
 }
