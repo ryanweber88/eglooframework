@@ -29,17 +29,19 @@ abstract class Composite extends Model {
 
 				// lets keep track of the class this composite
 				// type is composed of
-				$this->composedOf = $mixed;
+				$this->composedOf = get_class($mixed);
 				
 				// finally convert mixed to array representation so that
 				// it can be passed to parent constructor
-				$mixed = $mixed->toArray(true);
+				$mixed = $mixed->toArray();
+				
+				
 			} else {
+				$class    =  get_called_class();
+				$composed =  get_class($mixed);
+				
 				throw new \Exception(
-					'Failed to initialize composite model ' . 
-					get_class($this) . 
-					' because model ' . 
-					get_class($mixed) . ' has not been initalized'
+					"Failed to initialize composite model '$class' because argument model '$composed' is not initialized"
 				);
 	
 			}

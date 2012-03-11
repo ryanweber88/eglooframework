@@ -40,7 +40,7 @@ abstract class Model extends Delegator
 		$this->__attributes();
 	}
 
-	/** @Polymorphic */
+	/** @Polymorphic */ 
 	public static function __static() {
 		
 	
@@ -313,8 +313,6 @@ abstract class Model extends Delegator
 					// contract of the defineRelationship method
 					if (is_array($result)) {
 						
-						
-						
 						if (\eGloo\Utilities\Collection::isHash($result)) {
 							$result = new $model($result);
 							
@@ -346,6 +344,7 @@ abstract class Model extends Delegator
 							// replace result with temporary
 							$result = new Model\Set($temporary);
 						}
+						
 						
 						return $result;
 					}
@@ -502,7 +501,7 @@ abstract class Model extends Delegator
 			$values = array();
 			
 			foreach(array_keys($this->properties) as $field) {
-				$values[] = $this->$field;
+				$values[$field] = $this->$field;
 			}
 			
 			$returns = $values;

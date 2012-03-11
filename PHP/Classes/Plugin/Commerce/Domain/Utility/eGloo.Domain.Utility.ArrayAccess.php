@@ -62,6 +62,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			//echo $ignore->getMessage();exit;
 			$result = null;
 		}
+	
 		
 		if ( !is_null($result) ) {
 						
@@ -71,9 +72,9 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			// we directly return the set, because we want to work directly
 			// on it in most cases
 			if ( is_object($result) &&  
-					 $result->delegated instanceof Domain\Model\Set &&
-					 1) {
+					 $result->delegated instanceof Domain\Model\Set) {
 					 //!$result->delegated->isEmpty()) {
+
 
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
