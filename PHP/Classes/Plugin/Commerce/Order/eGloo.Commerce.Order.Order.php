@@ -43,21 +43,20 @@ class Order extends Domain\Model {
 
 
 	
-	const	_STATUS_NEED_ACTION		= 1,
-        _STATUS_ASSEMBLY		= 2,
-        _STATUS_BACKORDER		= 3,
-        _STATUS_CANCELED		= 4,
-        _STATUS_CC_EXPIRED		= 5,
-        _STATUS_CC_FAILED		= 6,
-        _STATUS_PROCESSING		= 7,
-        _STATUS_SCHEDULED		= 8,
-        _STATUS_SHIPPED			= 9,
+	const	_STATUS_NEED_ACTION		  = 1,
+        _STATUS_ASSEMBLY		    = 2,
+        _STATUS_BACKORDER		    = 3,
+        _STATUS_CANCELED		    = 4,
+        _STATUS_CC_EXPIRED		  = 5,
+        _STATUS_CC_FAILED		    = 6,
+        _STATUS_PROCESSING		  = 7,
+        _STATUS_SCHEDULED		    = 8,
+        _STATUS_SHIPPED			    = 9,
         _STATUS_WAREHOUSE_ISSUE = 10,
         _STATUS_WAREHOUSE_QUEUE = 11,
-        _STATUS_SUSPECT			= 12;
+        _STATUS_SUSPECT			    = 12;
 
 
-	
 
 	/**
 	 * Populate data int the Product object
@@ -77,7 +76,7 @@ class Order extends Domain\Model {
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
-		
+		/*
 		if (property_exists($this, $key)) {
 			$method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key);
 	
@@ -91,6 +90,10 @@ class Order extends Domain\Model {
 			return $this->properties[$key];
 		}
 		return false;
+		 * 
+		 */
+		
+		return parent::__get($key);
 	}
 	
 	
