@@ -182,11 +182,12 @@ abstract class Model extends Delegator
 				// does not pan out; so callers will be explicitly aware
 				try {
 					
-					return new $class($class::statement("
+					$set = $class::statement("
 						SELECT * FROM $table
 							
-					"));
+					");
 					
+					return $class::sendStatic('process', $set);
 				}
 				
 				catch(\Exception $passthrough) {
