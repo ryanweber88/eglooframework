@@ -46,6 +46,7 @@ abstract class Model extends Delegator
 	
 		$class          = get_called_class();
 		$formattedClass = strtolower(\eGlooString::toUnderscores(static::classname()));
+		$classname      = static::classname();
 			
 		// assign static delegation 
 		Delegator::delegate($class, get_class(static::data()));
@@ -53,11 +54,11 @@ abstract class Model extends Delegator
 		// provide reg exp list to check methods against
 		$lookFor = array(
 			'/^loadByI(D|d)$/'                    => 'find',
-			"/^load{$formattedClass}ByI(D|d)$/"   => 'find',
+			"/^load{$classname}ByI(D|d)$/"        => 'find',
 			'/^load([A-Z][a-z]+?)By([a-zA-Z]+)$/' => 'find_by_$1_$2',
 			'/^get([A-Z][a-z]+?)By([a-zA-Z]+)$/'  => 'find_by_$1_$2',
-			"/^load{$formattedClass}List$/"       => 'all',
-			"/^create{$formattedClass}$/"         => 'create'
+			"/^load{$classname}List$/"            => 'all',
+			"/^create{$classname}$/"              => 'create'
 		);
 
 		// retrieve list of methods from class
@@ -83,18 +84,31 @@ abstract class Model extends Delegator
 						)));
 						
 						$alias = str_replace("{$formattedClass}_", null, $alias);
+						$from  = $method->getName();
 						
 						try {
 							
 							//echo "$alias to {$method->getName()} on $class<br />";
-							//echo "found alias $alias for $from on class $class<br />"; exit;
+							//echo "found alias $alias for $from on class $class<br />"; 
+							static::defineMethod($alias, function($arguments) use ($class, $from) {
+							
+								// call original method and pass to process which will convert
+								// over to proper return type (null, Model, Set)
+								$result = call_user_func_array(
+									array($class, $from), func_get_args() 
+								);	
+																				
+								return $class::sendStatic('process', $result);
+								
+							});
+							
 							
 							// get fully qualified class name and call alias method - 
 							// 'static' should work here, but it doesn't??
-							static::aliasMethod(strtolower(preg_replace(
-								$pattern, $alias, $method->getName()
-							
-							)), $match[0]);
+							//static::aliasMethod(strtolower(preg_replace(
+							//	$pattern, $alias, $method->getName()
+							//
+							//)), $match[0]);
 							
 						}
 			
@@ -104,7 +118,7 @@ abstract class Model extends Delegator
 						// that
 						catch(\Exception $ignore) {
 							//exit('bizarre');
-							//echo $ignore->getMessage() . "<br />"; 
+							echo $ignore->getMessage() . "<br />"; 
 						}
 						
 						break ;
@@ -511,7 +525,9 @@ abstract class Model extends Delegator
 		
 		
 		foreach($properties as $name) {
+
 			if (preg_match("/{$class}_(.+)/", $name, $match)) {
+
 				try { 
 					$this->aliasProperty(
 						strtolower($match[1]), $name	
@@ -526,9 +542,6 @@ abstract class Model extends Delegator
 			
 	}
 	
-	public static function all() {
-		
-	}
 	
 	
 	/**
@@ -733,8 +746,19 @@ abstract class Model extends Delegator
 			// otherwise, we manually build set with model instances
 			else {
 				
-				foreach($result as $record) {
-					$temporary[] = new static($record);	
+				// check if result is composed of a list of Model
+				// instances; then we set temporary to result list
+				if ($result[0] instanceof Model) {
+					$temporary = $result;
+				}
+				
+				// otherwise, result list is set of
+				// of associative arrays; we wrap each index
+				// in Model instance
+				else { 
+					foreach($result as $record) {
+						$temporary[] = new static($record);	
+					}
 				}
 				
 				// replace result with temporary
@@ -802,12 +826,13 @@ abstract class Model extends Delegator
 		
 		return $interface;
 		
- 
 	}
+
 
 /**
 	public function __call($name, $arguments) {
 		
+
 		try { 
 			return parent::__call($name, $arguments);
 		}
@@ -963,15 +988,31 @@ abstract class Model extends Delegator
 				
 				return $this->$name;
 			}
+		}
+
+		// look for relationship using xxx_id pattern
+		// and see if that relationship has been defined
+		if (preg_match('/^(.+)_id/', $name, $match)) {
+			$relationship = ucfirst($match[1]);
 			
+			if (isset($this->$relationship) && $this->$relationship instanceof Model) {
+				// it is assumed that id field is set on model, whether it be null or not, it
+				// should always alias to a primary key (or null if no primary key)	
+				// @TODO fix relationship attribute alias
+				$this->$name = null;
+				$this->$name = &$this->$relationship->id;
+				
+				return $this->$name;
+			};
 		}
 		
+				
 		// if this is a new instance, and aliases have not been defined (since
 		// we have not initialized; check to see if name is a match to class_name_property)
 		// this has the danger of presenting very hard to track bugs, so we need to think
 		// about legitimacy
 		$class = strtolower(preg_replace(
-			'/([a-z])([A-Z])/', '$1_$2', static::className()
+			'/([a-z])([A-Z])/', '$1_$2', static::classname()
 		));
 		
 		if (property_exists($this, $field = "{$class}_$name")) {

@@ -116,15 +116,6 @@ class Brand extends Domain\Model {
 		return $result;
 	}
 	
-	/**
-	 * An alias to loadBrandList - the purpose is to 1) provide a single
-	 * comprehensive interface and 2) make refactoring easier when delegated
-	 * data layer is changed
-	 */
-	public static function all() {
-		return static::loadBrandList();
-	}
-
 
 	/**
 	 * Load Brand by Brand Id

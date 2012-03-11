@@ -346,8 +346,14 @@ abstract class ObjectSafe {
 	 * presented 
 	 */
 	public function send($method, $__mixed = null) {
-		call_user_func_array(
+		return call_user_func_array(
 			array($this, $method), array_slice(func_get_args(), 1)	
+		);
+	}
+	
+	public static function sendStatic($method, $__mixed = null) {
+		return call_user_func_array(
+			array(get_called_class(), $method), array_slice(func_get_args(), 1)	
 		);
 	}
 	
