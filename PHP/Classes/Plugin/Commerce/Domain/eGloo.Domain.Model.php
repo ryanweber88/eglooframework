@@ -345,10 +345,9 @@ abstract class Model extends Delegator
 							$result = new Model\Set($temporary);
 						}
 						
-						
 						return $result;
 					}
-
+					
 				}
 
 				
