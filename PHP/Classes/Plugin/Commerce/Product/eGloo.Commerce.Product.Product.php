@@ -40,8 +40,6 @@ use \eGloo\Domain;
  */
 class Product extends Domain\Model {
 
-
-	
 	public function loadProductImages() {
 		if (empty ($this->product_images)) {
 			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_id);
@@ -90,15 +88,9 @@ class Product extends Domain\Model {
 		return $this;
 	}
 
-
 	public function getSizes() {
 		return $this->__get('sizes');
 	}
-
-
-	/*protected function getBrandImages = function ( $this->brand_id ) {
-		
-	}*/ 
 
 	/**
 	 * Extract Product property out for clean UI display
@@ -117,6 +109,5 @@ class Product extends Domain\Model {
 		//echo $product_id; exit;
 		return new static($rows);
 	}
-	
 
 }
