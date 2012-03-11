@@ -169,7 +169,7 @@ abstract class Model extends Delegator
 		// explicitly define all, if not aliased and not explicitly defined
 		
 		if ( !static::respondTo('all') ) {
-			static::defineMethod('all', function($__mixed, $class) {
+			static::defineMethod('all', function($class) {
 					
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
