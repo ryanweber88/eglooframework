@@ -66,6 +66,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	public function collect($__mixed) {
 		
 		// filters will only work if natural key has been specified
+		$model = $this->model;
 		
 		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
 			

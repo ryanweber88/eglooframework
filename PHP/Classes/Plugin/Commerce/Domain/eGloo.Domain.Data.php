@@ -127,6 +127,22 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		$method = ($match = strtolower($match[1])) == 'select'
 			? 'getList'
 			: 'execute' . ucfirst($match);
+			
+		if ($method != 'getList') {
+			
+			if ($match == 'update') {
+				preg_match_all('/([^\s\.]+)\s+?\=/is', $statement, $matches, PREG_SET_ORDER);
+
+				foreach($matches as $pair) {
+					$fields[] = $pair[1];
+				}
+			}
+				
+			else if ($match == 'insert' ) {
+				preg_match('/\((.+?)\)/s', $statement, $match);
+				$fields = explode(',', $match[1]);
+			}	
+		}		
 		
 		// lets do some magic - lets determine arguments if first
 		// argument is a model, and we are performing an update/insert
@@ -140,19 +156,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			// from statement itself
 			$arguments = array(); 
 			
-			if ($match == 'update') {
-				preg_match_all('/([^\s\.]+)\s+?\=/is', $statement, $matches, PREG_SET_ORDER);
-
-				foreach($matches as $pair) {
-					$fields[] = $pair[1];
-				}
-			}
-				
-			else if ($match == 'insert' ) {
-				preg_match('/\((.+?)\)/s', $statement, $match);
-				$fields = explode(',', $match[1]);
-			}
-
 			if (is_array($fields)) { 
 				
 				foreach($fields as $field) { 
@@ -161,14 +164,17 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					}
 									
 					catch(\Exception $passthrough) {
+						
+						$arguments[$field = trim($field)] = null;
+						
 						// @TODO this is an instancer where I'd like to have a StackException
 						
 						
-						throw new \Exception(
-							"Could not find attribute $field on receiver " . get_class($model) . 
-							" when attempting to autogenerate arguments for statement"	
+						//throw new \Exception(
+						//	"Could not find attribute $field on receiver " . get_class($model) . 
+						//	" when attempting to autogenerate arguments for statement"	
 							
-						);
+						//);
 						
 						//throw $passthrough;
 					}
@@ -181,6 +187,51 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					"Failed to automatically detect fields from statement $statement"		
 				);
 			}
+		}
+
+		// if running an execute statement and argument isn't available
+		// remove from query		
+		if ($method != 'getList') {
+			
+			foreach ($arguments as $key => $value) {
+				if (is_null($value)) {
+					
+					unset($arguments[$key]);
+					
+					// if an insert statement
+					if (stripos($method, 'insert') !== false) {
+						// now remove field from arguments list in statement
+						$statement = preg_replace("/{$key}([\s\,\)])/", '$1', $statement);
+						
+					}
+					
+					// otherwise an update
+					else if (stripos($method, 'update') !== false) {
+						
+					}
+					
+					else if (stripos($method, 'delete') !== false) {
+						
+					}
+				}
+			}
+			
+			// replace argument/value lists
+			$statement = preg_replace(
+				'/\(.*?\).*?(values).*?\(.*\)/is', '(#keys#)$1(#values#)', $statement
+			);
+			
+						
+			// add back stupid argument/values list
+			$statement = str_replace(
+				"#keys#", implode(' , ', array_keys($arguments)), $statement
+			);
+			
+			$statement = str_replace(
+				"#values#", implode(' , ', array_fill(0, count(array_values($arguments)), '?')), $statement
+			);			
+			
+			
 		}
 				
 			

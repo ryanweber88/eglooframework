@@ -230,8 +230,8 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		//return isset($this->id);
-		return $this->initialized();
+		return isset($this->id);
+		//return $this->initialized();
 	}
 
 	/**
@@ -304,7 +304,7 @@ abstract class Model extends Delegator
 				// check if the model exists in the database to ensure we are
 				// not running queries against an empty/shallow model - because
 				// there is nothing to match against here
-				if ($self->exists()) {
+				if ($self->initialized()) {
 					$result = $lambda($model);
 
 					// check if singular result or hash (which would indicate
@@ -577,6 +577,7 @@ abstract class Model extends Delegator
 			// to by-pass access modifier; sorry folks, this is the only way to do
 			// this without creating a static create and instance create method
 			$self->send('runCallbacks', __FUNCTION__);
+			
 		}
 			
 		
@@ -590,8 +591,10 @@ abstract class Model extends Delegator
 			$model->id = null;
 						
 			
-			// saves model to underlying data layer
+			// saves model to underlying data layer and sets
+			// initialized to true
 			$model->save();
+			$model->initialized = true;
 			
 			// return model to caller
 			return $model;
@@ -642,7 +645,7 @@ abstract class Model extends Delegator
 			
 			// based on whether model primary key is set, call the correct
 			// action method
-			return $this->id
+			return $this->exists()
 			
 				// run update against instance if 
 				? $this->update()
@@ -654,9 +657,9 @@ abstract class Model extends Delegator
 		
 		// lets see what is missing for validation and throw exception
 		throw new \Exception(
-			"Cannot save model because the attributes did not pass validation : " . 
-			print_r($this->whatsInvalid(), true)	
-		);
+			"Cannot save model because the attributes did not pass validation : " . print_r(
+				$this->whatsInvalid(), true
+		));
 		
 	}
 	
