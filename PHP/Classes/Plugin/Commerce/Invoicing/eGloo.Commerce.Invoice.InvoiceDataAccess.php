@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Invoice;
-use \eGloo\DataProcessing\Connection;
+
+use \eGloo\DataProcessing\Connection,
+    \eGloo\Domain;
 
 /**
  * InvoiceDataAccess Class File
@@ -36,28 +38,4 @@ use \eGloo\DataProcessing\Connection;
  * @package Plugins
  * @subpackage Commerce
  */
-class InvoiceDataAccess {
-	/** @var resource Object */
-	protected static $instance = null;
-	
-	/**
-	 * Overwrite $rawConnectionResource setting in connection file
-	 * 
-	 * @param resource $rawConnectionResource = null
-	 * @return void
-	 */
-	public function __construct() {}
-	
-	/**
-	 * Create an instance of the class
-	 * Delegate class to access Database layer
-	 * 
-	 * @return $this class object
-	 */
-	public static function fetch () {
-		if (static::$instance === null) {
-			static::$instance = new self();
-		}
-		return static::$instance;
-	}
-}
+class InvoiceDataAccess extends Domain\Data { }

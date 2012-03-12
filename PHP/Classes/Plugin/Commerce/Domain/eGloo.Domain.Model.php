@@ -493,9 +493,21 @@ abstract class Model extends Delegator
 	 * 
 	 */
 	public function toArray($wrapped = false) {
-		return $wrapped 
-			? $this->__toArray() 	
-			: $this->properties;	
+		if ($wrapped) {
+			$returns = $this->__toArray();	
+		}
+		
+		else {
+			$values = array();
+			
+			foreach(array_keys($this->properties) as $field) {
+				$values[] = $this->$field;
+			}
+			
+			$returns = $values;
+		}
+		
+		return $returns;
 	}
 
 	

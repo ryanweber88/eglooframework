@@ -1,6 +1,8 @@
 <?php
 namespace eGloo\Commerce\Invoice;
-use \eGloo\Commerce\Slug\InvoiceDataAccess;
+
+use \eGloo\Commerce\Slug\InvoiceDataAccess,
+    \eGloo\Domain;
 
 /**
  * Invoice Class File
@@ -36,46 +38,4 @@ use \eGloo\Commerce\Slug\InvoiceDataAccess;
  * @package Plugins
  * @subpackage Commerce
  */
-class Invoice {
-	
-	/**
-	 * Create a new Product object
-	 * 
-	 * @param array $args optional
-	 */
-	public function __construct (array $args) {
-		foreach ($args as $key => $value){
-			$this->{$key} = $value;
-		}
-	}
-	
-	/**
-	 * Populate data int the Setter
-	 *
-	 * @param type $key
-	 * @param type $value
-	 */
-	public function __set($key, $value) {
-		if (property_exists($this, $key)) {
-			$this->{$key} = $value;
-		} else {
-			$this->{$key} = $value;
-		}
-		return true;
-	}
-
-	/**
-	 * Getter for the
-	 * @param type $key
-	 *
-	 * @return mix type object retrieved from 
-	 */
-	public function __get( $key ) {
-		if (property_exists($this, $key)) {
-			return $this->$key;
-		} elseif ( isset($this->properties[$key] )) {
-			return $this->properties[$key];
-		} 
-		return false;
-	}
-}
+class Invoice extends Domain\Model { }

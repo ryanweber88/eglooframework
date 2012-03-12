@@ -40,8 +40,6 @@ use \eGloo\Domain;
  */
 class Product extends Domain\Model {
 
-
-	
 	public function loadProductImages() {
 		if (empty ($this->product_images)) {
 			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_id);
