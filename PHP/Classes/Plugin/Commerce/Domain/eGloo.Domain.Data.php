@@ -46,24 +46,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	
 	
 	
-	/**
-	 * Used as dynamic/shorthand method to build array 
-	 *  @Note not using this idea right now
-	 */
-	public static function __callstatic($name, $arguments) {
 
-		// not going to do rigorous checks here right now 
-		if (strtolower($name) == 'insert') {
-			$idioms = $arguments[1]; 
-			$statement = 
-				"insert into ({$idioms['into']}) values (" .
-				array_fill(0, count(explode($idioms['with_fields'])), '?') .
-				")";
-
-			echo $statement; exit;
-		}
-	}
-	
 
 	
 	/**
@@ -80,12 +63,21 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 				// next check if idiom with_fields exists; this is optional
 				// in which case fields will be queried from information schema
-				if(!isset($idioms['with_columns']) || !is_array($idioms['with_columns'])) {
+				if(!isset($idioms['with_columns'])) {
 					$idioms['with_columns'] = static::columns($idioms['into']);
 				}
+								
+				// columns have been passed as tokenized string
+				if (!is_array($idioms['with_columns'])) {
+					$idioms['with_columns'] = explode(',', preg_replace(
+						'/\s/', null, $idioms['with_columns']
+					));
+				}
+
 				
-				$columns = implode (',', $idioms['with_columns']);
-				$binds   = implode (',', array_fill(0, count($idioms['columns']), '?'));
+				$columns = implode (' , ', $idioms['with_columns']);
+				$binds   = implode (' , ', array_fill(0, count($idioms['with_columns']), '?'));
+				
 				
 				// build query 
 				// @TODO this should be abstracted out a bit, but i don't like
@@ -126,8 +118,15 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 				// next check if idiom with_fields exists; this is optional
 				// in which case fields will be queried from information schema
-				if(!isset($idioms['with_columns']) || !is_array($idioms['with_columns'])) {
-					$idioms['with_columns'] = static::columns($idioms['against']);
+				if(!isset($idioms['with_columns'])) {
+					$idioms['with_columns'] = static::columns($idioms['into']);
+				}
+				
+				// columns have been passed as tokenized string
+				if (!is_array($idioms['with_columns'])) {
+					$idioms['with_columns'] = explode(',', preg_replace(
+						'/\s/', null, $idioms['with_columns']
+					));
 				}
 				
 				// build determine our sets (columns = value) and conditions

@@ -516,10 +516,10 @@ abstract class Model extends Delegator
 		//parent::__properties();
 		
 		// from ClassNameYada derive pattern class_class1_class2
-		$class = strtolower(preg_replace(
-			'/([a-z])([A-Z])/', '$1_$2', static::classname()
-		));
-				
+		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		
+
+						
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
 		// @TODO replace self reference - stupid 5.3 issue
@@ -797,7 +797,13 @@ abstract class Model extends Delegator
 	 * Aliases our primary key to 'id'
 	 */
 	protected function aliasPrimaryKey($from) {
-		$this->aliasProperty( 'id', $from );
+		// for now we ignore our exception as primary
+		// has already been aliased	
+		try {
+			$this->aliasProperty( 'id', $from );
+		}
+		
+		catch(\Exception $ignore) { }
 	}
 	
 	/**
@@ -1020,22 +1026,28 @@ abstract class Model extends Delegator
 			};
 		}
 		
+		// check if primary key - this is temporary until better solution
+		//$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		
+		//if ($name == 'id' && \property_exists($this, $primaryKey = "{$class}_id")) {
+		//	$this->aliasPrimaryKey($primaryKey);
+		//	return $this->id;
+		//}
 				
 		// if this is a new instance, and aliases have not been defined (since
 		// we have not initialized; check to see if name is a match to class_name_property)
 		// this has the danger of presenting very hard to track bugs, so we need to think
 		// about legitimacy
-		$class = strtolower(preg_replace(
-			'/([a-z])([A-Z])/', '$1_$2', static::classname()
-		));
+		/*
+		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		echo "$class + $name<br />";
 		
 		if (property_exists($this, $field = "{$class}_$name")) {
 			// @TODO having issues with alias property - doing it old fashioned way for now
 			//$this->aliasProperty($name, "{$class}_$name");
-			$this->$name = &$this->$field;
-			return $this->$name;
+			$this->aliasProperty($name, $field);
 		}
-		
+		*/
 		// otherwise pass to parent __get handler for higher level
 		// processing
 

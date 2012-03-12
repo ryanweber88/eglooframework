@@ -636,6 +636,27 @@ function getArrayDefinitionString( $array_to_define ) {
 }
 
 /**
+ * Allows for a similar paradigm to ruby raise 'Exception' if condition
+ * expression; in php: condition or throws()
+ */
+function throws( $mixed ) {
+	
+	// determine our exception; this can be passed explicitly, or
+	// will default to global namespaced exception
+	$exception = $mixed instanceof \Exception 
+		// if mixed is already an instance of exception, we 
+		// assign to exception
+		? $mixed
+		
+		// it is assumed that mixed is our message and we instantiate
+		// base exception with message
+		: new \Exception($mixed);	
+		
+	// now throw our exception	
+	throw $exception;
+}
+
+/**
  * Convenience method
  */
 function echo_r( $mixed ) {
