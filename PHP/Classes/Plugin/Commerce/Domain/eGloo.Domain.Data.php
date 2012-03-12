@@ -25,6 +25,25 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return static::instance();
 	}
 	
+	/**
+	 * Uses information schema to retrieve column names
+	 */
+	protected static function columns($table) {
+		$class = get_called_class();
+		
+		return static::cache($table, function() use ($class, $table) {
+			return $class::statement('
+				SELECT
+					column_name
+				FROM
+					information_schema.columns
+				WHERE
+						table_name = ?
+						
+			', $table);	
+		});
+	}
+	
 	
 	
 	/**
@@ -45,6 +64,128 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		}
 	}
 	
+
+	
+	/**
+	 * This is simply a wrapper method to statement - it allows
+	 * for autoconstructing queries which are then passed to
+	 * our statement method
+	 */
+	public static function inserts(array $idioms) {
+				
+		// check that idiom 'into' exists
+		if (isset($idioms['into'])) {
+			
+			if (isset($idioms['using'])) {
+			
+				// next check if idiom with_fields exists; this is optional
+				// in which case fields will be queried from information schema
+				if(!isset($idioms['with_columns']) || !is_array($idioms['with_columns'])) {
+					$idioms['with_columns'] = static::columns($idioms['into']);
+				}
+				
+				$columns = implode (',', $idioms['with_columns']);
+				$binds   = implode (',', array_fill(0, count($idioms['columns']), '?'));
+				
+				// build query 
+				// @TODO this should be abstracted out a bit, but i don't like
+				// this solution in the first place
+				return static::statement("
+					INSERT INTO 
+						{$idioms['into']} ( $columns )
+					
+					VALUES 
+						( $binds )
+				
+				", $idioms['using']);
+				
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed inserts because idiom 'using' does not exist"
+				);
+			}
+			
+			
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed inserts because idiom 'into' does not exist"
+			);
+		}
+	}
+
+	public static function updates(array $idioms) {
+		// check that idiom 'into' exists
+		if (isset($idioms['against'])) {
+			
+			
+			if (isset($idioms['using'])) {
+			
+				// next check if idiom with_fields exists; this is optional
+				// in which case fields will be queried from information schema
+				if(!isset($idioms['with_columns']) || !is_array($idioms['with_columns'])) {
+					$idioms['with_columns'] = static::columns($idioms['against']);
+				}
+				
+				// build determine our sets (columns = value) and conditions
+				$sets       = array();
+				$conditions = array(1); 
+				
+				foreach($idioms['with_columns'] as $column) {
+					$sets[] = "$column = ?";
+				}
+				
+				$sets = implode(",\n", $sets);
+				
+				// our where idiom is not required, persay, but will be
+				// used in most cases
+				foreach ($idioms['where'] as $condition) {
+					$conditions[] = $condition;
+				}
+				
+				$conditions = implode(",\n", $conditions);
+				
+				
+				// build query 
+				// @TODO this should be abstracted out a bit, but i don't like
+				// this solution in the first place
+				return static::statement("
+					UPDATE
+						{$idioms['against']} 
+					
+					SET 
+						$sets
+						
+					WHERE
+						$conditions
+				
+				", $idioms['using']);
+				
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed updates because idiom 'using' does not exist"
+				);
+			}
+			
+			
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed updates because idiom 'against' does not exist"
+			);
+		}		
+	}
+	
+	public static function deletes(array $idioms) {
+		
+	}
+		
 
 	/**
 	 * Executes a statement on underlying layer - currently makes use of *DataAccess

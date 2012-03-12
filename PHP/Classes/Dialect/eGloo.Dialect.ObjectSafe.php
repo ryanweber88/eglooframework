@@ -384,7 +384,7 @@ abstract class ObjectSafe {
 			// force it into existense - it is upon the onus of the
 			// developer to not absuse this principle
 			if (!\property_exists($this, $from)) {
-				$this->from = null;
+				$this->$from = null;
 			} 
 
 			// this is a wtfphp issue; when assigning by reference, the __get
