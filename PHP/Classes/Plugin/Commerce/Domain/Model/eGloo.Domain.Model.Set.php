@@ -305,7 +305,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function offsetUnset($offset) {
-		unset($this->collection);
+		unset($this->collection[$offset]);
 	}
 	
 	public function getIterator() {

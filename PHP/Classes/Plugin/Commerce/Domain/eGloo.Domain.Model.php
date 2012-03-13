@@ -1018,14 +1018,20 @@ abstract class Model extends Delegator
 			}
 		}
 		
-		if ((preg_match('/^(.+)_Count$/', $name, $match))) {
+		if ((preg_match('/^(.+?)(_?)Count$/', $name, $match))) {
+			
+			// convert to underscore to appease master
+			if (\eGlooString::isCamelCase($match[0])) {
+				$name = \eGlooString::toUnderscore();
+			}
+			
+						
 			if ($this->respondTo($match[1]) && \method_exists($this, $method = "__$name")) {
 				if ($this->exists()) {
 					return ($this->$name = $this->$method());
 				}
 				
 				else {
-					exit('here');
 					$class = get_class($this);
 					
 					throw new \Exception(
