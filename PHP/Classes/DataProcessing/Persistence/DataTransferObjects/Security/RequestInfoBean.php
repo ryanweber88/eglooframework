@@ -609,18 +609,99 @@ class RequestInfoBean implements \ArrayAccess {
 	 * A convenience method for getting a fully qualified URI based on validated GET parameters
 	 * provided to this request.
 	 */
-	public function getFullyQualifiedRequestString( $keys_to_ignore = array() ) {
-		$retVal = $this->requestClass . '/' . $this->requestID . '?';
+	public function getFullyQualifiedRequestString( $keys_to_ignore = array(), $pairs_to_set = array(), $__mixed = array() ) {
+		$retVal = '';
 
-		$currentGETArray = $this->GET;
+		$get_params = $this->GET;
 
-		foreach( $keys_to_ignore as $key ) {
-			unset($currentGETArray[$key]);
+		if ( in_array($this->requestClass, array('egDefault', 'externalMainPage'))
+			 && !in_array('show_hidden', $__mixed) ) {
+
+			$request_class = '';
+		} else {
+			$request_class = $this->requestClass;
 		}
 
-		$retVal .= http_build_query( $currentGETArray );
+		if ( in_array($this->requestID, array('index', 'egDefault', 'extMainViewBase'))
+			 && !in_array('show_hidden', $__mixed) ) {
+
+			$request_id = '';
+		} else {
+			$request_id = $this->requestID;
+		}
+
+		if ( in_array('unroll_rewrite', $__mixed) ) {
+			$retVal .= 'index.php';
+			$get_params['eg_requestClass'] = $request_class;
+			$get_params['eg_requestID'] = $request_id;
+		} else {
+			if ( $request_class !== '' && !in_array('hide_request_class', $__mixed) ) {
+				if ( !in_array('unroll_request_class', $__mixed) ) {
+					$retVal .= $request_class;
+				} else {
+					$get_params['eg_requestClass'] = $request_class;
+					$get_params['eg_requestID'] = $request_id;
+				}
+			}
+
+			if ( $request_id !== '' && !in_array('hide_request_id', $__mixed) && !isset($get_params['eg_requestID']) ) {
+				if ( $request_class !== '' && !in_array('hide_request_class', $__mixed) && !in_array('unroll_request_id', $__mixed) ) {
+					$retVal .= '/' . $request_id;
+				} else if ( !in_array('unroll_request_id', $__mixed) && ($request_class === '' || in_array('hide_request_class', $__mixed)) ) {
+					$retVal .= $request_id;
+				} else {
+					$get_params['eg_requestID'] = $request_id;
+				}
+			}
+
+			if ( isset($get_params['eg_slug']) &&
+				 !in_array('unroll_slug', $__mixed) &&
+				 !isset($get_params['eg_requestClass']) &&
+				 !isset($get_params['eg_requestID']) ) {
+
+				if ( trim($retVal) !== '' ) {
+					$retVal .= '/' . $get_params['eg_slug'];
+				} else {
+					$retVal .= $get_params['eg_slug'];
+				}
+
+				unset( $get_params['eg_slug'] );
+			}
+		}
+
+		foreach( $keys_to_ignore as $key ) {
+			unset($get_params[$key]);
+		}
+
+		if ( in_array('prune', $__mixed) ) {
+			$old_get_params = $get_params;
+
+			foreach( $old_get_params as $key => $value ) {
+				if ( trim($value) === '' || $value === null ) {
+					unset($get_params[$key]);
+				}
+			}
+		}
+
+		foreach( $pairs_to_set as $key => $value ) {
+			$get_params[$key] = $value;
+		}
+
+		if ( !empty($get_params ) || in_array('include_delimiter', $__mixed) ) {
+			$retVal .= '?';
+		}
+
+		$retVal .= http_build_query( $get_params );
 
 		return $retVal;
+	}
+
+	/**
+	 * A convenience method for getting a fully qualified URI based on validated GET parameters
+	 * provided to this request.
+	 */
+	public function uri( $keys_to_ignore = array(), $pairs_to_set = array(), $__mixed = array() ) {
+		return $this->getFullyQualifiedRequestString( $keys_to_ignore, $pairs_to_set, $__mixed );
 	}
 
 	/**
