@@ -128,7 +128,7 @@ class Brand extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$rows = BrandDataAccess::fetch()->loadBrandByID($brand_id);
-		return new Brand($rows);
+		return new static($rows);
 	}
 	
 	/**

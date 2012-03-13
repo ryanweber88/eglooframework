@@ -486,7 +486,7 @@ abstract class ObjectSafe {
 		// assignment; conditional assignment is equivalent to ruby's ||=
 		// method and will only set the property if it has not yet been set
 		
-		if (preg_match('/^(.+)\__$/', $name, $match)) {
+		if (preg_match('/^(.+)\_\_$/', $name, $match)) {
 			$field = $match[1];
 			
 			if (!isset($this->$field)) {

@@ -78,7 +78,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				$columns = implode (' , ', $idioms['with_columns']);
 				$binds   = implode (' , ', array_fill(0, count($idioms['with_columns']), '?'));
 				
-				
+
 				// build query 
 				// @TODO this should be abstracted out a bit, but i don't like
 				// this solution in the first place
@@ -282,6 +282,12 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				preg_match('/\((.+?)\)/s', $statement, $match);
 				$fields = explode(',', $match[1]);
 			}	
+			
+			// make sure field values are trimmed
+			foreach ($fields as $key => $value) {
+				$fields[$key] = trim($value);
+			}
+			
 		}		
 		
 		// lets do some magic - lets determine arguments if first
@@ -298,7 +304,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 			if (is_array($fields)) { 
 				
-				foreach($fields as $field) { 
+				foreach($fields as $index => $field) { 
 					try { 
 						$arguments[$field = trim($field)] = $model->$field;	
 					}
@@ -306,6 +312,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					catch(\Exception $passthrough) {
 						
 						$arguments[$field = trim($field)] = null;
+						unset($fields[$index]);
 						
 						// @TODO this is an instancer where I'd like to have a StackException
 						
@@ -332,10 +339,10 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// if running an execute statement and argument isn't available
 		// remove from query		
 		if ($method != 'getList') {
-			
+									
 			foreach ($arguments as $key => $value) {
 				if (is_null($value)) {
-					
+		
 					unset($arguments[$key]);
 					
 					// if an insert statement
@@ -347,7 +354,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					
 					// otherwise an update
 					else if (stripos($method, 'update') !== false) {
-						
+						$statement = preg_replace('/{$key}\s*\=\s*[\S]+\s/is', null, $statement);
 					}
 					
 					else if (stripos($method, 'delete') !== false) {
@@ -356,21 +363,29 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 			}
 			
-			// replace argument/value lists
-			$statement = preg_replace(
-				'/\(.*?\).*?(values).*?\(.*\)/is', '(#keys#)$1(#values#)', $statement
-			);
-			
+			if (stripos($method, 'insert') !== false) {
+				// replace argument/value lists
+				
+				$statement = preg_replace(
+					'/\(.*?\).*?(values).*?\(.*\)/is', '(#keys#) $1 (#values#)', $statement
+				);
+				
+							
+				// add back stupid argument/values list
+				$statement = str_replace(
+					"#keys#", implode(' , ', array_values($fields)), $statement
+				);
+				
+				$statement = str_replace(
+					"#values#", implode(' , ', array_fill(0, count(array_values($arguments)), '?')), $statement
+				);			
 						
-			// add back stupid argument/values list
-			$statement = str_replace(
-				"#keys#", implode(' , ', array_keys($arguments)), $statement
-			);
+						
+			}
 			
-			$statement = str_replace(
-				"#values#", implode(' , ', array_fill(0, count(array_values($arguments)), '?')), $statement
-			);			
-			
+			else if (stripos($method, 'update') !== false) {
+				echo $statement; exit;
+			}
 			
 		}
 				

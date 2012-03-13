@@ -995,6 +995,7 @@ abstract class Model extends Delegator
 		//	return $this->properties[$key];
 		//}
 		
+		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
@@ -1056,6 +1057,11 @@ abstract class Model extends Delegator
 				
 				return $this->$name;
 			};
+		}
+				
+		if (\property_exists($this, $field = "{$class}_$name")) {
+			$this->aliasProperty($name, $field);
+			return $this->$name;
 		}
 		
 		// check if primary key - this is temporary until better solution
