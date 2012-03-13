@@ -340,7 +340,7 @@ abstract class ObjectSafe {
 		static::aliasMethodsStatic();			
 	}
 	
-	
+		
 	/**
 	 * Allows breaking of protected/private modifiers, from outside of the
 	 * context of class; calls an method on instance receiver with arguments 

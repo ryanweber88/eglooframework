@@ -1017,6 +1017,24 @@ abstract class Model extends Delegator
 				return $this->$name;
 			}
 		}
+		
+		if ((preg_match('/^(.+)_Count$/', $name, $match))) {
+			if ($this->respondTo($match[1]) && \method_exists($this, $method = "__$name")) {
+				if ($this->exists()) {
+					return ($this->$name = $this->$method());
+				}
+				
+				else {
+					exit('here');
+					$class = get_class($this);
+					
+					throw new \Exception(
+						"Failed to get count of association {$match[1]} because class '$class' does not exist"
+					); 
+				}
+				
+			}
+		}
 
 		// look for relationship using xxx_id pattern
 		// and see if that relationship has been defined
