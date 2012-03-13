@@ -521,8 +521,10 @@ abstract class Model extends Delegator
 		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 		// with model; in the future need to determine existence of primary key and cache 
 		// beforehand
+
+		
 		$this->aliasPrimaryKey("{$class}_id");
-						
+					
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
 		// @TODO replace self reference - stupid 5.3 issue
@@ -541,6 +543,7 @@ abstract class Model extends Delegator
 		foreach($properties as $name) {
 
 			if (preg_match("/{$class}_(.+)/", $name, $match)) {
+				
 
 				try { 
 					$this->aliasProperty(
@@ -553,8 +556,10 @@ abstract class Model extends Delegator
 				}
 			}
 		}
+	
 			
 	}
+	
 	
 	
 	
@@ -806,7 +811,9 @@ abstract class Model extends Delegator
 			$this->aliasProperty( 'id', $from );
 		}
 		
-		catch(\Exception $ignore) { }
+		catch(\Exception $ignore) {
+			var_export($ignore); exit;
+		}
 	}
 	
 	/**

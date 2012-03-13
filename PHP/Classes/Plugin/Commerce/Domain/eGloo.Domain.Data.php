@@ -131,7 +131,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 				// build determine our sets (columns = value) and conditions
 				$sets       = array();
-				$conditions = array(1); 
+				$conditions = array('TRUE'); 
 				
 				foreach($idioms['with_columns'] as $column) {
 					$sets[] = "$column = ?";
@@ -139,29 +139,46 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 				$sets = implode(",\n", $sets);
 				
-				// our where idiom is not required, persay, but will be
-				// used in most cases
-				foreach ($idioms['where'] as $condition) {
-					$conditions[] = $condition;
-				}
-				
-				$conditions = implode(",\n", $conditions);
-				
-				
-				// build query 
-				// @TODO this should be abstracted out a bit, but i don't like
-				// this solution in the first place
-				return static::statement("
-					UPDATE
-						{$idioms['against']} 
-					
-					SET 
-						$sets
+				if (isset($idioms['where'])) {
+					if (is_array($where = $idioms['where']) && count($where)) {
 						
-					WHERE
-						$conditions
-				
-				", $idioms['using']);
+						// we add an add to initial condition to ensure statement
+						// does not break
+						$conditions[] = 'AND';
+					
+						// our where idiom is not required, persay, but will be
+						// used in most cases
+						foreach ($idioms['where'] as $condition) {
+							$conditions[] = $condition;
+						}
+						
+						$conditions = implode("\n", $conditions);
+
+						// build query 
+						// @TODO this should be abstracted out a bit, but i don't like
+						// this solution in the first place
+						return static::statement("
+							UPDATE
+								{$idioms['against']} 
+							
+							SET 
+								$sets
+								
+							WHERE
+								$conditions
+						
+						", $idioms['using']);
+					}
+					
+					else {
+						throw new \Exception (
+							"Failed updates because idion 'where' is not in the proper format: " . print_r(
+								$idioms['where']
+						));
+					
+					}
+				}
+					
 				
 			}
 			
@@ -384,7 +401,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			}
 			
 			else if (stripos($method, 'update') !== false) {
-				echo $statement; exit;
+				// don't know what to do here yet - specifying all columns explicitly
 			}
 			
 		}

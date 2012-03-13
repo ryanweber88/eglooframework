@@ -379,7 +379,14 @@ abstract class ObjectSafe {
 	 * and will be affected by get/set definition
 	 */
 	protected function aliasProperty($alias, $from) {
-		if (!\property_exists($this, $alias)) {
+		
+		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		
+		
+		// check that we are not overwriting a "concretely" defined property, with an 
+		// an alias, but we are safe to overwrite dynamically determined aliases
+		// (those that are determined at runtime)
+		if (!\property_exists($this, $alias) || isset($this->_aliasedProperties[$alias])) {
 			
 			// in the case that our from property doesn't exist, we
 			// force it into existense - it is upon the onus of the
@@ -393,14 +400,26 @@ abstract class ObjectSafe {
 			// around, you must first assign ANY non-reference value, which
 			// has the effect of calling __set, which then officially adds
 			// property to instance
-			$this->$alias = null;
+			// MAKE SURE TO CHECK that property hasn't been previously aliased
+			// because setting a reference to null WILL set the aliased property
+			// to null as well
+			if (!isset($this->$alias)) {
+				$this->$alias = null;
+			}
+			
 			$this->$alias = &$this->$from;
+			
+			// keep track of alias properties
+			$this->_aliasedProperties[$alias] = $from;
+						
 			return $this;
 		}
 		
 		
 		throw new \Exception(
-			"Attempted alias '$alias' on property '$from' failed because it already exists as a property on receiver " . get_class($this)		
+			"Attempted alias '$alias' on property '$from' failed because it ".
+			"already exists as a property on receiver " . get_class($this)   .
+			"with value '{$this->$alias}'"		
 		);
 	}
 		
@@ -700,13 +719,14 @@ abstract class ObjectSafe {
 
 	
 	protected static $_singleton;
-	protected static $_scache         = array();
-	protected static $_methodsStatic  = array();
+	protected static $_scache            = array();
+	protected static $_methodsStatic     = array();
 	protected static $ns;
-	protected        $_methods        = array();
-	protected        $_cache          = array();
-	protected        $_properties     = array();
-	protected        $_defers         = array();
+	protected        $_methods           = array();
+	protected        $_cache             = array();
+	protected        $_properties        = array();
+	protected        $_defers            = array();
+	protected        $_aliasedProperties = array(); 
 	
 	
 }
