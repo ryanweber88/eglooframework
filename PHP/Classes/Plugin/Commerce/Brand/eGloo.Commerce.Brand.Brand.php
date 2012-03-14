@@ -157,7 +157,7 @@ class Brand extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		foreach ($brands as $brand_id) {
-			$brand					= self::loadByID($brand_id);
+			$brand					= static::loadByID($brand_id);
 			$brand->brand_images	= BrandDataAccess::fetch()->getBrandImagesByID((int)$brand->brand_id);
 			//$brand->friendly_url	= 'brand/' . Utilities::createSlug($brand->name);
 			$brand->friendly_url	= 'brand/'. BrandDataAccess::fetch()->loadBrandSlugDestination((int)$brand->brand_id);

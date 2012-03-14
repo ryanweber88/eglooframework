@@ -62,6 +62,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		return $this->cache($member, function() use ($self, $member) {
 			//echo "in cache for $member"; 
 			$delegated = &$self->reference('delegated');
+			$result    = null;
 			
 			// first lets check if the member is indeed valid
 				
@@ -118,7 +119,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				}
 				
 				
-				if (!$result && \method_exists($delegated, '__call')) {
+				if (is_null($result) && \method_exists($delegated, '__call')) {
 					try {
 						echo $delegated->title();
 						$result = $delegated->$member();
@@ -128,7 +129,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 					}
 				}
 								
-				if (!$result && \method_exists($delegated, '__callstatic')) {
+				if (is_null($result) && \method_exists($delegated, '__callstatic')) {
 					try {
 						$result = $delegated::$$member();
 					}
