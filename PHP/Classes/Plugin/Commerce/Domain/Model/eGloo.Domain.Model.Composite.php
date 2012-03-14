@@ -29,7 +29,7 @@ abstract class Composite extends Model {
 
 				// lets keep track of the class this composite
 				// type is composed of
-				$this->composedOf = get_class($mixed);
+				$this->composed = get_class($mixed);
 				
 				// finally convert mixed to array representation so that
 				// it can be passed to parent constructor
@@ -49,7 +49,52 @@ abstract class Composite extends Model {
 
 		parent::__construct($mixed);
 	}
+	
+	/**
+	 * Composite#__get composite allows for on-the-fly model initialization; since 
+	 * a composite is "composed-of" data from multiple targets, we can in effect
+	 * feed that data into model at runtime and return; the caller will in turn
+	 * retrieve the model-specific behaviors of retrieved instance
+	 */
+	public function __get($name) {
+				
+		// parent __get takes precedence over composite model
+		// generation; we first attempt to retrieve from parent
+		// 
+		try {
+			return parent::__get($name);
+		}
+		
+		// save exception "defered exception"  
+		catch(\Exception $defer) { }
+		
+		// check if model exists with namespace of current 
+		// receiver
+		$namespace = $this->namespace();
+		$class     = $this->classname();
+		
+		
+		// we check against namespace/$name and namespace/class/namespace
+		// anything beyond that, and our complexity of convetion becomes
+		// to great
+		if (\class_exists($model = "$namespace\\$name")) { 
+		   // \class_exists($model = "$namespace/$class/$potential")) {
 
-	protected $composedOf;
+			$this->$name = new $model($this->toArray());
+			return $this->$name;
+		}
+				
+		// otherwise throw deferrred exception
+		throw $defer;		
+		
+	}
+	
+	/**
+	 * Here we override the method since we don't need automatic
+	 * property aliasing
+	 */
+	protected function __attributes() { }
+
+	protected $composed;
 }
 

@@ -373,7 +373,7 @@ abstract class Model extends Delegator
 	}
 
 	
-	
+	 
 	/**
 	 * Provides a variable length argument list of items that
 	 * must exist prior to certain callbacks
@@ -710,6 +710,7 @@ abstract class Model extends Delegator
 		}
 	
 	}
+	
 		
 	protected function runCallbacks($event, $lambda = null) {
 		
@@ -813,6 +814,15 @@ abstract class Model extends Delegator
 		catch(\Exception $ignore) {
 			//var_export($ignore); exit;
 		}
+	}
+	
+	/**
+	 * This is an alias of ObjectSafe#aliasProperty - since dynamically bound
+	 * properties on a model are termed "attributes", "aliasAttribute" is
+	 * moreso fitting
+	 */
+	protected function aliasAttribute($alias, $attribute) {
+		$this->aliasProperty($alias, $attribute);
 	}
 	
 	/**
@@ -952,7 +962,7 @@ abstract class Model extends Delegator
 		// exception will be thrown, which in this case is ignored
 		// because we DO want dynamic properties/attributes added
 		// to our receiver
-		$failed = true;
+		$failed = false;
 		
 		try {
 			parent::__set($key, $value);
@@ -1113,7 +1123,7 @@ abstract class Model extends Delegator
 		
 		return parent::__toString();
 	}
-	
+		
 	
 	
 	private function guessPrimaryKey() {
