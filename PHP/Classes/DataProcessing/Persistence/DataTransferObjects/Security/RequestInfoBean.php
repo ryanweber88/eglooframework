@@ -614,18 +614,22 @@ class RequestInfoBean implements \ArrayAccess {
 
 		$get_params = $this->GET;
 
-		if ( in_array($this->requestClass, array('egDefault', 'externalMainPage'))
+		if ( in_array($this->requestClass, array('externalMainPage'))
 			 && !in_array('show_hidden', $__mixed) ) {
 
 			$request_class = '';
+		} else if ( $this->_wildCardRequestClass !== null ) {
+			$request_class = $this->_wildCardRequestClass;
 		} else {
 			$request_class = $this->requestClass;
 		}
 
-		if ( in_array($this->requestID, array('index', 'egDefault', 'extMainViewBase'))
+		if ( in_array($this->requestID, array('index', 'extMainViewBase'))
 			 && !in_array('show_hidden', $__mixed) ) {
 
 			$request_id = '';
+		} else if ( $this->_wildCardRequestID !== null ) {
+			$request_id = $this->_wildCardRequestID;
 		} else {
 			$request_id = $this->requestID;
 		}
@@ -677,7 +681,8 @@ class RequestInfoBean implements \ArrayAccess {
 			$old_get_params = $get_params;
 
 			foreach( $old_get_params as $key => $value ) {
-				if ( trim($value) === '' || $value === null ) {
+				if ( (is_array($value) && almost_empty($value, true)) ||
+					 (is_string($value) && trim($value) === '') || $value === null ) {
 					unset($get_params[$key]);
 				}
 			}
@@ -692,6 +697,10 @@ class RequestInfoBean implements \ArrayAccess {
 		}
 
 		$retVal .= http_build_query( $get_params );
+
+		if ( in_array('prepend_rewrite_base', $__mixed) ) {
+			$retVal = eGlooConfiguration::getRewriteBase() . $retVal;
+		}
 
 		return $retVal;
 	}
