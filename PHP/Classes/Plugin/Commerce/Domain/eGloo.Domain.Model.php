@@ -812,7 +812,7 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore) {
-			var_export($ignore); exit;
+			//var_export($ignore); exit;
 		}
 	}
 	

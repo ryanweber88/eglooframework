@@ -201,6 +201,30 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	public static function deletes(array $idioms) {
 		
 	}
+	
+	public static function __callstatic($name, $arguments) {
+		
+		if ($name == 'statement_sql') {
+			die_r ($arguments[0]);
+		}
+	}
+	
+	/**
+	 * @TEMP
+	 */
+	public static function statement_sql($statement, $__mixed = null) {
+		echo_r(str_replace("\t", null, $statement)); 
+		echo_r($__mixed);
+		exit;
+	}
+	
+	/**
+	 * @TEMP
+	 */
+	public static function statement_result($statement, $__mixed = null) {
+		echo_r(static::statement($statement, $__mixed));
+		exit;
+	}
 		
 
 	/**

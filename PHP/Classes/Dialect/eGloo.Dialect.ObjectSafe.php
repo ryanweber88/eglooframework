@@ -394,7 +394,7 @@ abstract class ObjectSafe {
 			if (!\property_exists($this, $from)) {
 				$this->$from = null;
 			} 
-
+			
 			// this is a wtfphp issue; when assigning by reference, the __get
 			// dump is called, which throws an exception at this level; to get
 			// around, you must first assign ANY non-reference value, which
@@ -411,9 +411,13 @@ abstract class ObjectSafe {
 			
 			// keep track of alias properties
 			$this->_aliasedProperties[$alias] = $from;
+			
+			//echo "in $class with " . var_export($this->_aliasedProperties, true) . "<br />"; 
 						
 			return $this;
 		}
+		
+		//die_r($this->_aliasedProperties); exit;
 		
 		
 		throw new \Exception(

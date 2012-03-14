@@ -6,8 +6,30 @@ namespace eGloo\Utilities;
  * Provides utility methods, mostly static, for array manipulation
  * @author Christian Calloway callowaylc@gmail.com
  */
-class Collection extends \eGloo\Dialect\ObjectSafe {
+class Collection extends \ArrayObject {
 	
+	function __construct($collection = array()) {
+		parent::__construct($collection);
+	}
+	
+	public function offsetGet($offset) {
+		if (\eGloo\Primitives\RegExp::valid($pattern = $offset)) {
+			$collection = new static;
+			
+			foreach($this as $value) {
+				if (preg_match($pattern, $value)) {
+					$collection[] = $value;
+				}
+			}
+			
+			return $collection;	
+		}
+		
+		return $this[$offset];
+	}
+	
+	
+		
 	/**
 	 * 
 	 * Determines if collection is a dictionary/associative/etc;
@@ -67,5 +89,4 @@ class Collection extends \eGloo\Dialect\ObjectSafe {
 		return $collection;
 	}
 	
-
 } 
