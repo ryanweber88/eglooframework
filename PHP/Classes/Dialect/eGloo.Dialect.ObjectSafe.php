@@ -422,7 +422,13 @@ abstract class ObjectSafe {
 		}
 	}
 	
+	public function instanceEval($lambda) {
+		return $lambda($this);
+	}
 	
+	public static function classEval($lambda) {
+		return $lambda(get_called_class());
+	}
 
 	
 	/**

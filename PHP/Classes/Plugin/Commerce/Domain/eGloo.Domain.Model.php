@@ -518,7 +518,10 @@ abstract class Model extends Delegator
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 		
-
+		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
+		// with model; in the future need to determine existence of primary key and cache 
+		// beforehand
+		$this->aliasPrimaryKey("{$class}_id");
 						
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
