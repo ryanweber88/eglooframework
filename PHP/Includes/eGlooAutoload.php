@@ -660,12 +660,26 @@ function throws( $mixed ) {
  * Convenience method
  */
 function echo_r( $mixed ) {
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo_r( '<b>Argument #' . $name . '</b>' );
+			echo_r( $value );
+		}
+	}
+
 	echo '<pre>';
 	print_r($mixed);
 	echo '</pre>';
 }
 
 function echo_d( $mixed ) {
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo_r( '<b>Argument #' . $name . '</b>' );
+			echo_d( $value );
+		}
+	}
+
 	echo '<pre>';
 	var_dump($mixed);
 	echo '</pre>';
@@ -681,7 +695,15 @@ function die_r( $mixed ) {
 		session_write_close();
 	}
 
-	echo_r($mixed);
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo_r( '<b>Argument #' . $name . '</b>' );
+			echo_r( $value );
+		}
+	} else {
+		echo_r( $mixed );
+	}
+
 	die;
 }
 
@@ -692,7 +714,15 @@ function die_d( $mixed ) {
 		session_write_close();
 	}
 
-	echo_d($mixed);
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo_r( '<b>Argument #' . $name . '</b>' );
+			echo_d( $value );
+		}
+	} else {
+		echo_d( $mixed );
+	}
+
 	die;
 }
 
