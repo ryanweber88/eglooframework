@@ -138,7 +138,6 @@ abstract class Model extends Delegator
 		if ( !static::respondTo('find') ) {
 										
 			static::defineMethod('find', function($__mixed, $class) {
-					
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();

@@ -41,22 +41,22 @@ use \eGloo\Domain;
  */
 class ProductDataAccess extends Domain\Data {
 
-	public function loadProductById($product_id) {
-		if ($product_id == '') {
-			throw new \InvalidArgumentException('[: Missing argument error:] product_id is required!', __METHOD__);
-		}
-		
-		return static::statement('
-			SELECT
-				*
-			FROM
-				product p
-			WHERE
-				p.product_id = ?
-			
-			', $product_id	
-		);
-	}
+	// public function loadProductById($product_id) {
+	// 	if ($product_id == '') {
+	// 		throw new \InvalidArgumentException('[: Missing argument error:] product_id is required!', __METHOD__);
+	// 	}
+	// 	
+	// 	return static::statement('
+	// 		SELECT
+	// 			*
+	// 		FROM
+	// 			product p
+	// 		WHERE
+	// 			p.product_id = ?
+	// 		
+	// 		', $product_id	
+	// 	);
+	// }
 	
 	public function loadProductByName($product_name) {
 		if ($product_name == '') {
