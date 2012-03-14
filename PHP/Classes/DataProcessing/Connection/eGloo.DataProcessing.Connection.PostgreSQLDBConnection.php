@@ -203,14 +203,16 @@ class PostgreSQLDBConnection extends DBConnection {
 				preg_match('/insert\s+?into\s+?(\S+)/i', $sql, $match);
 				$primaryKey = "{$match[1]}_id";
 				
-				return isset($insert_row[$primaryKey])
-					? $insert_row[$primaryKey]
-					
-					// otherwise we take a stab in the dark and shift off first element
-					// but weary of this though - need to think if this will introduce
-					// more problems than solves
-					: array_shift($insert_row);
-			
+				if (is_array($insert_row) && \eGloo\Utilities\Collection::isHash($insert_row)) {
+					return isset($insert_row[$primaryKey])
+						? $insert_row[$primaryKey]
+						
+						// otherwise we take a stab in the dark and shift off first element
+						// but weary of this though - need to think if this will introduce
+						// more problems than solves
+						: array_shift($insert_row);
+				}
+				
 				
 			}
 		} else {

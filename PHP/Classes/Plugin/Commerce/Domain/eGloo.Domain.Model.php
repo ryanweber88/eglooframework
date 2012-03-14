@@ -230,7 +230,7 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return isset($this->id);
+		return isset($this->id) && !is_null($this->id);
 		//return $this->initialized();
 	}
 
@@ -1015,6 +1015,30 @@ abstract class Model extends Delegator
 				);
 				
 				return $this->$name;
+			}
+		}
+		
+		if ((preg_match('/^(.+?)(_?)Count$/', $name, $match))) {
+			
+			// convert to underscore to appease master
+			if (\eGlooString::isCamelCase($match[0])) {
+				$name = \eGlooString::toUnderscore();
+			}
+			
+						
+			if ($this->respondTo($match[1]) && \method_exists($this, $method = "__$name")) {
+				if ($this->exists()) {
+					return ($this->$name = $this->$method());
+				}
+				
+				else {
+					$class = get_class($this);
+					
+					throw new \Exception(
+						"Failed to get count of association {$match[1]} because class '$class' does not exist"
+					); 
+				}
+				
 			}
 		}
 
