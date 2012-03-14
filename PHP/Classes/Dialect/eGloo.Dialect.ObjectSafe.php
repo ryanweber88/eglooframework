@@ -62,7 +62,7 @@ abstract class ObjectSafe {
 			$methods        = &$self->reference('_methods');
 			$methods[$name] = $lambda;
 				
-			return $self;
+			return $methods[$name];
 		};		
 		
 		$this->defineMethod('defer', function($lambda) {
@@ -166,6 +166,7 @@ abstract class ObjectSafe {
 			$methods                = &$class::referenceStatic('_methodsStatic');
 			$methods[$class][$name] = $lambda;
 		
+			return $methods[$class][$name];
 			//return $self;
 		};
 		

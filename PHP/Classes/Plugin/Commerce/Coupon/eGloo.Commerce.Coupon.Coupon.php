@@ -40,59 +40,6 @@ use \eGloo\Commerce,
 
 class Coupon {
 	
-	public $coupon_id;
-	
-	public $coupon_code;
-	
-	public $coupon_type_id;
-	
-	public $invisible_to_user;
-	
-	public $valid_at;
-	
-	public $valid_till;
-	
-	public $user_description;
-	
-	public $admin_description;
-	
-	public $discount_type_id;
-	
-	public $discount_amount;
-	
-	public $max_usages;
-	
-	public $max_user_orders;
-	
-	public $min_user_orders;
-	
-	public $max_per_user		= 1;
-	
-	public $max_per_program		= 1;
-	
-	public $max_per_order		= 1;
-	
-	public $weight				= 0;
-	
-	public $stackable			= 0;
-	
-	public $min_threshold		= 0.0;
-	
-	public $recurring_only		= 0;
-	
-	public $coupon_status		= 1;
-
-	public $issuing_by;
-	
-	public $last_action;
-	
-	public $last_action_by;
-	
-	public $action_taken;
-	
-	public $properties			= array();
-
-
 	const COUPON_TYPE_SHIPPING		= 1,
 			COUPON_TYPE_PRODUCT		= 2,
 			COUPON_TYPE_ORDER		= 3;
@@ -105,8 +52,10 @@ class Coupon {
 		if (!is_array($args) || sizeof($args) == 0) {
 			throw new \InvalidArgumentException();
 		}
+		
 		foreach ( $args as $key => $value ){
 			$this->{$key} = $value;
+			
 		}
 	}
 	
@@ -117,8 +66,8 @@ class Coupon {
 	 * @param type $value 
 	 */
 	public function __set($key, $value) {
-		$this->properties[$key] = $value;
-		return $this;
+		$this->$key = $value;
+		return true;
 	}
 	
 	/**

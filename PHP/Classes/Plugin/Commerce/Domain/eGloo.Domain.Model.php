@@ -879,9 +879,9 @@ abstract class Model extends Delegator
 		if (preg_match('/^find_by_(.+)$/', $name, $match)) {
 			$class  = get_called_class();
 			$fields = explode('_and_', $match[1]);
-			
+						
 			// now lets define out dynamic finder function
-			static::defineMethod($name, function($__mixed) use ($class, $fields) {
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields) {
 				
 				// get table name using convetion of ModelName to model_name; this will
 				// not fit in all cases and exception will be thrown from query if this
@@ -899,7 +899,7 @@ abstract class Model extends Delegator
 				
 				
 				
-				return $class::process($class::statement("
+				return $class::sendStatic('process', $class::statement("
 					SELECT
 						*
 						
@@ -913,6 +913,11 @@ abstract class Model extends Delegator
 				
 				
 			});
+			
+			// now call our little pretty dynamic finder method
+			return call_user_func_array(
+		  	$block, $arguments 
+			);
 		}
 		
 				
