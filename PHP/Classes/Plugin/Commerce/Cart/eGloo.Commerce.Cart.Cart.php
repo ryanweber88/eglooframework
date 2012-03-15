@@ -88,20 +88,20 @@ class Cart extends Domain\Model {
 			if (isset($_SESSION['cart_id'])) {
 				self::$cart_id = $_SESSION['cart_id'];
 				
-				// Regenerate Cookies and set it to expires in 3 days
-				setcookie('cart_id', self::$cart_id, time()+24*60*60*3, '/');
+				// Regenerate Cookies and set it to expires in 1 days
+				setcookie('cart_id', self::$cart_id, time()+24*60*60, '/');
 			
 			} elseif (isset ($_COOKIE['cart_id'])) {
 				self::$cart_id = $_COOKIE['cart_id'];
 				$_SESSION['cart_id'] = self::$cart_id;
 				
-				// Regenerate Cookies and set it to expires in 3 days
-				// setcookie('cart_id', self::$cart_id, time()+24*60*60*3);
+				// Regenerate Cookies and set it to expires in 1 days
+				// setcookie('cart_id', self::$cart_id, time()+24*60*60);
 			} else {
 				self::$cart_id = md5(uniqid(rand(), true));
 				
-				// Generate Cookies and set it to expires in 3 days
-				setcookie('cart_id', self::$cart_id, time()+24*60*60*3, '/');
+				// Generate Cookies and set it to expires in 1 days
+				setcookie('cart_id', self::$cart_id, time()+24*60*60, '/');
 			}
 		}
 		return true;
@@ -118,7 +118,7 @@ class Cart extends Domain\Model {
 	public static function destroyCart() {
 		self::$cart_id = null;
 		unset($_SESSION['cart_id']);
-		setcookie('cart_id', self::getCartID(), time() - 24*60*60*3, '/');
+		setcookie('cart_id', self::getCartID(), time() - 24*60*60, '/');
 		return true;
 	}
 
