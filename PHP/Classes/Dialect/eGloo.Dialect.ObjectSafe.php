@@ -518,7 +518,7 @@ abstract class ObjectSafe {
 		if (preg_match('/^(.+)\_\_$/', $name, $match)) {
 			$field = $match[1];
 			
-			if (!isset($this->$field)) {
+			if (!isset($this->$field) || is_null($this->$field)) {
 				$this->$field = $value;
 			}
 			
