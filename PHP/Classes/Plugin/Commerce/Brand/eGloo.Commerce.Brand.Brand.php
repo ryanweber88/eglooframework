@@ -110,9 +110,12 @@ class Brand extends Domain\Model {
 	public static function loadBrandList() {
 		$result = array();
 		$rows = BrandDataAccess::fetch()->loadBrandList();
+
 		foreach ($rows as $row) {
 			$result[] = new static($row);
 		}
+		
+		
 		return $result;
 	}
 	

@@ -221,12 +221,18 @@ abstract class ObjectSafe {
 		});		
 				
 		
-		static::defineMethod('namespaceName', function($class) {
+		static::defineMethod('namespacename', function($class) {
 			
 			return $class::cache('namespace', function($class) {
 				$reflection = new \ReflectionClass($class);
 				return $reflection->getNamespaceName();
 			});
+		});
+		
+		static::defineMethod('send', function($name, $arguments) use ($class) {
+			return call_user_func_array(
+				'staticStatic', func_get_args()
+			);
 		});
 		
 		

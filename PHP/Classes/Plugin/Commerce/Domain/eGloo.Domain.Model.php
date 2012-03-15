@@ -141,7 +141,7 @@ abstract class Model extends Delegator
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
-				$table     = strtolower( \eGlooString::toUnderscores($class::className()) );
+				$table     = $class::sendStatic('signature');
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
 				
@@ -173,7 +173,7 @@ abstract class Model extends Delegator
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
-				$table     = strtolower( \eGlooString::toUnderscores($class::className()) );
+				$table     = $class::sendStatic('signature');
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
 				
@@ -196,6 +196,43 @@ abstract class Model extends Delegator
 				
 			});
 		}
+	}
+	
+	protected function __methods() {
+		parent::__methods();
+
+		// Provides a callback/deferred space in which to group transactions;
+
+		$this->defineMethod('transaction', function($lambda) {
+
+			// @TODO trigger begin transaction
+		
+			try {
+				$result = $lambda();
+			} 
+			
+			catch(\Exception $pass) {
+				throw $pass;
+			}
+			
+			return $result;
+		
+		// @TODO trigger end transaction
+	
+		});
+		
+	}
+	
+	protected static function __methodsStatic() {
+		
+		$class = get_called_class();
+		
+		static::defineMethod('transaction', function($lambda) {
+			throw new \Exception(
+				"Class-level transaction support not implemented"
+			);
+		});
+		
 	}
 
 	/**
@@ -296,7 +333,7 @@ abstract class Model extends Delegator
 			: InflectionsSafe::isSingular($relationshipName);
 			
 				
-		if (class_exists($model = "$ns\\$name") || class_exists($model = "$ns\\{$this->className()}\\$name")) {
+		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
 			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 				
 				
@@ -445,8 +482,39 @@ abstract class Model extends Delegator
 	/**
 	 * A stubb method here to be used by concrete model classes
 	 */
-	protected function __relationships() { }
-	protected function __callbacks()     { }
+	protected function __relationships() {
+		
+		$class     = $this->classname();
+		$namespace = $this->namespace();
+		
+		// check for status relationship and draw if exists, we could
+		// explicitly do this in a try/catch, but would present a serious
+		// issue were someone to write a generic Common.Domain.Model.Status
+		// class; so here, our convention is "if there is a Status class
+		// in Comon.Domain.Model.$ClassName namespace, then define status
+		// relationship"
+		if (class_exists($model = "$namespace\\$class\\Status")) {
+			$self = $this;
+			
+			$this->hasOne('Status', function() use ($self, $model) {
+				return $model::find($self->id);
+			});
+						
+			// finally alias $this->status to $this->Status->class_name_status
+			// for convenient lookup; please remember that this can be overwritten
+			// at anytime during initialization, so be cautious
+			$field = strtolower(\eGlooString::toUnderscores($class)) . "_status";
+			
+			if ($this->Status->exists() && isset($this->Status->$field)) {
+				$this->status__ = $this->Status->$field;
+			} 
+		}
+		
+	}
+
+	protected function __callbacks() { }
+	
+
 	
 	/** Callbacks **************************************************************/
 	
@@ -467,7 +535,19 @@ abstract class Model extends Delegator
 		});
 	}
 	
-	
+	/**
+	 * Attempts to find a model's "signature" which is a pattern based on namespace + class;
+	 * basically everything appearing after "model" in namespace will be underscored 
+	 */
+	protected static function signature() {
+		// get signature pattern - so Common\Domain\ModelProductOption\Status, will be
+		// converted to product_option_status; this could have been accomplished on 
+		// one line, but we sacrifice readability
+		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, get_called_class()));
+		$signature = strtolower(\eGlooString::toUnderscores(implode('_', $tokens)));
+		
+		return $signature;
+	}
 	
 	/**
 	 * Provides an array representation of modelphp 
