@@ -24,10 +24,13 @@ class Range extends \eGloo\Dialect\Object {
 			}
 		}
 		
-		throw \eGloo\Dialect\Exception(
-			"Invalid range $range"
-		);
+		else {
+			throw \Exception(
+				"Invalid range $range"
+			);
+		}
 	}
+		
 	
 	/**
 	 * 

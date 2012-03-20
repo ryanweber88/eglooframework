@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Domain;
 
+use \eGloo\Utilities\Collection;
 
 /**
  * Serves as parent class to all *DataAcces Classes; general purpose is to provide
@@ -43,8 +44,30 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			', $table);	
 		});
 	}
+
+	/**
+	 * Specify columns to select from
+	 * @TODO chain and lazy-load
+	 */
+	public static function selects($__mixed) {
+		
+	}
+	
+	public static function from($__mixed)    { }
+	
+	/**
+	 * Alias to from
+	 */	
+	public static function joins($__mixed)   { }
 	
 	
+	/**
+	 * Allows easy list of conditions to be applied
+	 * @TODO chain and lazy-load
+	 */
+	public static function where($__mixed)   {
+		
+	}
 	
 
 
@@ -61,10 +84,33 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 			if (isset($idioms['using'])) {
 			
+				
 				// next check if idiom with_fields exists; this is optional
 				// in which case fields will be queried from information schema
 				if(!isset($idioms['with_columns'])) {
-					$idioms['with_columns'] = static::columns($idioms['into']);
+					
+					if ( $idioms['using'] instanceof Model ) {
+						$columns = array_keys($idioms['using']->toArray());
+					}
+					
+					else if (is_array(($idioms['using']))) {
+						$columns = Collection::isHash($idioms['using'])
+						
+							// use array keys from using
+							? array_keys($idioms['using'])
+							
+							// otherwise grab a static list of columns from
+							// our table name
+							: static::columns($idioms['into']);
+					}
+					
+					else {
+						throw new \Exception (
+							"Failed inserts because idiom 'using' is invalid " . print_r(
+								$idioms['using']
+						));
+					}
+
 				}
 								
 				// columns have been passed as tokenized string
@@ -303,108 +349,111 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		preg_match('/^\s*?(\S+)/is', $statement, $match);
 		
 		
-		
-		
-		$method = ($match = strtolower($match[1])) == 'select'
+		$method = ($classification = strtolower($match[1])) == 'select'
 			? 'getList'
 			: 'execute' . ucfirst($match);
 			
-		if ($method != 'getList') {
+		
+		
+		// check if query requires arguments list	
+		if (preg_match('/\?/s', $statement)) {
 			
-			if ($match == 'update') {
-				preg_match_all('/([^\s\.]+)\s+?\=/is', $statement, $matches, PREG_SET_ORDER);
+			// select, update, delete all share similar style in terms of key = ?
+			// whether it be for assignment or just condition
+			if (in_array($classification, array('select', 'update', 'delete'))) {
+				preg_match_all('/([^\s\.]+)\s*?\=\s*?\?/is', $statement, $matches, PREG_SET_ORDER);
 
 				foreach($matches as $pair) {
 					$fields[] = $pair[1];
 				}
 			}
 				
-			else if ($match == 'insert' ) {
+			else if ($classification == 'insert' ) {
 				preg_match('/\((.+?)\)/s', $statement, $match);
 				$fields = explode(',', $match[1]);
 			}	
-			
+						
 			// make sure field values are trimmed
 			foreach ($fields as $key => $value) {
 				$fields[$key] = trim($value);
 			}
 			
-		}		
-		
-		// lets do some magic - lets determine arguments if first
-		// argument is a model, and we are performing an update/insert
-		// statememnt; please note that this isn't always going to 
-		// work so use with caution
-		
-		if (isset($arguments[0]) && 
-				($model = $arguments[0]) instanceof Model) { 
+			// lets do some magic - lets determine arguments if first
+			// argument is a model, and we are performing an update/insert
+			// statememnt; please note that this isn't always going to 
+			// work so use with caution
 			
-			// lets reset our arguments list with those arguments gleaned
-			// from statement itself
-			$arguments = array(); 
-			
-			if (is_array($fields)) { 
+			if (isset($arguments[0]) && 
+					($model = $arguments[0]) instanceof Model) {
+						
+				 
+				// lets reset our arguments list with those arguments gleaned
+				// from statement itself
+				$arguments = $model->toArray();
 				
-				foreach($fields as $index => $field) { 
-					try { 
-						$arguments[$field = trim($field)] = $model->$field;	
-					}
-									
-					catch(\Exception $passthrough) {
+			}
+	
+			// otherwise, lets see if arguments is an associative array; if this 
+			// is the case, we want to match arguments up to fields (in terms)		
+			if (\eGloo\Utilities\Collection::isHash($arguments)) {
+				
+				//
+				foreach($fields as $index => $field) {
+					if (isset($arguments[$field])) {
+						$temporary[$field = trim($field)] = isset($arguments[$field])
 						
-						$arguments[$field = trim($field)] = null;
-						unset($fields[$index]);
-						
-						// @TODO this is an instancer where I'd like to have a StackException
-						
-						
-						//throw new \Exception(
-						//	"Could not find attribute $field on receiver " . get_class($model) . 
-						//	" when attempting to autogenerate arguments for statement"	
+							? $arguments[$field]
 							
-						//);
-						
-						//throw $passthrough;
+							: null;
 					}
+					
+			
+					
+					//else {
+					//	throw new \Exception(
+					//		"Statement failed because key '$field' does not exist in arguments list: " . print_r(
+					//			$arguments
+					//	));
+					//}
 				}
 				
+				$arguments = $temporary;
 			}
-			
-			else {
-				throw new \Exception(
-					"Failed to automatically detect fields from statement $statement"		
-				);
-			}
+					
 		}
 
 		// if running an execute statement and argument isn't available
-		// remove from query		
-		if ($method != 'getList') {
+		// remove from query
+		// @TODO this shouldn't be done this way, but for the time being
+		// to save time on queries, we remove fields that aren't available
+		// in the passed argument list	
+		if ($classification != 'select') {
 									
 			foreach ($arguments as $key => $value) {
-				if (is_null($value)) {
 		
+				if (is_null($value)) {
+					
 					unset($arguments[$key]);
 					
 					// if an insert statement
-					if (stripos($method, 'insert') !== false) {
+					if ($classification == 'insert') {
 						// now remove field from arguments list in statement
 						$statement = preg_replace("/{$key}([\s\,\)])/", '$1', $statement);
 						
 					}
 					
 					// otherwise an update
-					else if (stripos($method, 'update') !== false) {
+					else if ($classification == 'update') {
 						$statement = preg_replace('/{$key}\s*\=\s*[\S]+\s/is', null, $statement);
 					}
 					
-					else if (stripos($method, 'delete') !== false) {
-						
-					}
+				
+					
 				}
+				
 			}
 			
-			if (stripos($method, 'insert') !== false) {
+			if ($classification == "insert") {
 				// replace argument/value lists
 				
 				$statement = preg_replace(
@@ -424,9 +473,10 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						
 			}
 			
-			else if (stripos($method, 'update') !== false) {
+			else if ($classification == 'update') {
 				// don't know what to do here yet - specifying all columns explicitly
 			}
+			
 			
 		}
 				

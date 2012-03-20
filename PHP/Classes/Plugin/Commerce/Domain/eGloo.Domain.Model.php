@@ -750,6 +750,37 @@ abstract class Model extends Delegator
 		
 	}
 	
+	/**
+	 * Temporary measure to provide simple where condition
+	 * for associative arrays for query-building; this doesn't really belong in
+	 * the model class and will be moved
+	 */
+	public static function where($__mixed) {
+			
+		// @TODO do associative check	
+		$arguments  = $__mixed;
+		$model      = new static;
+		$table      = $model->signature();
+		$conditions = array();
+		
+		foreach ($arguments as $key => $ignore) {
+			$conditions[] = "$key = ?";
+		}
+				
+		
+		return static::statement("
+			SELECT
+				$table.*
+			
+			FROM
+				$table
+			
+			WHERE
+					( $conditions )
+		
+		", $arguments);
+	}
+	
 	
 	public function update() {
 		$this->runCallbacks(__FUNCTION__);
@@ -1069,9 +1100,44 @@ abstract class Model extends Delegator
 			// compatibility on anything that is explicitly 
 			// setting/getting on properties
 			$this->properties[$key] = $value;
+			
+		
+			// now record change
+			$this->changes[$key][] = $value;
 		}
 		
 		return $this;
+	}
+
+	/**
+	 * Determines if model instance has changed since initialization
+	 */
+	public function changed() {
+		$self = $this;
+		
+		return $this->cache(function() use ($self) {
+			if ($self->initialized()) {
+				$changes = &$self->reference('changes');
+				
+				// iterate through change list - if a change property has more than one 
+				// value in its change list, then it has clearly changed, thus marking
+				// the model as changed
+				foreach ($changes as $key => $values) {
+					if (count($values) > 1) {
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		});
+	}
+	
+	/**
+	 * Explicitly lists changes 
+	 */
+	public function changes() {
+		return $this->changes;
 	}
 	
 	/**
@@ -1156,13 +1222,42 @@ abstract class Model extends Delegator
 		}
 		
 		// check for _change|changes pattern
-		if (preg_match('/^(.+)_(change(s|d)?)$/', $name)) {
+		if (preg_match('/^(.+)_((change(s|d)?)|was)$/', $name, $match)) {
+			$field  = $match[1];
+			$action = $match[2]; 
 			
-		}
-		
-		if (preg_match('/^(.+)_was/', )) {
+			if (isset($this->$field)) {
+				
+				// 'changed' asks if field value has changed since originally
+				// initialized value
+				if ($action == 'changed') {
+					$self = $this;
+					
+					return $this->cache($name, function() use ($self) { 
+						return count($this->changes[$field]) > 1;
+					});
+				}
+				
+				// otherwise we are asking to see a list of explicit changes
+				// for this field
+				else if ($action == 'changes') {
+					return $this->changes[$field];
+				}
+				
+				// lastly, we determine original initialized value of
+				// changes
+				else {
+					return $this->changes[$field][0];
+				}
+			}
 			
+			else {
+				throw new \Exception(
+					"Failed to determine change history because field '$field' does not exist on receiver " . get_called_class()
+				); 
+			}
 		}
+
 				
 		if (\property_exists($this, $field = "{$class}_$name")) {
 			$this->aliasProperty($name, $field);
@@ -1200,6 +1295,15 @@ abstract class Model extends Delegator
 		
 		
 	}	
+
+	/**
+	 * The purpose of a scope is to encapsulate chain calling
+	 * and provide a chain-calling mechanism of its own
+	 */
+	protected function scope($name, $lambda) {
+		
+		return $this;
+	}
 	
 	public function __toString() {
 		if (($field = static::constGet('NATURAL_KEY'))) {
@@ -1243,6 +1347,6 @@ abstract class Model extends Delegator
 	protected $validates   = array();
 	protected $callbacks   = array();
 	private   $initialized = false;
-	protected $changed     = array();
+	protected $changes     = array();
 }
 
