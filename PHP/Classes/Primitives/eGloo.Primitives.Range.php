@@ -1,10 +1,4 @@
 <?php
-/**
- * 
- * Enter description here ...
- * @author Christian Calloway
- *
- */
 namespace eGloo\Primitives;
 
 /**
@@ -14,7 +8,7 @@ namespace eGloo\Primitives;
  * @todo   method_missing
  *
  */
-class Range extends \eGloo\Dialect\Object { 
+class Range extends \eGloo\Dialect\ObjectSafe { 
 	
 	function __construct($range) {
 		if (static::valid($range)) {
@@ -48,26 +42,7 @@ class Range extends \eGloo\Dialect\Object {
 		return false;
 	}
 	
-	public function __call($name, $arguments) {
-		
-		if ($name == 'toArray') {
-			return range($this->start, $this->end);	
-		}
-		
-		
-		parent::__call($name, $arguments);
-	}
-	
-	public function __callstatic($name, $arguments) {
-		
-		// handle toArray for static
-		if ($name == 'toArray') {
-			$range = new Range($arguments[0]);
-			return $range->toArray();
-		}
-		
-	}
-	
+
 	protected $start;
 	protected $end;
 }

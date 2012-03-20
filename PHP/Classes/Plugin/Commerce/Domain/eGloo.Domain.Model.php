@@ -304,6 +304,10 @@ abstract class Model extends Delegator
 		);
 	}
 	
+	protected function hasRelationship($name) {
+		return isset($this->relationships[$name]);
+	}
+	
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
 	 * idiomatic reasons only
@@ -334,8 +338,17 @@ abstract class Model extends Delegator
 			
 				
 		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
-			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+			
+			$relationships = &$self->reference('relationships');
+			$relationships[$relationshipName] = $model;
 				
+			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+					
+				
+				// get reference to relationships and make reference that relationship is
+				// beging created
+				$result = null;
+
 				
 				// check if the model exists in the database to ensure we are
 				// not running queries against an empty/shallow model - because
@@ -381,7 +394,6 @@ abstract class Model extends Delegator
 							$result = new Model\Set($temporary);
 						}
 						
-						return $result;
 					}
 					
 				}
@@ -392,15 +404,22 @@ abstract class Model extends Delegator
 				// an empty result or a failure to find data), 
 				// we return a shallow copy of our relationship(s), either as an instance
 				// of model or emptyset, based on plurality rules
-
-				return $singular
-					
-					// return an empty instance of model
-					? new $model
-					
-					
-					: new Model\Set($model);
 				
+				if (!$result) {
+
+					return $singular
+						
+						// return an empty instance of model
+						? new $model
+						
+						
+						: new Model\Set($model);
+					
+				}
+				
+				// otherwise we return result as is, which can be any value outside
+				// of null
+				return $result;
 			});
 		}
 		
@@ -495,19 +514,12 @@ abstract class Model extends Delegator
 		// relationship"
 		if (class_exists($model = "$namespace\\$class\\Status")) {
 			$self = $this;
-			
+
 			$this->hasOne('Status', function() use ($self, $model) {
-				return $model::find($self->id);
+				return $model::find($self->status_id);
 			});
-						
-			// finally alias $this->status to $this->Status->class_name_status
-			// for convenient lookup; please remember that this can be overwritten
-			// at anytime during initialization, so be cautious
-			$field = strtolower(\eGlooString::toUnderscores($class)) . "_status";
 			
-			if ($this->Status->exists() && isset($this->Status->$field)) {
-				$this->status__ = $this->Status->$field;
-			} 
+						
 		}
 		
 	}
@@ -595,7 +607,7 @@ abstract class Model extends Delegator
 		//parent::__properties();
 		
 		// from ClassNameYada derive pattern class_class1_class2
-		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		$class = static::signature();
 		
 		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 		// with model; in the future need to determine existence of primary key and cache 
@@ -603,6 +615,16 @@ abstract class Model extends Delegator
 
 		
 		$this->aliasPrimaryKey("{$class}_id");
+		
+		
+
+		
+		// check if model has status relationship
+		if ($this->hasRelationship('Status') && $this->Status->exists()) {
+			$field = "{$this->signature()}_status";
+			$this->status__ = $this->Status->$field;
+		}
+		
 					
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
@@ -754,6 +776,7 @@ abstract class Model extends Delegator
 	 * Temporary measure to provide simple where condition
 	 * for associative arrays for query-building; this doesn't really belong in
 	 * the model class and will be moved
+	 * @TODO put into relation
 	 */
 	public static function where($__mixed) {
 			
@@ -1171,7 +1194,9 @@ abstract class Model extends Delegator
 			// to __call, but simply to call methods, which look like
 			// properties, where it makes sense 
 			if (count($reflection->getParameters()) == 0) {
-				$this->$name = null;
+				// for some reason, removing this allows us to see relationship in 
+				// export statements (even the valid relationship model value is there..)
+				//$this->$name = null;
 				
 				$this->$name = call_user_func(
 						$this->_methods[$name]
@@ -1344,9 +1369,10 @@ abstract class Model extends Delegator
 		);
 	}	
 
-	protected $validates   = array();
-	protected $callbacks   = array();
-	private   $initialized = false;
-	protected $changes     = array();
+	protected $validates     = array();
+	protected $callbacks     = array();
+	private   $initialized   = false;
+	protected $changes       = array();
+	protected $relationships = array();
 }
 

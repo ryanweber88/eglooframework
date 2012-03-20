@@ -324,6 +324,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 		} 
 		
+		
 	
 	
 		// determine who is calling method - this will be used to track down where/when
@@ -359,13 +360,19 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		if (preg_match('/\?/s', $statement)) {
 			
 			// select, update, delete all share similar style in terms of key = ?
-			// whether it be for assignment or just condition
+			// or key in (?..); essentially a conditional
 			if (in_array($classification, array('select', 'update', 'delete'))) {
-				preg_match_all('/([^\s\.]+)\s*?\=\s*?\?/is', $statement, $matches, PREG_SET_ORDER);
-
-				foreach($matches as $pair) {
-					$fields[] = $pair[1];
+				foreach(array('/([^\s\.]+)\s*?\=\s*?\?/is', '/([^\s\.]+?)\s+?in\s*?\(.+?\)/is') as $index => $pattern) { 
+					if (preg_match_all($pattern, $statement, $matches, PREG_SET_ORDER)) {
+							
+						foreach($matches as $pair) {
+							$fields[] = $pair[1];
+						}
+						
+						break;
+					}
 				}
+					
 			}
 				
 			else if ($classification == 'insert' ) {
@@ -374,6 +381,10 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			}	
 						
 			// make sure field values are trimmed
+			if (!isset($fields)) {
+				echo $statement; exit;
+				
+			}			
 			foreach ($fields as $key => $value) {
 				$fields[$key] = trim($value);
 			}
