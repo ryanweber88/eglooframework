@@ -1154,6 +1154,15 @@ abstract class Model extends Delegator
 				return $this->$name;
 			};
 		}
+		
+		// check for _change|changes pattern
+		if (preg_match('/^(.+)_(change(s|d)?)$/', $name)) {
+			
+		}
+		
+		if (preg_match('/^(.+)_was/', )) {
+			
+		}
 				
 		if (\property_exists($this, $field = "{$class}_$name")) {
 			$this->aliasProperty($name, $field);
@@ -1234,5 +1243,6 @@ abstract class Model extends Delegator
 	protected $validates   = array();
 	protected $callbacks   = array();
 	private   $initialized = false;
+	protected $changed     = array();
 }
 
