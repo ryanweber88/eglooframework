@@ -364,7 +364,7 @@ abstract class Model extends Delegator
 						
 						if (\eGloo\Utilities\Collection::isHash($result)) {
 							$result = new $model($result);
-							
+				
 							// @TODO this is a shortcut to we establish a better rule
 							// in terms of convetion around singular vs set
 							
@@ -397,6 +397,9 @@ abstract class Model extends Delegator
 					}
 					
 				}
+
+
+
 
 				
 				// if the model doesn't exist (the case where we have a "shallow"
@@ -618,12 +621,7 @@ abstract class Model extends Delegator
 		
 		
 
-		
-		// check if model has status relationship
-		if ($this->hasRelationship('Status') && $this->Status->exists()) {
-			$field = "{$this->signature()}_status";
-			$this->status__ = $this->Status->$field;
-		}
+
 		
 					
 		// iterate across properties and determine if they
@@ -657,6 +655,16 @@ abstract class Model extends Delegator
 				}
 			}
 		}
+		
+		// check if model has status relationship
+		// @TODO this may be a bit too specific for this instance
+		if (isset($this->status_id)          &&
+		    $this->hasRelationship('Status') && 
+		    $this->Status->exists()) {
+		    	
+			$field = "{$this->signature()}_status";
+			$this->status__ = $this->Status->$field;
+		}		
 	
 			
 	}
@@ -1089,6 +1097,7 @@ abstract class Model extends Delegator
 	public function __set($key, $value) {
 		
 		//echo "attempting set on $key\n";
+
 		
 		// we first attempt to resolve set within parent, which
 		// is responsible for evaluating meta patterns. If they
@@ -1102,9 +1111,12 @@ abstract class Model extends Delegator
 			parent::__set($key, $value);
 		}
 		
-		catch(\Exception $ignore)  { 
+		catch(\Exception $ignore)  {
+			 
 			$failed = true;
 		}
+		
+		
 		
 		// if parent has thrown an exception, then meta tests have
 		// failed and we intentionally wish to defined a dynamic 
