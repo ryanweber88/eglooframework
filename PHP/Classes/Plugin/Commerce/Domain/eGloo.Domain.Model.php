@@ -44,9 +44,9 @@ abstract class Model extends Delegator
 	public static function __static() {
 		
 	
-		$class          = get_called_class();
-		$formattedClass = strtolower(\eGlooString::toUnderscores(static::classname()));
-		$classname      = static::classname();
+		$class     = get_called_class();
+		$signature = static::signature();
+		$classname = static::classname();
 			
 		// assign static delegation 
 		Delegator::delegate($class, get_class(static::data()));
@@ -83,7 +83,7 @@ abstract class Model extends Delegator
 							$pattern, $alias, $method->getName()
 						)));
 						
-						$alias = str_replace("{$formattedClass}_", null, $alias);
+						$alias = str_replace("{$signature}_", null, $alias);
 						$from  = $method->getName();
 						
 						try {

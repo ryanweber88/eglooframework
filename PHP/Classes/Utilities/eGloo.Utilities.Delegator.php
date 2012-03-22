@@ -15,23 +15,7 @@ abstract class Delegator extends Object {
 		$this->delegated = $delegated;
 	}
 	
-	/**
-	 * Allows for delegation on a moreso granular level to any instance
-	 */
-	protected function delegate(array $methods, $receiver) {
-		
-		// first check that our delegation is valid 
-		if (is_object($receiver)) {
-			
-		}
-		
-		else {
-			throw new \Exception(
-				"Failed delegation to '$receiver' because it is not an object"
-			);
-		}
-		
-	}
+
 	
 	/**
 	 * Determines if method exists on delegated and call at instance level

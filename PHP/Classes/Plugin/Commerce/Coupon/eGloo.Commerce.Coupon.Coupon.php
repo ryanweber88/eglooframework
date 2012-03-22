@@ -1,7 +1,10 @@
 <?php
 namespace eGloo\Commerce\Coupon;
+
+
 use \eGloo\Commerce,
-	\eGloo\Utility;
+	  \eGloo\Utility,
+    \eGloo\Domain;
 
 /**
  * Coupon Class File
@@ -38,58 +41,15 @@ use \eGloo\Commerce,
  * @subpackage Commerce
  */
 
-class Coupon {
+class Coupon extends Domain\Model {
 	
-	const COUPON_TYPE_SHIPPING		= 1,
-			COUPON_TYPE_PRODUCT		= 2,
-			COUPON_TYPE_ORDER		= 3;
+	const COUPON_TYPE_SHIPPING = 1,
+        COUPON_TYPE_PRODUCT  = 2,
+        COUPON_TYPE_ORDER    = 3;
 	
-	const DISCOUNT_TYPE_AMOUNT		= 1,
-			DISCOUNT_TYPE_PERCENT	= 2,
-			DISCOUNT_TYPE_FLAT_RATE = 3;
+	const DISCOUNT_TYPE_AMOUNT    = 1,
+        DISCOUNT_TYPE_PERCENT	  = 2,
+        DISCOUNT_TYPE_FLAT_RATE = 3;
 	
-	public function __construct (array $args) {
-		if (!is_array($args) || sizeof($args) == 0) {
-			throw new \InvalidArgumentException();
-		}
-		
-		foreach ( $args as $key => $value ){
-			$this->{$key} = $value;
-			
-		}
-	}
-	
-	/**
-	 * Populate data int the Coupon object
-	 * 
-	 * @param type $key
-	 * @param type $value 
-	 */
-	public function __set($key, $value) {
-		$this->$key = $value;
-		return true;
-	}
-	
-	/**
-	 * Getter for the Coupon Object
-	 * 
-	 * @param type $key
-	 * 
-	 * @return mix type object retrieved from user
-	 */
-	public function __get( $key ) {
-		if (isset($this->properties[$key])) {
-			return $this->properties[$key];
-		}
-		return false;
-	}
-	
-	/**
-	 * Return String version of this object
-	 * @return type 
-	 */
-	public function __toString () {
-		return var_export($this, true);
-	}
 	
 }
