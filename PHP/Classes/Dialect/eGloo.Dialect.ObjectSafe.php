@@ -243,7 +243,7 @@ abstract class ObjectSafe {
 			// or cache key only, is option as a key value (we can get a unique key 
 			// by getting a signature from closure/block
 			$key = $mixed;
-			
+
 			if (is_callable($mixed)) {
 				$reflection = new \ReflectionFunction($mixed);
 				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
@@ -518,7 +518,7 @@ abstract class ObjectSafe {
 		if (preg_match('/^(.+)\_\_$/', $name, $match)) {
 			$field = $match[1];
 			
-			if (!isset($this->$field)) {
+			if (!isset($this->$field) || is_null($this->$field)) {
 				$this->$field = $value;
 			}
 			

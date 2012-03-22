@@ -249,6 +249,20 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					return $set;
 				}
 				
+				// otherwise check if offset is a valid range "1..10";
+				// in which case we return a new set with elements that fall
+				// within prescribed range 
+				else if (\eGloo\Primitives\Range::valid($offset)) {
+					// unfortunately we can't 
+					$set = new static($this->model);
+					
+					foreach($this as $model) {
+						$set[] = $model;
+					}
+					
+					return $set;
+				}
+				
 				else {
 		
 					foreach($this as $model) {

@@ -44,9 +44,9 @@ abstract class Model extends Delegator
 	public static function __static() {
 		
 	
-		$class          = get_called_class();
-		$formattedClass = strtolower(\eGlooString::toUnderscores(static::classname()));
-		$classname      = static::classname();
+		$class     = get_called_class();
+		$signature = static::signature();
+		$classname = static::classname();
 			
 		// assign static delegation 
 		Delegator::delegate($class, get_class(static::data()));
@@ -83,7 +83,7 @@ abstract class Model extends Delegator
 							$pattern, $alias, $method->getName()
 						)));
 						
-						$alias = str_replace("{$formattedClass}_", null, $alias);
+						$alias = str_replace("{$signature}_", null, $alias);
 						$from  = $method->getName();
 						
 						try {
@@ -304,6 +304,10 @@ abstract class Model extends Delegator
 		);
 	}
 	
+	protected function hasRelationship($name) {
+		return isset($this->relationships[$name]);
+	}
+	
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
 	 * idiomatic reasons only
@@ -334,8 +338,17 @@ abstract class Model extends Delegator
 			
 				
 		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
-			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+			
+			$relationships = &$self->reference('relationships');
+			$relationships[$relationshipName] = $model;
 				
+			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+					
+				
+				// get reference to relationships and make reference that relationship is
+				// beging created
+				$result = null;
+
 				
 				// check if the model exists in the database to ensure we are
 				// not running queries against an empty/shallow model - because
@@ -351,7 +364,7 @@ abstract class Model extends Delegator
 						
 						if (\eGloo\Utilities\Collection::isHash($result)) {
 							$result = new $model($result);
-							
+				
 							// @TODO this is a shortcut to we establish a better rule
 							// in terms of convetion around singular vs set
 							
@@ -381,10 +394,12 @@ abstract class Model extends Delegator
 							$result = new Model\Set($temporary);
 						}
 						
-						return $result;
 					}
 					
 				}
+
+
+
 
 				
 				// if the model doesn't exist (the case where we have a "shallow"
@@ -392,15 +407,22 @@ abstract class Model extends Delegator
 				// an empty result or a failure to find data), 
 				// we return a shallow copy of our relationship(s), either as an instance
 				// of model or emptyset, based on plurality rules
-
-				return $singular
-					
-					// return an empty instance of model
-					? new $model
-					
-					
-					: new Model\Set($model);
 				
+				if (!$result) {
+
+					return $singular
+						
+						// return an empty instance of model
+						? new $model
+						
+						
+						: new Model\Set($model);
+					
+				}
+				
+				// otherwise we return result as is, which can be any value outside
+				// of null
+				return $result;
 			});
 		}
 		
@@ -495,19 +517,12 @@ abstract class Model extends Delegator
 		// relationship"
 		if (class_exists($model = "$namespace\\$class\\Status")) {
 			$self = $this;
-			
+
 			$this->hasOne('Status', function() use ($self, $model) {
-				return $model::find($self->id);
+				return $model::find($self->status_id);
 			});
-						
-			// finally alias $this->status to $this->Status->class_name_status
-			// for convenient lookup; please remember that this can be overwritten
-			// at anytime during initialization, so be cautious
-			$field = strtolower(\eGlooString::toUnderscores($class)) . "_status";
 			
-			if ($this->Status->exists() && isset($this->Status->$field)) {
-				$this->status__ = $this->Status->$field;
-			} 
+						
 		}
 		
 	}
@@ -595,7 +610,7 @@ abstract class Model extends Delegator
 		//parent::__properties();
 		
 		// from ClassNameYada derive pattern class_class1_class2
-		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+		$class = static::signature();
 		
 		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 		// with model; in the future need to determine existence of primary key and cache 
@@ -603,6 +618,11 @@ abstract class Model extends Delegator
 
 		
 		$this->aliasPrimaryKey("{$class}_id");
+		
+		
+
+
+		
 					
 		// iterate across properties and determine if they
 		// fit pattern of $class_(name)
@@ -635,6 +655,16 @@ abstract class Model extends Delegator
 				}
 			}
 		}
+		
+		// check if model has status relationship
+		// @TODO this may be a bit too specific for this instance
+		if (isset($this->status_id)          &&
+		    $this->hasRelationship('Status') && 
+		    $this->Status->exists()) {
+		    	
+			$field = "{$this->signature()}_status";
+			$this->status__ = $this->Status->$field;
+		}		
 	
 			
 	}
@@ -748,6 +778,38 @@ abstract class Model extends Delegator
 				$this->whatsInvalid(), true
 		));
 		
+	}
+	
+	/**
+	 * Temporary measure to provide simple where condition
+	 * for associative arrays for query-building; this doesn't really belong in
+	 * the model class and will be moved
+	 * @TODO put into relation
+	 */
+	public static function where($__mixed) {
+			
+		// @TODO do associative check	
+		$arguments  = $__mixed;
+		$model      = new static;
+		$table      = $model->signature();
+		$conditions = array();
+		
+		foreach ($arguments as $key => $ignore) {
+			$conditions[] = "$key = ?";
+		}
+				
+		
+		return static::statement("
+			SELECT
+				$table.*
+			
+			FROM
+				$table
+			
+			WHERE
+					( $conditions )
+		
+		", $arguments);
 	}
 	
 	
@@ -1035,6 +1097,7 @@ abstract class Model extends Delegator
 	public function __set($key, $value) {
 		
 		//echo "attempting set on $key\n";
+
 		
 		// we first attempt to resolve set within parent, which
 		// is responsible for evaluating meta patterns. If they
@@ -1048,9 +1111,12 @@ abstract class Model extends Delegator
 			parent::__set($key, $value);
 		}
 		
-		catch(\Exception $ignore)  { 
+		catch(\Exception $ignore)  {
+			 
 			$failed = true;
 		}
+		
+		
 		
 		// if parent has thrown an exception, then meta tests have
 		// failed and we intentionally wish to defined a dynamic 
@@ -1069,9 +1135,44 @@ abstract class Model extends Delegator
 			// compatibility on anything that is explicitly 
 			// setting/getting on properties
 			$this->properties[$key] = $value;
+			
+		
+			// now record change
+			$this->changes[$key][] = $value;
 		}
 		
 		return $this;
+	}
+
+	/**
+	 * Determines if model instance has changed since initialization
+	 */
+	public function changed() {
+		$self = $this;
+		
+		return $this->cache(function() use ($self) {
+			if ($self->initialized()) {
+				$changes = &$self->reference('changes');
+				
+				// iterate through change list - if a change property has more than one 
+				// value in its change list, then it has clearly changed, thus marking
+				// the model as changed
+				foreach ($changes as $key => $values) {
+					if (count($values) > 1) {
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		});
+	}
+	
+	/**
+	 * Explicitly lists changes 
+	 */
+	public function changes() {
+		return $this->changes;
 	}
 	
 	/**
@@ -1105,7 +1206,9 @@ abstract class Model extends Delegator
 			// to __call, but simply to call methods, which look like
 			// properties, where it makes sense 
 			if (count($reflection->getParameters()) == 0) {
-				$this->$name = null;
+				// for some reason, removing this allows us to see relationship in 
+				// export statements (even the valid relationship model value is there..)
+				//$this->$name = null;
 				
 				$this->$name = call_user_func(
 						$this->_methods[$name]
@@ -1154,6 +1257,44 @@ abstract class Model extends Delegator
 				return $this->$name;
 			};
 		}
+		
+		// check for _change|changes pattern
+		if (preg_match('/^(.+)_((change(s|d)?)|was)$/', $name, $match)) {
+			$field  = $match[1];
+			$action = $match[2]; 
+			
+			if (isset($this->$field)) {
+				
+				// 'changed' asks if field value has changed since originally
+				// initialized value
+				if ($action == 'changed') {
+					$self = $this;
+					
+					return $this->cache($name, function() use ($self) { 
+						return count($this->changes[$field]) > 1;
+					});
+				}
+				
+				// otherwise we are asking to see a list of explicit changes
+				// for this field
+				else if ($action == 'changes') {
+					return $this->changes[$field];
+				}
+				
+				// lastly, we determine original initialized value of
+				// changes
+				else {
+					return $this->changes[$field][0];
+				}
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed to determine change history because field '$field' does not exist on receiver " . get_called_class()
+				); 
+			}
+		}
+
 				
 		if (\property_exists($this, $field = "{$class}_$name")) {
 			$this->aliasProperty($name, $field);
@@ -1191,6 +1332,15 @@ abstract class Model extends Delegator
 		
 		
 	}	
+
+	/**
+	 * The purpose of a scope is to encapsulate chain calling
+	 * and provide a chain-calling mechanism of its own
+	 */
+	protected function scope($name, $lambda) {
+		
+		return $this;
+	}
 	
 	public function __toString() {
 		if (($field = static::constGet('NATURAL_KEY'))) {
@@ -1231,8 +1381,10 @@ abstract class Model extends Delegator
 		);
 	}	
 
-	protected $validates   = array();
-	protected $callbacks   = array();
-	private   $initialized = false;
+	protected $validates     = array();
+	protected $callbacks     = array();
+	private   $initialized   = false;
+	protected $changes       = array();
+	protected $relationships = array();
 }
 

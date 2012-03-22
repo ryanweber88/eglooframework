@@ -15,6 +15,8 @@ abstract class Delegator extends Object {
 		$this->delegated = $delegated;
 	}
 	
+
+	
 	/**
 	 * Determines if method exists on delegated and call at instance level
 	 * if the case
@@ -96,7 +98,7 @@ abstract class Delegator extends Object {
 	}
 	
 	
-	
-	protected $delegated;
-	protected static $associated = array();
+	protected static $associated = array();	
+	protected        $delegated;
+	protected        $delegatedTo = array();    
 }
