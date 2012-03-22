@@ -25,7 +25,6 @@
  * @version 1.0
  */
 
-
 // Check for the minimum PHP version to run the framework
 
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
@@ -42,7 +41,6 @@ if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
 	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
 	exit;
 }
-
 
 // Build a request info bean
 $requestInfoBean = RequestInfoBean::getInstance();

@@ -234,6 +234,20 @@ final class Configuration {
 		$webRootConfigOptions['egInterfaceBundle']		= $_SERVER['EG_UI'];
 
 		// Check if we're displaying traces in the UI or not
+		if ( isset($_SERVER['EG_APD_PROFILE']) ) {
+			switch( $_SERVER['EG_APD_PROFILE'] ) {
+				case 'ON' :
+					$webRootConfigOptions['egAPDProfile'] = true;
+					break;
+				case 'OFF' :
+					$webRootConfigOptions['egAPDProfile'] = false;
+					break;
+				default :
+					break;
+			}
+		}
+
+		// Check if we're displaying traces in the UI or not
 		if ( isset($_SERVER['EG_APD_TRACE']) ) {
 			switch( $_SERVER['EG_APD_TRACE'] ) {
 				case 'ON' :
@@ -2194,6 +2208,10 @@ final class Configuration {
 		return isset(self::$configuration_options['egAPCCacheEnabled']) ? self::$configuration_options['egAPCCacheEnabled'] : false;
 	}
 
+	public static function getUseAPDProfile() {
+		return isset(self::$configuration_options['egAPDProfile']) ? self::$configuration_options['egAPDProfile'] : false;
+	}
+
 	public static function getUseAPDTrace() {
 		return isset(self::$configuration_options['egAPDTrace']) ? self::$configuration_options['egAPDTrace'] : false;
 	}
@@ -2326,6 +2344,10 @@ final class Configuration {
 		}
 
 		return $retVal;
+	}
+
+	public static function getUseXdebugTrace() {
+		return isset(self::$configuration_options['egXdebugTrace']) ? self::$configuration_options['egXdebugTrace'] : false;
 	}
 
 	public static function getWebRoot() {
