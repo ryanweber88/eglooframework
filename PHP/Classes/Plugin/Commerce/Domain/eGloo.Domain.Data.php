@@ -353,18 +353,18 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		$method = ($classification = strtolower($match[1])) == 'select'
 			? 'getList'
 			: 'execute' . ucfirst($match);
-			
-		
-		
+
+		$fields = array();
+
 		// check if query requires arguments list	
-		if (preg_match('/\?/s', $statement)) {
+		if (preg_match('/\?/', $statement)) {
 			
 			// select, update, delete all share similar style in terms of key = ?
 			// or key in (?..); essentially a conditional
+
 			if (in_array($classification, array('select', 'update', 'delete'))) {
-				foreach(array('/([^\s\.]+)\s*?\=\s*?\?/is', '/([^\s\.]+?)\s+?in\s*?\(.+?\)/is') as $index => $pattern) { 
+				foreach(array('/([^\s\.]+)\s*?\=\s*?\?/is', '/([^\s\.]+?)\s+?in\s*?\(.+?\)/is') as $index => $pattern) {
 					if (preg_match_all($pattern, $statement, $matches, PREG_SET_ORDER)) {
-							
 						foreach($matches as $pair) {
 							$fields[] = $pair[1];
 						}
@@ -379,12 +379,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				preg_match('/\((.+?)\)/s', $statement, $match);
 				$fields = explode(',', $match[1]);
 			}	
-						
-			// make sure field values are trimmed
-			if (!isset($fields)) {
-				echo $statement; exit;
-				
-			}			
+
 			foreach ($fields as $key => $value) {
 				$fields[$key] = trim($value);
 			}

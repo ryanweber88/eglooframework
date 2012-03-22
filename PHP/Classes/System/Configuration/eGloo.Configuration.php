@@ -233,6 +233,20 @@ final class Configuration {
 		$webRootConfigOptions['egApplicationName']		= preg_replace('~([a-zA-Z0-9/ ]*/)?([a-zA-Z0-9 ]*?)\.gloo~', '$2', $_SERVER['EG_APP']);
 		$webRootConfigOptions['egInterfaceBundle']		= $_SERVER['EG_UI'];
 
+		// Check if we're displaying traces in the UI or not
+		if ( isset($_SERVER['EG_APD_TRACE']) ) {
+			switch( $_SERVER['EG_APD_TRACE'] ) {
+				case 'ON' :
+					$webRootConfigOptions['egAPDTrace'] = true;
+					break;
+				case 'OFF' :
+					$webRootConfigOptions['egAPDTrace'] = false;
+					break;
+				default :
+					break;
+			}
+		}
+
 		if ( isset($_SERVER['EG_CACHE']) ) {
 			switch( $_SERVER['EG_CACHE'] ) {
 				case 'ON' :
@@ -2178,6 +2192,10 @@ final class Configuration {
 
 	public static function getUseAPCCache() {
 		return isset(self::$configuration_options['egAPCCacheEnabled']) ? self::$configuration_options['egAPCCacheEnabled'] : false;
+	}
+
+	public static function getUseAPDTrace() {
+		return isset(self::$configuration_options['egAPDTrace']) ? self::$configuration_options['egAPDTrace'] : false;
 	}
 
 	public static function getUseCache() {
