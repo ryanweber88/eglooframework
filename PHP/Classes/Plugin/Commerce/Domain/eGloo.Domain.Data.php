@@ -45,29 +45,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		});
 	}
 
-	/**
-	 * Specify columns to select from
-	 * @TODO chain and lazy-load
-	 */
-	public static function selects($__mixed) {
-		
-	}
-	
-	public static function from($__mixed)    { }
-	
-	/**
-	 * Alias to from
-	 */	
-	public static function joins($__mixed)   { }
-	
-	
-	/**
-	 * Allows easy list of conditions to be applied
-	 * @TODO chain and lazy-load
-	 */
-	public static function where($__mixed)   {
-		
-	}
+
 	
 
 
@@ -355,6 +333,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			: 'execute' . ucfirst($match);
 			
 		
+		$fields = array();
 		
 		// check if query requires arguments list	
 		if (preg_match('/\?/s', $statement)) {

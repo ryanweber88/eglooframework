@@ -67,6 +67,15 @@ spl_autoload_register('eglooAutoload');
  * These conditional includes are ordered for speed; do not reorganize without benchmarking and serious testing
  */
 
+ 
+// Load Bella
+// @Temporary
+//if ( eGlooConfiguration::getUseBella() ) {
+if ( true ) { 
+	include( eGlooConfiguration::getBellaIncludePath() );
+}
+ 
+ 
 // Load Haanga
 if ( eGlooConfiguration::getUseHaanga() ) {
 	include( eGlooConfiguration::getHaangaIncludePath() );
@@ -142,6 +151,7 @@ function eglooAutoload( $class_name ) {
 					__constructStatic($class_name);
 					
 				} catch ( \Exception $e ) {
+					var_export($e);
 					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
 					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
 

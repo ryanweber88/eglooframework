@@ -726,6 +726,10 @@ abstract class ObjectSafe {
 		return $tokens[count($tokens)-1];
 	}
 	
+	public static function classNameFull() {
+		return get_called_class();
+	}
+	
 
 	
 	protected static $_singleton;

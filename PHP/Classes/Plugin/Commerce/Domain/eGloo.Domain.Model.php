@@ -38,6 +38,8 @@ abstract class Model extends Delegator
 		$this->__relationships();
 		$this->__callbacks();
 		$this->__attributes();
+		
+
 	}
 
 	/** @Polymorphic */ 
@@ -195,6 +197,22 @@ abstract class Model extends Delegator
 				
 				
 			});
+		}
+		
+		// delegate our query building methods to Relation
+		// @TODO we should delegate to scoped which should handle
+		// the rest
+		$reflection = new \ReflectionClass(static::classNameFull());
+			
+		// @TODO user is causing all kinds of fucking problem when not
+		// receiving an initializing hash; so i am taking the bitch out
+		// for the moment
+		if (!$reflection->isAbstract() && static::className() != 'User') {
+			
+			static::delegates(array(
+				'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group'),
+				'to'      => new Model\Relation(new static) 
+			));
 		}
 	}
 	

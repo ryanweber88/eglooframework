@@ -2203,6 +2203,10 @@ final class eGlooConfiguration {
 		// return self::$configuration_options['SwiftPath'];
 		return self::$configuration_options['FrameworkRootPath'] . '/Library/Swift4/lib/swift_required.php';
 	}
+	
+	public static function getBellaIncludePath() {
+		return self::$configuration_options['FrameworkRootPath'] . '/Library/bella/bella.php';
+	}
 
 	public static function getTwigIncludePath() {
 		// TODO make this customizable
