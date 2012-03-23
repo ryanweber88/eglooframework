@@ -56,6 +56,12 @@ class Program extends Domain\Model {
 	 * @return mix type object retrieved from Product
 	 */
 	public function __get($key) {
+		
+		try {
+			return parent::__get($key);
+		}
+		
+		catch(\Exception $deferred) { }
 
 		if (($method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key))) {
 
@@ -69,9 +75,7 @@ class Program extends Domain\Model {
 				
 		}
 		
-		// pass our meta lookup to parent
-		return parent::__get($key);
-		
+		throw $deferred;
 		
 	}
 

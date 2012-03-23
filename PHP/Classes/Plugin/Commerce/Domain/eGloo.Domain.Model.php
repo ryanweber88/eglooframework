@@ -46,7 +46,7 @@ abstract class Model extends Delegator
 	public static function __static() {
 		
 	
-		$class     = get_called_class();
+		$class     = static::classNameFull();
 		$signature = static::signature();
 		$classname = static::classname();
 			
@@ -243,7 +243,7 @@ abstract class Model extends Delegator
 	
 	protected static function __methodsStatic() {
 		
-		$class = get_called_class();
+		$class = static::classNameFull();
 		
 		static::defineMethod('transaction', function($lambda) {
 			throw new \Exception(
@@ -373,6 +373,15 @@ abstract class Model extends Delegator
 				// there is nothing to match against here
 				if ($self->initialized()) {
 					$result = $lambda($model);
+					
+					// if returned result is an instance of relationship, which is a query build tool
+					// then evaluate and pass to statement
+					// @TODO the relation should be responsible for the build of model instance, not just
+					// as a query build tool - this will have to be addressed, but converting right now
+					// will present too much variability
+					if ($result instanceof Model\Relation) {
+						$result = static::statement($result->build());
+					}
 
 					// check if singular result or hash (which would indicate
 					// a single record being returned); if an array is returned
@@ -576,7 +585,7 @@ abstract class Model extends Delegator
 		// get signature pattern - so Common\Domain\ModelProductOption\Status, will be
 		// converted to product_option_status; this could have been accomplished on 
 		// one line, but we sacrifice readability
-		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, get_called_class()));
+		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, static::classNameFull()));
 		$signature = strtolower(\eGlooString::toUnderscores(implode('_', $tokens)));
 		
 		return $signature;
@@ -738,7 +747,7 @@ abstract class Model extends Delegator
 		// otherwise we have passed an invalid argument to create and
 		// we throw an exception to that fact
 		else {
-			$class = get_called_class();
+			$class = static::getCalledClass();
 			
 			throw new \Exception(
 				"Failed to create instance of '$model' because argument(s) are invalid " . print_r(
@@ -994,8 +1003,8 @@ abstract class Model extends Delegator
 	 * @TODO is this even needed anymore if we are delegating to data class?
 	 */
 	protected static function data($__mixed = null) {
-		$className     = get_called_class();
-		$dataClassName = get_called_class() . 'DataAccess';
+		$className     = static::classNameFull();
+		$dataClassName = static::classNameFull() . 'DataAccess';
 
 		$interface = class_exists($dataClassName)
 			? $dataClassName::instance()
@@ -1056,7 +1065,7 @@ abstract class Model extends Delegator
 		
 		
 		if (preg_match('/^find_by_(.+)$/', $name, $match)) {
-			$class  = get_called_class();
+			$class  = static::classNameFull();
 			$fields = explode('_and_', $match[1]);
 						
 			// now lets define out dynamic finder function
@@ -1250,7 +1259,7 @@ abstract class Model extends Delegator
 				}
 				
 				else {
-					$class = get_class($this);
+					$class = static::classNameFull();
 					
 					throw new \Exception(
 						"Failed to get count of association {$match[1]} because class '$class' does not exist"
@@ -1308,7 +1317,7 @@ abstract class Model extends Delegator
 			
 			else {
 				throw new \Exception(
-					"Failed to determine change history because field '$field' does not exist on receiver " . get_called_class()
+					"Failed to determine change history because field '$field' does not exist on receiver " . static::classNameFull()
 				); 
 			}
 		}
@@ -1376,7 +1385,7 @@ abstract class Model extends Delegator
 	
 	private function guessPrimaryKey() {
 		// attempt to get primary key based on strlower(classname)_id pattern
-		$tokens       = explode('\\', get_class());
+		$tokens       = explode('\\', static::classNameFull());
 		$primary_key  = strtolower(array_pop($tokens)) . '_id';
 		
 		return property_exists($this, $primary_key)

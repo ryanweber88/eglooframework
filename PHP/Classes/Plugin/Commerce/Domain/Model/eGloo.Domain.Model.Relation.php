@@ -9,9 +9,14 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	function __construct(Domain\Model $model) {
 		$this->builder    = new \Bella\Table($model->signature());
 		$this->composed = $model::classNameFull(); 
+		
+		$this->chain = $this->builder;
 	}
 	
-
+	
+	/**
+	 * 
+	 */
 	public function selects($__mixed) {
 		$arguments = Collection::flatten(func_get_args());
 		// if we only have one argument, we have either passed
@@ -32,16 +37,40 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 				$arguments = $argument;
 			}
 			
+			else {
+				throw new \Exception(
+					"Failed determining 'selects' because arguments are not valid : " . print_r (
+					$__mixed		
+				));
+			}
 		}
 		
-		try {
-			echo $this->builder->project(implode(',', $arguments))->to_sql(); exit;
-		}
-		catch(\Exception $e) {
-			echo $e; exit;
-		}
-		
+		$this->chain = $this->chain->project(implode(',', $arguments));
+				
 	}
+	
+	/**
+	 * 
+	 */
+	public function where($mixed, $arguments = null) {
+		
+		if (Collection::isHash($conditions = $mixed)) {
+				
+		}
+		
+		else if (is_string($conditions = $mixed)) {
+			
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed determining 'where' because arguments are not valid : " . print_r (
+				$mixed		
+			));
+		}
+				
+	}
+	
 	public function joins($__mixed) { }
 	
 	public function on($__mixed) { }
@@ -52,10 +81,11 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	/**
 	 * Evaluates query 
 	 */
-	protected function evaluate() {
-		
+	public function build() {
+		return $this->builder->to_sql();
 	}
 
 	protected $builder;	
+	protected $chain;
 	protected $composed;
 }
