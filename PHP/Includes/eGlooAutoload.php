@@ -112,6 +112,22 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 // TODO place into configuration
 require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php';
 
+// Let's override some built-in functions in profiling mode
+if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDProfile() ) {
+	apd_set_pprof_trace();
+	register_shutdown_function( 'apd_profile_exit' );
+}
+
+// Let's override some built-in functions in ADP debug mode
+if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDTrace() ) {
+	apd_set_pprof_trace();
+	register_shutdown_function( 'apd_trace_exit' );
+}
+
+// Let's override some built-in functions in xdebug mode
+if ( extension_loaded('xdebug') && eGlooConfiguration::getUseXdebugTrace() ) {
+	register_shutdown_function( 'xdebug_exit' );
+}
 
 /**
  * Defines the class and interface autoload runtime handler.
@@ -666,33 +682,66 @@ function throws( $mixed ) {
 	throw $exception;
 }
 
+function print_backtrace_header( $backtrace ) {
+	if ( isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
+		$header = $backtrace[0]['function'] . ' invoked in "' . $backtrace[1]['function'] . '" on class "' . $backtrace[1]['class'];
+		$header .= '" on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
+		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+	} else {
+		$header = $backtrace[0]['function'] . ' invoked on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
+		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+	}
+
+	echo $header;
+}
+
+function vprint_r( $mixed ) {
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo '<pre>';
+			print_r( '<b>Argument #' . $name . '</b>' );
+			echo '</pre>';
+
+			echo '<pre>';
+			print_r( $value );
+			echo '</pre>';
+		}
+	} else {
+		echo '<pre>';
+		print_r($mixed);
+		echo '</pre>';
+	}
+}
+
+function vvar_dump( $mixed ) {
+	if ( func_num_args() > 1 ) {
+		foreach( func_get_args() as $name => $value ) {
+			echo '<pre>';
+			var_dump( '<b>Argument #' . $name . '</b>' );
+			echo '</pre>';
+
+			echo '<pre>';
+			var_dump( $value );
+			echo '</pre>';
+		}
+	} else {
+		echo '<pre>';
+		var_dump($mixed);
+		echo '</pre>';
+	}
+}
+
 /**
  * Convenience method
  */
 function echo_r( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
-			echo_r( '<b>Argument #' . $name . '</b>' );
-			echo_r( $value );
-		}
-	}
-
-	echo '<pre>';
-	print_r($mixed);
-	echo '</pre>';
+	print_backtrace_header( debug_backtrace() );
+	vprint_r( $mixed );
 }
 
 function echo_d( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
-			echo_r( '<b>Argument #' . $name . '</b>' );
-			echo_d( $value );
-		}
-	}
-
-	echo '<pre>';
-	var_dump($mixed);
-	echo '</pre>';
+	print_backtrace_header( debug_backtrace() );
+	vvar_dump( $mixed );
 }
 
 /**
@@ -705,14 +754,8 @@ function die_r( $mixed ) {
 		session_write_close();
 	}
 
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
-			echo_r( '<b>Argument #' . $name . '</b>' );
-			echo_r( $value );
-		}
-	} else {
-		echo_r( $mixed );
-	}
+	print_backtrace_header( debug_backtrace() );
+	vprint_r( $mixed );
 
 	die;
 }
@@ -724,14 +767,8 @@ function die_d( $mixed ) {
 		session_write_close();
 	}
 
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
-			echo_r( '<b>Argument #' . $name . '</b>' );
-			echo_d( $value );
-		}
-	} else {
-		echo_d( $mixed );
-	}
+	print_backtrace_header( debug_backtrace() );
+	vvar_dump( $mixed );
 
 	die;
 }
@@ -743,6 +780,44 @@ function big( $mixed ) {
 	echo '<h1>';
 	print_r($mixed);
 	echo '</h1>';
+}
+
+function apd_profile_exit() {
+	echo "\n\n" . '<!-- BEGIN APD PROFILE' . "\n\n";
+
+	$process_id = getmypid();
+	$apd_dump_dir = ini_get('apd.dumpdir');
+	$profile_location = $apd_dump_dir . '/' . 'pprof.' . $process_id;
+
+	$profile_files = array();
+
+	foreach( glob($profile_location . '.*') as $filename ) {
+		$profile_files[fileatime($filename)] = $filename;
+	}
+
+	ksort( $profile_files );
+	$profile_file = array_pop( $profile_files );
+
+	echo $profile_file;
+
+	$profile_output = shell_exec( '/usr/local/bin/pprofp -u ' . $profile_file );
+
+	echo $profile_output;
+
+	echo "\n\n" . 'END APD PROFILE -->';
+}
+
+function apd_trace_exit() {
+	echo "\n\n" . '<!-- BEGIN APD TRACE' . "\n\n";
+
+	echo "\n\n" . 'END APD TRACE -->';
+}
+
+function xdebug_exit() {
+	$xdebug_stack = xdebug_get_function_stack();
+	echo "\n\n" . '<!-- BEGIN XDEBUG TRACE' . "\n\n";
+	print_r($xdebug_stack);
+	echo "\n\n" . 'END XDEBUG TRACE -->';
 }
 
 /**
@@ -841,3 +916,4 @@ function __constructStatic($name) {
 		}
 	}
 }
+
