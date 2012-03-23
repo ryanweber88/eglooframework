@@ -7,8 +7,8 @@ use \eGloo\Domain,
 class Relation extends \eGloo\Dialect\ObjectSafe {
 	
 	function __construct(Domain\Model $model) {
-		$this->builder    = new \Bella\Table($model->signature());
-		$this->composed = $model::classNameFull(); 
+		$this->builder = new \Bella\Table($model->signature());
+		$this->model   = $model; 
 		
 		$this->chain = $this->builder;
 	}
@@ -46,20 +46,47 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		}
 		
 		$this->chain = $this->chain->project(implode(',', $arguments));
+		
+		return $this;
 				
 	}
 	
 	/**
 	 * 
 	 */
-	public function where($mixed, $arguments = null) {
+	public function where($mixed, $__arguments = null) {
 		
-		if (Collection::isHash($conditions = $mixed)) {
-				
+
+		
+		// it is assumed that if hash, we have passed key:value pairs, and
+		// not key:? placeholders.. we push our values into arguments
+		
+		if (Collection::isHash($arguments = $mixed)) {
+			foreach($arguments as $field => $value) {
+				$conditions[]      = "$key = ?";
+				$this->arguments[] = $value; 
+			}
+			
+			$conditions = implode (' AND ', $conditions);
 		}
 		
-		else if (is_string($conditions = $mixed)) {
+		// otherwise we simply pass string to to our builder and check if 
+		// arguments have been passed as well
+		else if (is_string($mixed)) {
 			
+			$conditions = $mixed;
+					
+			// arguments can be variable length, so we determine first,
+			// if they have been passed
+			if (!is_null($__arguments)) {
+				// since our first argument is required we slice off the first element
+				$arguments = array_slice(func_get_args(), 1);
+				
+				// now we merge onto our list of arguments
+				$this->arguments = array_merge(
+					$this->arguments, $arguments
+				);
+			}			
 		}
 		
 		else {
@@ -68,6 +95,11 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 				$mixed		
 			));
 		}
+			
+		// pass our conditions to where method and return instance
+		$this->chain = $this->chain->where($conditions);
+		
+		return $this;
 				
 	}
 	
@@ -79,13 +111,21 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	public function group($number) { }
 	
 	/**
-	 * Evaluates query 
+	 * Evaluates query and executes on statement 
 	 */
 	public function build() {
-		return $this->builder->to_sql();
+		$result = $model::statement(
+			$this->builder->to_sql(), $this->arguments
+		);
+			
+		// now lets flush our chain and arguments to prepare
+		// for fresh query
+		$this->arguments = array();
+		$this->chain     = null;	
 	}
 
 	protected $builder;	
 	protected $chain;
-	protected $composed;
+	protected $model;
+	protected $arguments;
 }

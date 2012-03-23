@@ -312,6 +312,14 @@ abstract class Model extends Delegator
 		);
 	}
 	
+	/**
+	 * An alias to hasOne, but provides a more idiomatic signature for
+	 * the relationship
+	 */
+	protected function belongsTo($name, $lambda) {
+		return $this->hasOne($name, $lambda);
+	}
+	
 	protected function hasMany($name, $lambda) {
 		if (InflectionsSafe::isPlural($name)) {
 			return $this->defineRelationship($name, $lambda, false);
@@ -668,9 +676,16 @@ abstract class Model extends Delegator
 		
 		foreach($properties as $name) {
 
-			if (preg_match("/{$class}_(.+)/", $name, $match)) {
+			// in some instances, for sub model types, like coupon\type, our convention doesn't work for
+			// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
+			// look for a field matching the exact name
+			if (preg_match("/{$class}_(.+)/", $name, $match) || $name == $class) {
 				
-
+				
+				$alias = $name == $class
+					? preg_replace('/^.+_/', null, $name)
+					: $match[1];
+					
 				try { 
 					$this->aliasProperty(
 						strtolower($match[1]), $name	

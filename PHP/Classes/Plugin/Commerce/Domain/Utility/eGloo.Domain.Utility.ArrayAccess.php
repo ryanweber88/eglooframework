@@ -171,7 +171,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			}
 		}
 		
-		return false;
+		return '';
 		
 		// unfortunately we have to do a return of the exception, because a raised
 		// exception in __toString does not return the 
