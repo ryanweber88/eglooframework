@@ -47,12 +47,22 @@ class SelectManager extends TreeManager
 	
 	public function on($expressions)
 	{
+		$this->ast->on[] = $expressions;
 		
+		return $this;
 	}
 	
-	public function join($relation, $class)
-	{
+	public function eq($expression) {
+		$this->ast->eq[count($this->ast->on) - 1] = $expression;
 		
+		return $this;
+	}
+	
+	public function join($relation)
+	{
+		$this->ast->joins[] = $relation;
+		
+		return $this;
 	}
 	
 	public function skip($amount)

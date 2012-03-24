@@ -5,6 +5,10 @@ class NodeSelectStatement extends Node
 {
 	public $orders, $froms, $projections, $wheres, $groups, $having, $offset,  $limit;
 	
+	public $joins = array();
+	public $on    = array();
+	public $eq    = array();
+	
 	public function __construct()
 	{
 		$this->limit = NULL;

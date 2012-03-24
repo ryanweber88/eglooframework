@@ -147,6 +147,7 @@ abstract class Model extends Delegator
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
 				
+				
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
 				try {
@@ -822,38 +823,6 @@ abstract class Model extends Delegator
 		
 	}
 	
-	/**
-	 * Temporary measure to provide simple where condition
-	 * for associative arrays for query-building; this doesn't really belong in
-	 * the model class and will be moved
-	 * @TODO put into relation
-	 */
-	public static function where($__mixed) {
-			
-		// @TODO do associative check	
-		$arguments  = $__mixed;
-		$model      = new static;
-		$table      = $model->signature();
-		$conditions = array();
-		
-		foreach ($arguments as $key => $ignore) {
-			$conditions[] = "$key = ?";
-		}
-				
-		
-		return static::statement("
-			SELECT
-				$table.*
-			
-			FROM
-				$table
-			
-			WHERE
-					( $conditions )
-		
-		", $arguments);
-	}
-	
 	
 	public function update() {
 		$this->runCallbacks(__FUNCTION__);
@@ -998,6 +967,8 @@ abstract class Model extends Delegator
 		catch(\Exception $ignore) {
 			//var_export($ignore); exit;
 		}
+		
+		$this->primaryKeyName = $from;
 	}
 	
 	/**
@@ -1089,7 +1060,7 @@ abstract class Model extends Delegator
 				// get table name using convetion of ModelName to model_name; this will
 				// not fit in all cases and exception will be thrown from query if this
 				// is the case
-				$table = strtolower( \eGlooString::toUnderscores($class::className()) );
+				$table = $class::sendStatic('signature');
 				
 				// build string representation of query coinditionals
 				$conditions = array();
@@ -1184,6 +1155,23 @@ abstract class Model extends Delegator
 		}
 		
 		return $this;
+	}
+
+	/**
+	 * Returns a "by-convention" (ie, best guess) of what the primary
+	 * key name is - this should not be relied upon unless we have an
+	 * explicit understanding of underlying data structure; the methodology
+	 * by which primary key is obtained will change in the future
+	 */
+	public function primaryKeyName() {
+		
+		if (!is_null($this->primaryKeyName)) {
+			return $this->primaryKeyName;
+		}
+		
+		throw new \Exception(
+			"Failed to determine primary key name; it can be explicitly set using Model#aliasPrimaryKey"
+		);
 	}
 
 	/**
@@ -1423,10 +1411,11 @@ abstract class Model extends Delegator
 		);
 	}	
 
-	protected $validates     = array();
-	protected $callbacks     = array();
-	private   $initialized   = false;
-	protected $changes       = array();
-	protected $relationships = array();
+	protected $validates      = array();
+	protected $callbacks      = array();
+	private   $initialized    = false;
+	protected $changes        = array();
+	protected $relationships  = array();
+	protected $primaryKeyName; 
 }
 

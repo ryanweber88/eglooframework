@@ -175,6 +175,7 @@ class SQLVisitor implements Visitor
 		}
 
 		$projections_sql = "";
+		
 		if ( $projections = $node->projections )
 		{
 			$projections_sql .= " ";
@@ -189,6 +190,35 @@ class SQLVisitor implements Visitor
 			
 			$projections_sql .= implode(', ', $segments);
 		}
+		
+		else {
+			$projections_sql = " * ";
+		}
+		
+		// sets see if we can add the fucking joins
+		// statements; 
+		
+		
+		$segments = array();
+		$table     = $this->visit($node->froms);
+		$joins_sql = "\n";
+		
+		if (count($node->joins)) {
+			for ($counter = 0; $counter < count($node->joins); $counter++) {
+				$join = $node->joins[$counter];
+				$on   = $node->on[$counter];
+				$eq   = isset($this->eq[$counter])
+					? $this->eq[$counter]
+					: $on;
+				
+				
+				$segments[] = "INNER JOIN $join ON $join.$eq = $table.$on";
+			}
+			
+			$joins_sql .= implode ("\n", $segments);
+		}
+		
+		
 
 		$group_sql = "";
 		if ( $groups = $node->groups )
@@ -204,11 +234,15 @@ class SQLVisitor implements Visitor
 			$group_sql .= implode(', ', $segments);
 		}
 
-		$where_sql = "";
+		$where_sql;
+		
 		if ( $node->wheres)
 		{
-			$expression = $this->visit($node->wheres);
-			$where_sql = " WHERE {$expression}";
+			// @TODO for some tard reason, this stupid shit was quoting the entire expression
+			// when it was most likely meant to quote the column name, for the time being
+			// doing a replace on quote - until it bites me in the ass
+			$expression = str_replace('\'', null, $this->visit($node->wheres));
+			$where_sql = "\nWHERE {$expression}";
 		}
 		
 		$having_sql = "";
@@ -237,7 +271,7 @@ class SQLVisitor implements Visitor
 			$limit_sql = " LIMIT {$limit}";
 		}
 		
-		return "SELECT{$projections_sql}{$from_sql}{$where_sql}{$group_sql}{$having_sql}{$order_sql}{$limit_sql}";
+		return "SELECT{$projections_sql}{$from_sql}{$joins_sql}{$where_sql}{$group_sql}{$having_sql}{$order_sql}{$limit_sql}";
 	}
 	
 	public function visitBinaryEquality(NodeBinaryEquality $node)

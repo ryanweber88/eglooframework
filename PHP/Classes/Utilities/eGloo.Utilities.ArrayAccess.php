@@ -13,13 +13,13 @@ use \eGloo\Dialect\ObjectSafe as Object;
  */
 class ArrayAccess extends Object implements \ArrayAccess {
 	
-	function __construct($object) {
+	function __construct($receiver) {
 		// make sure we are receiving an instance
-		if (is_object($object)) { 
+		if (is_object($receiver) || is_array($receiver)) { 
 			parent::__construct();
 			
 			// this is the object to which we are delegated TO
-			$this->delegated = $object;
+			$this->delegated = $receiver;
 		}
 		
 		else { 
@@ -68,7 +68,11 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				
 			// if property is valid, it will takes precedence - deal with
 			// it buddy
-			if (\property_exists($delegated, $member)) {
+			if (is_array($delegated) && isset($delegated[$member])) {
+				$result = $delegated[$member];
+			}
+			
+			else if (\property_exists($delegated, $member)) {
 				$reflection = new \ReflectionProperty($delegated, $member);
 				$result     = $reflection->isStatic()
 					? $delegated::$$member

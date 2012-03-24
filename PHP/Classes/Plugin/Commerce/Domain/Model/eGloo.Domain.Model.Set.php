@@ -23,6 +23,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// in type
 		if ($mixed instanceof Domain\Model) {
 			$this->model = $mixed;
+			
+			// if passed in model exists, then add as first element to set
+			if ($mixed->exists()) {
+				$this->collection[] = $mixed;
+			}
 		}
 		
 		// if mixed is an array with 1+ elements, then we wrapping at collection

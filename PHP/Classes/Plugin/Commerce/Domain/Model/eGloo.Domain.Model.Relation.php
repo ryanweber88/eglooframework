@@ -4,6 +4,15 @@ namespace eGloo\Domain\Model;
 use \eGloo\Domain,
     \eGloo\Utilities\Collection;
 		
+		
+/**
+ * Represents a relationship and provides query build tools; this class is never directly
+ * invoked, but delegated to from Model. 
+ * @TODO At the moment, it simply serves as a query build, but Model#defineRelationship will
+ * eventually be moved here
+ * @TODO this->chain = $this->chain needs to scoped to a handler method
+ * 
+ */		
 class Relation extends \eGloo\Dialect\ObjectSafe {
 	
 	function __construct(Domain\Model $model) {
@@ -57,16 +66,24 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	public function where($mixed, $__arguments = null) {
 		
 
+		$conditions = array();
 		
 		// it is assumed that if hash, we have passed key:value pairs, and
 		// not key:? placeholders.. we push our values into arguments
-		
 		if (Collection::isHash($arguments = $mixed)) {
 			foreach($arguments as $field => $value) {
-				$conditions[]      = "$key = ?";
-				$this->arguments[] = $value; 
+				// @TODO should the where here be cleaning argument input, or should
+				// that job rest with extrinsic callers?
+				if (!empty($value)) {
+					$conditions[] = strpos($value, '%') !== false 
+						? "$field like ?"
+						: "$field = ?";
+						
+					$this->arguments[] = $value;
+
+				} 
 			}
-			
+						
 			$conditions = implode (' AND ', $conditions);
 		}
 		
@@ -95,7 +112,8 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 				$mixed		
 			));
 		}
-			
+					
+		
 		// pass our conditions to where method and return instance
 		$this->chain = $this->chain->where($conditions);
 		
@@ -103,9 +121,27 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 				
 	}
 	
-	public function joins($__mixed) { }
+	/**
+	 * @TODO this should really be delegated, since its a direct call on 
+	 * Bella/ARel, but delegation chains are getting complex
+	 */
+	public function joins($table) {
+		$this->chain = $this->chain->join($table);
+		//var_export($this->chain); exit;
+		
+		return $this;
+	}
+
+	/**
+	 * @TODO this should really be delegated, since its a direct call on 
+	 * Bella/ARel, but delegation chains are getting complex
+	 */	
+	public function on($field) {
+		$this->chain = $this->chain->on($field);
+		
+		return $this;
+	}
 	
-	public function on($__mixed) { }
 	public function limit($number) { }
 	public function offset($number) { }
 	public function group($number) { }
@@ -114,18 +150,31 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	 * Evaluates query and executes on statement 
 	 */
 	public function build() {
-		$result = $model::statement(
-			$this->builder->to_sql(), $this->arguments
-		);
+		//echo $this->chain->to_sql(); exit;
+		$model = $this->model;
+		$result = $model::sendStatic('process', $model::statement(
+			$this->chain->to_sql(), $this->arguments
+		));
+								
+		// our query method should always return set, so we
+		// wrap in set if we have only returned on record, which would
+		// result in a single model instance
+		if ($result instanceof Domain\Model) {
+			$result = new Domain\Model\Set($result);
+		}
+		
 			
 		// now lets flush our chain and arguments to prepare
 		// for fresh query
 		$this->arguments = array();
-		$this->chain     = null;	
+		$this->chain     = $this->builder;	
+		
+				
+		return $result;
 	}
 
 	protected $builder;	
 	protected $chain;
 	protected $model;
-	protected $arguments;
+	protected $arguments = array();
 }
