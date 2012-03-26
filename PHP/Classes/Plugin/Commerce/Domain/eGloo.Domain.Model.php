@@ -812,14 +812,25 @@ abstract class Model extends Delegator
 			
 			// based on whether model primary key is set, call the correct
 			// action method
-			return $this->exists()
+			if ($this->exists()) {
 			
-				// run update against instance if 
-				? $this->update()
+				if ($this->changed() || $this->overrides_changed === true) {
+					return $this->update();
+				}
 				
-				// unfortunately this has be passed here as we can call static
-				// context, but not have static funciton be aware of instance
-				: $this->create($this);
+				else {
+					throw new \Exception(
+						"Update failed because model has not changed; if you wish to override this  " .
+						"behavior, then set property overrides_changed to absolute true in 'before' " .
+						"save callback"
+					);
+				}
+		
+			}
+			
+			// unfortunately this has be passed here as we can call static
+			// context, but not have static funciton be aware of instance
+			return $this->create($this);
 		}
 		
 		// lets see what is missing for validation and throw exception
@@ -1156,6 +1167,11 @@ abstract class Model extends Delegator
 				
 			}
 			
+			// flag whether value has been changed, this is important
+			// for checking 
+			$changed = !isset($this->$key) || 
+			           isset($this->$key) && $this->$key !== $value;
+			
 			$this->$key = $value;
 			
 			// we also set on properties to maintain backwards 
@@ -1165,10 +1181,27 @@ abstract class Model extends Delegator
 			
 		
 			// now record change
-			$this->changes[$key][] = $value;
+			if ($changed) { 
+				$this->changes[$key][] = $value;
+			}
 		}
 		
 		return $this;
+	}
+
+	/**
+	 * Duplicates a model, but sets primary key to nil; this way, our on-save will invoke a create
+	 * as opposed to update
+	 */
+	public function duplicate() {
+		// creates a shallow copy of current instance	
+		$dup = clone $this;
+		
+		// explicitly set primary to nil so record in essence "does-not_exist"; the
+		// side-effect of this, is that calls to save will cause create action
+		$dup->id = null;
+		
+		return $dup;
 	}
 
 	/**

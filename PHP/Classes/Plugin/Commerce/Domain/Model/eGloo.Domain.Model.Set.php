@@ -178,6 +178,57 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		);
 	}
 
+
+	public function minimum($attribute, $lambda = null) {
+		$statistic = null;
+		
+		
+		// first check that last has at least one value
+		if (!$this->isEmpty()) {
+			 
+			// how check that attribute is valid
+			if (isset($this[0]->$attribute)) {	
+				foreach($this as $model) {
+					$compare = is_callable($lambda)
+						? $lamba($model->$attribute)
+						: $model->$attribute;
+					
+					if (is_null($statistic)) {
+						$statistic = $model;
+					}
+					
+					else {
+						$against = is_callable($lambda)
+							? $lambda($statistic->$attribute)
+							: $statistic->$attribute;
+							
+						if ($compare < $against) {
+							$statistic = $model;
+						}
+					}
+					
+				}
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed running column statistic '$method' on receiver '$this' for model-type '$class' ".
+					"because attribute '$attribute' does not exist"
+				);
+			}
+		}
+		
+		else {
+			$method = __FUNCTION__;
+			$class  = get_class($this->model);
+			
+			throw new \Exception(
+				"Failed running column statistic '$method' on receiver '$this' for model-type '$class' because it is empty"
+			);
+		}
+		
+		return $statistic;
+	}
 	
 	
 	/**
