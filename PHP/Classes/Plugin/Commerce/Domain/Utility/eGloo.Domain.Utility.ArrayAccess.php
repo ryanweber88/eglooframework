@@ -113,11 +113,13 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 						
 		}
 
+		
+
 		// here we provide evaluation methods on a !is_null result; make sure
 		// not to overwrite the values provided by methods already available
 		// to delegated class
 		if (!\method_exists($this->delegated, $offset) && 
-		    in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b', 'exists'))) {
+		    in_array($offset, array('evaluate', 'to_i', 'to_s', 'to_b', 'exists', 'true', 'false'))) {
 			
 			$value = $this->evaluate($result);
 			
@@ -132,6 +134,23 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				case 'exists'   :
 					$result = $value && is_object($result);
 					break;
+					
+				// determines if result is a boolean value since we have a wide range
+				// of return values that can be determined as boolean, we need to
+				// check against each and determine of is true
+				case 'true'    :
+					if (!is_null($result) && !is_object($result)) {
+						$result =  in_array($result, array(
+							true,
+							'true',
+							't',
+							1,
+							'1'
+						));
+						
+					}
+					
+					$result = false;
 						
 				default:
 					

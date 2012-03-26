@@ -61,6 +61,7 @@ class Program extends Domain\Model {
 			return parent::__get($key);
 		}
 		
+		
 		catch(\Exception $deferred) { }
 
 		if (($method = preg_replace('/(^|_)([a-z])/e', 'ucfirst("\\2")',  $key))) {
@@ -69,8 +70,8 @@ class Program extends Domain\Model {
 				if ( is_callable( array($this, 'load'. $method )) ) {
 					return call_user_func(array($this, 'load' . $method));
 				}
-			} else {
-				throw new \Exception('Undefined Method '. $method . ' invoqued');
+			//} else {
+			//	throw new \Exception('Undefined Method '. $method . ' invoqued');
 			}
 				
 		}
