@@ -199,14 +199,19 @@ class SQLVisitor implements Visitor
 		// statements; 
 		
 		
-		$segments = array();
-		$table     = $this->visit($node->froms);
-		$joins_sql = "\n";
+		$segments   = array();
+		$table      = $this->visit($node->froms);
+		$joins_sql  = "\n";
+		$primaryKey = "{$table}_id";
+		 		
 		
 		if (count($node->joins)) {
 			for ($counter = 0; $counter < count($node->joins); $counter++) {
 				$join = $node->joins[$counter];
-				$on   = $node->on[$counter];
+				$on   = isset($node->on[$counter])
+					? $node->on[$counter]
+					: $primaryKey;
+					
 				$eq   = isset($this->eq[$counter])
 					? $this->eq[$counter]
 					: $on;
