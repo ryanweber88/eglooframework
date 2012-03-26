@@ -71,15 +71,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 			if (is_array($delegated) && isset($delegated[$member])) {
 				$result = $delegated[$member];
 			}
-			
-			else if (\property_exists($delegated, $member)) {
-				$reflection = new \ReflectionProperty($delegated, $member);
-				$result     = $reflection->isStatic()
-					? $delegated::$$member
-					: $delegated->$member;
-				
-			}
-				
+
 			// if offset actually reflects an object method, then we call 
 			// method on object - this will currently not work in instances
 			// where parameters are needed; if that were to be the case,
@@ -94,6 +86,16 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				
 			}
 			
+						
+			else if (\property_exists($delegated, $member)) {
+				$reflection = new \ReflectionProperty($delegated, $member);
+				$result     = $reflection->isStatic()
+					? $delegated::$$member
+					: $delegated->$member;
+				
+			}
+				
+
 			// check if we are dealing with an object that uses array notation;
 			// if this is the case, we'll have to check against its offsetGet
 			// method for a result

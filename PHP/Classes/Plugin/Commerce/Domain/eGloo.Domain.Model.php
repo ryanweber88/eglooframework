@@ -1142,6 +1142,13 @@ abstract class Model extends Delegator
 			// @TODO remove and place into properties when we
 			// have figured out succesful toArray implementation
 			// on our classes
+			
+			// override simple get functionality with method
+			// @TODO not yet implemented
+			if (\method_exists($this, $key)) {
+				
+			}
+			
 			$this->$key = $value;
 			
 			// we also set on properties to maintain backwards 
