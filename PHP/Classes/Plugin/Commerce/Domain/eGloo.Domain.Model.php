@@ -389,7 +389,14 @@ abstract class Model extends Delegator
 					// as a query build tool - this will have to be addressed, but converting right now
 					// will present too much variability
 					if ($result instanceof Model\Relation) {
-						$result = static::statement($result->build());
+						try { 
+							$result = $result->build();
+						}
+						
+						catch(\Exception $passthrough) {
+							throw new $passthrough;
+						}
+
 					}
 
 					// check if singular result or hash (which would indicate
