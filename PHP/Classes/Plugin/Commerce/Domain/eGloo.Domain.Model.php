@@ -29,7 +29,7 @@ abstract class Model extends Delegator
 			$this->initialize($__mixed);
 		}
 		
-		echo "constructing " . get_class($this) . "\n";
+		//echo "constructing " . get_class($this) . "\n";
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
