@@ -57,18 +57,28 @@ class User extends Domain\Model {
 	 * @param array $args
 	 * @throws \InvalidArgumentException 
 	*/
-	public function __construct (array $args) {
-		if (count($args)) {
-			parent::__construct($args);
+	public function __construct ($__mixed = null) {
+		
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+				
+		if (count($arguments)) {
+			parent::__construct($arguments);
 
 			if ($this->user_id > 0 && $this->user_status_id == 1) {
-				static::$logged_in = true;
+				static::$logged_in      = true;
 				static::$active_user_id = $this->user_id;
 			}
 
+		// we wan't to be able to instantiate a new user without having it
+		// explicitly linked to an anonymous user; thus commenting out our
+		// invalid exception
 		} else { 
-			throw new \InvalidArgumentException("User does not exist in the System");
+			//throw new \InvalidArgumentException("User does not exist in the System");
+			exit('here');
 		}
+		
 	}
 
 	/**

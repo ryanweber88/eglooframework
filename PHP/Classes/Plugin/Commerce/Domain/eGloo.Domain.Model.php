@@ -29,6 +29,7 @@ abstract class Model extends Delegator
 			$this->initialize($__mixed);
 		}
 		
+		echo "constructing " . get_class($this) . "\n";
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
@@ -49,6 +50,7 @@ abstract class Model extends Delegator
 		$class     = static::classNameFull();
 		$signature = static::signature();
 		$classname = static::classname();
+		
 			
 		// assign static delegation 
 		Delegator::delegate($class, get_class(static::data()));
@@ -132,6 +134,8 @@ abstract class Model extends Delegator
 		}
 
 
+
+
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
 		// with aliases, which for the time being are more correct (specific)
@@ -199,7 +203,7 @@ abstract class Model extends Delegator
 				
 			});
 		}
-		
+				
 		// delegate our query building methods to Relation
 		// @TODO we should delegate to scoped which should handle
 		// the rest
@@ -351,6 +355,9 @@ abstract class Model extends Delegator
 						          ->singularize($name));
 		//$ns               = $this->namespace();
 		
+		//echo "-- " . static::classNameFull() . " has $name<br />"; 
+	
+		
 		// @TODO this has to be determined dynamically, but for the time being
 		// will ensure that proper model is instantiated if attempting an alias
 		// call on \Model will return \Common\Domain\Model\*
@@ -363,14 +370,18 @@ abstract class Model extends Delegator
 			? $singular
 			: InflectionsSafe::isSingular($relationshipName);
 			
-				
 		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
 			
 			$relationships = &$self->reference('relationships');
 			$relationships[$relationshipName] = $model;
+			
+			//echo "relationship model '$model'"
 				
 			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+				
 					
+				//echo "----calling relationship '$model' for class " . get_class($self) . "<br />";
+				//exit;
 				
 				// get reference to relationships and make reference that relationship is
 				// beging created
@@ -394,7 +405,7 @@ abstract class Model extends Delegator
 						}
 						
 						catch(\Exception $passthrough) {
-							throw new $passthrough;
+							throw $passthrough;
 						}
 
 					}
@@ -838,8 +849,13 @@ abstract class Model extends Delegator
 			"Cannot save model because the attributes did not pass validation : " . print_r(
 				$this->whatsInvalid(), true
 		));
-		
+
+				
 	}
+
+
+
+
 	
 	
 	public function update() {
@@ -930,6 +946,10 @@ abstract class Model extends Delegator
 	 * @return Model | Model\Set
 	 */
 	protected static function shape($result) {
+		
+		if ($result instanceof Model\Relation) {
+			return $result->build();
+		}
 		
 		if (is_array($result) && count($result)) {	
 			if (\eGloo\Utilities\Collection::isHash($result)) {
@@ -1060,6 +1080,8 @@ abstract class Model extends Delegator
 	public static function __callstatic($name, $arguments) {
 		
 		try {
+			//echo get_called_class() . "\n";
+			//echo "calling static $name on receiver " . get_called_class() . "<br />";
 			return parent::__callstatic($name, $arguments);
 		}
 		catch(\Exception $deferred) { }
@@ -1089,19 +1111,10 @@ abstract class Model extends Delegator
 				
 				$conditions = implode(' and ', $conditions); 
 				
+				return $class::sendStatic('process', $class::where(
+					$conditions, func_get_args()
+				)); 
 				
-				
-				return $class::sendStatic('process', $class::statement("
-					SELECT
-						*
-						
-					FROM
-						$table
-						
-					WHERE
-						$conditions
-						
-				", func_get_args()));
 				
 				
 			});
@@ -1268,7 +1281,6 @@ abstract class Model extends Delegator
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
-		
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
 		// check if name has been defined in methods - if so, 

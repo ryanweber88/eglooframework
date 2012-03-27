@@ -179,8 +179,17 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 
 
+	/**
+	 * Runs a "column statistic" on returned set and determines minimum value containg
+	 * model within set
+	 */
 	public function minimum($attribute, $lambda = null) {
 		$statistic = null;
+		
+		
+		return $this->statistic(function($model) use ($statistic) {
+				
+		});
 		
 		
 		// first check that last has at least one value
@@ -189,6 +198,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			// how check that attribute is valid
 			if (isset($this[0]->$attribute)) {	
 				foreach($this as $model) {
+					
+					
 					$compare = is_callable($lambda)
 						? $lamba($model->$attribute)
 						: $model->$attribute;
@@ -228,6 +239,40 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		}
 		
 		return $statistic;
+	}
+
+	public function statistic($lambda) {
+		$statistic = null;
+		
+		
+		// first check that last has at least one value
+		if (!$this->isEmpty()) {
+			 
+			// how check that attribute is valid
+			if (isset($this[0]->$attribute)) {	
+				foreach($this as $model) {
+					$statistic = $lambda($model);
+				}
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed running column statistic '$method' on receiver '$this' for model-type '$class' ".
+					"because attribute '$attribute' does not exist"
+				);
+			}
+		}
+		
+		else {
+			$method = __FUNCTION__;
+			$class  = get_class($this->model);
+			
+			throw new \Exception(
+				"Failed running column statistic '$method' on receiver '$this' for model-type '$class' because it is empty"
+			);
+		}
+		
+		return $statistic;		
 	}
 	
 	

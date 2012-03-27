@@ -50,8 +50,8 @@ class Collection extends \ArrayObject {
 	public static function flatten($collection) {
 		$return = array();
 		
-		array_walk_recursive($collection, function($a) use (&$return) {
-			$return[] = $a;
+		array_walk_recursive($collection, function($element, $key) use (&$return) {
+			$return[$key] = $element;
 		});
 		
 		return $return;

@@ -68,9 +68,13 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 
 		$conditions = array();
 		
+		
+	
+
+		
 		// it is assumed that if hash, we have passed key:value pairs, and
 		// not key:? placeholders.. we push our values into arguments
-		if (Collection::isHash($arguments = $mixed)) {
+		if (is_array($mixed) && Collection::isHash($arguments = $mixed)) {
 			foreach($arguments as $field => $value) {
 				// @TODO should the where here be cleaning argument input, or should
 				// that job rest with extrinsic callers?
@@ -97,7 +101,10 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 			// if they have been passed
 			if (!is_null($__arguments)) {
 				// since our first argument is required we slice off the first element
-				$arguments = array_slice(func_get_args(), 1);
+				$arguments = \eGloo\Utilities\Collection::flatten(array_slice(
+					func_get_args(), 1
+				));
+				
 				
 				// now we merge onto our list of arguments
 				$this->arguments = array_merge(
@@ -150,7 +157,6 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	 * Evaluates query and executes on statement 
 	 */
 	public function build() {
-		//echo $this->chain->to_sql(); exit;
 		$model = $this->model;
 		$result = $model::sendStatic('process', $model::statement(
 			$this->chain->to_sql(), $this->arguments

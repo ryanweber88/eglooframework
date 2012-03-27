@@ -131,9 +131,11 @@ abstract class Delegator extends Object {
 					}
 					
 					catch(\Exception $ignore) {
-						throw new \Exception(
-							"Failed delegating method '$name' to receiver '$class' because method does not exist"
-						);
+						echo $ignore; exit;
+						
+						//throw new \Exception(
+						//	"Failed delegating method '$name' to receiver '$class' because method does not exist"
+						//);
 					}
 				}
 			}		
@@ -161,8 +163,9 @@ abstract class Delegator extends Object {
 		$arguments = Collection::flatten(func_get_args()); 
 		
 		if (count($arguments) >= 2) {
-			$receiver = $arguments[$count = count($arguments)-1];
-			$methods  = array_slice($arguments, 0, $count - 2);
+		
+			$receiver = $arguments['to'];
+			$methods  = array_slice($arguments, 0, count($arguments) - 2);
 			
 			
 			if (is_object($receiver)) {
