@@ -15,8 +15,8 @@ use \eGloo\Domain,
  */		
 class Relation extends \eGloo\Dialect\ObjectSafe {
 	
-	function __construct(Domain\Model $model) {
-		$this->builder = new \Bella\Table($model->signature());
+	function __construct($model) {
+		$this->builder = new \Bella\Table($model::sendStatic('signature'));
 		$this->model   = $model; 
 		
 		$this->chain = $this->builder;

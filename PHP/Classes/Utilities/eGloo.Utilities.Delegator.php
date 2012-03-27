@@ -130,8 +130,9 @@ abstract class Delegator extends Object {
 						);
 					}
 					
-					catch(\Exception $ignore) {
-						echo $ignore; exit;
+					catch(\Exception $passthrough) {
+						throw new $passthrough;
+						//echo $ignore; exit;
 						
 						//throw new \Exception(
 						//	"Failed delegating method '$name' to receiver '$class' because method does not exist"

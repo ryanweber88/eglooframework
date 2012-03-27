@@ -239,7 +239,7 @@ class SQLVisitor implements Visitor
 			$group_sql .= implode(', ', $segments);
 		}
 
-		$where_sql;
+		$where_sql='';
 		
 		if ( $node->wheres)
 		{

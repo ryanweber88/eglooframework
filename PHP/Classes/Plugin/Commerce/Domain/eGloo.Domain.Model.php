@@ -30,6 +30,11 @@ abstract class Model extends Delegator
 		}
 		
 		//echo "constructing " . get_class($this) . "\n";
+		
+		if (get_class($this) == 'Common\\Domain\\Model\\Program') {
+			//var_export(debug_backtrace()); exit;
+		}
+		
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
@@ -216,7 +221,7 @@ abstract class Model extends Delegator
 			
 			static::delegates(array(
 				'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group'),
-				'to'      => new Model\Relation(new static) 
+				'to'      => new Model\Relation(static::classNameFull())
 			));
 		}
 	}
@@ -371,6 +376,7 @@ abstract class Model extends Delegator
 			: InflectionsSafe::isSingular($relationshipName);
 			
 		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
+		//if (1) {
 			
 			$relationships = &$self->reference('relationships');
 			$relationships[$relationshipName] = $model;
@@ -379,9 +385,6 @@ abstract class Model extends Delegator
 				
 			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 				
-					
-				//echo "----calling relationship '$model' for class " . get_class($self) . "<br />";
-				//exit;
 				
 				// get reference to relationships and make reference that relationship is
 				// beging created
