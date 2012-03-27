@@ -29,11 +29,6 @@ abstract class Model extends Delegator
 			$this->initialize($__mixed);
 		}
 		
-		//echo "constructing " . get_class($this) . "\n";
-		
-		if (get_class($this) == 'Common\\Domain\\Model\\Program') {
-			//var_export(debug_backtrace()); exit;
-		}
 		
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data

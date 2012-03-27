@@ -321,6 +321,7 @@ function eglooAutoload( $class_name ) {
 				try {
 					__constructStatic($class_name);
 				} catch ( \Exception $e ) {
+					var_export($e); exit;
 					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
 					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
 
@@ -908,8 +909,8 @@ function __constructStatic($name) {
 		// children of 
 		if (strpos($reflection->getDocComment(), '@Polymorphic') !== false || 
 
-		// check if __static is in declaring class, as opposed to simply available
-		// through inheritence
+				// check if __static is in declaring class, as opposed to simply available
+				// through inheritence
 				$reflection->getDeclaringClass()->getName() == $name) {
 					 
 			$name::__static();
