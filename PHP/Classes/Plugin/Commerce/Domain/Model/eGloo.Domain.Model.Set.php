@@ -209,12 +209,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	public function minimum($attribute, $lambda = null) {
 		$statistic = null;
 		
-		
-		return $this->statistic(function($model) use ($statistic) {
-				
-		});
-		
-		
 		// first check that last has at least one value
 		if (!$this->isEmpty()) {
 			 
