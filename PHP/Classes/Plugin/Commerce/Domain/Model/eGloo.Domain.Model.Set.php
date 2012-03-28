@@ -26,7 +26,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			
 			// if passed in model exists, then add as first element to set
 			if ($mixed->exists()) {
-				$this->collection[] = $mixed;
+				$this->collection[] = $mixed;  
 			}
 		}
 		
