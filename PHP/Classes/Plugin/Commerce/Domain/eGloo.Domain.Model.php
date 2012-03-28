@@ -579,7 +579,94 @@ abstract class Model extends Delegator
 		
 	}
 
-	protected function __callbacks() { }
+	protected function __callbacks() {
+		
+		$self = $this;
+		
+		// define a generic create callback based on
+		// model convention if there currently 
+		$this->defineCallback('create', function() use ($self) {
+			echo "here";
+			// check that a create callback has not already been created - this is to ensure
+			// we don't face double inserts
+			// @TODO since this was added late in the lifecycle of model design, there already
+			// exist many create callbacks - until this is cleaned up, we have to specifically
+			// check for the existence of create
+			$callbacks = &$self->reference('callbacks');
+			
+			if ($self->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
+			
+				// get instance attributes - strip the primary key if 
+				// is in list of attributes and has a null value
+				$attributes = $self->attributes();
+				$signature  = $self->send('signature');
+				
+				// apparently an associative array key with an associated value of nil is
+				// considered unset, #wtfphp
+				if (isset($attributes[$pk = $self->primaryKeyName()]) || 
+				    is_null($attributes[$pk])) {
+				
+					unset($attributes[$pk]);			
+				}
+						
+				try {
+					// set primary key with result of insert - if it has been succesfully aliased,
+					// then value will be updated on true primary key
+					// @TODO composite keys? 
+					$self->id = $self::inserts(array(
+						'into'         => $self->send('signature'),
+						'with_columns' => array_keys($attributes),
+						'using'        => array_values($attributes)
+					));	
+					
+				}
+				
+				catch(\Exception $append) {
+					throw new \Exception(
+						"Default create failed but can be overriden using setCallback(create, lambda). " . 
+						"The following message was returned : \n$append "
+					);
+				}	
+			}	
+			
+		});
+		
+		
+		// define a generic create callback based on
+		// model convention
+		$this->defineCallback('update', function() use ($self) {
+			
+			// check that a create callback has not already been created - this is to ensure
+			// we don't face double inserts
+			// @TODO since this was added late in the lifecycle of model design, there already
+			// exist many create callbacks - until this is cleaned up, we have to specifically
+			// check for the existence of create
+			$callbacks = &$self->reference('callbacks');
+			
+			if ($self->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
+				// get instance attributes
+				$attributes = $self->attributes();
+				$signature  = $self->send('signature');
+				
+				try { 
+					$self::updates(array(
+						'against'      => $self->send('signature'),
+						'with_columns' => array_keys($attributes),
+						'using'        => array_values($attributes)
+					));	
+					
+				}
+				
+				catch(\Exception $append) {
+					throw new \Exception(
+						"Default create failed but can be overriden using setCallback(create, lambda). " . 
+						"The following message was returned : \n$append "
+					);
+				}		
+			}
+		});
+				
+	}
 	
 
 	
@@ -653,6 +740,31 @@ abstract class Model extends Delegator
 		}
 		
 		return $returns;
+	}
+	
+	/**
+	 * Returns a list of attributes as associative array
+	 * @TODO this currently only works if instance exists - 
+	 * given the way model works, this perhaps should be the
+	 * required/intended behavior
+	 * @TODO name may be too close to __attributes?
+	 * @return mixed[]
+	 */
+	public function attributes() {
+		
+		$values = array();
+		
+		// iterate through properties, retrieve values and return
+		foreach(array_keys($this->properties) as $field) {
+			// @TODO there is a chance here that an alias may have the same
+			// name as a property
+			if (!isset($this->_aliasedProperties[$field])) {
+				$values[$field] = $this->$field;
+			}
+		}
+		
+		return $values;
+		
 	}
 
 	
@@ -872,7 +984,10 @@ abstract class Model extends Delegator
 	}
 	
 	
-	
+	/**
+	 * Adds a callback of type $event, to a specific point (before, around, after)
+	 * and pushes callback $lambda on event + point stack
+	 */
 	protected function defineCallback($event, $mixed, $lambda = null) {
 	
 		$point = $mixed;
@@ -895,6 +1010,53 @@ abstract class Model extends Delegator
 		}
 	
 	}
+	
+	/**
+	 * Does the same as defineCallback, but first unsets an event + point callback stack and
+	 * pushes on new event
+	 */
+	protected function setCallback($event, $mixed, $lambda = null) {
+	
+		$point = $mixed;
+	
+		if (is_null($lambda) && is_callable($mixed)) {
+			$lambda = $mixed;
+			
+			// @TODO 'around' should not be specified inline
+			$point  = 'around';
+		}
+	
+		if (is_callable($lambda)) {
+			// reset our callback stack
+			$this->callbacks[$event] = array();
+			
+			// now push first callback on stack
+			$this->callbacks[$event][$point][] = $lambda;
+		}
+	
+		else {
+			throw new \Exception(
+					"A block/lambda must be provided when defining a callback"
+			);
+		}
+	
+	}
+	
+	/**
+	 * Determines if an event + point callback stack exists
+	 */
+	protected function hasCallbacks($event, $point) {
+		// reference callbacks so my fingers fall off
+		$cs = &$this->callbacks;
+		
+		// now return condition
+		return isset($cs[$event])         && 
+		       isset($cs[$event][$point]) && 
+		       count($cs[$event][$point]);
+			
+	}
+	
+
 	
 		
 	protected function runCallbacks($event, $lambda = null) {

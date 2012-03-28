@@ -328,11 +328,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		preg_match('/^\s*?(\S+)/is', $statement, $match);
 		
 		
+		
+		
 		$method = ($classification = strtolower($match[1])) == 'select'
 			? 'getList'
-			: 'execute' . ucfirst($match);
+			: 'execute' . ucfirst($classification);
 			
-		
+					
 		$fields = array();
 		
 
