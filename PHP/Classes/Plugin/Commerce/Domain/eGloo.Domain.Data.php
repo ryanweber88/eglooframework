@@ -68,7 +68,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				if(!isset($idioms['with_columns'])) {
 					
 					if ( $idioms['using'] instanceof Model ) {
-						$columns = array_keys($idioms['using']->toArray());
+						$columns = array_keys($idioms['using']->attributes());
 					}
 					
 					else if (is_array(($idioms['using']))) {
@@ -377,7 +377,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				 
 				// lets reset our arguments list with those arguments gleaned
 				// from statement itself
-				$arguments = $model->toArray();
+				$arguments = $model->attributes();
 				
 			}
 	

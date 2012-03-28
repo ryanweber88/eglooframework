@@ -621,11 +621,13 @@ abstract class Model extends Delegator
 					
 				}
 				
-				catch(\Exception $append) {
-					throw new \Exception(
-						"Default create failed but can be overriden using setCallback(create, lambda). " . 
-						"The following message was returned : \n$append "
-					);
+				// since we guesing on this insert, we ignore sql errors and make a determination
+				// in inherited classes whether insert was successful
+				catch(\Exception $ignore) {
+					//throw new \Exception(
+					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
+					//	"The following message was returned : \n$append "
+					//);
 				}	
 			}	
 			
@@ -657,11 +659,13 @@ abstract class Model extends Delegator
 					
 				}
 				
+				// again, since this is a guess, we ignore exception and make determination that
+				// update succeeded in child classes
 				catch(\Exception $append) {
-					throw new \Exception(
-						"Default create failed but can be overriden using setCallback(create, lambda). " . 
-						"The following message was returned : \n$append "
-					);
+					//throw new \Exception(
+					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
+					//	"The following message was returned : \n$append "
+					//);
 				}		
 			}
 		});
