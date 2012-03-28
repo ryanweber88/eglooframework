@@ -51,6 +51,29 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 	}
 	
+	/**
+	 * Adds reduce/inject functionality to set; please note that lambda takes two parameters
+	 * lambda (result, model)
+	 * @returns mixed
+	 * @TODO this behavior should be moved to abstract Collection
+	 */
+	public function reduce($lambda, $initial = null) {
+		$inject = $initial;
+		
+		foreach($this as $model) {
+			$inject = $lambda($inject, $model);	
+		}
+		
+		return $inject;
+	}
+	
+	/**
+	 * An alias to reduce
+	 */
+	public function inject($lambda, $initial = null) {
+		return $this->reduce($lambda, $initial);
+	}
+	
 	
 	public function isEmpty() {
 		return count($this) === 0;	
