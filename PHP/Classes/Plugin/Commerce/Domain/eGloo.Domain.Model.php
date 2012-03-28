@@ -215,7 +215,7 @@ abstract class Model extends Delegator
 		if (!$reflection->isAbstract() && static::className() != 'User') {
 			
 			static::delegates(array(
-				'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group'),
+				'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group', 'search'),
 				'to'      => new Model\Relation(static::classNameFull())
 			));
 		}
@@ -308,12 +308,12 @@ abstract class Model extends Delegator
 	 * must still follow plurality conventions
 	 */
 	protected function hasOne($name, $lambda) {
-		if (InflectionsSafe::isSingular($name)) {
+		if (InflectionsSafe::isSingular($cleanName = preg_replace('/\s+as\s+([A-Z].*)^/', null, $name))) {
 			return $this->defineRelationship($name, $lambda, true);
 		}
 		
 		throw new \Exception(
-			"Failed to create relationship '$name' because it does not follow singularity convention"
+			"Failed to create relationship '$cleanName' because it does not follow singularity convention"
 		);
 	}
 	
@@ -326,12 +326,12 @@ abstract class Model extends Delegator
 	}
 	
 	protected function hasMany($name, $lambda) {
-		if (InflectionsSafe::isPlural($name)) {
+		if (InflectionsSafe::isPlural($cleanName = preg_replace('/\s+as\s+([A-Z].*)^/', null, $name))) {
 			return $this->defineRelationship($name, $lambda, false);
 		}
 		
 		throw new \Exception(
-			"Failed to create relationship '$name' because it does not follow plurality convention"
+			"Failed to create relationship '$cleanName' because it does not follow plurality convention"
 		);
 	}
 	
@@ -350,6 +350,18 @@ abstract class Model extends Delegator
 		// @TODO this will need to be changed as it doesn't
 		// belong here
 		//echo static::namespaceName(); exit;
+		
+		// check if an 'as Alias' has been specified
+		$alias = null;
+		
+		if (preg_match($pattern = '/\s+as\s+([A-Z].*)^/', $name, $match)) {
+			$name = trim(preg_replace(
+				$pattern, null, $name
+			));
+			
+			$alias = $match[1];
+		}
+		
 		$relationshipName = $name;
 		$name             = ucfirst(\eGloo\Utilities\InflectionsSafe::instance()
 						          ->singularize($name));
@@ -378,7 +390,8 @@ abstract class Model extends Delegator
 			
 			//echo "relationship model '$model'"
 				
-			return $this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+			//@TODO using ternary below may be hard to read
+			return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 				
 				
 				// get reference to relationships and make reference that relationship is
@@ -672,7 +685,7 @@ abstract class Model extends Delegator
 				
 	}
 	
-
+	
 	
 	/** Callbacks **************************************************************/
 	

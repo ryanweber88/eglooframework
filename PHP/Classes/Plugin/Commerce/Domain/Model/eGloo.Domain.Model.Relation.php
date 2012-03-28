@@ -22,6 +22,20 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		$this->chain = $this->builder;
 	}
 	
+	/**
+	 * Shortcut/convenience to where method, creates field like ? conditions
+	 */
+	public function search(array $arguments) {
+		$conditions = array();
+		
+		foreach($arguments as $key => $value) {
+			$conditions[] = "$key like ?";
+		}
+		
+		return $this->where(
+			implode(' OR ', $conditions), array_values($arguments)
+		);
+	}
 	
 	/**
 	 * 
