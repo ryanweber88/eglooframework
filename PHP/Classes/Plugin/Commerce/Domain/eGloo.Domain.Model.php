@@ -308,12 +308,12 @@ abstract class Model extends Delegator
 	 * must still follow plurality conventions
 	 */
 	protected function hasOne($name, $lambda) {
-		if (InflectionsSafe::isSingular($cleanName = preg_replace('/\s+as\s+([A-Z].*)^/', null, $name))) {
+		if (InflectionsSafe::isSingular($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
 			return $this->defineRelationship($name, $lambda, true);
 		}
 		
 		throw new \Exception(
-			"Failed to create relationship '$cleanName' because it does not follow singularity convention"
+			"Failed to create relationship '$relation' because it does not follow singularity convention"
 		);
 	}
 	
@@ -326,12 +326,12 @@ abstract class Model extends Delegator
 	}
 	
 	protected function hasMany($name, $lambda) {
-		if (InflectionsSafe::isPlural($cleanName = preg_replace('/\s+as\s+([A-Z].*)^/', null, $name))) {
+		if (InflectionsSafe::isPlural($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
 			return $this->defineRelationship($name, $lambda, false);
 		}
 		
 		throw new \Exception(
-			"Failed to create relationship '$cleanName' because it does not follow plurality convention"
+			"Failed to create relationship '$relation' because it does not follow plurality convention"
 		);
 	}
 	
@@ -350,11 +350,11 @@ abstract class Model extends Delegator
 		// @TODO this will need to be changed as it doesn't
 		// belong here
 		//echo static::namespaceName(); exit;
-		
+				
 		// check if an 'as Alias' has been specified
 		$alias = null;
 		
-		if (preg_match($pattern = '/\s+as\s+([A-Z].*)^/', $name, $match)) {
+		if (preg_match($pattern = '/\s+as\s+([A-Z].*)$/', $name, $match)) {
 			$name = trim(preg_replace(
 				$pattern, null, $name
 			));
@@ -384,12 +384,12 @@ abstract class Model extends Delegator
 			
 		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
 		//if (1) {
-			
 			$relationships = &$self->reference('relationships');
 			$relationships[$relationshipName] = $model;
 			
 			//echo "relationship model '$model'"
-				
+
+						
 			//@TODO using ternary below may be hard to read
 			return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 				
@@ -489,6 +489,8 @@ abstract class Model extends Delegator
 				// of null
 				return $result;
 			});
+			
+			exit('there');
 		}
 		
 		throw new \Exception(

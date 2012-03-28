@@ -41,7 +41,8 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 	        array( '/(h|bl)ouses$/i'           , "$1ouse" ),
 	        array( '/(corpse)s$/i'             , "$1" ),
 	        array( '/(us)es$/i'                , "$1" ),
-	        array( '/.*?status/i'          ,  "$0"),	
+	        array( '/.*?status/i'              , "$0"),	
+	        array( '/.*?address$/i'            , "$0"),
 	        array( '/s$/i'                     , "" ),
 	        		
 		);
