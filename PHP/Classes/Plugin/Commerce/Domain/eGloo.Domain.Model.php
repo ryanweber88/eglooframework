@@ -999,6 +999,10 @@ abstract class Model extends Delegator
 				// context, but not have static funciton be aware of instance
 				$model = $this->create($this);
 			}
+			
+			// reset our changed, since model is now (theoretically) in 
+			// parrallel to database
+			$model->changed = array();
 		}
 		
 		// lets see what is missing for validation and throw exception
@@ -1013,14 +1017,49 @@ abstract class Model extends Delegator
 		// @EXPERIMENTAL = we are going to run through our relationships
 		// and determine if they have been created - if not, we attempt
 		// to create them
+		// @TODO this should be pushed into a callback, not has a "hard-code"
+		// here
 		
 		if ($cascade) { 
 			foreach($model->relationships as $relation) {
 				
-				// determine if a hasOne relationship and if initialized
+				// determine if a hasOne relationship and if initialized - 
+				// which case save
 				// @TODO this needs to be abstracted to Model.Relation
-				if ($relation instanceof Model) {
+				if ($relation instanceof Model && 
+				    $relation->initialized()   &&
+						$relation->changed()) {
+							
+					try { 
+						$relation->save();
+					}
 					
+					// a not changed exception we ignore, as this will be the case
+					// in many instances
+					catch(Model\Exception\Update\NotChanged $ignore) { }
+					
+					catch(\Exception $pass) {
+						throw new $pass;
+					}
+					
+				}
+				
+				// we ONLY do updates on has_many relationships on a create event
+				else if ($isCreate && (($relations = $relation) instanceof Model\Set)) {
+				
+					foreach($relation as $relation) {
+						if ($relation->initialized() && $relation->changed()){
+							try {
+								$relation->save();
+							}
+							
+							catch(Model\Exception\Update\NotChanged $ignore) { }
+							
+							catch(\Exception $pass) {
+								throw new $pass;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -1318,12 +1357,14 @@ abstract class Model extends Delegator
 		// __call chain, determine if a dynamic finder
 		
 		
-		if (preg_match('/^find_by_(.+)$/', $name, $match)) {
-			$class  = static::classNameFull();
-			$fields = explode('_and_', $match[1]);
+		if (preg_match('/^find_(one_)?by_(.+)$/', $name, $match)) {
+			$class   = static::classNameFull();
+			$fields  = explode('_and_', $match[2]);
+			$findOne = !empty($match[1]); 
+			
 						
 			// now lets define out dynamic finder function
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields) {
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne) {
 				
 				// get table name using convetion of ModelName to model_name; this will
 				// not fit in all cases and exception will be thrown from query if this
@@ -1339,10 +1380,20 @@ abstract class Model extends Delegator
 				
 				$conditions = implode(' and ', $conditions); 
 				
-				return $class::sendStatic('process', $class::where(
+				
+				$result = $class::sendStatic('process', $class::where(
 					$conditions, func_get_args()
 				)); 
 				
+				
+				// if we have specified find_one_by then we return the first
+				// instance - in most cases, this will be used when we know
+				// there is only one corresponding record
+				if ($findOne && $result instanceof Model\Set) {
+					$result = $result[0];
+				}
+				
+				return $result;
 				
 				
 			});
