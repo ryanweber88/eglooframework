@@ -1492,7 +1492,7 @@ abstract class Model extends Delegator
 				
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
-				if($this->$name->belongsTo($this->classname())) {
+				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
 					$field = $this->primaryKeyName;
 					
 					if (!is_null($this->$field)) {
