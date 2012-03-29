@@ -324,13 +324,17 @@ abstract class Model extends Delegator
 	 */
 	protected function belongsTo($name, $lambda = null) {
 		if (is_null($lambda)) {
-			return $this->hasOne($name, $lambda);
+			// @TODO this is not a foolproof scheme of determining whether relationship
+			// is truely a 'belongs_to', but will do for now
+			return $this->hasRelationship($name) &&
+		         InflectionsSafe::isSingular($name);
+			
 		}
 		
-		// @TODO this is not a foolproof scheme of determining whether relationship
-		// is truely a 'belongs_to', but will do for now
-		return $this->hasRelationship($name) &&
-		       InflectionsSafe::isSingular($name);
+		return $this->hasOne($name, $lambda);
+		
+
+
 	}
 	
 	protected function hasMany($name, $lambda) {
@@ -1507,6 +1511,7 @@ abstract class Model extends Delegator
 		//}
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
+
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if ($this->respondTo($name)) {
@@ -1522,7 +1527,6 @@ abstract class Model extends Delegator
 				// for some reason, removing this allows us to see relationship in 
 				// export statements (even the valid relationship model value is there..)
 				//$this->$name = null;
-				
 				$this->$name = call_user_func(
 						$this->_methods[$name]
 				);
