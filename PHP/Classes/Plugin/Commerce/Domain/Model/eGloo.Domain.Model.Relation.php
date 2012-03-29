@@ -22,6 +22,12 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		$this->chain = $this->builder;
 	}
 	
+	public function from($tables) {
+		$this->chain = $this->chain->from($tables);
+		
+		return $this;
+	}
+	
 	/**
 	 * Shortcut/convenience to where method, creates field like ? conditions
 	 */
@@ -35,6 +41,14 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		return $this->where(
 			implode(' OR ', $conditions), array_values($arguments)
 		);
+	}
+	
+	/**
+	 * Alias to search, a bit more idiomatic in terms of its purpose 
+	 * which is a like wildcard search
+	 */
+	public function like(array $arguments) {
+		return $this->search($arguments);
 	}
 	
 	/**
@@ -163,6 +177,10 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		return $this;
 	}
 	
+	public function to_sql() {
+		return $this->chain->to_sql();
+	}
+	
 	public function limit($number) { }
 	public function offset($number) { }
 	public function group($number) { }
@@ -171,6 +189,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	 * Evaluates query and executes on statement 
 	 */
 	public function build() {
+		//echo $this->chain->to_sql(); exit;
 		$model = $this->model;
 		$result = $model::sendStatic('process', $model::statement(
 			$this->chain->to_sql(), $this->arguments

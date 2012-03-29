@@ -49,6 +49,22 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			);
 		}
 		
+		// check if model has natural key, if case, then set key
+		$model          = $this->model;
+		$model          = new $model;
+		$primaryKeyName = null;
+		 
+		try {
+			$primaryKeyName = $model->send('primaryKeyName');
+		}
+		
+		catch(\Exception $ignore) { }
+		
+				
+		$this->key = is_null($key = $model::constant('NATURAL_KEY'))
+			? $primaryKeyName
+			: $key;
+		
 	}
 	
 	/**
@@ -86,6 +102,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$this->collection = array();
 	}
 	
+	public function key($value) {
+		$this->key = $value;	
+	}
+	
 	/**
 	 * Returns filtered set - not that this returns a new instance of
 	 * set and not a modified version of the old set
@@ -96,7 +116,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// filters will only work if natural key has been specified
 		$model = $this->model;
 		
-		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
+		if (!is_null($field = $this->key)) {
 			
 			$arguments = func_get_args();
 			$set       = new static($this->model);
@@ -135,7 +155,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$class = get_class($this);
 		
 		throw new \Exception(
-			"Cannot apply collect to set<$class> because '$class::NATURAL_KEY' is not defined"
+			"Cannot apply collect to set<$class> because '$class::NATURAL_KEY' is not defined " . 
+			"or key has not been explicitly set"
 		);
 	}
 	
@@ -148,7 +169,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// filters will only work if natural key has been specified
 		$model = $this->model;
 		
-		if (!is_null($field = $model::constant('NATURAL_KEY'))) {
+		if (!is_null($field = $this->key)) {
 			$arguments = func_get_args();
 			$set       = new static($model);
 			
@@ -197,7 +218,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		
 		throw new \Exception(
-			"Cannot apply collect to $this because '$model::NATURAL_KEY' is not defined"
+			"Cannot apply collect to $this because '$model::NATURAL_KEY' is not defined " .
+			"or key has not been explicitly set"
 		);
 	}
 
@@ -341,12 +363,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$model = $this->model;
 		
 		// make sure offset is a string and not some '19' fuckery
-		if (is_string($offset) && !is_numeric($offset)) {
+		if (is_string($offset)) {
 			
 			
 			// if our natural field exist, iterate through collection and
 			// determine if we can field a match to offset
-			if (!is_null($field = $model::constant('NATURAL_KEY'))) { 
+			if (!is_null($field = $this->key)) {
 		
 				// since we allow regular expression filtering, determine
 				// if offset is valid regular expression (this is still a bit
@@ -355,7 +377,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				// using the '/' character and you don't intend it as a regular
 				// expression, then please shoot yourself
 				if (\eGloo\Primitives\RegExp::valid($regexp = $offset)) {
-					
 					$set = new static($this->model);
 					
 					foreach($this as $model) {
@@ -404,7 +425,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$class = get_class($this);
 			
 			throw new \Exception(
-					"Cannot get offset '$offset' to '$this' because '$class::NATURAL_KEY' is not defined"	
+					"Cannot get offset '$offset' to '$this' because '$class::NATURAL_KEY' is not defined or " .
+					"key has not been explicitly set"	
 			);				
 			
 			
@@ -468,5 +490,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	protected $model;
+	protected $key;
 	protected $collection = array();	
 }

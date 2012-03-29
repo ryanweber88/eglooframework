@@ -169,7 +169,7 @@ class SQLVisitor implements Visitor
 		$from_sql = "";
 		if ( $froms = $node->froms)
 		{
-			$from = $this->visit($node->froms);
+			$from = str_replace('\'', null, $this->visit($node->froms));
 			
 			$from_sql = " FROM {$from}";
 		}
@@ -200,18 +200,18 @@ class SQLVisitor implements Visitor
 		
 		
 		$segments   = array();
-		$table      = $this->visit($node->froms);
+		$table      = preg_replace($pattern = '/["\']/', null, $this->visit($node->froms));
 		$joins_sql  = "\n";
-		$primaryKey = "{$table}_id";
+		$primaryKey = preg_replace($pattern = '/["\']/', null, "{$table}_id");
 		 		
 		
 		if (count($node->joins)) {
 			for ($counter = 0; $counter < count($node->joins); $counter++) {
-				$join = $node->joins[$counter];
+				$join = preg_replace($pattern, null, $node->joins[$counter]);
 				$on   = isset($node->on[$counter])
 					? $node->on[$counter]
 					: $primaryKey;
-					
+										
 				$eq   = isset($this->eq[$counter])
 					? $this->eq[$counter]
 					: $on;

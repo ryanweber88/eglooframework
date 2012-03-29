@@ -212,10 +212,11 @@ abstract class Model extends Delegator
 		// @TODO user is causing all kinds of fucking problem when not
 		// receiving an initializing hash; so i am taking the bitch out
 		// for the moment
-		if (!$reflection->isAbstract() && static::className() != 'User') {
+		if (!$reflection->isAbstract() ) {
+			
 			
 			static::delegates(array(
-				'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group', 'search'),
+				'methods' => array('selects', 'search', 'like', 'where', 'from', 'join', 'limit', 'order', 'group'),
 				'to'      => new Model\Relation(static::classNameFull())
 			));
 		}

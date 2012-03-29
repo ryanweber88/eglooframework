@@ -32,7 +32,7 @@ class Range extends \eGloo\Dialect\ObjectSafe {
 	 * @param string $range
 	 */
 	public static function valid($range) {
-		if (preg_match('/([0-9]+)\s*?..\s*?([0-9]+)/', $range, $match)) {
+		if (preg_match('/([0-9]+)\s*?\.\.\s*?([0-9]+)/', $range, $match)) {
 			$start = (int)$match[1];
 			$end   = (int)$match[2];
 			
