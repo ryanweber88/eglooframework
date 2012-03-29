@@ -493,17 +493,24 @@ abstract class Model extends Delegator
 					
 				}
 				
+				// because our find_by methods returns sets automatically, we need to
+				// check $singular argument to see if this is truely intended
+				else if ($singular && $result instanceof Model\Set) {
+					$result = $result[0];
+				}
+				
 				// otherwise we return result as is, which can be any value outside
 				// of null
 				return $result;
 			});
 			
-			exit('there');
 		}
 		
+
 		throw new \Exception(
 			"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
 		);
+		
 	}
 
 	
@@ -949,7 +956,7 @@ abstract class Model extends Delegator
 	 * 
 	 */
 	
-	public function save() {
+	public function save($cascade = true) {
 		
 		
 		// we ask the question again, if valid, after performing
@@ -958,12 +965,19 @@ abstract class Model extends Delegator
 			// execute our save callbacks
 			$this->runCallbacks(__FUNCTION__);
 			
+			// flag to detemrine if running a create operation; this is important
+			// for cascading save operations, as updates do not cascade save
+			// on has many relationships
+			$isCreate = false;
+			
 			// based on whether model primary key is set, call the correct
 			// action method
 			if ($this->exists()) {
+				
+				$model = $this;
 			
 				if ($this->changed() || $this->overrides_changed === true) {
-					return $this->update();
+					$this->update();
 				}
 				
 				else {
@@ -976,16 +990,39 @@ abstract class Model extends Delegator
 		
 			}
 			
-			// unfortunately this has be passed here as we can call static
-			// context, but not have static funciton be aware of instance
-			return $this->create($this);
+			else {
+				// unfortunately this has be passed here as we can call static
+				// context, but not have static funciton be aware of instance
+				$model = $this->create($this);
+			}
 		}
 		
 		// lets see what is missing for validation and throw exception
-		throw new \Exception(
-			"Cannot save model because the attributes did not pass validation : " . print_r(
-				$this->whatsInvalid(), true
-		));
+		else { 
+			throw new \Exception(
+				"Cannot save model because the attributes did not pass validation : " . print_r(
+					$this->whatsInvalid(), true
+			));
+		}
+		
+		
+		// @EXPERIMENTAL = we are going to run through our relationships
+		// and determine if they have been created - if not, we attempt
+		// to create them
+		
+		if ($cascade) { 
+			foreach($model->relationships as $relation) {
+				
+				// determine if a hasOne relationship and if initialized
+				// @TODO this needs to be abstracted to Model.Relation
+				if ($relation instanceof Model) {
+					
+				}
+			}
+		}
+		
+		return $model;
+		
 
 				
 	}
