@@ -319,11 +319,18 @@ abstract class Model extends Delegator
 	}
 	
 	/**
-	 * An alias to hasOne, but provides a more idiomatic signature for
-	 * the relationship
+	 * Either provides an alias to hasOne (but more idiomatic), or answers the question
+	 * of whether model belongsTo another
 	 */
-	protected function belongsTo($name, $lambda) {
-		return $this->hasOne($name, $lambda);
+	protected function belongsTo($name, $lambda = null) {
+		if (is_null($lambda)) {
+			return $this->hasOne($name, $lambda);
+		}
+		
+		// @TODO this is not a foolproof scheme of determining whether relationship
+		// is truely a 'belongs_to', but will do for now
+		return $this->hasRelationship($name) &&
+		       InflectionsSafe::isSingular($name);
 	}
 	
 	protected function hasMany($name, $lambda) {
@@ -1482,6 +1489,16 @@ abstract class Model extends Delegator
 				$this->$name = call_user_func(
 						$this->_methods[$name]
 				);
+				
+				// lets add an automatic bind of foreign key to relationship, if
+				// it belongsTo current model instance
+				if($this->$name->belongsTo($this->classname())) {
+					$field = $this->primaryKeyName;
+					
+					if (!is_null($this->$field)) {
+						$this->$name->$field = $this->$field;
+					}
+				}
 				
 				return $this->$name;
 			}
