@@ -403,7 +403,7 @@ abstract class Model extends Delegator
 
 						
 			//@TODO using ternary below may be hard to read
-			return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+			return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular, $alias) {
 				
 				
 				// get reference to relationships and make reference that relationship is
@@ -487,7 +487,7 @@ abstract class Model extends Delegator
 				
 				if (!$result) {
 
-					return $singular
+					$result = $singular
 						
 						// return an empty instance of model
 						? new $model
@@ -792,13 +792,18 @@ abstract class Model extends Delegator
 		
 		$values = array();
 		
+		//echo "-- entering attributes for receiver " . get_class($this) . "\n";
+		
 		// iterate through properties, retrieve values and return
 		foreach(array_keys($this->properties) as $field) {
+			
 			// @TODO there is a chance here that an alias may have the same
 			// name as a property
 			if (!isset($this->_aliasedProperties[$field])) {
 				$values[$field] = $this->$field;
 			}
+			
+			//echo "property $field on " . get_class($this) . "\n";
 		}
 		
 		return $values;
@@ -817,63 +822,64 @@ abstract class Model extends Delegator
 		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 		// with model; in the future need to determine existence of primary key and cache 
 		// beforehand
-
 		
 		$this->aliasPrimaryKey("{$class}_id");
 		
 		
-
-
-		
+		if ($this->initialized()) {
 					
-		// iterate across properties and determine if they
-		// fit pattern of $class_(name)
-		// @TODO replace self reference - stupid 5.3 issue
-		$self = $this;
-				
-		
-		// @TODO static cache is not working here - needs to be
-		// polymorphic
-		$properties = static::cache(function() use ($self) {
-			return \array_keys(\get_object_vars($self));
-		});
-		
-		$properties = \array_keys(\get_object_vars($this));
-		
-		
-		foreach($properties as $name) {
-
-			// in some instances, for sub model types, like coupon\type, our convention doesn't work for
-			// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
-			// look for a field matching the exact name
-			if (preg_match("/{$class}_(.+)/", $name, $match) || $name == $class) {
-				
-				
-				$alias = $name == $class
-					? preg_replace('/^.+_/', null, $name)
-					: $match[1];
+			// iterate across properties and determine if they
+			// fit pattern of $class_(name)
+			// @TODO replace self reference - stupid 5.3 issue
+			$self = $this;
 					
-				try { 
-					$this->aliasProperty(
-						strtolower($match[1]), $name	
-					);
+			
+			// @TODO static cache is not working here - needs to be
+			// polymorphic
+			$properties = static::cache(function() use ($self) {
+				return $self->send('attributes');
+			});
+			
+			
+			foreach($properties as $name) {
+	
+				// in some instances, for sub model types, like coupon\type, our convention doesn't work for
+				// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
+				// look for a field matching the exact name
+				$match = array();
+				
+				if (preg_match("/{$class}_(.+)/", $name, $match) || $name == $class) {
+					
+					
+					$alias = $name == $class
+						? preg_replace('/^.+_/', null, $name)
+						: $match[1];
+						
+					
+						
+					try { 
+						$this->aliasProperty(
+							strtolower($alias), $name	
+						);
+					}
+	
+					catch(\Exception $ignore) { }
 				}
-
-				catch(\Exception $ignore) {
-					//var_export($this); exit;
-				}
+	
 			}
-		}
+
 		
-		// check if model has status relationship
-		// @TODO this may be a bit too specific for this instance
-		if (isset($this->status_id)          &&
-		    $this->hasRelationship('Status') && 
-		    $this->Status->exists()) {
-		    	
-			$field = "{$this->signature()}_status";
-			$this->status__ = $this->Status->$field;
-		}		
+			
+			// check if model has status relationship
+			// @TODO this may be a bit too specific for this instance
+			if (isset($this->status_id)          &&
+			    $this->hasRelationship('Status') && 
+			    $this->Status->exists()) {
+			    	
+				$field = "{$this->signature()}_status";
+				$this->status__ = $this->Status->$field;
+			}		
+		}
 	
 			
 	}
@@ -980,17 +986,11 @@ abstract class Model extends Delegator
 				
 				$model = $this;
 			
-				if ($this->changed() || $this->overrides_changed === true) {
+				if ($this->changed() || 
+				    isset($this->overrides_changed) && $this->overrides_changed === true) {
+				    	
 					$this->update();
-				}
-				
-				else {
-					throw new \Exception(
-						"Update failed because model has not changed; if you wish to override this  " .
-						"behavior, then set property overrides_changed to absolute true in 'before' " .
-						"save callback"
-					);
-				}
+				}				
 		
 			}
 			
@@ -1270,9 +1270,8 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore) {
-			//var_export($ignore); exit;
+			//var_export($ignore); exit('asdf');
 		}
-		
 		$this->primaryKeyName = $from;
 	}
 	
@@ -1325,6 +1324,26 @@ abstract class Model extends Delegator
 		
 		return $interface;
 		
+	}
+
+	/**
+	 * Checks equality against model primary key value and type
+	 * @return boolean
+	 */
+	public function equals(Model $model) {
+		if ($model instanceof static) {
+			// we surround with try catch in-case model has not been
+			// initialized, or primary key is unavailable; in these
+			// cases, checking equality is pointless so we return false
+			// as opposed to raising an exception message
+			try {
+				return $model->id == $this->id;
+			}
+			
+			catch(\Exception $ignore) { }
+		}
+		
+		return false;
 	}
 
 
@@ -1384,7 +1403,6 @@ abstract class Model extends Delegator
 				$result = $class::sendStatic('process', $class::where(
 					$conditions, func_get_args()
 				)); 
-				
 				
 				// if we have specified find_one_by then we return the first
 				// instance - in most cases, this will be used when we know
@@ -1730,6 +1748,20 @@ abstract class Model extends Delegator
 		}
 		
 		return parent::__toString();
+	}
+	
+	public function cast($class) {
+		
+		// allow for passing class namespace as Model.SubType, or Model::SubType
+		$class = preg_replace('/(\.|::)/', '\\', $class);
+			
+		if (class_exists($class)) {
+			return new $class($this->attributes());
+		}
+		
+		throw new \Exception(
+			"Cannot cast to model class '$class' because it does not exist"
+		);
 	}
 		
 	

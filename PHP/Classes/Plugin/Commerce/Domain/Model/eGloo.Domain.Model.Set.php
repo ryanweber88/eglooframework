@@ -22,7 +22,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// in c++, where array values may only be of passed
 		// in type
 		if ($mixed instanceof Domain\Model) {
-			$this->model = $mixed;
+			$model = get_class($mixed);
+			$this->model = new $model;
+
 			
 			// if passed in model exists, then add as first element to set
 			if ($mixed->exists()) {
