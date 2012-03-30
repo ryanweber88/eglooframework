@@ -355,6 +355,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			return false;
 		}
 		
+			
 		return !is_null($result);
 	}
 	
@@ -405,10 +406,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				}
 				
 				else {
+					
 		
-					foreach($this as $model) {
+					foreach($this as $key => $model) {
 						if ($model->$field == $offset) {
-							return $model; 
+							return $this->collection[$key];
 						}
 					}
 					
