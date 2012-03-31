@@ -422,7 +422,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					// @TODO this doesn't fucking work right now
 					//$this[] = new $this->model(array($field => $offset));
 					
-					return false;
+					return null;
 				}
 			}
 			

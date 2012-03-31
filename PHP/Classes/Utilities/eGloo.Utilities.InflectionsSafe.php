@@ -54,7 +54,7 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			array( '/(matr|vert|ind)ix|ex$/i', "$1ices"  ),
 			array( '/(x|ch|ss|sh)$/i',		  "$1es"	),
 			array( '/([^aeiouy]|qu)y$/i',	  "$1ies"   ),
-			array( '/([^aeiouy]|qu)ies$/i',	  "$1y"	    ),
+			array( '/([^aeiouy]|qu)ies$/i',	  "$1ies"	    ),
 			array( '/(hive)$/i',			      "$1s"	    ),
 			array( '/(?:([^f])fe|([lr])f)$/i', "$1$2ves" ),
 			array( '/sis$/i',				  "ses"	    ),
@@ -64,6 +64,8 @@ class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
 			array( '/(alias|status)$/i',	      "$1es"	),
 			array( '/(octop|vir)us$/i',		  "$1i"	    ),
 			array( '/(ax|test)is$/i',		  "$1es"    ),
+			array( '/^(categories)$/i',        "asdf"),
+			
 			array( '/s$/i',					  "s"       ),
 			array( '/$/',					  "s"       )
 		);
