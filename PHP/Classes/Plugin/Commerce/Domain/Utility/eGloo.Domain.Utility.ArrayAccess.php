@@ -75,26 +75,29 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			if ( is_object($result) &&  
 					 $result->delegated instanceof Domain\Model\Set) {
 					 //!$result->delegated->isEmpty()) {
+	
 
 
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
 				$set       = array();
-				$deletated = &$result->delegated;
+				$delegated = &$result->delegated;
 				
-				if (count($result->delegated)) {				
+				if (count($delegated)) {				
 					// check if model has a natural key defined; in these cases
 					// the model->key value will servce as our index for the
 					// returned set
-					
+
 					// we do two distinct loops as means of saving 
-					if (isset($delegated[0])          && 
-					   ($key = $delegated[0]->key())) {
+					if (isset($delegated[0])               && 
+					    !is_null($key = $delegated->key()) &&
+					    !empty($delegated[0]->$key)) {
+					   	
 					   	
 							
 						foreach($result->delegated as $ignore => $model) {
-							if ($model->exists()) { 
+							if ($model->exists()) {
 								$set[$index = $model->$key] = new static($model);			
 							}		
 						}
@@ -111,6 +114,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 								
 												
 				$result = $set;
+				
 			}
 			
 			// set a backward reference for any needed 'backward' evaluations
@@ -119,6 +123,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			}
 						
 		}
+
 
 		
 

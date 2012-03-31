@@ -116,7 +116,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 * Setter/getter for key
 	 */
 	public function key($value = null) {
-		if (is_null($key)) {
+		if (is_null($value)) {
 			return $this->key;
 		}
 		
@@ -522,7 +522,18 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$wrapped = array();
 		
 		foreach ($this->collection as $model) {
-			$wrapped[] = new Domain\Utility\ArrayAccess(
+			if (is_null($key = $this->key) || 
+			    !isset($model->$key) || 
+			    is_null($model->$key)) {
+			    	
+				$index = count($wrapped);
+			}
+			
+			else {
+				$index = (string)$model->$key;
+			}
+				
+			$wrapped[$index] = new Domain\Utility\ArrayAccess(
 				$model
 			);
 		}
