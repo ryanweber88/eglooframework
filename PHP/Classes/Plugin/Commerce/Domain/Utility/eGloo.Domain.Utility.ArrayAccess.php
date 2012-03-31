@@ -62,6 +62,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			//echo $ignore->getMessage();exit;
 			$result = null;
 		}
+		
 	
 		
 		if ( !is_null($result) ) {
@@ -79,25 +80,31 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
-				$set = array();
-								
-				// check if model has a natural key defined; in these cases
-				// the model->key value will servce as our index for the
-				// returned set
+				$set       = array();
+				$deletated = &$result->delegated;
 				
-				// we do two distinct loops as means of saving 
-				if (($key = $result->delegated[0]->constGet('NATURAL_KEY'))) {
-					foreach($result->delegated as $ignore => $model) {
-						if ($model->exists()) { 
-							$set[$index = $model->$key] = new static($model);			
-						}		
+				if (count($result->delegated)) {				
+					// check if model has a natural key defined; in these cases
+					// the model->key value will servce as our index for the
+					// returned set
+					
+					// we do two distinct loops as means of saving 
+					if (isset($delegated[0])          && 
+					   ($key = $delegated[0]->key())) {
+					   	
+							
+						foreach($result->delegated as $ignore => $model) {
+							if ($model->exists()) { 
+								$set[$index = $model->$key] = new static($model);			
+							}		
+						}
 					}
-				}
-				
-				else {
-					foreach ($result->delegated as $key => $model) {
-						if ($model->exists()) {
-							$set[] = new static($result->delegated[$key]);
+					
+					else {
+						foreach ($result->delegated as $key => $model) {
+							if ($model->exists()) {
+								$set[] = new static($result->delegated[$key]);
+							}
 						}
 					}
 				}

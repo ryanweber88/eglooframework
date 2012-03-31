@@ -66,6 +66,14 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$this->key = is_null($key = $model::constant('NATURAL_KEY'))
 			? $primaryKeyName
 			: $key;
+			
+		// check that primary key is returning unique values for 	
+		if (!$this->keyReturnsUnique()) {
+			throw new \Exception(
+				"Failed constructing $this because key '$key' is not valid because " .
+				"it returns non-unique model instances"
+			);
+		}
 		
 	}
 	
@@ -104,8 +112,42 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		$this->collection = array();
 	}
 	
-	public function key($value) {
-		$this->key = $value;	
+	/**
+	 * Setter/getter for key
+	 */
+	public function key($value = null) {
+		if (is_null($key)) {
+			return $this->key;
+		}
+		
+		else {
+			$this->key = $value;	
+		}
+	}
+	
+	
+	/**
+	 * Somes a key for given set is not unique (for example, a returned set of categories all shares the same
+	 * key which is somethink like parent_category, so this key, in effect, does not function as primary key)
+	 * - in these cases, which are bitch to find, we provide a method to make the determination if this is
+	 * the case
+	 */
+	protected function keyReturnsUnique() {
+		// there's no point on doing a check of uniqueness if there is only
+		// one value	
+		if (count($this) > 1 && !is_null($key = $this->key)) {	
+			$values = array();
+			
+			foreach($this as $ignore => $model) {
+				foreach($values as $past) {
+					if ($model === $past) {
+						return false;
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -445,14 +487,16 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return $this->collection[$offset];
 	}
 	
-	public function offsetSet($offset, $value) {
+	public function offsetSet($offset, $model) {
 		
-		if ($value instanceof $this->model) { 
+		if ($model instanceof $this->model) { 
 			$index = empty($offset)
 				? count($this->collection)
 				: $offset;
+			
 							
-			$this->collection[$index] = $value;
+			$this->collection[$index] = $model;
+			
 		}
 		
 		else { 

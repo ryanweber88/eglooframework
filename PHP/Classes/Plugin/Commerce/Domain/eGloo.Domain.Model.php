@@ -1215,10 +1215,11 @@ abstract class Model extends Delegator
 	protected static function shape($result) {
 		
 		if ($result instanceof Model\Relation) {
-			return $result->build();
+			$result = $result->build();
 		}
 		
-		if (is_array($result) && count($result)) {	
+		else if (is_array($result) && count($result)) {
+					
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				$result = new static($result);					
 			}
@@ -1226,10 +1227,12 @@ abstract class Model extends Delegator
 			// otherwise, we manually build set with model instances
 			else {
 				
+				$set = array();
+				
 				// check if result is composed of a list of Model
 				// instances; then we set temporary to result list
 				if ($result[0] instanceof Model) {
-					$temporary = $result;
+					$set = $result;
 				}
 				
 				// otherwise, result list is set of
@@ -1237,12 +1240,12 @@ abstract class Model extends Delegator
 				// in Model instance
 				else { 
 					foreach($result as $record) {
-						$temporary[] = new static($record);	
+						$set[] = new static($record);	
 					}
 				}
 				
 				// replace result with temporary
-				$result = new Model\Set($temporary);
+				$result = new Model\Set($set);
 			}				
 		}
 		
