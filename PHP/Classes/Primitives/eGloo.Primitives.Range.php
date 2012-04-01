@@ -24,6 +24,14 @@ class Range extends \eGloo\Dialect\ObjectSafe {
 			);
 		}
 	}
+	
+	public function start() {
+		return $this->start;
+	}
+	
+	public function end() {
+		return $this->end;
+	}
 		
 	
 	/**

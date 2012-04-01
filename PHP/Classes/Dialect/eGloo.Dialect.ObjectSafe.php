@@ -171,8 +171,8 @@ abstract class ObjectSafe {
 		};
 		
 		static::defineMethod('defer', function($name, $lambda, $class) {
-			$methods = &$class::referenceStatic('defers');
-			$methods[$class][$name] = $lambda;
+			$defers                = &$class::referenceStatic('defers');
+			$defers[$class][$name] = $lambda;
 		});
 		
 		static::defineMethod('respondTo', function($method, $class) { 

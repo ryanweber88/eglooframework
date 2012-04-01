@@ -62,7 +62,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		catch(\Exception $ignore) { }
 		
-				
+		
+		//if (!is_null($key = $model::constant('NATURAL_KEY'))) {
+		//	$this->key = $key;
+		//}		
+		
 		$this->key = is_null($key = $model::constant('NATURAL_KEY'))
 			? $primaryKeyName
 			: $key;
@@ -76,6 +80,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		}
 		
 	}
+
 	
 	/**
 	 * Adds reduce/inject functionality to set; please note that lambda takes two parameters
@@ -401,6 +406,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return !is_null($result);
 	}
 	
+	public function slice($offset, $length) {
+		return new static(array_slice(
+			$this->collection, $offset, $length, true
+		));
+	}
+	
 	public function offsetGet($offset) {
 		// if a string we are attempting to match by "natural_key" 
 		// or a field that is representative of the model in a 
@@ -411,6 +422,18 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		if (is_string($offset)) {
 			
 			
+			// otherwise check if offset is a valid range "1..10";
+			// in which case we return a new set with elements that fall
+			// within prescribed range 
+			if (\eGloo\Primitives\Range::valid($offset)) {
+				// unfortunately we can't 
+				$set   = new static($this->model);
+				$range = \eGloo\Primitives\Range($offset); 
+				
+				return $set->slice($range->start(), $range->end());
+								
+				//return $set;
+			}
 			// if our natural field exist, iterate through collection and
 			// determine if we can field a match to offset
 			if (!is_null($field = $this->key)) {
@@ -433,19 +456,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					return $set;
 				}
 				
-				// otherwise check if offset is a valid range "1..10";
-				// in which case we return a new set with elements that fall
-				// within prescribed range 
-				else if (\eGloo\Primitives\Range::valid($offset)) {
-					// unfortunately we can't 
-					$set = new static($this->model);
-					
-					foreach($this as $model) {
-						$set[] = $model;
-					}
-					
-					return $set;
-				}
 				
 				else {
 					
@@ -476,6 +486,14 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			);				
 			
 			
+		}
+
+		else if (is_integer($offset)) {
+			$values = array_values($this->collection);
+			
+			if (isset($values[$offset])) {
+				return $values[$offset];
+			}
 		}
 
 		// otherwise we create an instance of templated model and push
@@ -521,23 +539,50 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	public function __toArray() {
 		$wrapped = array();
 		
-		foreach ($this->collection as $model) {
-			if (is_null($key = $this->key) || 
-			    !isset($model->$key) || 
-			    is_null($model->$key)) {
-			    	
-				$index = count($wrapped);
-			}
+		if (count($this)) {
+			$model   = current($this->collection);
 			
-			else {
-				$index = (string)$model->$key;
-			}
+			// make a determiniation on whether to use 'natural key'
+			// or precede with numerical indicies
+			// @TODO this get's a little overcomplex because
+			// php determines numerical-string based indicies
+			// as numerical, thus the shitload of checks below
+			$key     = $this->key;
+			
+			$useKey  = !is_null($key)              &&
+			           count($this)                &&
+			           isset($model->$key)         && 
+	               !is_null($model->$key)      &&
+			           !is_numeric($model->$key);
+								 
+			
+			
+			foreach ($this->collection as $model) {
 				
-			$wrapped[$index] = new Domain\Utility\ArrayAccess(
-				$model
-			);
+				if ($useKey) {
+					if (isset($model->$key) && !is_null($model->$key)) {
+						$index = $model->$key;
+					}
+					
+					else {
+						$class = $model::callNameFull();
+						
+						throw new \Exception (
+							"Failed creating index with key '$key' because receiver instance '$model' does not have '$key' as a member"
+						);
+					}
+				}
+				
+				else {
+					$index = count($wrapped);
+				}
+					
+				$wrapped[$index] = new Domain\Utility\ArrayAccess(
+					$model
+				);
+			}
 		}
-		
+	
 		return $wrapped;
 	}
 	

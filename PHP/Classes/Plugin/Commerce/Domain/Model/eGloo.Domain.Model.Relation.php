@@ -132,12 +132,13 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 				$arguments = \eGloo\Utilities\Collection::flatten(array_slice(
 					func_get_args(), 1
 				));
-				
-				
+								
 				// now we merge onto our list of arguments
 				$this->arguments = array_merge(
 					$this->arguments, $arguments
 				);
+				
+				//var_export($this->arguments); 
 			}			
 		}
 		
@@ -190,25 +191,35 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 	 */
 	public function build() {
 		//echo $this->chain->to_sql(); exit;
-		$model = $this->model;
-		$result = $model::sendStatic('process', $model::statement(
-			$this->chain->to_sql(), $this->arguments
-		));
-								
+		$model  = $this->model;
+		$result = null;
+		 
+		
+		try { 
+			$result = $model::sendStatic('process', $model::statement(
+				$this->chain->to_sql(), $this->arguments
+			));
+		}
+		
+		catch(\Exception $deferred) { }
+	
+									
 		// our query method should always return set, so we
 		// wrap in set if we have only returned on record, which would
 		// result in a single model instance
-		if ($result instanceof Domain\Model) {
+		if (isset($result) && $result instanceof Domain\Model) {
 			$result = new Domain\Model\Set($result);
 		}
-		
 			
 		// now lets flush our chain and arguments to prepare
 		// for fresh query
 		$this->arguments = array();
 		$this->chain     = $this->builder;	
 		
-				
+		if (isset($deferred) && $deferred instanceof \Exception) {
+			throw $deferred;
+		}
+	
 		return $result;
 	}
 

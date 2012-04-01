@@ -1392,7 +1392,9 @@ abstract class Model extends Delegator
 			
 						
 			// now lets define out dynamic finder function
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne) {
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+				
+				
 				
 				// get table name using convetion of ModelName to model_name; this will
 				// not fit in all cases and exception will be thrown from query if this
@@ -1407,11 +1409,24 @@ abstract class Model extends Delegator
 				}
 				
 				$conditions = implode(' and ', $conditions); 
+				$arguments  = func_get_args();
 				
+				// @TODO this is a temporary measure because ObjectSafe will pass in
+				// class context as last parameter, which causes our result below
+				// to break; for now, remove last argument if it matches $class
+				if (($count = count($arguments)) > 1 && $arguments[$count-1] == $class) {
+					unset($arguments[$count-1]);
+				} 
 				
-				$result = $class::sendStatic('process', $class::where(
-					$conditions, func_get_args()
-				)); 
+				try {
+					$result = $class::sendStatic('process', $class::where(
+						$conditions, $arguments
+					));
+				}
+				catch(\Exception $pass) {
+					throw $pass;
+				} 
+				
 				
 				// if we have specified find_one_by then we return the first
 				// instance - in most cases, this will be used when we know

@@ -59,7 +59,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 		// made to the same member property/method within a template for
 		// example will only have to execute an expensive routine once
 		//echo "caching for $member<br />";
-		return $this->cache($member, function() use ($self, $member) {
+		//return $this->cache($member, function() use ($self, $member) {
 			//echo "in cache for $member"; 
 			$delegated = &$self->reference('delegated');
 			$result    = null;
@@ -169,7 +169,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				"Unable to access $member for instance of class-type " . get_class($delegated)
 			);
 			
-		});
+		//});
 	}
 	
 	public function offsetSet($property, $value) {
