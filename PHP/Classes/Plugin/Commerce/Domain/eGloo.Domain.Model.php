@@ -394,126 +394,133 @@ abstract class Model extends Delegator
 			? $singular
 			: InflectionsSafe::isSingular($relationshipName);
 			
-		if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
-		//if (1) {
-			$relationships = &$self->reference('relationships');
-			$relationships[$relationshipName] = $model;
-			
-			//echo "relationship model '$model'"
-
-						
-			//@TODO using ternary below may be hard to read
-			return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular, $alias) {
-				
-				
-				// get reference to relationships and make reference that relationship is
-				// beging created
-				$result = null;
-
-				
-				// check if the model exists in the database to ensure we are
-				// not running queries against an empty/shallow model - because
-				// there is nothing to match against here
-				if ($self->initialized()) {
-					$result = $lambda($model);
-					
-					// if returned result is an instance of relationship, which is a query build tool
-					// then evaluate and pass to statement
-					// @TODO the relation should be responsible for the build of model instance, not just
-					// as a query build tool - this will have to be addressed, but converting right now
-					// will present too much variability
-					if ($result instanceof Model\Relation) {
-						try { 
-							$result = $result->build();
-						}
-						
-						catch(\Exception $passthrough) {
-							throw $passthrough;
-						}
-
-					}
-
-					// check if singular result or hash (which would indicate
-					// a single record being returned); if an array is returned
-					// then it should contain 1+ elements as this is-a required
-					// contract of the defineRelationship method
-					if (is_array($result)) {
-						
-						if (\eGloo\Utilities\Collection::isHash($result)) {
-							$result = new $model($result);
-				
-							// @TODO this is a shortcut to we establish a better rule
-							// in terms of convetion around singular vs set
-							
-							if (!$singular) {
-								$result = new Model\Set(array($result));
-							}	
-							
-						}
-						
-						// otherwise we have a set return; check if elements are
-						// model instances, in which case we can simply wrap
-						// reset in set instance
-						else if ($result[0] instanceof Model) {
-
-							$result = new Model\Set($result);
-						
-						}
-						
-						// otherwise, we manually build set with model instances
-						else {
-							
-							foreach($result as $record) {
-								$temporary[] = new $model($record);	
-							}
-							
-							// replace result with temporary
-							$result = new Model\Set($temporary);
-						}
-						
-					}
-					
-				}
-
-
-
-
-				
-				// if the model doesn't exist (the case where we have a "shallow"
-				// model) or our return result from lambda is false (which indicates 
-				// an empty result or a failure to find data), 
-				// we return a shallow copy of our relationship(s), either as an instance
-				// of model or emptyset, based on plurality rules
-				
-				if (!$result) {
-
-					$result = $singular
-						
-						// return an empty instance of model
-						? new $model
-						
-						
-						: new Model\Set($model);
-					
-				}
-				
-				// because our find_by methods returns sets automatically, we need to
-				// check $singular argument to see if this is truely intended
-				else if ($singular && $result instanceof Model\Set) {
-					$result = $result[0];
-				}
-				
-				// otherwise we return result as is, which can be any value outside
-				// of null
-				return $result;
-			});
-			
+		// if class does not exist, then replace with generic	handler
+		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
+			$model = "$ns\\Generic";
 		}
 		
+		
+			
+		//if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
+		//if (1) {
+		$relationships = &$self->reference('relationships');
+		$relationships[$relationshipName] = $model;
+		
+		//echo "relationship model '$model'"
 
-		throw new \Exception(
-			"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
-		);
+					
+		//@TODO using ternary below may be hard to read
+		return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular, $alias) {
+			
+			
+			// get reference to relationships and make reference that relationship is
+			// beging created
+			$result = null;
+
+			
+			// check if the model exists in the database to ensure we are
+			// not running queries against an empty/shallow model - because
+			// there is nothing to match against here
+			if ($self->initialized()) {
+				$result = $lambda($model);
+				
+				// if returned result is an instance of relationship, which is a query build tool
+				// then evaluate and pass to statement
+				// @TODO the relation should be responsible for the build of model instance, not just
+				// as a query build tool - this will have to be addressed, but converting right now
+				// will present too much variability
+				if ($result instanceof Model\Relation) {
+					try { 
+						$result = $result->build();
+					}
+					
+					catch(\Exception $passthrough) {
+						throw $passthrough;
+					}
+
+				}
+
+				// check if singular result or hash (which would indicate
+				// a single record being returned); if an array is returned
+				// then it should contain 1+ elements as this is-a required
+				// contract of the defineRelationship method
+				if (is_array($result)) {
+					
+					if (\eGloo\Utilities\Collection::isHash($result)) {
+						$result = new $model($result);
+			
+						// @TODO this is a shortcut to we establish a better rule
+						// in terms of convetion around singular vs set
+						
+						if (!$singular) {
+							$result = new Model\Set(array($result));
+						}	
+						
+					}
+					
+					// otherwise we have a set return; check if elements are
+					// model instances, in which case we can simply wrap
+					// reset in set instance
+					else if ($result[0] instanceof Model) {
+
+						$result = new Model\Set($result);
+					
+					}
+					
+					// otherwise, we manually build set with model instances
+					else {
+						
+						foreach($result as $record) {
+							$temporary[] = new $model($record);	
+						}
+						
+						// replace result with temporary
+						$result = new Model\Set($temporary);
+					}
+					
+				}
+				
+			}
+
+
+
+
+			
+			// if the model doesn't exist (the case where we have a "shallow"
+			// model) or our return result from lambda is false (which indicates 
+			// an empty result or a failure to find data), 
+			// we return a shallow copy of our relationship(s), either as an instance
+			// of model or emptyset, based on plurality rules
+			
+			if (!$result) {
+
+				$result = $singular
+					
+					// return an empty instance of model
+					? new $model
+					
+					
+					: new Model\Set($model);
+				
+			}
+			
+			// because our find_by methods returns sets automatically, we need to
+			// check $singular argument to see if this is truely intended
+			else if ($singular && $result instanceof Model\Set) {
+				$result = $result[0];
+			}
+			
+			// otherwise we return result as is, which can be any value outside
+			// of null
+			return $result;
+		});
+			
+		
+		
+
+		//throw new \Exception(
+		//	"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
+		//);
 		
 	}
 
@@ -620,7 +627,6 @@ abstract class Model extends Delegator
 		// define a generic create callback based on
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
-			echo "here";
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
 			// @TODO since this was added late in the lifecycle of model design, there already
@@ -1419,12 +1425,71 @@ abstract class Model extends Delegator
 				
 			});
 			
+			
 			// now call our little pretty dynamic finder method
 			return call_user_func_array(
 		  	$block, $arguments 
 			);
 		}
-		
+
+		// dynamic range finders
+		if (preg_match('/^find_(one_)?range_(.+)$/', $name, $match)) {
+			$class   = static::classNameFull();
+			$fields  = explode('_and_', $match[2]);
+			$findOne = !empty($match[1]);
+			
+			/**
+			// now lets define out dynamic finder function
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne) {
+				
+				$validRanges = true;
+				
+				// test whether we are passing range values like '4..10'
+				foreach(func_get_args() as $range) {
+					if (!\eGloo\Primitives\Range::valid($range)) {
+						$validRanges = false;
+						break;
+					}		
+				}
+				
+				// if not valid range, it is assumed that range is composed of parameter pairs, make
+				// sure that the number of arguments matches number of fields * 2
+				if ($validRanges) {
+					
+				}
+				
+				// get table name using convetion of ModelName to model_name; this will
+				// not fit in all cases and exception will be thrown from query if this
+				// is the case
+				$table = $class::sendStatic('signature');
+				
+				// build string representation of query coinditionals
+				$conditions = array();
+				
+				foreach($fields as $field) {
+					$conditions[] = "$field = ?";
+				}
+				
+				$conditions = implode(' and ', $conditions); 
+				
+				
+				$result = $class::sendStatic('process', $class::where(
+					$conditions, func_get_args()
+				)); 
+				
+				// if we have specified find_one_by then we return the first
+				// instance - in most cases, this will be used when we know
+				// there is only one corresponding record
+				if ($findOne && $result instanceof Model\Set) {
+					$result = $result[0];
+				}
+				
+				return $result;
+				
+				
+			});
+			 **/
+		}
 				
 		throw $deferred;
 	}
