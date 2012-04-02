@@ -197,13 +197,12 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		
 		try { 
 			$result = $model::sendStatic('process', $model::statement(
-				$this->chain->to_sql(), $this->arguments
+				$sql = $this->chain->to_sql(), $this->arguments
 			));
 		}
 		
 		catch(\Exception $deferred) { }
 	
-									
 		// our query method should always return set, so we
 		// wrap in set if we have only returned on record, which would
 		// result in a single model instance

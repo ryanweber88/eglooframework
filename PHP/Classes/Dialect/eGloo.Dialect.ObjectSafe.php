@@ -62,7 +62,10 @@ abstract class ObjectSafe {
 			$methods        = &$self->reference('_methods');
 			$methods[$name] = $lambda;
 				
-			return $methods[$name];
+			$lambda = $methods[$name];
+			
+			// fire methodAdded event
+			$self->send('methodAdded', $name, $lambda);
 		};		
 		
 		$this->defineMethod('defer', function($lambda) use ($self) {
@@ -152,6 +155,11 @@ abstract class ObjectSafe {
 	protected function __methods() {
 		$this->aliasMethods();
 	}
+	
+	/**
+	 *  Stubbed here; this can be used an handler for defineMethod events
+	 */
+	protected function methodAdded($name, $lambda) { }
 	
 	
 	protected static function aliasMethodsStatic() { 
@@ -478,6 +486,20 @@ abstract class ObjectSafe {
 	 * Here we provide our catchall and dynamic property meta functionality
 	 */
 	public function __get($name) {
+		
+		// check if ruby-style attributes have been specified, in which case we
+		// fire our reader/accessor method
+		$attr = &$this->_attributes;
+	
+		if (isset($attr[$name])) {
+			// determine lambda method, since we are in __get context, reader will
+			// take presedence over accessor
+			$lambda = isset($attr[$name]['reader'])
+				? $attr[$name]['reader']
+				: $attr[$name]['accessor'];	
+				
+			return $lambda; 
+		}			
 
 		// specify our meta properties; these are properties that follow
 		// specific patterns to allow for returning meta/descriptive
@@ -497,9 +519,8 @@ abstract class ObjectSafe {
 			$field = $match[1];
 			return isset($this->$field);
 				
-		}		
+		}	
 		
-	
 		
 		// if we have reached this point, all dynamic get options have been
 		// exhausted and we trigger an error
@@ -511,6 +532,20 @@ abstract class ObjectSafe {
 	
 	
 	public function __set($name, $value) {
+		
+		// check if ruby-style attributes have been specified, in which case we
+		// fire our accessor method
+		$attr = &$this->_attributes;
+	
+		if (isset($attr[$name])) {
+			// determine lambda method, since we are in __set context, writer will
+			// take presedence over accessor
+			$lambda = isset($attr[$name]['writer'])
+				? $attr[$name]['writer']
+				: $attr[$name]['accessor'];	
+				
+			return $lambda($value); 
+		}			
 
 		// if property follows pattern name__ we are attempting conditional
 		// assignment; conditional assignment is equivalent to ruby's ||=
@@ -714,6 +749,58 @@ abstract class ObjectSafe {
 
 
 	
+	/**
+	 * Declaring ruby-style attr-accessor; this is convenient for creating on the 
+	 * fly closures that act as accessors (readers/writers) on a property
+	 */
+	protected function attr($__mixed) {
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+		
+		$attr = &$this->_attributes;
+		$self = $this;
+
+		// iterate through arguments, and assign accessor
+		// closures to each
+		foreach ($arguments as $name) {
+			
+			// if a 'concrete' method already exists, then it will take
+			// prescedence
+			if (\method_exists($this, $name)) {
+				
+				// @TODO replace with ReflectionMethod#getClosure on switch
+				// to php 5.4
+				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {
+					$result = $self->send($name, $value, &$attr[$name]['value']);
+				};
+				
+			}
+			
+			// otherwise, we create a default set/get closure
+			else {
+				
+				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {
+					if (is_null($value)) {
+						return $attr[$name]['value'];
+					}
+					
+					else {
+						$attr[$name]['value'] = $value;
+						return $self;
+					}
+				};
+			}
+		}
+	}
+	
+	/**
+	 * Alias to attr method
+	 */
+	protected function attrAccessor($__mixed) {
+		return $this->attr($__mixed);
+	}
+	
 	
 	/**
 	 * Convenience method for determining class name - 
@@ -739,9 +826,10 @@ abstract class ObjectSafe {
 	protected static $ns;
 	protected        $_methods           = array();
 	protected        $_cache             = array();
-	protected        $_properties        = array();
 	protected        $_defers            = array();
 	protected        $_aliasedProperties = array(); 
+	protected        $_attributes        = array();
+	
 	
 	
 }

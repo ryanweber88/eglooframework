@@ -174,10 +174,9 @@ abstract class Model extends Delegator
 						$field => $key
 					)));
 					
-					if ($result                      && 
-					    $result instanceof Model\Set &&
-							count($result))              {
-								
+					// we know that if result is not absolute false, it will be returned
+					// as a set from our process method
+					if ($result) {
 						$result = $result[0];
 					}
 					
@@ -286,11 +285,37 @@ abstract class Model extends Delegator
 	 */
 	protected function initialize(array $arguments) {
 
-		$self = $this;
+		$self  = $this;
 		
-		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) { 
-			foreach($arguments as $name => $value) { 
+		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) {
+			 
+			foreach($arguments as $name => $value) {
+				
+				// first check if a method exists with the same name
+				// or if value is a lambda, in which case we define
+				// as "callable" attribute
+				if (\method_exists($this, $name) || is_callable($value)) {
+					$self->send('attr', $name);
+					//$reflection     = new ReflectionMethod($this, $name);
+					
+					
+					// check parameter count is 1; we do this because we are assigning
+					// one value in the context of intialize and we want to at least
+					// try to avoid collisions; this isn't a fullproof method to
+					// avoid collisions but will help
+					//if ($reflection->getDeclaringClass()->getName() == $self->classNameFull() &&
+					 //   $reflection->getNumberOfParameters() == 1) {
+						
+						// we want a method with the same name to act as arbiter to model
+						// attribute
+						//$self->send('attr', $name);
+					//}
+				}
+	
+				// now set value of attribute; if it has been defined as a callable attribute
+				// then value will be routed through closure that $self->$name defines
 				$self->$name = $value;
+				
 			}
 		});
 				
@@ -1312,7 +1337,46 @@ abstract class Model extends Delegator
 	 * moreso fitting
 	 */
 	protected function aliasAttribute($alias, $attribute) {
-		$this->aliasProperty($alias, $attribute);
+		
+		// attribute is callable, then lambda should return a reference to the
+		// attribute in question, to which our alias will become a true
+		// alias of
+		if (is_callable($lambda = $attribute)) {
+			// make sure that lambda returns a reference, if it does
+			// not we are creating a true alias and throw an exception
+			// if the case
+			$reflection = new \ReflectionFunction($lambda);
+			
+			if ($reflection->returnsReference()) {
+				
+				// we HAVE to set a !isset value to null first, otherwise an
+				// assignment by reference will call __get first, which will
+				// result in a thrown exception, because $alias does not yet
+				// exist on this receiver
+				//if (!isset($this->$alias)) {
+				//	$this->$alias = null;
+				//}
+				
+				// unset our attribute; this will make sure referenced values
+				// are not unset as well
+				unset($this->$alias);
+				
+				// now specify alias as attribute accessor and set with
+				// value as lambda
+				$this->attrAccessor($alias);
+				$this->$alias = $lambda;
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed to create alias '$alias' because lambda does not return-by-reference"
+				);
+			}
+		}
+		
+		else {
+			$this->aliasProperty($alias, $attribute);
+		}
 	}
 	
 	/**
@@ -1843,17 +1907,7 @@ abstract class Model extends Delegator
 		return $this;
 	}
 	
-	public function __toString() {
-		if (($field = static::constGet('NATURAL_KEY'))) {
-			try { 
-				return $this->$field;
-			}
-			
-			catch(\Exception $ignore) { }
-		}
-		
-		return parent::__toString();
-	}
+
 	
 	public function cast($class) {
 		
@@ -1896,6 +1950,7 @@ abstract class Model extends Delegator
 		);
 	}	
 
+	protected $attributes     = array();
 	protected $validates      = array();
 	protected $callbacks      = array();
 	private   $initialized    = false;
