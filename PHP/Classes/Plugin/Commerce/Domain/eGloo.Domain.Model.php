@@ -144,6 +144,7 @@ abstract class Model extends Delegator
 		if ( !static::respondTo('find') ) {
 										
 			static::defineMethod('find', function($__mixed, $class) {
+								
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
@@ -156,10 +157,31 @@ abstract class Model extends Delegator
 				// does not pan out; so callers will be explicitly aware
 				try {
 					
-					return new $class($class::statement("
-						SELECT * FROM $table WHERE $field = ?
+					/*
+					return $class::sendStatic('process', $class::statement("
+						SELECT
+							*
+						FROM 
+							$table
+						WHERE
+							$field = ?
 							
 					", $key));
+					 */
+					
+					
+					$result = $class::sendStatic('process', $class::where(array(
+						$field => $key
+					)));
+					
+					if ($result                      && 
+					    $result instanceof Model\Set &&
+							count($result))              {
+								
+						$result = $result[0];
+					}
+					
+					return $result;
 					
 				}
 				
