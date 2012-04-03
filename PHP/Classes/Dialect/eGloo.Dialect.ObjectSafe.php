@@ -66,6 +66,9 @@ abstract class ObjectSafe {
 			
 			// fire methodAdded event
 			$self->send('methodAdded', $name, $lambda);
+			
+			// return lambda to caller
+			return $lambda;
 		};		
 		
 		$this->defineMethod('defer', function($lambda) use ($self) {
@@ -361,10 +364,33 @@ abstract class ObjectSafe {
 	 * context of class; calls an method on instance receiver with arguments 
 	 * presented 
 	 */
-	public function send($method, $__mixed = null) {
-		return call_user_func_array(
-			array($this, $method), array_slice(func_get_args(), 1)	
+	public function send($name, $__mixed = null) {
+		
+		if (\method_exists($this, $name)) {
+			$method = array($this, $name);
+		}
+		
+		else if (isset($this->_methods[$name])) {
+			$method = $this->_methods[$name];
+		} 
+		
+		if (isset($method)) {
+			return call_user_func_array(
+				$method, array_slice(func_get_args(), 1)	
+			);
+		}
+		
+		// if we have reached this point, we know method does
+		// not exist, either as concrete or as dynamically
+		// defined
+		$class = $this->classNameFull();
+		
+		throw new \Exception(
+			"Failed to send method '$method' to receiver '$class' because method does not exist"
 		);
+		
+		
+
 	}
 	
 	public static function sendStatic($method, $__mixed = null) {
@@ -490,15 +516,19 @@ abstract class ObjectSafe {
 		// check if ruby-style attributes have been specified, in which case we
 		// fire our reader/accessor method
 		$attr = &$this->_attributes;
-	
+		
 		if (isset($attr[$name])) {
+			
+			//exit('asdf');
+			//var_export(isset($attr[$name]['reader']));
+			
 			// determine lambda method, since we are in __get context, reader will
 			// take presedence over accessor
 			$lambda = isset($attr[$name]['reader'])
 				? $attr[$name]['reader']
 				: $attr[$name]['accessor'];	
 				
-			return $lambda; 
+			return $lambda(); 
 		}			
 
 		// specify our meta properties; these are properties that follow
@@ -536,15 +566,20 @@ abstract class ObjectSafe {
 		// check if ruby-style attributes have been specified, in which case we
 		// fire our accessor method
 		$attr = &$this->_attributes;
-	
+		
 		if (isset($attr[$name])) {
+						
 			// determine lambda method, since we are in __set context, writer will
 			// take presedence over accessor
 			$lambda = isset($attr[$name]['writer'])
 				? $attr[$name]['writer']
 				: $attr[$name]['accessor'];	
 				
-			return $lambda($value); 
+			$lambda($value); 
+	
+			
+			// returning false will stop chain in descendants
+			return false;
 		}			
 
 		// if property follows pattern name__ we are attempting conditional
@@ -559,7 +594,7 @@ abstract class ObjectSafe {
 			}
 			
 			
-			return $this;
+			return false;
 		}
 
 
@@ -765,19 +800,41 @@ abstract class ObjectSafe {
 		// closures to each
 		foreach ($arguments as $name) {
 			
-			// if a 'concrete' method already exists, then it will take
-			// prescedence
-			if (\method_exists($this, $name)) {
-				
-				// @TODO replace with ReflectionMethod#getClosure on switch
-				// to php 5.4
-				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {
-					$result = $self->send($name, $value, &$attr[$name]['value']);
+			// check get & set accessor first
+			if ($this->respondTo($method = "get_$name")) {
+				$attr[$name]['reader'] = function() use ($method, $name, $self, &$attr) {
+					return $self->send($method, $attr[$name]['value']);
 				};
 				
 			}
 			
-			// otherwise, we create a default set/get closure
+			if ($this->respondTo($method = "set_$name")) {
+				$attr[$name]['writer'] = function($value) use ($method, $name, $self, &$attr) {
+					
+					if (!is_null($result = $self->send($method, $value, &$attr[$name]['value']))) {
+						$attr[$name]['value'] = $result;
+					}	
+										
+					return $self;
+				};
+				
+			}
+			
+			// if a 'concrete' method already exists, then it will take
+			// prescedence			
+			if ($this->respondTo($name)) {
+
+				// @TODO replace with ReflectionMethod#getClosure on switch
+				// to php 5.4
+				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {
+					if (!is_null($result = $self->send($name, $value, &$attr[$name]['value']))) {
+						$attr[$name]['value'] = $result;
+					};	
+				};
+				
+			}
+			
+			// otherwise, we create a default/generic set/get closure
 			else {
 				
 				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {

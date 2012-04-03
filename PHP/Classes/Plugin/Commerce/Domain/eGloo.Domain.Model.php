@@ -9,7 +9,7 @@ use \eGloo\Utilities\InflectionsSafe;
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface {
+	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -20,7 +20,11 @@ abstract class Model extends Delegator
 	 * @param variable-length $__mixed
 	 */
 	function __construct($__mixed = null) {
-		
+
+		// pass to parent delegator::__construct our *DataAccess
+		// instance or Domain\Data
+		parent::__construct(static::data());
+				
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
@@ -30,9 +34,8 @@ abstract class Model extends Delegator
 		}
 		
 		
-		// pass to parent delegator::__construct our *DataAccess
-		// instance or Domain\Data
-		parent::__construct(static::data());
+
+		
 
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
@@ -40,7 +43,6 @@ abstract class Model extends Delegator
 		$this->__callbacks();
 		$this->__attributes();
 		
-
 	}
 
 	/** @Polymorphic */ 
@@ -284,8 +286,8 @@ abstract class Model extends Delegator
 	 * Responsible for initialize of model attributes
 	 */
 	protected function initialize(array $arguments) {
-
-		$self  = $this;
+		
+		$self = $this;
 		
 		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) {
 			 
@@ -294,8 +296,10 @@ abstract class Model extends Delegator
 				// first check if a method exists with the same name
 				// or if value is a lambda, in which case we define
 				// as "callable" attribute
-				if (\method_exists($this, $name) || is_callable($value)) {
+				if (\method_exists($self, $name) || is_callable($value)) {
+						
 					$self->send('attr', $name);
+					
 					//$reflection     = new ReflectionMethod($this, $name);
 					
 					
@@ -348,7 +352,7 @@ abstract class Model extends Delegator
 	protected function aliasProperty($alias, $from) {
 		parent::aliasProperty($alias, $from);
 		
-		$this->properties[$alias] = &$this->properties[$from];
+		//$this->properties[$alias] = &$this->properties[$from];
 	}
 
 	/**
@@ -571,7 +575,17 @@ abstract class Model extends Delegator
 		
 	}
 
-	
+	/**
+	 * The point of trapping the defineMethod event is to determine
+	 * if any names match that of attributes, in which case we replace
+	 * the current handler or value with the new handler
+	 * 
+	 */
+	protected function methodAdded($name, $lambda) {
+		if (isset($this->_attributes[$name])) {
+			$this->attrAccessor($name);
+		}
+	}
 	 
 	/**
 	 * Provides a variable length argument list of items that
@@ -823,7 +837,7 @@ abstract class Model extends Delegator
 		else {
 			$values = array();
 			
-			foreach(array_keys($this->properties) as $field) {
+			foreach($this->attributes as $field) {
 				$values[$field] = $this->$field;
 			}
 			
@@ -848,7 +862,7 @@ abstract class Model extends Delegator
 		//echo "-- entering attributes for receiver " . get_class($this) . "\n";
 		
 		// iterate through properties, retrieve values and return
-		foreach(array_keys($this->properties) as $field) {
+		foreach($this->attributes as $field) {
 			
 			// @TODO there is a chance here that an alias may have the same
 			// name as a property
@@ -1363,8 +1377,7 @@ abstract class Model extends Delegator
 				
 				// now specify alias as attribute accessor and set with
 				// value as lambda
-				$this->attrAccessor($alias);
-				$this->$alias = $lambda;
+				$this->defineMethod($alias, $lambda);
 			}
 			
 			else {
@@ -1606,7 +1619,14 @@ abstract class Model extends Delegator
 	 */
 	public function __set($key, $value) {
 		
+		if ($key == 'classification') {
+			echo "\n__set on classification for ". spl_object_hash($this) . "\n";
+		}
 		//echo "attempting set on $key\n";
+		
+		if (!in_array($key, $this->attributes)) {
+			$this->attributes[] = $key;
+		}
 
 		
 		// we first attempt to resolve set within parent, which
@@ -1615,24 +1635,33 @@ abstract class Model extends Delegator
 		// exception will be thrown, which in this case is ignored
 		// because we DO want dynamic properties/attributes added
 		// to our receiver
-		$failed = false;
+		$continue = true;
 		
 		try {
-			parent::__set($key, $value);
+			$continue = parent::__set($key, $value);
+			
+			if ($key == 'classification') {
+				echo var_export($continue, true); 
+			}
 		}
 		
 		catch(\Exception $ignore)  {
-			 
-			$failed = true;
+			//echo $ignore; 
+			$continue = true;
 		}
 		
-		
-		
+
 		// if parent has thrown an exception, then meta tests have
 		// failed and we intentionally wish to defined a dynamic 
 		// property
 		
-		if ($failed) { 
+		if ($continue) {
+			
+			if ($key == 'classification') {
+				exit('fucked');
+			}
+		
+		 
 			// because we rely on certain instance fields being set
 			// during class definition (or when class is self) we
 			// also set field on public
@@ -1656,7 +1685,7 @@ abstract class Model extends Delegator
 			// we also set on properties to maintain backwards 
 			// compatibility on anything that is explicitly 
 			// setting/getting on properties
-			$this->properties[$key] = $value;
+			//$this->properties[$key] = $value;
 			
 		
 			// now record change
@@ -1752,7 +1781,9 @@ abstract class Model extends Delegator
 
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
-		if ($this->respondTo($name)) {
+		if (isset($this->_methods[$name])) {
+			
+			//var_export($this->_methods)
 			$reflection = new \ReflectionFunction(
 					$this->_methods[$name]
 			);
