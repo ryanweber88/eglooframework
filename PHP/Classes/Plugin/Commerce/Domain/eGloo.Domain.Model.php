@@ -772,6 +772,28 @@ abstract class Model extends Delegator
 		});
 				
 	}
+
+	/** ArrayAccess Interface **************************************************/
+	// ArrayAccess interface is intended to be used to access attribute values
+	// from within override setters; though the methods are public, it is not
+	// truely intended for outside access
+	
+	public function offsetGet($attribute) {
+		return $this->_attributes[$attribute]['value'];
+	}
+	
+	public function offsetSet($attribute, $value) {
+		$this->_attributes[$attribute]['value'] = $value;
+	}
+	
+	public function offsetExists($attribute) {
+		return isset($this->_attributes[$attribute]);
+	}
+	
+	public function offsetUnset($attribute) {
+		unset($this->_attributes[$attribute]);
+	}
+	
 	
 	
 	
@@ -885,6 +907,11 @@ abstract class Model extends Delegator
 		
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = static::signature();
+		
+		// @TODO this is a temporary measure, don't know if it will work, but
+		// some code still refers to properties
+		//$this->aliasProperty('properties', 'attributes');
+	
 		
 		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 		// with model; in the future need to determine existence of primary key and cache 
@@ -1619,9 +1646,6 @@ abstract class Model extends Delegator
 	 */
 	public function __set($key, $value) {
 		
-		if ($key == 'classification') {
-			echo "\n__set on classification for ". spl_object_hash($this) . "\n";
-		}
 		//echo "attempting set on $key\n";
 		
 		if (!in_array($key, $this->attributes)) {
@@ -1637,12 +1661,9 @@ abstract class Model extends Delegator
 		// to our receiver
 		$continue = true;
 		
+		
 		try {
 			$continue = parent::__set($key, $value);
-			
-			if ($key == 'classification') {
-				echo var_export($continue, true); 
-			}
 		}
 		
 		catch(\Exception $ignore)  {
@@ -1657,10 +1678,6 @@ abstract class Model extends Delegator
 		
 		if ($continue) {
 			
-			if ($key == 'classification') {
-				exit('fucked');
-			}
-		
 		 
 			// because we rely on certain instance fields being set
 			// during class definition (or when class is self) we
@@ -1672,16 +1689,27 @@ abstract class Model extends Delegator
 			// override simple get functionality with method
 			// @TODO not yet implemented
 			if (\method_exists($this, $key)) {
-				
+				// pass	
 			}
 			
 			// flag whether value has been changed, this is important
 			// for checking 
-			$changed = !isset($this->$key) || 
-			           isset($this->$key) && $this->$key !== $value;
+			// @TODO this doesn't work because i am stupid, set will 
+			// be bypassed after initial property set..  
+			//$changed = !isset($this->$key) || 
+			//           (isset($this->$key) && $this->$key !== $value);
 			
-			$this->$key = $value;
 			
+			// we check if attribute has been set as lambda, in which case we avoid
+			// a direct set (or arbitrarily creating a public property) as that would
+			// bypass future calls to __get and __set, and thus undo the point of 
+			// ruby style attributes
+			// @TODO this is really messy, as its forced conglomerate of two different
+			// concepts; eventually all attributes will be moved over to ruby style attribute
+			// accessor
+			if (!isset($this[$key])) {
+				$this->$key = $value;
+			}
 			// we also set on properties to maintain backwards 
 			// compatibility on anything that is explicitly 
 			// setting/getting on properties
@@ -1689,9 +1717,10 @@ abstract class Model extends Delegator
 			
 		
 			// now record change
-			if ($changed) { 
+			//@TODO this will always be true in initial set
+			//if ($changed) { 
 				$this->changes[$key][] = $value;
-			}
+			//}
 		}
 		
 		return $this;
