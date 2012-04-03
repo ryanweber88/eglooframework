@@ -17,32 +17,39 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 * @param String $model
 	 */
 	function __construct($mixed) {
-		
+		parent::__construct();
+				
 		// set our model type; think of this as templated collection
 		// in c++, where array values may only be of passed
 		// in type
+		$instance = null;
+		
 		if ($mixed instanceof Domain\Model) {
-			$model = get_class($mixed);
-			$this->model = new $model;
-
+			$this->model = get_class(
+				$instance = $mixed
+			);
+			
 			
 			// if passed in model exists, then add as first element to set
 			if ($mixed->exists()) {
 				$this->collection[] = $mixed;  
 			}
+			
 		}
 		
 		// if mixed is an array with 1+ elements, then we wrapping at collection
 		// with the functionality provided by set
 		else if (is_array($mixed) && count($mixed)) {
 			$this->collection = $mixed;
-			$this->model      = get_class($mixed[0]);
+			$this->model      = get_class(
+				$instance = $mixed[0]
+			);
 		}
 		
 		// in this case, our model is passsed/identified as fully qualified string
 		// and our set is currently empty
 		else if (is_string($mixed) && class_exists($mixed)) {
-			$this->model = new $mixed;
+			$this->model = $mixed;
 		}
 		
 		else { 
@@ -52,33 +59,34 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		}
 		
 		// check if model has natural key, if case, then set key
-		$model          = $this->model;
-		$model          = new $model;
-		$primaryKeyName = null;
-		 
-		try {
-			$primaryKeyName = $model->send('primaryKeyName');
-		}
+		// by that; otherwise default to primary key, if available
 		
-		catch(\Exception $ignore) { }
-		
-		
-		//if (!is_null($key = $model::constant('NATURAL_KEY'))) {
-		//	$this->key = $key;
-		//}		
-		
-		$this->key = is_null($key = $model::constant('NATURAL_KEY'))
-			? $primaryKeyName
-			: $key;
+		if (!is_null($instance)) {
+			 
+			try {
+				$primaryKeyName = $instance->send('primaryKeyName');
+			}
 			
-		// check that primary key is returning unique values for 	
-		if (!$this->keyReturnsUnique()) {
-			throw new \Exception(
-				"Failed constructing $this because key '$key' is not valid because " .
-				"it returns non-unique model instances"
-			);
+			catch(\Exception $ignore) { }
+			
+			
+			if (!is_null($key = $instance::constant('NATURAL_KEY'))) {
+				$this->key = $key;
+			}
+			
+			else if (isset($primaryKeyName) && !is_null($key = $primaryKeyName)) {
+				$this->key = $key;
+			}
+
+				
+			// check that primary key is returning unique values for 	
+			if (!is_null($this->key) && !$this->keyReturnsUnique()) {
+				throw new \Exception(
+					"Failed constructing $this because key '$key' is not valid because " .
+					"it returns non-unique model instances"
+				);
+			}			
 		}
-		
 	}
 
 	
@@ -319,7 +327,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		else {
 			$method = __FUNCTION__;
-			$class  = get_class($this->model);
+			$class  = $this->model;
 			
 			throw new \Exception(
 				"Failed running column statistic '$method' on receiver '$this' for model-type '$class' because it is empty"
@@ -353,7 +361,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		else {
 			$method = __FUNCTION__;
-			$class  = get_class($this->model);
+			$class  = $this->model;
 			
 			throw new \Exception(
 				"Failed running column statistic '$method' on receiver '$this' for model-type '$class' because it is empty"
@@ -388,10 +396,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 * Prints out a bit more descriptive information about our set
 	 */
 	public function __toString() {
-		return parent::__toString() . '<' . get_class($this->model) . '>';
+		return parent::__toString() . "<{$this->model}>";
 	}
 	
 	public function offsetExists($offset) {
+		
 		// @TODO cache these results and below is lazy - 
 		// we should do a true check on exists
 		try {
@@ -413,6 +422,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function offsetGet($offset) {
+
 		// if a string we are attempting to match by "natural_key" 
 		// or a field that is representative of the model in a 
 		// collection
@@ -519,7 +529,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		else { 
 			throw new \Exception (
-				"Collection $this can only accept instance of type " . get_class($this->model)	
+				"Collection $this can only accept instance of type {$this->model}"
 			);
 		}
 	}

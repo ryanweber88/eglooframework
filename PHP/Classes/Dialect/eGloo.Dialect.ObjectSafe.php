@@ -444,15 +444,17 @@ abstract class ObjectSafe {
 			// MAKE SURE TO CHECK that property hasn't been previously aliased
 			// because setting a reference to null WILL set the aliased property
 			// to null as well
-			if (!isset($this->$alias)) {
-				$this->$alias = null;
-			}
+			
+			unset($this->$alias);
+			$this->$alias = null;
+			
 			
 			$this->$alias = &$this->$from;
 			
 			// keep track of alias properties
 			$this->_aliasedProperties[$alias] = $from;
 			
+			//echo "aliased '$from' with alias '$alias' on receiver '{$this->identifyInstance()}'\n";
 			//echo "in $class with " . var_export($this->_aliasedProperties, true) . "<br />"; 
 						
 			return $this;
@@ -518,6 +520,7 @@ abstract class ObjectSafe {
 		$attr = &$this->_attributes;
 		
 		if (isset($attr[$name])) {
+			
 			
 			//exit('asdf');
 			//var_export(isset($attr[$name]['reader']));
@@ -685,6 +688,20 @@ abstract class ObjectSafe {
 	}
 	
 	/**
+	 * Returns fully qualified class name with instance hash
+	 */
+	public function identifyInstance() {
+		$class = $this->classNameFull();
+		$hash  = spl_object_hash($this);
+		
+		return "$class<$hash>";
+	}
+	
+	protected function isAliasedProperty($name) {
+		return isset($this->_aliasedProperties[$name]);
+	}
+	
+	/**
 	 * Stub call - needed because it assumed all classes on Objet hierarchy
 	 * have a fallback to method missing
 	 */
@@ -705,9 +722,12 @@ abstract class ObjectSafe {
 
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
+
 			return call_user_func_array(
 				$this->_methods[$name], $arguments	
 			);
+			
+							
 		}
 		
 		// lets provide conversion to underscored and camel case
@@ -723,8 +743,12 @@ abstract class ObjectSafe {
 
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)
+		$class = $this->classNameFull();
+		
+		
+		
 		throw new \Exception (
-			"Call to undefined instance method \"$name\" on receiver $this"
+			"Call to undefined instance method '$name' on receiver '{$this->identifyInstance()}'"
 		);
 		
 	}

@@ -24,7 +24,17 @@ abstract class Model extends Delegator
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
-				
+
+
+		// call our relationships method, which provides callbacks attached
+		// to the names of our relationships
+		$this->__relationships();
+		
+		// call __callbacks method, which defines behaviors during life cycle
+		// of instance
+		$this->__callbacks();
+		
+
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
@@ -32,16 +42,12 @@ abstract class Model extends Delegator
 			
 			$this->initialize($__mixed);
 		}
+				
 		
-		
-
-		
-
-		// call our relationships method, which provides callbacks attached
-		// to the names of our relationships
-		$this->__relationships();
-		$this->__callbacks();
+		// finally call attributes, which sets up convience attributes for
+		// instance		
 		$this->__attributes();
+				
 		
 	}
 
@@ -146,7 +152,7 @@ abstract class Model extends Delegator
 		if ( !static::respondTo('find') ) {
 										
 			static::defineMethod('find', function($__mixed, $class) {
-								
+												
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
@@ -170,12 +176,10 @@ abstract class Model extends Delegator
 							
 					", $key));
 					 */
-					
-					
 					$result = $class::sendStatic('process', $class::where(array(
 						$field => $key
 					)));
-					
+										
 					// we know that if result is not absolute false, it will be returned
 					// as a set from our process method
 					if ($result) {
@@ -457,6 +461,7 @@ abstract class Model extends Delegator
 		$relationships = &$self->reference('relationships');
 		$relationships[$relationshipName] = $model;
 		
+
 		//echo "relationship model '$model'"
 
 					
@@ -497,8 +502,10 @@ abstract class Model extends Delegator
 				// contract of the defineRelationship method
 				if (is_array($result)) {
 					
-					if (\eGloo\Utilities\Collection::isHash($result)) {
+					
+					if (\eGloo\Utilities\Collection::isHash($result)) {						
 						$result = new $model($result);
+						
 			
 						// @TODO this is a shortcut to we establish a better rule
 						// in terms of convetion around singular vs set
@@ -880,19 +887,18 @@ abstract class Model extends Delegator
 	public function attributes() {
 		
 		$values = array();
-		
-		//echo "-- entering attributes for receiver " . get_class($this) . "\n";
-		
+						
 		// iterate through properties, retrieve values and return
 		foreach($this->attributes as $field) {
 			
 			// @TODO there is a chance here that an alias may have the same
 			// name as a property
-			if (!isset($this->_aliasedProperties[$field])) {
+			if (!$this->isAliasedProperty($field)    &&
+			    !$this->hasRelationship($field))     {
+			    	
 				$values[$field] = $this->$field;
 			}
 			
-			//echo "property $field on " . get_class($this) . "\n";
 		}
 		
 		return $values;
@@ -912,15 +918,11 @@ abstract class Model extends Delegator
 		// some code still refers to properties
 		//$this->aliasProperty('properties', 'attributes');
 	
-		
-		// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
-		// with model; in the future need to determine existence of primary key and cache 
-		// beforehand
-		
-		$this->aliasPrimaryKey("{$class}_id");
-		
+				
 		
 		if ($this->initialized()) {
+
+					
 					
 			// iterate across properties and determine if they
 			// fit pattern of $class_(name)
@@ -930,13 +932,16 @@ abstract class Model extends Delegator
 			
 			// @TODO static cache is not working here - needs to be
 			// polymorphic
-			$properties = static::cache(function() use ($self) {
-				return $self->send('attributes');
+			$attributes = static::cache($class, function() use ($self) {
+				return $self->reference('attributes');
 			});
 			
-			
-			foreach($properties as $name) {
+
+
+								
+			foreach($attributes as $name) {
 	
+				
 				// in some instances, for sub model types, like coupon\type, our convention doesn't work for
 				// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
 				// look for a field matching the exact name
@@ -949,7 +954,6 @@ abstract class Model extends Delegator
 						? preg_replace('/^.+_/', null, $name)
 						: $match[1];
 						
-					
 						
 					try { 
 						$this->aliasProperty(
@@ -961,13 +965,21 @@ abstract class Model extends Delegator
 				}
 	
 			}
-
 		
+
+			
+				
+			// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
+			// with model; in the future need to determine existence of primary key and cache 
+			// beforehand
+			$this->aliasPrimaryKey("{$class}_id");
+			
+	
 			
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
 			if (isset($this->status_id)          &&
-			    $this->hasRelationship('Status') && 
+			    $this->hasRelationship('Status')  && 
 			    $this->Status->exists()) {
 			    	
 				$field = "{$this->signature()}_status";
@@ -1369,6 +1381,8 @@ abstract class Model extends Delegator
 		catch(\Exception $ignore) {
 			//var_export($ignore); exit('asdf');
 		}
+		
+
 		$this->primaryKeyName = $from;
 	}
 	
@@ -1648,9 +1662,7 @@ abstract class Model extends Delegator
 		
 		//echo "attempting set on $key\n";
 		
-		if (!in_array($key, $this->attributes)) {
-			$this->attributes[] = $key;
-		}
+
 
 		
 		// we first attempt to resolve set within parent, which
@@ -1710,6 +1722,11 @@ abstract class Model extends Delegator
 			if (!isset($this[$key])) {
 				$this->$key = $value;
 			}
+			
+			if (!in_array($key, $this->attributes)) {
+				$this->attributes[] = $key;
+			}
+			
 			// we also set on properties to maintain backwards 
 			// compatibility on anything that is explicitly 
 			// setting/getting on properties
@@ -1807,7 +1824,9 @@ abstract class Model extends Delegator
 		//}
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
-
+		//if ($name == 'Brand') {
+		//	exit('here');
+		//}
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if (isset($this->_methods[$name])) {
@@ -1816,6 +1835,7 @@ abstract class Model extends Delegator
 			$reflection = new \ReflectionFunction(
 					$this->_methods[$name]
 			);
+			
 			
 			
 			// we don't want to use __get as replacement or alternative
@@ -1832,7 +1852,7 @@ abstract class Model extends Delegator
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
 				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
-					$field = $this->primaryKeyName;
+					//$field = $this->primaryKeyName;
 					
 					if (!is_null($this->$field)) {
 						$this->$name->$field = $this->$field;
