@@ -1807,6 +1807,11 @@ abstract class Model extends Delegator
 	}
 	
 	/**
+	 * Locks any explicit changes on model
+	 */
+	public function lock() { }
+	
+	/**
 	 * Get properties on instance that belong to
 	 * our properties array; this will eventually
 	 * be removed and handled on our delegated class
@@ -1817,16 +1822,13 @@ abstract class Model extends Delegator
 	 *
 	 */
 	public function __get($name) {
-		
-		//echo "attempting get on $name\n";
+				
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
-		//if ($name == 'Brand') {
-		//	exit('here');
-		//}
+
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if (isset($this->_methods[$name])) {

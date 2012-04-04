@@ -549,29 +549,36 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	public function __toArray() {
 		$wrapped = array();
 		
+
 		if (count($this)) {
-			$model   = current($this->collection);
+			// we are gaurenteed that at least one model element exists
+			// within collection
+			$model = $this[0];
+			
+			
 			
 			// make a determiniation on whether to use 'natural key'
 			// or precede with numerical indicies
 			// @TODO this get's a little overcomplex because
 			// php determines numerical-string based indicies
 			// as numerical, thus the shitload of checks below
-			$key     = $this->key;
+			$key    = $this->key;
+			$useKey = !is_null($key)              &&
+			          count($this)                &&
+			          isset($model->$key)         && 
+	              !is_null($model->$key)      &&
+			          !is_numeric($model->$key);
+																
 			
-			$useKey  = !is_null($key)              &&
-			           count($this)                &&
-			           isset($model->$key)         && 
-	               !is_null($model->$key)      &&
-			           !is_numeric($model->$key);
-								 
-			
-			
-			foreach ($this->collection as $model) {
-				
+									 	
+			foreach ($this as $model) {
+							
 				if ($useKey) {
 					if (isset($model->$key) && !is_null($model->$key)) {
+					  
+						//if ($this->model == 'Common\\Domain\\Model\\Product\\Category') { echo $model->$key; }  	
 						$index = $model->$key;
+						
 					}
 					
 					else {
@@ -584,15 +591,28 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				}
 				
 				else {
+					
+					if ($this->model == 'Common\\Domain\\Model\\Product\\Category') {
+						var_export($model->$key);	
+						var_export($useKey);
+							
+						echo $key; 
+						//exit('shouldnt be here'); 
+					}
+					
+					
+					
 					$index = count($wrapped);
 				}
+				
+				
 					
 				$wrapped[$index] = new Domain\Utility\ArrayAccess(
 					$model
 				);
 			}
 		}
-	
+
 		return $wrapped;
 	}
 	

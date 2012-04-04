@@ -488,6 +488,10 @@ abstract class ObjectSafe {
 		}
 	}
 	
+	public function hash() {
+		return spl_object_hash($this);
+	}
+	
 	public function instanceEval($lambda) {
 		return $lambda($this);
 	}

@@ -51,7 +51,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// are very difficult to track
 		//$exceptions = array();
 		//echo "offset is $offset\n";
-
 		try {
 			$result = parent::offsetGet($offset);
 		}
@@ -63,64 +62,21 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 			$result = null;
 		}
 		
-	
 		
 		if ( !is_null($result) ) {
-						
-		
 			
+		
 			// check if result delegate is instanceof of set; in which case
 			// we directly return the set, because we want to work directly
 			// on it in most cases
 			if ( is_object($result) &&  
 					 $result->delegated instanceof Domain\Model\Set) {
 					 //!$result->delegated->isEmpty()) {
-						
+
 				// since this will be used in the context of template, we iterate
 				// through set, and wrap each model with arrayaccess, so it can
 				// be used with array notation (in smarty)
 				$result = $result->delegated->__toArray();
-				
-
-				
-				/*
-				$delegated = &$result->delegated;
-				
-				if (count($delegated)) {				
-					// check if model has a natural key defined; in these cases
-					// the model->key value will servce as our index for the
-					// returned set
-					
-
-					// we do two distinct loops as means of saving 
-					if (isset($delegated[0])               && 
-					    !is_null($key = $delegated->key()) &&
-					    !is_numeric($key)                  &&
-					    !empty($delegated[0]->$key)) {
-					   	
-					  echo $delegated->key; exit; 	
-							
-						foreach($delegated as $ignore => $model) {
-							if ($model->exists()) {
-								$set[(string)($index = $model->$key)] = new static($model);			
-							}		
-						}
-					}
-					
-					else {
-						exit('asdf');
-						foreach ($result->delegated as $key => $model) {
-							if ($model->exists()) {
-								$set[] = new static($result->delegated[$key]);
-							}
-						}
-					}
-				}
-				
-								
-												
-				$result = $set;
-				*/
 				
 			}
 			
@@ -179,7 +135,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		
 		}
 
-		
 		// if our result is null, we return an ArrayAccess instance, which
 		// delegates to a Nil class instance - we do this because there
 		// are many instances where simply returning null will cause

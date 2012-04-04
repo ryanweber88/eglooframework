@@ -68,7 +68,10 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				
 			// if property is valid, it will takes precedence - deal with
 			// it buddy
-			if (is_array($delegated) && isset($delegated[$member])) {
+			if ((is_array($delegated)               ||
+					$delegated instanceof \ArrayAccess) &&
+			    isset($delegated[$member])) {
+				  	
 				$result = $delegated[$member];
 			}
 
@@ -77,6 +80,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 			// where parameters are needed; if that were to be the case,
 			// the argument would be that there is a fatal design flaw
 			else if (\method_exists($delegated, $member)) {
+				
 				// check if class/instance member 
 				$reflection = new \ReflectionMethod($delegated, $member);
 				$result     = $reflection->isStatic()
@@ -95,20 +99,6 @@ class ArrayAccess extends Object implements \ArrayAccess {
 				
 			}
 				
-
-			// check if we are dealing with an object that uses array notation;
-			// if this is the case, we'll have to check against its offsetGet
-			// method for a result
-			else if ( $delegated instanceof \ArrayAccess ) {
-				
-				// ask if 
-				//exit('there');
-				
-				if (isset($delegated[$member])) {
-					$result = $delegated[$member];
-				}
-			}
-	
 			// else we check our magic calls, if any - any exceptions will be caught 
 			// and ignored, as we can safely conclude that those were failures 
 			else {
@@ -122,6 +112,7 @@ class ArrayAccess extends Object implements \ArrayAccess {
 					catch (\Exception $ignore) { 
 						$result = null;
 					}
+										
 				}
 				
 				
