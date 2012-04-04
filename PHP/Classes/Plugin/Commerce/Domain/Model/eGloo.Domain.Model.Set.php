@@ -547,73 +547,66 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function __toArray() {
-		$wrapped = array();
+		$self  = $this;
 		
-
-		if (count($this)) {
-			// we are gaurenteed that at least one model element exists
-			// within collection
-			$model = $this[0];
+		return static::cache($this->hash(), function() use ($self) {
 			
+			$wrapped = array();
 			
-			
-			// make a determiniation on whether to use 'natural key'
-			// or precede with numerical indicies
-			// @TODO this get's a little overcomplex because
-			// php determines numerical-string based indicies
-			// as numerical, thus the shitload of checks below
-			$key    = $this->key;
-			$useKey = !is_null($key)              &&
-			          count($this)                &&
-			          isset($model->$key)         && 
-	              !is_null($model->$key)      &&
-			          !is_numeric($model->$key);
-																
-			
-									 	
-			foreach ($this as $model) {
-							
-				if ($useKey) {
-					if (isset($model->$key) && !is_null($model->$key)) {
-					  
-						//if ($this->model == 'Common\\Domain\\Model\\Product\\Category') { echo $model->$key; }  	
-						$index = $model->$key;
+			if (count($self)) {
 						
+				// we are gaurenteed that at least one model element exists
+				// within collection
+				$model = $self[0];
+				
+				
+				
+				// make a determiniation on whether to use 'natural key'
+				// or precede with numerical indicies
+				// @TODO this get's a little overcomplex because
+				// php determines numerical-string based indicies
+				// as numerical, thus the shitload of checks below
+				$key    = $self->reference('key');
+				$useKey = !is_null($key)              &&
+				          isset($model->$key)         && 
+		              !is_null($model->$key)      &&
+				          !is_numeric($model->$key);
+																	
+				
+										 	
+				foreach ($self as $model) {
+								
+					if ($useKey) {
+						if (isset($model->$key) && !is_null($model->$key)) {
+						  
+							$index = $model->$key;
+						}
+						
+						else {
+							$class = $model::callNameFull();
+							
+							throw new \Exception (
+								"Failed creating index with key '$key' because receiver instance '$model' does not have '$key' as a member"
+							);
+						}
 					}
 					
 					else {
-						$class = $model::callNameFull();
+	
+						$index = count($wrapped);
+					}
+					
+					
 						
-						throw new \Exception (
-							"Failed creating index with key '$key' because receiver instance '$model' does not have '$key' as a member"
-						);
-					}
+					$wrapped[$index] = new Domain\Utility\ArrayAccess(
+						$model
+					);
 				}
-				
-				else {
-					
-					if ($this->model == 'Common\\Domain\\Model\\Product\\Category') {
-						var_export($model->$key);	
-						var_export($useKey);
-							
-						echo $key; 
-						//exit('shouldnt be here'); 
-					}
-					
-					
-					
-					$index = count($wrapped);
-				}
-				
-				
-					
-				$wrapped[$index] = new Domain\Utility\ArrayAccess(
-					$model
-				);
 			}
-		}
-
-		return $wrapped;
+	
+			return $wrapped;
+			
+		});
 	}
 	
 	public function toArray($wrapped = false) {
