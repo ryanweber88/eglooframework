@@ -34,7 +34,7 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 		// we lock the model instance to read only and insert
 		// into persistence store
 		$model->lock();
-		$this->pool[$model->classNameFull()][$model->id()] = $model;
+		$this->pool[$model->classNameFull()][$model->id] = $model;
 	}
 	
 	/**

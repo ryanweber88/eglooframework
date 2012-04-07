@@ -7,7 +7,7 @@ namespace eGloo\Dialect;
  * @author Christian Calloway
  *
  */
-class _ClassSafe extends Object { 
+class _ClassSafe { 
 	
 	function __construct($mixed) { 
 		//parent::__construct();

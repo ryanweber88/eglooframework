@@ -78,7 +78,6 @@ abstract class Model extends Delegator
 		$methods    = $reflection->getMethods();
 		$found      = array();		
 		
-		
 		// iterate through patterns and check against our static methods
 		// drawing up aliases where patterns match
 		foreach($methods as $method) {
@@ -97,19 +96,17 @@ abstract class Model extends Delegator
 						
 						$alias = str_replace("{$signature}_", null, $alias);
 						$from  = $method->getName();
-						
-						
+												
 						try {
 							
 							//echo "$alias to {$method->getName()} on $class<br />";
 							//echo "found alias $alias for $from on class $class<br />"; 
-							static::defineMethod($alias, function($arguments) use ($class, $from) {
-							
+							static::defineMethod($alias, function($arguments) use ($class, $from, $alias) {
 								$arguments = func_get_args();
-								
+																
 								// if attempting a simple find by primary key, then attempt
 								// to retrieve from manager and persist
-								if ($alias == 'find' && count($arguments) == 1) {
+								if ($alias == 'find') {
 									$manager = Model\Manager::instance();
 									$key     = $arguments[0];
 									
@@ -124,13 +121,12 @@ abstract class Model extends Delegator
 								// call original method and pass to process which will convert
 								// over to proper return type (null, Model, Set)
 								else {
-								
 									$result = call_user_func_array(
 										array($class, $from), $arguments 
-									);	
-																				
-									return $class::sendStatic('process', $result);
+									);													
 								}
+								
+								return $class::sendStatic('process', $result);
 							});
 							
 							
@@ -169,6 +165,7 @@ abstract class Model extends Delegator
 		// @TODO these need to be moved to __methodStatic
 		
 		if ( !static::respondTo('find') ) {
+			
 										
 			static::defineMethod('find', function($__mixed, $class) {
 												
@@ -1364,11 +1361,16 @@ abstract class Model extends Delegator
 		
 		else if (is_array($result) && count($result)) {
 			
-			$mananger = Model\Manager::instance();
-			$key      = $this->primaryKeyName;
+			$manager = Model\Manager::instance();
+			//$key      = $this->primaryKeyName;
+			
+			// guess key
+			$signature = static::signature();
+			$key       = "{$signature}_id";
+			$class     = static::classNameFull();
 					
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($this, $key, function($class) use ($result) {
+				$result = $manager->find($class, $key, function($class) use ($result) {
 					return new $class($result);
 				});					
 			}
@@ -1391,7 +1393,7 @@ abstract class Model extends Delegator
 					foreach($result as $record) {
 						// attempt to retrieve instance from pool, if it is not available, return
 						// "fallback" result from pool; 
-						$set[] = $manager->find($this, $key, function($class) use ($result) {
+						$set[] = $manager->find($class, $key, function($class) use ($result) {
 							return new $class($result);
 						});					
 					}
