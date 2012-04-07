@@ -1800,9 +1800,11 @@ abstract class Model extends Delegator
 		
 			// now record change
 			//@TODO this will always be true in initial set
-			//if ($changed) { 
+			//if ($changed) {
+			if (!$this->hasRelationship($key)) { 
 				$this->changes[$key][] = $value;
 			//}
+			}	
 		}
 		
 		return $this;
