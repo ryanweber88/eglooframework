@@ -42,14 +42,28 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 	 * @return Model | boolean
 	 * 
 	 */
-	public function find($mixed, $key) {
+	public function find($mixed, $key, $lambda = null) {
+		
+		// our mixed parameter may be of either type Model or a string
+		// representing a valid, fully qualified class name
 		$class = (is_object($mixed) && $mixed instanceof Domain\Model)  
-			? $mixed->classNameFull()
+			? $mixed->class->qualified_name
 			: $mixed;
 			
 		if (class_exists($class)) { 
 			if (isset($this->pool[$class][$key])) {
 				return $this->pool[$class][$key];
+			}
+			
+			// if we have a callable lambda, then attempt to retrieve
+			// model from lambda
+			else if (is_callable($lambda)) {
+				if (($model = $lambda($class, $key))) {
+					// persist found model and return to caller
+					$this->persist($model);
+					
+					return $model;
+				}
 			}
 		}
 		

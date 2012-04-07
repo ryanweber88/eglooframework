@@ -98,20 +98,39 @@ abstract class Model extends Delegator
 						$alias = str_replace("{$signature}_", null, $alias);
 						$from  = $method->getName();
 						
+						
 						try {
 							
 							//echo "$alias to {$method->getName()} on $class<br />";
 							//echo "found alias $alias for $from on class $class<br />"; 
 							static::defineMethod($alias, function($arguments) use ($class, $from) {
 							
+								$arguments = func_get_args();
+								
+								// if attempting a simple find by primary key, then attempt
+								// to retrieve from manager and persist
+								if ($alias == 'find' && count($arguments) == 1) {
+									$manager = Model\Manager::instance();
+									$key     = $arguments[0];
+									
+									$result = $manager->find($class, $key, function($class) use ($from, $arguments) {
+										return call_user_func_array(
+											array($class, $from), $arguments 
+										);
+									});
+								}
+								
+								
 								// call original method and pass to process which will convert
 								// over to proper return type (null, Model, Set)
-								$result = call_user_func_array(
-									array($class, $from), func_get_args() 
-								);	
-																				
-								return $class::sendStatic('process', $result);
+								else {
 								
+									$result = call_user_func_array(
+										array($class, $from), $arguments 
+									);	
+																				
+									return $class::sendStatic('process', $result);
+								}
 							});
 							
 							
@@ -155,46 +174,49 @@ abstract class Model extends Delegator
 												
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
-				$arguments = func_get_args();
+				$arguments = \eGloo\Utilities\Collection::flatten(func_get_args());
 				$table     = $class::sendStatic('signature');
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
+				$set       = array();
+				$manager   = Model\Manager::instance();
 				
 				
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
 				try {
 					
-					/*
-					return $class::sendStatic('process', $class::statement("
-						SELECT
-							*
-						FROM 
-							$table
-						WHERE
-							$field = ?
+					
+					foreach($arguments as $key) {
+						
+						// check if model has already been persisted  
+						$set[] = $manger->find($class, $key, function($class, $key) use ($field) {
+							$result = $class::sendStatic('process', $class::where(array(
+								$field => $key
+							)));
 							
-					", $key));
-					 */
-					$result = $class::sendStatic('process', $class::where(array(
-						$field => $key
-					)));
-										
-					// we know that if result is not absolute false, it will be returned
-					// as a set from our process method
-					if ($result) {
-						$result = $result[0];
+							// we know that if result is not absolute false, it will be returned
+							// as a set from our process method
+							if ($result) {
+								$result = $result[0];
+							}
+							
+							return $result;
+						});
+
 					}
 					
-					return $result;
+					// if a set consisting of a single element; return element, as the likely
+					// intended purpose was to retrieve a single record; otherwise return set
+					// instance
+					return count($set) == 1
+						? $set[0]
+						: new Model\Set($set);
+				}	
 					
-				}
-				
 				catch(\Exception $passthrough) {
 					throw $passthrough;
-				}
-				
-				
+				}				
 			});
 			
 		}
@@ -214,13 +236,10 @@ abstract class Model extends Delegator
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
 				try {
-					
-					$set = $class::statement("
-						SELECT * FROM $table
-							
-					");
-					
-					return $class::sendStatic('process', $set);
+			
+					return $class::sendStatic('process', $class::statement("
+						SELECT * FROM $table	
+					"));
 				}
 				
 				catch(\Exception $passthrough) {
@@ -949,6 +968,21 @@ abstract class Model extends Delegator
 				
 				if (preg_match("/{$class}_(.+)/", $name, $match) || $name == $class) {
 					
+					if ($name == $class) {
+						$alias = preg_replace('/^.+_/', null, $name);
+						
+						try { 
+							$this->aliasProperty('name', $name);
+						}
+						
+						// the only reason an exception would be thrown, is if 
+						// 'name' attribute already exists
+						catch(\Exception $ignore) { }
+					}
+					
+					else {
+						$alias = $match[1];
+					}
 					
 					$alias = $name == $class
 						? preg_replace('/^.+_/', null, $name)
@@ -963,7 +997,11 @@ abstract class Model extends Delegator
 	
 					catch(\Exception $ignore) { }
 				}
-	
+				
+				if ($name == $class) {
+					
+				}
+				
 			}
 		
 
@@ -1325,9 +1363,14 @@ abstract class Model extends Delegator
 		}
 		
 		else if (is_array($result) && count($result)) {
+			
+			$mananger = Model\Manager::instance();
+			$key      = $this->primaryKeyName;
 					
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = new static($result);					
+				$result = $manager->find($this, $key, function($class) use ($result) {
+					return new $class($result);
+				});					
 			}
 					
 			// otherwise, we manually build set with model instances
@@ -1346,7 +1389,11 @@ abstract class Model extends Delegator
 				// in Model instance
 				else { 
 					foreach($result as $record) {
-						$set[] = new static($record);	
+						// attempt to retrieve instance from pool, if it is not available, return
+						// "fallback" result from pool; 
+						$set[] = $manager->find($this, $key, function($class) use ($result) {
+							return new $class($result);
+						});					
 					}
 				}
 				

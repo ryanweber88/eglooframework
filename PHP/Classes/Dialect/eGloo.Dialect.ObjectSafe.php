@@ -10,11 +10,15 @@ abstract class ObjectSafe {
 	
 	function __construct() {
 		
+		$this->class = new _ClassSafe($this);
+		
 		// fire our alias properties and methods
 		//$this->aliasMethods();
 		//$this->aliasProperties();
 		$this->__methods();
 		$this->__properties();
+		
+		
 	}
 	
 	/**
@@ -24,6 +28,7 @@ abstract class ObjectSafe {
 	static function __constructStatic() { 
 		static::__methodsStatic();
 	}
+	
 	
 	
 	
@@ -914,6 +919,7 @@ abstract class ObjectSafe {
 	protected        $_defers            = array();
 	protected        $_aliasedProperties = array(); 
 	protected        $_attributes        = array();
+	protected        $class;
 	
 	
 	
