@@ -189,6 +189,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	
 	/**
 	 * Evaluates query and executes on statement 
+	 * @return Set
 	 */
 	public function build() {
 		//echo $this->chain->to_sql(); exit;
@@ -224,7 +225,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function __toArray() {
-		return $this->build();
+		return $this->build()->__toArray();
 	}
 
 	protected $builder;	
