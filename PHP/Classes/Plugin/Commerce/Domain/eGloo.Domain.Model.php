@@ -186,20 +186,24 @@ abstract class Model extends Delegator
 					
 					foreach($arguments as $key) {
 						
-						// check if model has already been persisted  
-						$set[] = $manger->find($class, $key, function($class, $key) use ($field) {
-							$result = $class::sendStatic('process', $class::where(array(
-								$field => $key
-							)));
+						if (is_numeric($key)) {
 							
-							// we know that if result is not absolute false, it will be returned
-							// as a set from our process method
-							if ($result) {
-								$result = $result[0];
-							}
-							
-							return $result;
-						});
+							// check if model has already been persisted  
+							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
+								$result = $class::sendStatic('process', $class::where(array(
+									$field => $key
+								)));
+								
+								
+								// we know that if result is not absolute false, it will be returned
+								// as a set from our process method
+								if ($result) {
+									$result = $result[0];
+								}
+								
+								return $result;
+							});
+						}
 
 					}
 					
@@ -234,9 +238,12 @@ abstract class Model extends Delegator
 				// does not pan out; so callers will be explicitly aware
 				try {
 			
+					
 					return $class::sendStatic('process', $class::statement("
 						SELECT * FROM $table	
 					"));
+					
+					
 				}
 				
 				catch(\Exception $passthrough) {
@@ -1359,15 +1366,15 @@ abstract class Model extends Delegator
 			$result = $result->build();
 		}
 		
-		else if (is_array($result) && count($result)) {
-			
+		else if (is_array($result) && count($result)) {						
 			$manager = Model\Manager::instance();
-			//$key      = $this->primaryKeyName;
 			
-			// guess key
+	
+			// guess key for manager, and get class
 			$signature = static::signature();
 			$key       = "{$signature}_id";
 			$class     = static::classNameFull();
+			
 					
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				$result = $manager->find($class, $key, function($class) use ($result) {
@@ -1393,8 +1400,8 @@ abstract class Model extends Delegator
 					foreach($result as $record) {
 						// attempt to retrieve instance from pool, if it is not available, return
 						// "fallback" result from pool; 
-						$set[] = $manager->find($class, $key, function($class) use ($result) {
-							return new $class($result);
+						$set[] = $manager->find($class, $key, function($class) use ($record) {
+							return new $class($record);
 						});					
 					}
 				}

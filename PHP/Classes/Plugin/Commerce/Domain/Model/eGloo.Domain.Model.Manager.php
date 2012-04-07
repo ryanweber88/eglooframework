@@ -32,7 +32,7 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 	 * */
 	public function persist(Domain\Model $model) {
 		// we lock the model instance to read only and insert
-		// into persistence store
+		// into persistence store		
 		$model->lock();
 		$this->pool[$model->classNameFull()][$model->id] = $model;
 	}
@@ -49,7 +49,7 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 		$class = (is_object($mixed) && $mixed instanceof Domain\Model)  
 			? $mixed->class->qualified_name
 			: $mixed;
-			
+						
 		if (class_exists($class)) { 
 			if (isset($this->pool[$class][$key])) {
 				return $this->pool[$class][$key];
