@@ -13,7 +13,8 @@ use \eGloo\Domain,
  * @TODO this->chain = $this->chain needs to scoped to a handler method
  * 
  */		
-class Relation extends \eGloo\Dialect\ObjectSafe {
+class Relation extends \eGloo\Dialect\ObjectSafe 
+	implements \eGloo\Utilities\ToArrayInterface {
 	
 	function __construct($model) {
 		$this->builder = new \Bella\Table($model::sendStatic('signature'));
@@ -220,6 +221,10 @@ class Relation extends \eGloo\Dialect\ObjectSafe {
 		}
 	
 		return $result;
+	}
+	
+	public function __toArray() {
+		return $this->build();
 	}
 
 	protected $builder;	

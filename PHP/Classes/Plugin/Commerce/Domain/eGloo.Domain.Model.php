@@ -1020,12 +1020,16 @@ abstract class Model extends Delegator
 			
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
-			if (isset($this->status_id)          &&
-			    $this->hasRelationship('Status')  && 
-			    $this->Status->exists()) {
+			if (isset($this->status_id)           &&
+			    $this->hasRelationship('Status')) {
+
 			    	
 				$field = "{$this->signature()}_status";
-				$this->status__ = $this->Status->$field;
+				$self  = $this;
+				
+				$this->aliasAttribute('status', function & () use ($self, $field) {
+					return $self->Status->$field;
+				});
 			}		
 		}
 	
@@ -1396,8 +1400,13 @@ abstract class Model extends Delegator
 				// otherwise, result list is set of
 				// of associative arrays; we wrap each index
 				// in Model instance
-				else { 
+				else {
 					foreach($result as $record) {
+						// @TODO this is a temporary measure to guard against returns of a single
+						// value - this need to be fixed in Model#initialize
+						if (!is_array($record)) {
+							$record = array($record);
+						}
 						// attempt to retrieve instance from pool, if it is not available, return
 						// "fallback" result from pool; 
 						$set[] = $manager->find($class, $key, function($class) use ($record) {
