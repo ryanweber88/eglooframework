@@ -1911,10 +1911,14 @@ abstract class Model extends Delegator
 			if (count($reflection->getParameters()) == 0) {
 				// for some reason, removing this allows us to see relationship in 
 				// export statements (even the valid relationship model value is there..)
-				//$this->$name = null;
-				$this->$name = call_user_func(
-						$this->_methods[$name]
-				);
+				try {
+					$this->$name = null;
+					$this->$name = call_user_func(
+							$this->_methods[$name]
+					);
+				}
+				
+				catch(\Exception $ignore) { }
 				
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
