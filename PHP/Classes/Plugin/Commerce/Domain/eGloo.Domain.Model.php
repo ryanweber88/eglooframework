@@ -1600,12 +1600,6 @@ abstract class Model extends Delegator
 			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
 				
 				
-				
-				// get table name using convetion of ModelName to model_name; this will
-				// not fit in all cases and exception will be thrown from query if this
-				// is the case
-				$table = $class::sendStatic('signature');
-				
 				// build string representation of query coinditionals
 				$conditions = array();
 				
@@ -1658,43 +1652,60 @@ abstract class Model extends Delegator
 			$fields  = explode('_and_', $match[2]);
 			$findOne = !empty($match[1]);
 			
-			/**
+			
 			// now lets define out dynamic finder function
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne) {
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
 				
 				$validRanges = true;
+				$ranges      = array();
+				$arguments   = \eGloo\Utilities\Collection::flatten(func_get_args());
 				
 				// test whether we are passing range values like '4..10'
-				foreach(func_get_args() as $range) {
+				foreach($arguments as $range) {
 					if (!\eGloo\Primitives\Range::valid($range)) {
 						$validRanges = false;
 						break;
 					}		
 				}
 				
-				// if not valid range, it is assumed that range is composed of parameter pairs, make
-				// sure that the number of arguments matches number of fields * 2
+
 				if ($validRanges) {
-					
+					foreach ($arguments as $range) {
+						$range  = new \eGloo\Primitives\Range($range);
+						$ranges[] = array($range->min(), $range->max()); 
+					}
+				}
+
+				// if not valid range, it is assumed that range is composed of parameter pairs, make
+				// sure that the number of arguments matches number of fields * 2				
+				else if (count($arguments) == (count($fields) * 2)) {
+					for ($counter = 0; $counter < count($arguments); $counter += 2) {
+						$ranges[] = array(
+							$arguments[$counter], $arguments[$counter + 1]
+						);
+					}
 				}
 				
-				// get table name using convetion of ModelName to model_name; this will
-				// not fit in all cases and exception will be thrown from query if this
-				// is the case
-				$table = $class::sendStatic('signature');
+				else {
+					throw new \Exception(
+						"Failed executing dynamic finder '$name' because argument list does present valid ranges: " . print_r(
+							$arguments
+					));
+				}
+				
 				
 				// build string representation of query coinditionals
 				$conditions = array();
 				
 				foreach($fields as $field) {
-					$conditions[] = "$field = ?";
+					$conditions[] = "($field BETWEEN ? AND ?)";
 				}
 				
 				$conditions = implode(' and ', $conditions); 
 				
 				
 				$result = $class::sendStatic('process', $class::where(
-					$conditions, func_get_args()
+					$conditions, \eGloo\Utilities\Collection::flatten($ranges)
 				)); 
 				
 				// if we have specified find_one_by then we return the first
@@ -1708,7 +1719,7 @@ abstract class Model extends Delegator
 				
 				
 			});
-			 **/
+			 
 		}
 				
 		throw $deferred;

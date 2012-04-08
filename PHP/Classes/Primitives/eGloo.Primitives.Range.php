@@ -29,6 +29,14 @@ class Range extends \eGloo\Dialect\ObjectSafe {
 		return $this->start;
 	}
 	
+	public function min() {
+		return $this->start;
+	}
+	
+	public function max() {
+		return $this->end;
+	}
+	
 	public function end() {
 		return $this->end;
 	}
