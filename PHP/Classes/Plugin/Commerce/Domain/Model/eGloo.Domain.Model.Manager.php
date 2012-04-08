@@ -60,7 +60,9 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 			else if (is_callable($lambda)) {
 				if (($model = $lambda($class, $key))) {
 					// persist found model and return to caller
-					$this->persist($model);
+					if ($model->exists()) {
+						$this->persist($model);
+					}
 					
 					return $model;
 				}
