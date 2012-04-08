@@ -798,8 +798,8 @@ abstract class ObjectSafe {
 				
 				// otherwise pass exception to caller to handle as appropriate
 				catch(\Exception $passthrough) {
-					//throw $passthrough;
-					die_r($passthrough);
+					throw $passthrough;
+					//die_r($passthrough);
 				}
 			}
 			

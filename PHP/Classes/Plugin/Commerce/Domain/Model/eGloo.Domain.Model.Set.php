@@ -583,7 +583,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 						}
 						
 						else {
-							$class = $model::callNameFull();
+							//var_export($model); exit;
+							$class = $model::classNameFull();
 							
 							throw new \Exception (
 								"Failed creating index with key '$key' because receiver instance '$model' does not have '$key' as a member"
