@@ -319,12 +319,16 @@ abstract class Model extends Delegator
 		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) {
 			 
 			foreach($arguments as $name => $value) {
-				
+
 				// first check if a method exists with the same name
 				// or if value is a lambda, in which case we define
 				// as "callable" attribute
-				if (\method_exists($self, $name) || is_callable($value)) {
-						
+				$attributeAccessor = \method_exists($self, "get_$name") ||
+				                     \method_exists($self, "set_$name");
+				                   //  \method_exists($self, $name) // this feature needs to be fleshed out more
+				
+				if ($attributeAccessor || is_callable($value)) {
+					
 					$self->send('attr', $name);
 					
 					//$reflection     = new ReflectionMethod($this, $name);
@@ -785,7 +789,7 @@ abstract class Model extends Delegator
 					$self::updates(array(
 						'against'      => $self->send('signature'),
 						'with_columns' => array_keys($attributes),
-						'using'        => array_values($attributes)
+						'using'        => $self
 					));	
 					
 				}
@@ -793,6 +797,7 @@ abstract class Model extends Delegator
 				// again, since this is a guess, we ignore exception and make determination that
 				// update succeeded in child classes
 				catch(\Exception $append) {
+					var_export($append); exit;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
 					//	"The following message was returned : \n$append "

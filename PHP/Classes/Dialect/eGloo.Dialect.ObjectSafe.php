@@ -833,7 +833,6 @@ abstract class ObjectSafe {
 		// iterate through arguments, and assign accessor
 		// closures to each
 		foreach ($arguments as $name) {
-			
 			// check get & set accessor first
 			if ($this->respondTo($method = "get_$name")) {
 				$attr[$name]['reader'] = function() use ($method, $name, $self, &$attr) {

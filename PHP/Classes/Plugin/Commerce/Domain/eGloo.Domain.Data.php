@@ -1,6 +1,5 @@
 <?php
 namespace eGloo\Domain;
-
 use \eGloo\Utilities\Collection;
 
 /**
@@ -137,13 +136,19 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// check that idiom 'into' exists
 		if (isset($idioms['against'])) {
 			
-			
 			if (isset($idioms['using'])) {
 			
 				// next check if idiom with_fields exists; this is optional
 				// in which case fields will be queried from information schema
 				if(!isset($idioms['with_columns'])) {
-					$idioms['with_columns'] = static::columns($idioms['into']);
+					
+					if ( $idioms['using'] instanceof Model ) {
+						$idioms['with_columns'] = array_keys($idioms['using']->attributes());
+					}
+					
+					else {
+						$idioms['with_columns'] = static::columns($idioms['against']);
+					}
 				}
 				
 				// columns have been passed as tokenized string
@@ -161,58 +166,61 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					$sets[] = "$column = ?";
 				}
 				
-				$sets = implode(",\n", $sets);
-				
+				$sets       = implode(",\n", $sets);
+				$conditions = array();
+								
 				if (isset($idioms['where'])) {
 					if (is_array($where = $idioms['where']) && count($where)) {
 						
-						// we add an add to initial condition to ensure statement
-						// does not break
-						$conditions[] = 'AND';
-					
 						// our where idiom is not required, persay, but will be
 						// used in most cases
-						foreach ($idioms['where'] as $condition) {
+						foreach ($where as $condition) {
 							$conditions[] = $condition;
 						}
 						
-						$conditions = implode("\n", $conditions);
-
-						// build query 
-						// @TODO this should be abstracted out a bit, but i don't like
-						// this solution in the first place
-						return static::statement("
-							UPDATE
-								{$idioms['against']} 
-							
-							SET 
-								$sets
-								
-							WHERE
-								$conditions
-						
-						", $idioms['using']);
-					}
-					
-					else {
-						throw new \Exception (
-							"Failed updates because idion 'where' is not in the proper format: " . print_r(
-								$idioms['where']
-						));
-					
+						$conditions = implode(",\n", $conditions);
 					}
 				}
+
+				// otherwise we are going to assume we are updating
+				// against primary key, if using has been passed a model
+				else if (isset($idioms['using'])             &&
+				         $idioms['using'] instanceof Model   &&
+								 $idioms['using']->primaryKeyName()) {
+						
+					$conditions[] = $idioms['using']->primaryKeyName() . ' = ?';
+				}
+								 
+				else {
+					throw new \Exception(
+						"Failed updates because idiom 'using' does not exist"
+					);					
+				}
+							
+							
+				$conditions = implode("AND\n ", $conditions);					 
+
+				// build query 
+				// @TODO this should be abstracted out a bit, but i don't like
+				// this solution in the first place
+				return static::statement("
+					UPDATE
+						{$idioms['against']} 
 					
+					SET 
+						$sets
+						
+					WHERE
+						$conditions
 				
+				", $idioms['using']);
 			}
-			
+
 			else {
 				throw new \Exception(
 					"Failed updates because idiom 'using' does not exist"
-				);
+				);				
 			}
-			
-			
 		}
 		
 		else {
@@ -354,6 +362,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						break;
 					}
 				}
+				
 					
 			}
 				
@@ -370,15 +379,29 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			// argument is a model, and we are performing an update/insert
 			// statememnt; please note that this isn't always going to 
 			// work so use with caution
-			
+
 			if (isset($arguments[0]) && 
 					($model = $arguments[0]) instanceof Model) {
 						
-				 
+
+							 
 				// lets reset our arguments list with those arguments gleaned
 				// from statement itself
-				$arguments = $model->attributes();
+				//$arguments = $model->attributes();
+				$arguments = array();
 				
+				foreach($fields as $attribute) {
+					if (isset($model->$attribute) && !is_null($model->$attribute)) {
+						$arguments[] = $model->$attribute;
+					}
+					
+					else {
+						throw new \Exception(
+							"Failed to bind attribute '$attribute' because it does not exist in instance receiver {$model->instanceIdentity()}"
+						);
+					}	
+				}
+								
 			}
 	
 			// otherwise, lets see if arguments is an associative array; if this 
