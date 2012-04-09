@@ -446,14 +446,17 @@ abstract class Model extends Delegator
 		//echo static::namespaceName(); exit;
 				
 		// check if an 'as Alias' has been specified
-		$alias = null;
+		$aliases = array();
 		
 		if (preg_match($pattern = '/\s+as\s+([A-Z].*)$/', $name, $match)) {
 			$name = trim(preg_replace(
 				$pattern, null, $name
 			));
+						
+			foreach(explode(',', $match[1]) as $alias) {
+				$aliases[] = trim($alias);
+			}
 			
-			$alias = $match[1];
 		}
 		
 		$relationshipName = $name;
@@ -479,21 +482,21 @@ abstract class Model extends Delegator
 		// if class does not exist, then replace with generic	handler
 		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
 			$model = "$ns\\Generic";
+			
+			if (!$model::tangible($relationshipName)) {
+				throw new \Exception(
+					"Failed to create generic relation '$relationshipName' using the Generic model, because " .
+					"it cannot be determined on underlying data layer"
+				);
+			}
 		}
 		
-		
-			
-		//if (class_exists($model = "$ns\\{$this->className()}\\$name") || class_exists($model = "$ns\\$name")) {
-		//if (1) {
 		$relationships = &$self->reference('relationships');
 		$relationships[$relationshipName] = $model;
-		
+				
 
-		//echo "relationship model '$model'"
-
-					
 		//@TODO using ternary below may be hard to read
-		return $this->defineMethod(is_null($alias) ? $relationshipName : $alias, function() use ($model, $self, $relationshipName, $lambda, $singular, $alias) {
+		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
 			
 			
 			// get reference to relationships and make reference that relationship is
@@ -599,7 +602,10 @@ abstract class Model extends Delegator
 			// of null
 			return $result;
 		});
-			
+		
+		foreach($aliases as $alias) {			
+			$this->aliasRelationship($alias, $relationshipName);
+		}
 		
 		
 
@@ -607,6 +613,26 @@ abstract class Model extends Delegator
 		//	"Failed to define relationship \"$name\" because model \"$model\" does not exist"	
 		//);
 		
+	}
+
+	protected function aliasRelationship($alias, $relation) {
+		$self = $this;
+		
+		if ($this->hasRelationship($relation)) {
+			$this->aliasAttribute($alias, function & () use ($self, $relation) {
+				// we unfortunately (from a style/syntactical perspective) have to
+				// to first initialize relationship with non-returning call, and then
+				// we can return a reference to relationship 
+				$self->$relation;
+				return $self->$relation;
+			});	
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed to alias relation '$relation' because it does not exist in instance receiver '{$this->ident()}'"
+			);
+		}	
 	}
 
 	/**

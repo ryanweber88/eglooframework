@@ -421,6 +421,13 @@ abstract class ObjectSafe {
 	//}
 	
 	/**
+	 * Aliases identify instance
+	 */
+	public function ident() {
+		return $this->identifyInstance();
+	}
+	
+	/**
 	 * Aliases a property using reference; does not check on property existence
 	 * and will be affected by get/set definition
 	 */

@@ -10,9 +10,10 @@ use \eGloo\Utilities\Delegator;
  * be used as a dynamically determined model so we can avoid stubbing every single godamn
  * table
  */
-class Generic extends Domain\Model {
+abstract class Generic extends Domain\Model {
 	
 	function __construct($pseudonym, $__mixed = null) {
+		
 		parent::__construct($__mixed);
 		
 		// now lets create our fake namespaced pseudonym
@@ -28,11 +29,20 @@ class Generic extends Domain\Model {
 	/**
 	 * 
 	 */
-	static function __static() { }
+	static function __static() {
+			
+	}
 	
 	public static function factory($pseudonym, $__mixed = null) {
 		return new static($pseudonym, $__mixed);
 	}
+	
+	/**
+	 * Uses convention to determine if underlying layer has data representation
+	 * as identified by $name
+	 * 
+	 */
+	abstract public static function tangible($name);
 
 	
 	protected static function signature() {
@@ -65,11 +75,11 @@ class Generic extends Domain\Model {
 		$signature = static::signature();
 		$classname = static::className();
 		$fakeClass = static::classNameFull();
-		
-			
+					
 		// assign static delegation
 		 
 		Delegator::delegate(get_called_class(), get_class(static::data()));
+		
 				
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
@@ -103,9 +113,7 @@ class Generic extends Domain\Model {
 			
 		});
 		
-		
-		
-		
+				
 		// explicitly define all, if not aliased and not explicitly defined
 		
 		static::defineMethod('all', function($class) {
