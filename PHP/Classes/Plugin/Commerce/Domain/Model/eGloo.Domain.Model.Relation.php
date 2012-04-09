@@ -36,7 +36,8 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		$conditions = array();
 		
 		foreach($arguments as $key => $value) {
-			$conditions[] = "$key like ?";
+			$conditions[]    = "LOWER($key) like ?";
+			$arguments[$key] = strtolower($value); 
 		}
 		
 		return $this->where(
@@ -93,31 +94,42 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 * 
 	 */
 	public function where($mixed, $__arguments = null) {
-		
 
 		$conditions = array();
 		
-		
-	
-
-		
+				
 		// it is assumed that if hash, we have passed key:value pairs, and
 		// not key:? placeholders.. we push our values into arguments
 		if (is_array($mixed) && Collection::isHash($arguments = $mixed)) {
 			foreach($arguments as $field => $value) {
 				// @TODO should the where here be cleaning argument input, or should
 				// that job rest with extrinsic callers?
-				if (!empty($value)) {
-					$conditions[] = strpos($value, '%') !== false 
-						? "$field like ?"
-						: "$field = ?";
-						
-					$this->arguments[] = $value;
+				$operator = 'AND';
 
+				if (!empty($value)) {
+					
+					if (!is_array($values = $value)) {
+						$values = array($value);
+					}
+					
+					else {
+						$operator = 'OR';
+					}
+					
+					
+					foreach($values as $value) {
+						$conditions[] = strpos($value, '%') !== false 
+							? "$field like ?"
+							: "$field = ?";
+							
+						$this->arguments[] = $value;	
+					}
+						
+					
 				} 
 			}
 						
-			$conditions = implode (' AND ', $conditions);
+			$conditions = implode (" $operator ", $conditions);
 		}
 		
 		// otherwise we simply pass string to to our builder and check if 
@@ -139,7 +151,6 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 					$this->arguments, $arguments
 				);
 				
-				//var_export($this->arguments); 
 			}			
 		}
 		
@@ -149,7 +160,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 				$mixed		
 			));
 		}
-					
+							
 		
 		// pass our conditions to where method and return instance
 		$this->chain = $this->chain->where($conditions);
