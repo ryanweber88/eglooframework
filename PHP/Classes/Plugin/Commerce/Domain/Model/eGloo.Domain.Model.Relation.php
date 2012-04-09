@@ -96,6 +96,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function where($mixed, $__arguments = null) {
 
 		$conditions = array();
+		$groups     = array();
 		
 				
 		// it is assumed that if hash, we have passed key:value pairs, and
@@ -118,18 +119,20 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 					
 					
 					foreach($values as $value) {
-						$conditions[] = strpos($value, '%') !== false 
+						$groups[] = strpos($value, '%') !== false 
 							? "$field like ?"
 							: "$field = ?";
 							
 						$this->arguments[] = $value;	
 					}
-						
+										
+					//array_merge($);
+					$conditions[] = "(" . implode (" $operator ", $groups) . ")";
 					
 				} 
 			}
 						
-			$conditions = implode (" $operator ", $conditions);
+			$conditions = implode (" AND ", $conditions);
 		}
 		
 		// otherwise we simply pass string to to our builder and check if 
@@ -160,6 +163,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 				$mixed		
 			));
 		}
+
 							
 		
 		// pass our conditions to where method and return instance
