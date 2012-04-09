@@ -184,7 +184,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			if (is_callable($lambda = $arguments[0])) {
 				foreach($this as $model) {
 					if ($lambda($model) === true) {
-						$set[] = $lambda($model);
+						$set[] = $model;
 					}
 				}
 			}
@@ -236,7 +236,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			if (is_callable($lambda = $arguments[0])) {
 				foreach($this as $model) {
 					if ($lambda($model) === false) {
-						$set[] = $lambda($model);
+						$set[] = $model;
 					}
 				}
 			}
