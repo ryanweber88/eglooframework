@@ -183,6 +183,12 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		
 		return $this;
 	}
+	
+	public function order($column) {
+		$this->chain = $this->chain->order($column);
+		
+		return $this;
+	}
 
 	/**
 	 * @TODO this should really be delegated, since its a direct call on 

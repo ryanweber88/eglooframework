@@ -748,6 +748,7 @@ abstract class Model extends Delegator
 		// define a generic create callback based on
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
+
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
 			// @TODO since this was added late in the lifecycle of model design, there already
@@ -784,7 +785,8 @@ abstract class Model extends Delegator
 				
 				// since we guesing on this insert, we ignore sql errors and make a determination
 				// in inherited classes whether insert was successful
-				catch(\Exception $ignore) {
+				catch(\Exception $pass) {
+					//throw $pass;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
 					//	"The following message was returned : \n$append "
@@ -1087,7 +1089,7 @@ abstract class Model extends Delegator
 		
 		// check if receiver has beenb passed as argument 
 		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
-			
+			//echo "calling create callbacks"; exit;
 			// because runCallbacks is a protected method, we use the send method 
 			// to by-pass access modifier; sorry folks, this is the only way to do
 			// this without creating a static create and instance create method
@@ -1203,8 +1205,14 @@ abstract class Model extends Delegator
 		// @TODO this should be pushed into a callback, not has a "hard-code"
 		// here
 		
-		if ($cascade) { 
-			foreach($model->relationships as $relation) {
+		if (false) {
+			foreach($model->relations() as $relation) {
+				
+				if ($relation instanceof \Common\Domain\Model\UrlSlug) {
+					var_export($this->Slug->destination);
+					var_export($relation->destination); exit;
+					exit('asdf');
+				}
 				
 				// determine if a hasOne relationship and if initialized - 
 				// which case save
@@ -1212,8 +1220,10 @@ abstract class Model extends Delegator
 				if ($relation instanceof Model && 
 				    $relation->initialized()   &&
 						$relation->changed()) {
-							
-					try { 
+														
+					try {
+						echo "updating relation {$relation->ident()}\n";exit;
+						 
 						$relation->save();
 					}
 					
@@ -1231,7 +1241,10 @@ abstract class Model extends Delegator
 				else if ($isCreate && (($relations = $relation) instanceof Model\Set)) {
 				
 					foreach($relation as $relation) {
-						if ($relation->initialized() && $relation->changed()){
+						
+						if ($relation->initialized() && 
+						    $relation->changed())    {
+						    	
 							try {
 								$relation->save();
 							}
@@ -1239,7 +1252,7 @@ abstract class Model extends Delegator
 							catch(Model\Exception\Update\NotChanged $ignore) { }
 							
 							catch(\Exception $pass) {
-								throw new $pass;
+								throw $pass;
 							}
 						}
 					}
@@ -1254,7 +1267,18 @@ abstract class Model extends Delegator
 	}
 
 
-
+	/**
+	 * Returns a list of relation instances of this model instance
+	 */
+	public function relations() {
+		$relations = array();
+		
+		foreach($this->relationships as $key => $ignore) {
+			$relations[$key] = $this->$key;
+		}
+		
+		return $relations;
+	}
 
 	
 	
@@ -1898,9 +1922,14 @@ abstract class Model extends Delegator
 				// value in its change list, then it has clearly changed, thus marking
 				// the model as changed
 				foreach ($changes as $key => $values) {
-					if (count($values) > 1) {
+		
+					if (!in_array($key, array_keys($self->reference('_aliasedProperties'))) &&
+					    !in_array($key, array_keys($self->reference('relationships')))      &&
+					    $self->$key != $values[0])                                          {
+					  	
 						return true;
 					}
+				
 				}
 			}
 			
@@ -1969,9 +1998,9 @@ abstract class Model extends Delegator
 				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
 					//$field = $this->primaryKeyName;
 					
-					if (!is_null($this->$field)) {
-						$this->$name->$field = $this->$field;
-					}
+					//if (!is_null($this->$name)) {
+					//	$this->$name->$field = $this->$field;
+					//}
 				}
 				
 				return $this->$name;
@@ -2030,8 +2059,8 @@ abstract class Model extends Delegator
 				if ($action == 'changed') {
 					$self = $this;
 					
-					return $this->cache($name, function() use ($self) { 
-						return count($this->changes[$field]) > 1;
+					return $this->cache($name, function() use ($self, $name) {
+						return isset($changes[$name]) && count($changes[$name]) > 1;
 					});
 				}
 				

@@ -178,7 +178,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 							$conditions[] = $condition;
 						}
 						
-						$conditions = implode(",\n", $conditions);
+						//$conditions = implode(",\n", $conditions);
 					}
 				}
 
