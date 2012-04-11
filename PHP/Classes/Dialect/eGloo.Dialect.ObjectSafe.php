@@ -555,14 +555,18 @@ abstract class ObjectSafe {
 			unset($this->$name);
 			
 			// fire our deferrable closure and bind/set to $name property
-			$this->$name = $this->_defers[$name]();
+			if (!is_null($value = $this->_defers[$name]())) {
+				$this->$name = $value;
+			};
 			
-			// unset deferrable from collection because remember that we only
-			// something deffered once
+			// unset deferrable from collection because remember that deferred
+			// operations, while deferred, only supposed to run once
 			unset($this->_defers[$name]);
 			
 			// and now return value
-			return $this->$name;
+			return isset($this->$name) 
+				? $this->$name
+				: null;
 		}
 		
 		// check if ruby-style attributes have been specified, in which case we
