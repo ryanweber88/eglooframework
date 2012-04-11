@@ -76,9 +76,9 @@ abstract class ObjectSafe {
 			return $lambda;
 		};		
 		
-		$this->defineMethod('defer', function($lambda) use ($self) {
+		$this->defineMethod('defer', function($name, $lambda) use ($self) {
 			$defers = &$self->reference('defers');
-			//$defers[]
+			$defers[$name] = $lambda;
 		}); 
 
 		$this->defineMethod('respondTo', function($method) use ($self) {
@@ -543,6 +543,27 @@ abstract class ObjectSafe {
 	 * Here we provide our catchall and dynamic property meta functionality
 	 */
 	public function __get($name) {
+		
+		// check if property name is a "deferrable" property, in which case we
+		// fire lambda, and set property value with return from lambda; defers
+		// can only be used once, so the deferrable will be dropped after execution 
+		if (isset($this->_defers[$name])) {
+			
+			// first we unset our property - it may be the case that it is a 
+			// reference, in which case we are creating a fuck-you hard bug
+			// to find
+			unset($this->$name);
+			
+			// fire our deferrable closure and bind/set to $name property
+			$this->$name = $this->_defers[$name]();
+			
+			// unset deferrable from collection because remember that we only
+			// something deffered once
+			unset($this->_defers[$name]);
+			
+			// and now return value
+			return $this->$name;
+		}
 		
 		// check if ruby-style attributes have been specified, in which case we
 		// fire our reader/accessor method
