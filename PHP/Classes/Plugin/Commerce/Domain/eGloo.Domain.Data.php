@@ -258,11 +258,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function statement($statement, $__mixed = null) {
 		
-		// basically we're checking to see if statement is just one word, which indicates we
-		// are passing an "idiomatic" statement 
-		if (!preg_match('/\s/', $statement)) {
-			
-		}
+
 	
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
@@ -301,8 +297,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 		} 
 		
-		
-	
 	
 		// determine who is calling method - this will be used to track down where/when
 		// statements are made for later refactor
@@ -401,12 +395,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				$counter   = 0;
 				
 				foreach($fields as $attribute) {
-					if (isset($model->$attribute) && !is_null($model->$attribute)) {
-
-						
+					if (isset($model->$attribute) && !is_null($model->$attribute)) {				
 						$arguments[ isset($arguments[$attribute]) ? $attribute . $counter++ : $attribute ] = $model->$attribute;
-						
-						
 					}
 					
 					else {
@@ -459,7 +449,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 							$field .= $counter++;		
 						}
 						
-						$hold[$field] = array_shift($arguments);	
+						$hold[] = array_shift($arguments);	
 					}
 					
 					$arguments = $hold;
@@ -546,14 +536,15 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 		}
 				
-		if (strpos($statement, 'last_action') !== false && strpos($statement, 'brand_id') !== false) {
-			var_export($statement);	
-			exit('adsf');
-		}	
+	
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
+		
+
+		
+		
 		$result = $dataAccess->$method($statement, $arguments);
 		
 		// set result to false if we don't have a match
