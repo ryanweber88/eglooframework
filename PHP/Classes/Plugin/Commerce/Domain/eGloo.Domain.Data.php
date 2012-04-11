@@ -30,8 +30,10 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	protected static function columns($table) {
 		$class = get_called_class();
+		$key =   __FUNCTION__ . "/$table";
 		
-		return static::cache($table, function() use ($class, $table) {
+
+		return static::cache($key, function() use ($class, $table) {
 			return $class::statement('
 				SELECT
 					column_name
@@ -142,13 +144,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				// in which case fields will be queried from information schema
 				if(!isset($idioms['with_columns'])) {
 					
-					if ( $idioms['using'] instanceof Model ) {
-						$idioms['with_columns'] = array_keys($idioms['using']->attributes());
-					}
+					$idioms['with_columns'] = static::columns($idioms['against']);
 					
-					else {
-						$idioms['with_columns'] = static::columns($idioms['against']);
-					}
 				}
 				
 				// columns have been passed as tokenized string
@@ -198,8 +195,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 							
 							
-				$conditions = implode("AND\n ", $conditions);					 
-
+				$conditions = implode("AND\n ", $conditions);			
+				
 				// build query 
 				// @TODO this should be abstracted out a bit, but i don't like
 				// this solution in the first place
@@ -234,12 +231,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 	}
 	
-	public static function __callstatic($name, $arguments) {
-		
-		if ($name == 'statement_sql') {
-			die_r ($arguments[0]);
-		}
-	}
 	
 	/**
 	 * @TEMP
@@ -349,18 +340,33 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// check if query requires arguments list	
 		if (preg_match('/\?/', $statement)) {
 			
+			// get the count of placeholders
+			$placeholderCount = substr_count(
+				$statement, '?'
+			);
+			
 			// select, update, delete all share similar style in terms of key = ?
 			// or key in (?..); essentially a conditional
 
 			if (in_array($classification, array('select', 'update', 'delete'))) {
-				foreach(array('/([^\s\.]+)\s*?\=\s*?\?/is', '/([^\s\.]+?)\s+?in\s*?\(.+?\)/is') as $index => $pattern) {
+				foreach(array('/([^\s.(]+)\s*?\=\s*?\?/is', '/([^\s.(]+?)\s+?in\s*?\(.+?\)/is', '/\?/') as $index => $pattern) {
 					if (preg_match_all($pattern, $statement, $matches, PREG_SET_ORDER)) {
 						foreach($matches as $pair) {
-							$fields[] = $pair[1];
+							$fields[] = isset($pair[1]) 
+								? $pair[1]
+								: 'anonymous';
 						}
 						
 						break;
 					}
+				}
+				
+				// add anonymous fields if count of fields is less than placeholder
+				// number
+				if (count($fields) < $placeholderCount) {
+					do {
+						$fields[] = 'anonymous';
+					} while(count($fields) < $placeholderCount);
 				}
 				
 					
@@ -369,11 +375,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			else if ($classification == 'insert' ) {
 				preg_match('/\((.+?)\)/s', $statement, $match);
 				$fields = explode(',', $match[1]);
+				
+				
 			}	
 
 			foreach ($fields as $key => $value) {
 				$fields[$key] = trim($value);
 			}
+			
 			
 			// lets do some magic - lets determine arguments if first
 			// argument is a model, and we are performing an update/insert
@@ -384,29 +393,35 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					($model = $arguments[0]) instanceof Model) {
 						
 
-							 
+									 
 				// lets reset our arguments list with those arguments gleaned
 				// from statement itself
 				//$arguments = $model->attributes();
 				$arguments = array();
+				$counter   = 0;
 				
 				foreach($fields as $attribute) {
 					if (isset($model->$attribute) && !is_null($model->$attribute)) {
-						$arguments[] = $model->$attribute;
+
+						
+						$arguments[ isset($arguments[$attribute]) ? $attribute . $counter++ : $attribute ] = $model->$attribute;
+						
+						
 					}
 					
 					else {
-						throw new \Exception(
-							"Failed to bind attribute '$attribute' because it does not exist in instance receiver {$model->instanceIdentity()}"
-						);
+						//throw new \Exception(
+						//	"Failed to bind attribute '$attribute' because it does not exist in instance receiver {$model->ident()}"
+						//);
 					}	
 				}
+				
 								
 			}
 	
 			// otherwise, lets see if arguments is an associative array; if this 
 			// is the case, we want to match arguments up to fields (in terms)		
-			if (\eGloo\Utilities\Collection::isHash($arguments)) {
+			else if (\eGloo\Utilities\Collection::isHash($arguments)) {
 				
 				//
 				foreach($fields as $index => $field) {
@@ -428,7 +443,45 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					//}
 				}
 				
+				
 				$arguments = $temporary;
+			}
+			
+			
+			else if (is_array($arguments)) {
+				if (count($arguments) == count($fields)) {
+					
+					$counter = 0;
+					
+					foreach($fields as $field) {
+						
+						if ($field == 'anonymous') {
+							$field .= $counter++;		
+						}
+						
+						$hold[$field] = array_shift($arguments);	
+					}
+					
+					$arguments = $hold;
+				}
+				
+				else {					
+					throw new \Exception(
+						'Statement failed because count of argument values does not match number of ' .
+						'required fields' . echo_r(array(
+							'arguments' => $arguments,
+							'fields'    => $fields
+					)));
+					
+				}
+			} 
+			
+			
+			else {
+				throw new \Exception(
+					"Statement failed because arguments type is invalid : " . print_r(
+						$arguments	
+				));
 			}
 					
 		}
@@ -438,13 +491,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO this shouldn't be done this way, but for the time being
 		// to save time on queries, we remove fields that aren't available
 		// in the passed argument list	
-		if ($classification != 'select') {
-									
-			foreach ($arguments as $key => $value) {
-		
-				if (is_null($value)) {
+		if (isset($model) && $classification != 'select') {
+												
+			foreach ($fields as $field) {
+
+				if (!isset($arguments[$field]) || is_null($arguments[$field])) {
 					
-					unset($arguments[$key]);
+					unset($arguments[$field]);
 					
 					// if an insert statement
 					if ($classification == 'insert') {
@@ -455,14 +508,15 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					
 					// otherwise an update
 					else if ($classification == 'update') {
-						$statement = preg_replace('/{$key}\s*\=\s*[\S]+\s/is', null, $statement);
+						$statement = preg_replace("/{$field}\s*\=\s*[\S]+\s/is", null, $statement);
+						
 					}
-					
-				
-					
+
 				}
 				
 			}
+			
+			
 			
 			if ($classification == "insert") {
 				// replace argument/value lists
@@ -486,12 +540,16 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 			else if ($classification == 'update') {
 				// don't know what to do here yet - specifying all columns explicitly
+				//var_export($statement); exit;
 			}
 			
 			
 		}
 				
-			
+		if (strpos($statement, 'last_action') !== false && strpos($statement, 'brand_id') !== false) {
+			var_export($statement);	
+			exit('adsf');
+		}	
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert

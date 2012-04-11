@@ -809,14 +809,14 @@ abstract class Model extends Delegator
 			$callbacks = &$self->reference('callbacks');
 			
 			if ($self->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
+
 				// get instance attributes
 				$attributes = $self->attributes();
 				$signature  = $self->send('signature');
-				
+								
 				try { 
 					$self::updates(array(
 						'against'      => $self->send('signature'),
-						'with_columns' => array_keys($attributes),
 						'using'        => $self
 					));	
 					
@@ -835,6 +835,19 @@ abstract class Model extends Delegator
 		});
 				
 	}
+
+	public function __toString() {
+		if ($this->exists()) {
+			if (!is_null($value = $this->proxyToString())) {
+				return $value;
+			}
+		}
+		
+		return parent::__toString();
+	}
+	
+	protected function proxyToString() { }
+	
 
 	/** ArrayAccess Interface **************************************************/
 	// ArrayAccess interface is intended to be used to access attribute values
@@ -1511,12 +1524,25 @@ abstract class Model extends Delegator
 	 * properties on a model are termed "attributes", "aliasAttribute" is
 	 * moreso fitting
 	 */
-	protected function aliasAttribute($alias, $attribute) {
+	protected function aliasAttribute($__mixed) {
 		
+		// flatten arguments and check if last argument is a lambda
+		// and determine our aliases
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+		
+		
+		$aliases = is_callable($lambda = $arguments[count($arguments) - 1])
+			? array_slice($arguments, 0, count($arguments) - 1)
+			: $arguments;
+		
+				
+
 		// attribute is callable, then lambda should return a reference to the
 		// attribute in question, to which our alias will become a true
 		// alias of
-		if (is_callable($lambda = $attribute)) {
+		if (is_callable($lambda)) {
 			// make sure that lambda returns a reference, if it does
 			// not we are creating a true alias and throw an exception
 			// if the case
@@ -1531,14 +1557,19 @@ abstract class Model extends Delegator
 				//if (!isset($this->$alias)) {
 				//	$this->$alias = null;
 				//}
-				
-				// unset our attribute; this will make sure referenced values
-				// are not unset as well
-				unset($this->$alias);
+
 				
 				// now specify alias as attribute accessor and set with
 				// value as lambda
-				$this->defineMethod($alias, $lambda);
+				foreach($aliases as $alias) {
+					// unset our attribute; this will make sure referenced values
+					// are not unset as well
+					unset($this->$alias);					
+					 
+					$this->defineMethod($alias, $lambda);
+				}
+				
+				
 			}
 			
 			else {
@@ -1549,7 +1580,9 @@ abstract class Model extends Delegator
 		}
 		
 		else {
-			$this->aliasProperty($alias, $attribute);
+			foreach($aliases as $alias) {
+				$this->aliasProperty($alias, $attribute);
+			}
 		}
 	}
 	
@@ -1634,6 +1667,7 @@ abstract class Model extends Delegator
 	
 	public static function __callstatic($name, $arguments) {
 		
+		
 		try {
 			//echo get_called_class() . "\n";
 			//echo "calling static $name on receiver " . get_called_class() . "<br />";
@@ -1641,6 +1675,7 @@ abstract class Model extends Delegator
 		}
 		catch(\Exception $deferred) { }
 		
+
 		// if unable to find matching meta call within
 		// __call chain, determine if a dynamic finder
 		

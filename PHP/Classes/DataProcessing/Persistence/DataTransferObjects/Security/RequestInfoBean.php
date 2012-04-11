@@ -139,6 +139,11 @@ class RequestInfoBean implements \ArrayAccess {
 	public function __call($name, $arguments) {
 		// @TODO test and implement this
 
+
+		if (preg_match('/^request_?is_?(.+)$/i', $name, $match)) {
+			return strtolower($match[1]) == strtolower($_SERVER['REQUEST_METHOD']);	
+		}
+		
 		// match against xxx(Xxx) method name patterns, where it is assumed
 		// that our submatch is the name of property - in reality we are
 		// matching against GET/POST/DELETE/PUT
@@ -178,6 +183,25 @@ class RequestInfoBean implements \ArrayAccess {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Flattens array parameters into single hash; keeps keys intact, but
+	 * last key will override any previous to it. 
+	 * @return Hash
+	 */
+	public function flatten($__mixed) {
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+		
+		$hold = array();
+		
+		foreach($arguments as $argument) {
+			$hold[] = $this[$argument];
+		}
+		
+		return \eGloo\Utilities\Collection::flatten($hold);
 	}
 
 	// ArrayAccess Interface //////////////////////////////////////////////////

@@ -277,9 +277,22 @@ abstract class ObjectSafe {
 				$cache[$class][$key] = $lambda();
 			}
 			
+			
 			return $cache[$class][$key];		
 		});
 		
+		static::defineMethod('method', function($method, $class) {
+			$methods                = &$class::referenceStatic('_methodsStatic');
+						
+			if (isset($methods[$class][$method])) {
+				return $methods[$class][$method];
+			}
+			
+			throw new \Exception(
+				"Failed to retrieve method '$method' because it does not exist"
+			);
+		
+		});
 	
 		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
@@ -764,7 +777,7 @@ abstract class ObjectSafe {
 		
 		
 		throw new \Exception (
-			"Call to undefined instance method '$name' on receiver '{$this->identifyInstance()}'"
+			"Call to undefined instance method '$name' on receiver '{$this->ident()}'"
 		);
 		
 	}
