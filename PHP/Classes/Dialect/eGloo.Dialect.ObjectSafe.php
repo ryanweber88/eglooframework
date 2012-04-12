@@ -77,8 +77,16 @@ abstract class ObjectSafe {
 		};		
 		
 		$this->defineMethod('defer', function($name, $lambda) use ($self) {
-			$defers = &$self->reference('defers');
-			$defers[$name] = $lambda;
+			if (is_callable($lambda)) {
+				$defers = &$self->reference('_defers');
+				$defers[$name] = $lambda;
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed to defer action '$name' because lambda '$lambda' is not callable"
+				);
+			}
 		}); 
 
 		$this->defineMethod('respondTo', function($method) use ($self) {

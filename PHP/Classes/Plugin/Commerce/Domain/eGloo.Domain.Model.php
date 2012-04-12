@@ -757,7 +757,7 @@ abstract class Model extends Delegator
 			$callbacks = &$self->reference('callbacks');
 			
 			if ($self->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
-			
+
 				// get instance attributes - strip the primary key if 
 				// is in list of attributes and has a null value
 				$attributes = $self->attributes();
@@ -770,7 +770,7 @@ abstract class Model extends Delegator
 				
 					unset($attributes[$pk]);			
 				}
-						
+												
 				try {
 					// set primary key with result of insert - if it has been succesfully aliased,
 					// then value will be updated on true primary key
@@ -780,7 +780,7 @@ abstract class Model extends Delegator
 						'with_columns' => array_keys($attributes),
 						'using'        => array_values($attributes)
 					));	
-					
+							
 				}
 				
 				// since we guesing on this insert, we ignore sql errors and make a determination
@@ -1099,14 +1099,15 @@ abstract class Model extends Delegator
 		// passed as argument and should never been be external
 		// to Model
 		$arguments = func_get_args();
+
 		
 		// check if receiver has beenb passed as argument 
-		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
+		if (isset($arguments[0]) && ($model = $arguments[0]) instanceof Model) {
 			//echo "calling create callbacks"; exit;
 			// because runCallbacks is a protected method, we use the send method 
 			// to by-pass access modifier; sorry folks, this is the only way to do
 			// this without creating a static create and instance create method
-			$self->send('runCallbacks', __FUNCTION__);
+			$model->send('runCallbacks', __FUNCTION__);
 			
 		}
 			
@@ -1116,7 +1117,6 @@ abstract class Model extends Delegator
 		// upon the developer that they do not do an explicit call on create
 				
 		else if ( \eGloo\Utilities\Collection::isHash($arguments = $arguments[0]) ) {
-			
 			$model     = new static($arguments);
 			$model->id = null;
 						
@@ -1126,8 +1126,6 @@ abstract class Model extends Delegator
 			$model->save();
 			$model->initialized = true;
 			
-			// return model to caller
-			return $model;
 		}
 		
 		// otherwise we have passed an invalid argument to create and
@@ -1141,6 +1139,8 @@ abstract class Model extends Delegator
 				)
 			);
 		}
+		
+		return $model;
 	}
 
 	/*
@@ -1183,20 +1183,25 @@ abstract class Model extends Delegator
 			if ($this->exists()) {
 				
 				$model = $this;
-			
-				if ($this->changed() || 
-				    isset($this->overrides_changed) && $this->overrides_changed === true) {
-				    	
+				
+				// @TODO this needs to be updated, because changed model doesn't work, because changes can't be
+				// recorded without some type of indirection when loading attributes 
+				//if ($this->changed() || 
+				//    isset($this->overrides_changed) && $this->overrides_changed === true) {
+				if (true) {  
 					$this->update();
 				}				
 		
 			}
 			
 			else {
+				
 				// unfortunately this has be passed here as we can call static
 				// context, but not have static funciton be aware of instance
 				$model = $this->create($this);
+			
 			}
+			
 			
 			// reset our changed, since model is now (theoretically) in 
 			// parrallel to database
