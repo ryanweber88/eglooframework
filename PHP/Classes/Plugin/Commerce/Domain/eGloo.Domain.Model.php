@@ -1997,7 +1997,7 @@ abstract class Model extends Delegator
 				// it belongsTo current model instance
 				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
 					//$field = $this->primaryKeyName;
-					
+
 					//if (!is_null($this->$name)) {
 					//	$this->$name->$field = $this->$field;
 					//}
