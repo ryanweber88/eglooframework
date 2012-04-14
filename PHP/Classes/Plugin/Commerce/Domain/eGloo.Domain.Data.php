@@ -31,7 +31,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	protected static function columns($table) {
 		$class = get_called_class();
 		$key =   __FUNCTION__ . "/$table";
-		
 
 		return static::cache($key, function() use ($class, $table) {
 			return $class::statement('
@@ -143,7 +142,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				// next check if idiom with_fields exists; this is optional
 				// in which case fields will be queried from information schema
 				if(!isset($idioms['with_columns'])) {
-					
 					$idioms['with_columns'] = static::columns($idioms['against']);
 					
 				}
@@ -153,6 +151,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					$idioms['with_columns'] = explode(',', preg_replace(
 						'/\s/', null, $idioms['with_columns']
 					));
+					
 				}
 				
 				// build determine our sets (columns = value) and conditions
@@ -542,7 +541,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// point in return a multi-result set if performing an insert
 		// for example
 		
-
 		
 		
 		$result = $dataAccess->$method($statement, $arguments);

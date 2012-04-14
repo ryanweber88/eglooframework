@@ -76,6 +76,20 @@ abstract class ObjectSafe {
 			return $lambda;
 		};		
 		
+		// returns dynamically defined method as closure
+		$this->defineMethod('method', function($name) use ($self) {
+			$methods = &$self->reference($name);
+			
+			if (isset($methods[$name])) {
+				return $methods[$name];
+			}
+			
+			throw new \Exception (
+				"Failed to return closure of instance method '$name' on receiver '{$self->ident()}'"
+			);
+			
+		});
+		
 		$this->defineMethod('defer', function($name, $lambda) use ($self) {
 			if (is_callable($lambda)) {
 				$defers = &$self->reference('_defers');
@@ -390,29 +404,44 @@ abstract class ObjectSafe {
 	 * context of class; calls an method on instance receiver with arguments 
 	 * presented 
 	 */
-	public function send($name, $__mixed = null) {
+	public function send($method, $__mixed = null) {
 		
-		if (\method_exists($this, $name)) {
-			$method = array($this, $name);
-		}
 		
-		else if (isset($this->_methods[$name])) {
-			$method = $this->_methods[$name];
-		} 
-		
-		if (isset($method)) {
+		if (\method_exists($this, $method)) {
+			// another success story in phpwtf history - reflection method
+			// invokes method successfully, but static context is that of 
+			// where the method was defined IF the send message was sent
+			// from a lambda - for now, access modifier protected will have
+			// to be used
+			/*
+			$reflection = new \ReflectionMethod(get_class($this), $method);
+			$reflection->setAccessible(true);
+			
+			$tmp = $reflection->isStatic()
+				? null 
+				: $this;
+				
+			return $reflection->invokeArgs($tmp, array_slice(
+				func_get_args(), 1
+			));
+			*/ 			
 			return call_user_func_array(
-				$method, array_slice(func_get_args(), 1)	
-			);
+				array($this, $method), array_slice(func_get_args(), 1)	
+			);			
 		}
 		
+		else if (isset($this->_methods[$method])) {			
+			return call_user_func_array(
+				$this->method($name), array_slice(func_get_args(), 1)	
+			);			 
+		} 
+
 		// if we have reached this point, we know method does
 		// not exist, either as concrete or as dynamically
 		// defined
-		$class = $this->classNameFull();
 		
 		throw new \Exception(
-			"Failed to send method '$method' to receiver '$class' because method does not exist"
+			"Failed to send method '$method' to receiver '{$this->ident()}' because method does not exist"
 		);
 		
 		
@@ -623,8 +652,7 @@ abstract class ObjectSafe {
 			"Instance property '$name' does not exist in receiver " . get_called_class()		
 		);
 		
-	}
-	
+	}	
 	
 	public function __set($name, $value) {
 		
@@ -942,6 +970,59 @@ abstract class ObjectSafe {
 	 */
 	protected function attrAccessor($__mixed) {
 		return $this->attr($__mixed);
+	}
+	
+	protected function attr_accessor($__mixed) {
+		return $this->attr($__mixed);
+	}
+	
+	protected function attr_reader($__mixed) {
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+		
+		$attr = &$this->_attributes;
+		$self = $this;
+		
+		foreach($arguments as $name) {
+			if ($this->respondTo($method = "get_$name")) {
+				$attr[$name]['reader'] = function() use ($method, $name, $self, &$attr) {
+					return $self->send($method, $attr[$name]['value']);
+				};
+			}
+			
+			// otherwise we provide a generic writer
+			else {
+				$attr[$name]['reader'] = function() use ($name, $self, &$attr) {
+					return $attr[$name]['value'] = $value;
+				};
+			}
+		}			
+	}
+	
+	protected function attr_writer($__mixed) {
+		$arguments = \eGloo\Utilities\Collection::flatten(
+			func_get_args()
+		);
+		
+		$attr = &$this->_attributes;
+		$self = $this;
+		
+		foreach($arguments as $name) {
+			if ($this->respondTo($method = "set_$name")) {
+				$attr[$name]['writer'] = function() use ($method, $name, $self, &$attr) {
+					return $self->send($method, $attr[$name]['value']);
+				};
+			}
+			
+			// otherwise we provide a generic writer
+			else {
+				$attr[$name]['writer'] = function($value) use ($name, $self, &$attr) {
+					$attr[$name]['value'] = $value;
+					return $self;
+				};
+			}
+		}	
 	}
 	
 	

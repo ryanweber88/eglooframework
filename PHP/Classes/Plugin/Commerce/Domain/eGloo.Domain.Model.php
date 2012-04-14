@@ -765,11 +765,11 @@ abstract class Model extends Delegator
 				
 				// apparently an associative array key with an associated value of nil is
 				// considered unset, #wtfphp
-				if (isset($attributes[$pk = $self->primaryKeyName()]) || 
-				    is_null($attributes[$pk])) {
+				//if (isset($attributes[$pk = $self->primaryKeyName()]) || 
+				//    is_null($attributes[$pk])) {
 				
-					unset($attributes[$pk]);			
-				}
+				unset($attributes[$self->primaryKeyName()]);			
+				//}
 												
 				try {
 					// set primary key with result of insert - if it has been succesfully aliased,
@@ -809,11 +809,10 @@ abstract class Model extends Delegator
 			$callbacks = &$self->reference('callbacks');
 			
 			if ($self->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
-
 				// get instance attributes
 				$attributes = $self->attributes();
-				$signature  = $self->send('signature');
 								
+												
 				try { 
 					$self::updates(array(
 						'against'      => $self->send('signature'),
@@ -825,6 +824,7 @@ abstract class Model extends Delegator
 				// again, since this is a guess, we ignore exception and make determination that
 				// update succeeded in child classes
 				catch(\Exception $append) {
+					// throw 	
 					var_export($append); exit;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
@@ -986,7 +986,9 @@ abstract class Model extends Delegator
 		// @TODO this is a temporary measure, don't know if it will work, but
 		// some code still refers to properties
 		//$this->aliasProperty('properties', 'attributes');
-	
+			
+				
+
 				
 		
 		if ($this->initialized()) {
@@ -1053,16 +1055,11 @@ abstract class Model extends Delegator
 				}
 				
 			}
-		
-
 			
-				
 			// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 			// with model; in the future need to determine existence of primary key and cache 
 			// beforehand
-			$this->aliasPrimaryKey("{$class}_id");
-			
-	
+			$this->aliasPrimaryKey("{$class}_id");		
 			
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
@@ -1211,7 +1208,7 @@ abstract class Model extends Delegator
 		// lets see what is missing for validation and throw exception
 		else { 
 			throw new \Exception(
-				"Cannot save model because the attributes did not pass validation : " . print_r(
+				"Cannot save model '{$this->ident()}' because the attributes did not pass validation : " . print_r(
 					$this->whatsInvalid(), true
 			));
 		}
@@ -1226,21 +1223,16 @@ abstract class Model extends Delegator
 		if (false) {
 			foreach($model->relations() as $relation) {
 				
-				if ($relation instanceof \Common\Domain\Model\UrlSlug) {
-					var_export($this->Slug->destination);
-					var_export($relation->destination); exit;
-					exit('asdf');
-				}
-				
 				// determine if a hasOne relationship and if initialized - 
 				// which case save
 				// @TODO this needs to be abstracted to Model.Relation
 				if ($relation instanceof Model && 
 				    $relation->initialized()   &&
-						$relation->changed()) {
+						//$relation->changed()) {
+						!$relation->exists())      {
 														
 					try {
-						echo "updating relation {$relation->ident()}\n";exit;
+						//echo "updating relation {$relation->ident()}\n";exit;
 						 
 						$relation->save();
 					}
@@ -1250,7 +1242,7 @@ abstract class Model extends Delegator
 					catch(Model\Exception\Update\NotChanged $ignore) { }
 					
 					catch(\Exception $pass) {
-						throw new $pass;
+						throw  $pass;
 					}
 					
 				}
@@ -1261,8 +1253,8 @@ abstract class Model extends Delegator
 					foreach($relation as $relation) {
 						
 						if ($relation->initialized() && 
-						    $relation->changed())    {
-						    	
+						    //$relation->changed())    {
+						    !$relation->exists())     {	
 							try {
 								$relation->save();
 							}
@@ -1554,24 +1546,36 @@ abstract class Model extends Delegator
 			$reflection = new \ReflectionFunction($lambda);
 			
 			if ($reflection->returnsReference()) {
-				
-				// we HAVE to set a !isset value to null first, otherwise an
-				// assignment by reference will call __get first, which will
-				// result in a thrown exception, because $alias does not yet
-				// exist on this receiver
-				//if (!isset($this->$alias)) {
-				//	$this->$alias = null;
-				//}
 
+				$self = $this;
 				
 				// now specify alias as attribute accessor and set with
 				// value as lambda
 				foreach($aliases as $alias) {
+					
 					// unset our attribute; this will make sure referenced values
 					// are not unset as well
-					unset($this->$alias);					
+					unset($this->$alias);			
+					
+					// for the moment, simply set aliasedProperties with alias
+					// in order to note that $alias is indeed an alias! We set to
+					// false in order to indicate that value has not yet been set
+					$this->_aliasedProperties[$alias] = false;
+							
 					 
-					$this->defineMethod($alias, $lambda);
+					//$this->defineMethod($alias, $lambda);
+					$this->defer($alias, function() use ($alias, $self, $lambda) {
+						
+						// bind by reference alias to return of lambda (which should be
+						// a reference to a relationship attribute)
+						$self->$alias = &$lambda();
+						
+						// make note of alias within 
+						
+						// returning null indicates that value should NOT be assigned
+						// to $this->$alias, since we have already done so above
+						return null;
+					});
 				}
 				
 				
@@ -1861,6 +1865,20 @@ abstract class Model extends Delegator
 		
 		if ($continue) {
 			
+			// if an aliased property and meta container (aliasedProperties)
+			// value is false, then this is a deferred alias, whose assignment
+			// must be proceeded by a call to __get on the property
+			if ($this->isAliasedProperty($key) && 
+			    $this->_aliasedProperties[$key] === false) {
+				
+				// this will fire the defer method attached to alias
+				// which will bind-by-reference the alias to the return
+				// value of deferred method
+				$this->$key;
+				
+				// now set value 
+				$this->$key = $value;
+			}
 		 
 			// because we rely on certain instance fields being set
 			// during class definition (or when class is self) we
@@ -1871,9 +1889,9 @@ abstract class Model extends Delegator
 			
 			// override simple get functionality with method
 			// @TODO not yet implemented
-			if (\method_exists($this, $key)) {
+			//if (\method_exists($this, $key)) {
 				// pass	
-			}
+			//}
 			
 			// flag whether value has been changed, this is important
 			// for checking 
@@ -1894,7 +1912,10 @@ abstract class Model extends Delegator
 				$this->$key = $value;
 			}
 			
-			if (!in_array($key, $this->attributes)) {
+			if (!in_array($key, $this->attributes) && 
+			    !$this->isAliasedProperty($key)    &&
+					!$this->hasRelationship($key))     {
+						
 				$this->attributes[] = $key;
 			}
 			
@@ -1943,8 +1964,10 @@ abstract class Model extends Delegator
 			return $this->primaryKeyName;
 		}
 		
+		return static::signature() . '_id';
+		
 		throw new \Exception(
-			"Failed to determine primary key name; it can be explicitly set using Model#aliasPrimaryKey"
+			"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"
 		);
 	}
 

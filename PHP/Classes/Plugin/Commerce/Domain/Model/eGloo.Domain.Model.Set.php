@@ -89,6 +89,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		}
 	}
 
+	public function each($lambda) {
+		foreach($this as $model) {
+			$lambda($model);
+		}
+	}
 	
 	/**
 	 * Adds reduce/inject functionality to set; please note that lambda takes two parameters
