@@ -3,6 +3,7 @@ namespace eGloo\Domain;
 
 use \eGloo\Utilities\Delegator;
 use \eGloo\Utilities\InflectionsSafe;
+use \eGloo\Utilities\Collection;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -833,6 +834,42 @@ abstract class Model extends Delegator
 				}		
 			}
 		});
+		
+		$this->defineCallback('delete', function() use ($self) {
+			
+			// check that a create callback has not already been created - this is to ensure
+			// we don't face double inserts
+			// @TODO since this was added late in the lifecycle of model design, there already
+			// exist many create callbacks - until this is cleaned up, we have to specifically
+			// check for the existence of create
+			$callbacks = &$self->reference('callbacks');
+			
+			if ($self->send('hasCallbacks', 'delete', 'around') && count($callbacks['delete']['around']) == 1) {
+				
+				// @TODO replace with a flexible mechanism for deleting records; especially consider composite
+				// keys
+				$table = $self->send('signature');
+				
+				try { 
+					$self::statement("
+						DELETE 
+						
+						FROM
+							$table
+							
+						WHERE
+							{$table}_id = ? 
+							
+					", $self->id);
+				}
+				
+				catch (\Exception $pass) {
+					throw $pass;
+				}
+				
+			}
+			
+		});		
 				
 	}
 
@@ -1296,14 +1333,27 @@ abstract class Model extends Delegator
 		$this->runCallbacks(__FUNCTION__);
 	}
 	
-	public static function delete($key = null) {
-		if (isset($this)) { 
-			return $this->runCallbacks(__FUNCTION__);
-		}
+	public static function delete($__mixed) {
 		
-		else {
-			$model = static::find($key);
-			return $model->delete();
+		$arguments = Collection::flatten(
+			func_get_args()
+		);
+		
+		// an instance of model is needed
+		// in order to run callbacks
+		$model = new static;
+		
+		foreach ($arguments as $key) {
+			
+			// we assign primary key value to model as identifying
+			// during our delete callback
+			$model->id = $key;
+			
+			// @TODO currently delete is limited to invidual deletes per callback
+			// session, as opposed to allowing for group deletes (single statement);
+			// don't know if there is really a use case where many keys will be
+			// pushed to this method to justify writing aorund this limitation
+			$model->send('runCallbacks', __FUNCTION__);
 		}
 	}
 	
