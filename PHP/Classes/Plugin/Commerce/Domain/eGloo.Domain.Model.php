@@ -748,6 +748,7 @@ abstract class Model extends Delegator
 		// define a generic create callback based on
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
+			
 
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
@@ -757,7 +758,6 @@ abstract class Model extends Delegator
 			$callbacks = &$self->reference('callbacks');
 			
 			if ($self->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
-
 				// get instance attributes - strip the primary key if 
 				// is in list of attributes and has a null value
 				$attributes = $self->attributes();
@@ -780,13 +780,13 @@ abstract class Model extends Delegator
 						'with_columns' => array_keys($attributes),
 						'using'        => array_values($attributes)
 					));	
-							
+												
 				}
 				
 				// since we guesing on this insert, we ignore sql errors and make a determination
 				// in inherited classes whether insert was successful
 				catch(\Exception $pass) {
-					//throw $pass;
+					throw $pass;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
 					//	"The following message was returned : \n$append "
@@ -1690,7 +1690,7 @@ abstract class Model extends Delegator
 		
 		
 		if (preg_match('/^find_(one_)?by_(.+)$/', $name, $match)) {
-			$class   = static::classNameFull();
+			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
 			$fields  = explode('_and_', $match[2]);
 			$findOne = !empty($match[1]); 
 			
@@ -1717,6 +1717,8 @@ abstract class Model extends Delegator
 				} 
 				
 				try {
+					
+				
 					$result = $class::sendStatic('process', $class::where(
 						$conditions, $arguments
 					));
