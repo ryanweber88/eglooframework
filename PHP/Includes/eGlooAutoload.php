@@ -684,21 +684,30 @@ function throws( $mixed ) {
 }
 
 function print_backtrace_header( $backtrace ) {
+	$app_name_index = strpos( $backtrace[0]['file'], eGlooConfiguration::getApplicationName() );
+
+	if ( $app_name_index !== false ) {
+		$pretty_path = substr( $backtrace[0]['file'], $app_name_index );
+	} else {
+		$pretty_path = $backtrace[0]['file'];
+	}
+
 	if ( isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
 		$header = $backtrace[0]['function'] . ' invoked in "' . $backtrace[1]['function'] . '" on class "' . $backtrace[1]['class'];
-		$header .= '" on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
-		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+		$header .= '" on line ' . '<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' . $backtrace[0]['line'] . '</a>' . "<br />\n<br />\n";
+		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' . $pretty_path . '</a>' . "<br />\n";
 	} else {
-		$header = $backtrace[0]['function'] . ' invoked on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
-		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+		$header = $backtrace[0]['function'] . ' invoked on line ' .
+			'<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' .$backtrace[0]['file'] . '</a>' . "<br />\n<br />\n";
+		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' . $pretty_path . '</a>' . "<br />\n";
 	}
 
 	echo $header;
 }
 
-function vprint_r( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
+function vprint_r( $mixed, $arg_count ) {
+	if ( $arg_count > 1 ) {
+		foreach( $mixed as $name => $value ) {
 			echo '<pre>';
 			print_r( '<b>Argument #' . $name . '</b>' );
 			echo '</pre>';
@@ -737,12 +746,12 @@ function vvar_dump( $mixed ) {
  */
 function echo_r( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vprint_r( $mixed );
+	vprint_r( func_get_args(), func_num_args() );
 }
 
 function echo_d( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vvar_dump( $mixed );
+	vvar_dump( func_get_args(), func_num_args() );
 }
 
 /**
@@ -756,7 +765,7 @@ function die_r( $mixed ) {
 	}
 
 	print_backtrace_header( debug_backtrace() );
-	vprint_r( $mixed );
+	vprint_r( func_get_args(), func_num_args() );
 
 	die;
 }
@@ -769,7 +778,7 @@ function die_d( $mixed ) {
 	}
 
 	print_backtrace_header( debug_backtrace() );
-	vvar_dump( $mixed );
+	vvar_dump( func_get_args(), func_num_args() );
 
 	die;
 }
