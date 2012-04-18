@@ -700,6 +700,8 @@ function print_backtrace_header( $backtrace ) {
 		$header = $backtrace[0]['function'] . ' invoked on line ' .
 			'<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' .$backtrace[0]['file'] . '</a>' . "<br />\n<br />\n";
 		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . $backtrace[0]['file'] . '&line=' . $backtrace[0]['line'] . '">' . $pretty_path . '</a>' . "<br />\n";
+	} else {
+		$header = '';
 	}
 
 	echo $header;
