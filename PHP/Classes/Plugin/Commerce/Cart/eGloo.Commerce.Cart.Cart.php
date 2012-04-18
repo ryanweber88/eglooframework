@@ -71,12 +71,10 @@ class Cart extends Domain\Model {
 			ITEM_SIZE_UNIT				= 'IN';
 	
 	protected $currency					= 'USD';
-	
+
 	protected $shipping_line_id			= 0;
 
-
-	
-	public static function setCartID($cart_id = null) {
+	public static function setCartID( $cart_id = null ) {
 		if (!is_null($cart_id) && $cart_id > 0) {
 			self::$cart_id = $cart_id;		
 			$_SESSION['cart_id'] = self::$cart_id;
