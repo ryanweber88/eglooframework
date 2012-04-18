@@ -13,8 +13,9 @@ class _ClassSafe {
 		//parent::__construct();
 		
 		if (is_object($mixed)) {			
-			$this->class    = get_class($mixed);
+			$this->class          = get_class($mixed);
 			$this->qualified_name = get_class($mixed); 
+			
 			//$this->instance = new \WeakRef($mixed);
 			//$this->instance = $mixed;
 		}
@@ -46,6 +47,15 @@ class _ClassSafe {
 		}
 	}
 	
+	/**
+	 * Assuming a fully qualified class name has been passed, 
+	 * we return the classes name, with the 
+	 */
+	public static function name($qualifiedClassName) {
+		$tokens = explode('\\', $qualifiedClassName);
+		
+		return $tokens[count($tokens) - 1];
+	}
 	
 	/**
 	 * 

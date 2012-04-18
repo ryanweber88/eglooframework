@@ -18,7 +18,8 @@ abstract class ObjectSafe {
 		$this->__methods();
 		$this->__properties();
 		
-		
+		// provide some generic attr_reader properties
+		$this->attr_reader('ident');
 	}
 	
 	/**

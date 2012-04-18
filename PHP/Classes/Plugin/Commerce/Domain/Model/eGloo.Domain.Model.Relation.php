@@ -217,7 +217,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		$model  = $this->model;
 		$result = null;
 				
-		try { 
+		try {
 			$result = $model::sendStatic('process', $model::statement(
 				$sql = $this->chain->to_sql(), $this->arguments
 			));

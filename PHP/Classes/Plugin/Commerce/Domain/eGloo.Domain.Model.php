@@ -189,7 +189,8 @@ abstract class Model extends Delegator
 						
 						if (is_numeric($key)) {
 							
-							// check if model has already been persisted  
+							// check if model has already been persisted
+							// @TODO this needs to be converted to single statement ASAP  
 							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
 								$result = $class::sendStatic('process', $class::where(array(
 									$field => $key
@@ -308,6 +309,7 @@ abstract class Model extends Delegator
 			);
 		});
 		
+		
 	}
 
 	/**
@@ -421,8 +423,22 @@ abstract class Model extends Delegator
 	}
 	
 	protected function hasMany($name, $lambda) {
+		
+		// look for join table definition
+		$join = null;
+		
+		if (preg_match($pattern = '/through\s+?([a-z]+)$/i', $name, $match)) {
+			
+			// reomve from pattern	name
+			$name = preg_replace($pattern, null, $name);
+			
+			// retrieve join from match
+			$join = $match[1];	
+		}
+		
+		
 		if (InflectionsSafe::isPlural($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
-			return $this->defineRelationship($name, $lambda, false);
+			return $this->defineRelationship($name, $lambda, false, $join);
 		}
 		
 		throw new \Exception(
@@ -440,11 +456,12 @@ abstract class Model extends Delegator
 	 * @type experimental the moment - will be used to indicate relationship
 	 * type if plurality rules are ineffective
 	 */
-	protected function defineRelationship($name, $lambda, $singular = null) {
+	protected function defineRelationship($name, $lambda, $singular = null, $join = null) {
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
 		//echo static::namespaceName(); exit;
+		
 				
 		// check if an 'as Alias' has been specified
 		$aliases = array();
@@ -492,23 +509,56 @@ abstract class Model extends Delegator
 			}
 		}
 		
-		$relationships = &$self->reference('relationships');
-		$relationships[$relationshipName] = $model;
+		// @TODO replace with Model.Association
+		$association = new Model\Association(array(
+			'owner'       => $self->class->qualified_name,
+			'target'      => $model,
+			'through'     => $join,
+			'cardinality' => $singular 
+				? Model\Association::SINGULAR
+				: Model\Association::MANY 
+		));		
+		
+		// @TODO replace with Model.Relation
+		$this->relationships[$relationshipName] = $model;
 				
 
 		//@TODO using ternary below may be hard to read
-		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular) {
+		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, &$association) {
 			
+			$association->owner_id = $self->id;
 			
+
 			// get reference to relationships and make reference that relationship is
 			// beging created
 			$result = null;
 
-			
 			// check if the model exists in the database to ensure we are
 			// not running queries against an empty/shallow model - because
 			// there is nothing to match against here
+			
 			if ($self->initialized()) {
+					
+				/*
+				try { 	
+					$result = $self::sendStatic(
+						'process', $lambda($model)
+					);
+				}
+				
+				catch(\Exception $pass) {
+					throw $pass;
+				}
+				*/
+			
+				
+				
+				// define association on result
+				// @TODO should we add associations on single models as well 
+				// is there any purpose
+
+			
+				
 				$result = $lambda($model);
 				
 				// if returned result is an instance of relationship, which is a query build tool
@@ -535,7 +585,7 @@ abstract class Model extends Delegator
 					
 					
 					if (\eGloo\Utilities\Collection::isHash($result)) {						
-						$result = new $model($result);
+						$result              = new $model($result);
 						
 			
 						// @TODO this is a shortcut to we establish a better rule
@@ -569,7 +619,9 @@ abstract class Model extends Delegator
 					
 				}
 				
+				
 			}
+
 
 
 
@@ -597,6 +649,14 @@ abstract class Model extends Delegator
 			// check $singular argument to see if this is truely intended
 			else if ($singular && $result instanceof Model\Set) {
 				$result = $result[0];
+			}
+			
+			// check finally if result is set; if the case, pass in our association
+			// meta data
+			// @TODO is there a reason to set results of type Model with association
+			// as well
+			if ($result instanceof Model\Set) {
+				$result->association = $association;	
 			}
 			
 			// otherwise we return result as is, which can be any value outside
@@ -778,8 +838,7 @@ abstract class Model extends Delegator
 					// @TODO composite keys? 
 					$self->id = $self::inserts(array(
 						'into'         => $self->send('signature'),
-						'with_columns' => array_keys($attributes),
-						'using'        => array_values($attributes)
+						'using'        => $self
 					));	
 												
 				}
@@ -1485,7 +1544,7 @@ abstract class Model extends Delegator
 			$result = $result->build();
 		}
 		
-		else if (is_array($result) && count($result)) {						
+		else if (is_array($result) && count($result)) {
 			$manager = Model\Manager::instance();
 			
 	
@@ -1493,8 +1552,7 @@ abstract class Model extends Delegator
 			$signature = static::signature();
 			$key       = "{$signature}_id";
 			$class     = static::classNameFull();
-			
-					
+								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				$result = $manager->find($class, $key, function($class) use ($result) {
 					return new $class($result);
@@ -1737,7 +1795,37 @@ abstract class Model extends Delegator
 
 		// if unable to find matching meta call within
 		// __call chain, determine if a dynamic finder
-		
+		if (preg_match('/^delete_by_(.+)$/', $name, $match)) {
+			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
+			$fields  = explode('_and_', $match[2]);
+									
+			// now lets define out dynamic finder function
+			// @TODO most of the funcitonality here should be moved
+			// to Relation
+			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $name) {
+				//$disguisedClass = $class::classFullName();
+				$conditions = array();
+				
+				foreach($fields as $field) {
+					$conditions[] = "$field = ?"; 	
+				}
+				
+				$conditions = implode(' AND ', $conditions);
+				$table = $class::signature();
+				
+				$class::statement("
+					DELETE FROM
+						$table
+					
+					WHERE
+							( $conditions )		
+					
+					
+				", array_slice($args = func_get_args(), 0, count($args) - 1));
+				
+			});
+			
+		}		
 		
 		if (preg_match('/^find_(one_)?by_(.+)$/', $name, $match)) {
 			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
@@ -2009,6 +2097,7 @@ abstract class Model extends Delegator
 	 * key name is - this should not be relied upon unless we have an
 	 * explicit understanding of underlying data structure; the methodology
 	 * by which primary key is obtained will change in the future
+	 * @TODO this method needs to be rethought
 	 */
 	public function primaryKeyName() {
 		
@@ -2050,6 +2139,14 @@ abstract class Model extends Delegator
 			
 			return false;
 		});
+	}
+	
+	/**
+	 * Uses convention to determine primary key name - this is not a 
+	 * a gaurentee that is valid primary key name
+	 */
+	public static function primaryKey() {
+		return static::signature() . '_id';
 	}
 	
 	/**
@@ -2296,5 +2393,6 @@ abstract class Model extends Delegator
 	protected $changes        = array();
 	protected $relationships  = array();
 	protected $primaryKeyName; 
+	protected $association;
 }
 
