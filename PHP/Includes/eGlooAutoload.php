@@ -707,7 +707,7 @@ function print_backtrace_header( $backtrace ) {
 	echo $header;
 }
 
-function vprint_r( $mixed, $arg_count ) {
+function vprint_r( $mixed, $arg_count = 1 ) {
 	if ( $arg_count > 1 ) {
 		foreach( $mixed as $name => $value ) {
 			echo '<pre>';
@@ -725,9 +725,9 @@ function vprint_r( $mixed, $arg_count ) {
 	}
 }
 
-function vvar_dump( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
+function vvar_dump( $mixed, $arg_count = 1 ) {
+	if ( $arg_count > 1 ) {
+		foreach( $mixed as $name => $value ) {
 			echo '<pre>';
 			var_dump( '<b>Argument #' . $name . '</b>' );
 			echo '</pre>';
@@ -748,12 +748,22 @@ function vvar_dump( $mixed ) {
  */
 function echo_r( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vprint_r( func_get_args(), func_num_args() );
+
+	if ( func_num_args() > 1 ) {
+		vprint_r( func_get_args(), func_num_args() );
+	} else {
+		vprint_r( $mixed );
+	}
 }
 
 function echo_d( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vvar_dump( func_get_args(), func_num_args() );
+
+	if ( func_num_args() > 1 ) {
+		vvar_dump( func_get_args(), func_num_args() );
+	} else {
+		vvar_dump( $mixed );
+	}
 }
 
 /**
