@@ -21,7 +21,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		parent::__construct();
 				
 		// @TODO temporary; association data will be part of Model.Relation
-		$this->attr_accessor('association');
+		//$this->attr_accessor('association');
 				
 		// set our model type; think of this as templated collection
 		// in c++, where array values may only be of passed
@@ -64,32 +64,32 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 		// check if model has natural key, if case, then set key
 		// by that; otherwise default to primary key, if available
-		
 		if (!is_null($instance)) {
-			 
+
 			try {
 				$primaryKeyName = $instance->send('primaryKeyName');
 			}
 			
 			catch(\Exception $ignore) { }
+		}
 			
+		$model = $this->model;
 			
-			if (!is_null($key = $instance::constant('NATURAL_KEY'))) {
-				$this->key = $key;
-			}
-			
-			else if (isset($primaryKeyName) && !is_null($key = $primaryKeyName)) {
-				$this->key = $key;
-			}
+		if (!is_null($key = $model::constant('NATURAL_KEY'))) {
+			$this->key = $key;
+		}
+		
+		else if (isset($primaryKeyName) && !is_null($key = $primaryKeyName)) {
+			$this->key = $key;
+		}
 
-				
-			// check that primary key is returning unique values for 	
-			if (!is_null($this->key) && !$this->keyReturnsUnique()) {
-				throw new \Exception(
-					"Failed constructing $this because key '$key' is not valid because " .
-					"it returns non-unique model instances"
-				);
-			}			
+			
+		// check that primary key is returning unique values for 	
+		if (!is_null($this->key) && !$this->keyReturnsUnique()) {
+			throw new \Exception(
+				"Failed constructing $this because key '$key' is not valid because " .
+				"it returns non-unique model instances"
+			);		
 		}
 	}
 
@@ -435,7 +435,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// if a string we are attempting to match by "natural_key" 
 		// or a field that is representative of the model in a 
 		// collection
-		$model = $this->model;
 		
 		// make sure offset is a string and not some '19' fuckery
 		if (is_string($offset)) {
@@ -481,29 +480,35 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		
 					foreach($this as $key => $model) {
 						if ($model->$field == $offset) {
-							return $this->collection[$key];
+							$model = $this->collection[$key];
 						}
 					}
 					
-					// instead of returning false here, we are going to return an
-					// empty instance of model, that can be populated; this way we
-					// can add models to a new set or model that doesnt yet exist;
-					// please note though, there are no constraints in regards to
-					// the domain of model->natural_key values
-					// @TODO this doesn't fucking work right now
-					//$this[] = new $this->model(array($field => $offset));
-					
-					return null;
+						// instead of returning false here, we are going to return an
+						// empty instance of model, that can be populated; this way we
+						// can add models to a new set or model that doesnt yet exist;
+						// please note though, there are no constraints in regards to
+						// the domain of model->natural_key values
+						// @TODO this doesn't fucking work right now
+											
+					if (!isset($model)) {
+				
+						$model  = new $this->model(array($field => $offset));
+						$this[] = $model;						
+					}
 				}
 			}
+
+			else {
 			
-			$class = get_class($this);
-			
-			throw new \Exception(
-					"Cannot get offset '$offset' to '$this' because '$class::NATURAL_KEY' is not defined or " .
-					"key has not been explicitly set"	
-			);				
-			
+				$class = get_class($this);
+				
+				throw new \Exception(
+						"Cannot get offset '$offset' to '$this' because '$class::NATURAL_KEY' is not defined or " .
+						"key has not been explicitly set"	
+				);
+				
+			}
 			
 		}
 
@@ -511,18 +516,28 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$values = array_values($this->collection);
 			
 			if (isset($values[$offset])) {
-				return $values[$offset];
+				$model = $values[$offset];
 			}
 		}
+		
+		
+		else {
+			throw new \Exception(
+				"Failed to retrieve model from set '$this' because offset '$offset' must be a string or integer"
+			); 
+			
+		} 
 
 		// otherwise we create an instance of templated model and push
 		// onto queue
-		if (!isset($this->collection[$offset])) {
-			$this->collection[$offset] = new $this->model;
+		if (!isset($model)) {
+			$model  = new $this->model;
+			$this[] = new $this->model;
 		}
 		
-		return $this->collection[$offset];
+		return $model;
 	}
+
 	
 	public function offsetSet($offset, $model) {
 		
@@ -531,17 +546,36 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				? count($this->collection)
 				: $offset;
 			
-							
+			// if model being added to set "belongsTo" another model,
+			// as indicated by the presence of association and set within
+			// Model#defineRelationship, then we link/reference foreign key
+			// to relationship model primary key 
+			//var_export($this->association); exit('here');
+			if (!is_null($this->association)) {
+				$owner = $this->association->owner;
+				$field = $owner->primaryKeyName();
+				
+				$model->send('aliasAttribute', $owner->primaryKeyName(), function & () use ($owner) {
+					return $owner->id;
+				});
+				
+				// @TODO right now alias is deferred, so it doesnt exist until actually called upon
+				// so we debunk the deferral - this may be ok, as we only care about foreign key value
+				// on crud ops, where it will automatically be called
+				$model->$field;
+			}	
+						
 			$this->collection[$index] = $model;
 			
 		}
 		
 		else { 
 			throw new \Exception (
-				"Collection $this can only accept instance of type {$this->model}"
+				"Collection '$this' can only accept instance of type '{$this->model}'"
 			);
 		}
 	}
+	
 	
 	public function offsetUnset($offset) {
 		unset($this->collection[$offset]);
@@ -706,5 +740,5 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	protected $model;
 	protected $key;
 	protected $collection = array();	
-	protected $association; 
+	public $association; 
 }

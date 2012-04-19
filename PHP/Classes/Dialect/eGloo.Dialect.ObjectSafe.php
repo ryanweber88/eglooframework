@@ -10,7 +10,13 @@ abstract class ObjectSafe {
 	
 	function __construct() {
 		
-		$this->class = new _ClassSafe($this);
+		// ClassSafe is a class metaclass instance; here we statically cache it
+		// and key it fully qualified class name
+		$self = $this;
+		
+		$this->class = static::cache(get_called_class(), function() use ($self) {
+			return new _ClassSafe($self);
+		});
 		
 		// fire our alias properties and methods
 		//$this->aliasMethods();
@@ -582,6 +588,7 @@ abstract class ObjectSafe {
 	 */
 	public function __get($name) {
 		
+	
 		// check if property name is a "deferrable" property, in which case we
 		// fire lambda, and set property value with return from lambda; defers
 		// can only be used once, so the deferrable will be dropped after execution 
@@ -656,7 +663,7 @@ abstract class ObjectSafe {
 	}	
 	
 	public function __set($name, $value) {
-		
+			
 		// check if ruby-style attributes have been specified, in which case we
 		// fire our accessor method
 		$attr = &$this->_attributes;

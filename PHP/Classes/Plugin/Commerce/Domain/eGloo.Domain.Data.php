@@ -67,27 +67,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				// in which case fields will be queried from information schema
 				if(!isset($idioms['with_columns'])) {
 					
-					if ( $idioms['using'] instanceof Model ) {
-						$columns = array_keys($idioms['using']->attributes());
-					}
-					
-					else if (is_array(($idioms['using']))) {
-						$columns = Collection::isHash($idioms['using'])
-						
-							// use array keys from using
-							? array_keys($idioms['using'])
-							
-							// otherwise grab a static list of columns from
-							// our table name
-							: static::columns($idioms['into']);
-					}
-					
-					else {
-						throw new \Exception (
-							"Failed inserts because idiom 'using' is invalid " . print_r(
-								$idioms['using']
-						));
-					}
+					$idioms['with_columns'] = static::columns($idioms['into']);
 
 				}
 								
@@ -514,10 +494,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					'/\(.*?\).*?(values).*?\(.*\)/is', '(#keys#) $1 (#values#)', $statement
 				);
 				
+				
+				$keys = \eGloo\Utilities\Collection::isHash($arguments)
+					? array_keys($arguments)
+					: $fields;
 							
 				// add back stupid argument/values list
 				$statement = str_replace(
-					"#keys#", implode(' , ', array_values($fields)), $statement
+					"#keys#", implode(' , ', $keys), $statement
 				);
 				
 				$statement = str_replace(
@@ -540,7 +524,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
-		
 		
 		
 		$result = $dataAccess->$method($statement, $arguments);

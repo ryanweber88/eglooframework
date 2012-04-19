@@ -26,7 +26,7 @@ abstract class Model extends Delegator
 		// instance or Domain\Data
 		parent::__construct(static::data());
 
-
+		
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
 		$this->__relationships();
@@ -411,14 +411,29 @@ abstract class Model extends Delegator
 		if (is_null($lambda)) {
 			// @TODO this is not a foolproof scheme of determining whether relationship
 			// is truely a 'belongs_to', but will do for now
+			
 			return $this->hasRelationship($name) &&
-		         InflectionsSafe::isSingular($name);
+		         \property_exists($this, $name);
 			
 		}
 		
-		return $this->hasOne($name, $lambda);
+		// otherwise, we follow convention that foreign reference is within
+		// table, so we set property
+		// @TODO we need to grab an actual signature as opposed to making a 
+		// guess in terms 
+		$foreignKey = strtolower(\eGlooString::toUnderscores(
+			$name
+		));
+		
+		$foreignKey .= '_id';
 		
 
+		// set value to null, we'll check against whether property exists
+		// when relationship is evaluated
+		$this->$foreignKey = null;
+		
+		// finally, we create our 1 - 1 relationship
+		return $this->hasOne($name, $lambda);		
 
 	}
 	
@@ -509,25 +524,24 @@ abstract class Model extends Delegator
 			}
 		}
 		
-		// @TODO replace with Model.Association
-		$association = new Model\Association(array(
-			'owner'       => $self->class->qualified_name,
-			'target'      => $model,
-			'through'     => $join,
-			'cardinality' => $singular 
-				? Model\Association::SINGULAR
-				: Model\Association::MANY 
-		));		
+	
 		
 		// @TODO replace with Model.Relation
 		$this->relationships[$relationshipName] = $model;
 				
 
 		//@TODO using ternary below may be hard to read
-		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, &$association) {
-			
-			$association->owner_id = $self->id;
-			
+		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join) {
+		 
+			$association = new Model\Association(array(
+				'owner'      => $self,
+				'target'      => $model,
+				'through'     => $join,
+				'cardinality' => $singular 
+					? Model\Association::SINGULAR
+					: Model\Association::MANY 
+			));	
+						
 
 			// get reference to relationships and make reference that relationship is
 			// beging created
@@ -538,7 +552,11 @@ abstract class Model extends Delegator
 			// there is nothing to match against here
 			
 			if ($self->initialized()) {
-					
+
+				// @TODO replace with Model.Association
+				//$association->owner = $self;
+	
+				
 				/*
 				try { 	
 					$result = $self::sendStatic(
@@ -560,6 +578,7 @@ abstract class Model extends Delegator
 			
 				
 				$result = $lambda($model);
+				
 				
 				// if returned result is an instance of relationship, which is a query build tool
 				// then evaluate and pass to statement
@@ -642,7 +661,7 @@ abstract class Model extends Delegator
 					
 					
 					: new Model\Set($model);
-				
+
 			}
 			
 			// because our find_by methods returns sets automatically, we need to
@@ -655,13 +674,27 @@ abstract class Model extends Delegator
 			// meta data
 			// @TODO is there a reason to set results of type Model with association
 			// as well
-			if ($result instanceof Model\Set) {
-				$result->association = $association;	
+			//$result->association = $association;
+			if ($result instanceof Model) {
+				// the the result belongs to this model - meaning
+				// that result has a foreign key with the same signature
+				// as this model, then aliasAttribute on result to top this
+				// model primary key 	
+				if ($result->belongsTo($self)) {
+					$result->send('aliasAttribute', $self->primaryKeyName(), function & () {
+						return $result->id;
+					});
+				}
+			}
+			
+			else if ($result instanceof Model\Set) {
+				$result->association = $association;
 			}
 			
 			// otherwise we return result as is, which can be any value outside
 			// of null
 			return $result;
+			
 		});
 		
 		foreach($aliases as $alias) {			
@@ -840,6 +873,11 @@ abstract class Model extends Delegator
 						'into'         => $self->send('signature'),
 						'using'        => $self
 					));	
+					
+					// calling false will halt callback chain
+					if (!is_null($self->id) ||  $self->id === false) {
+						return false;
+					}
 												
 				}
 				
@@ -883,9 +921,9 @@ abstract class Model extends Delegator
 				
 				// again, since this is a guess, we ignore exception and make determination that
 				// update succeeded in child classes
-				catch(\Exception $append) {
-					// throw 	
-					var_export($append); exit;
+				catch(\Exception $pass) {
+					throw $pass; 	
+					//var_export($append); exit;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
 					//	"The following message was returned : \n$append "
@@ -1084,8 +1122,7 @@ abstract class Model extends Delegator
 		//$this->aliasProperty('properties', 'attributes');
 			
 				
-
-				
+		
 		
 		if ($this->initialized()) {
 
@@ -1155,8 +1192,12 @@ abstract class Model extends Delegator
 			// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
 			// with model; in the future need to determine existence of primary key and cache 
 			// beforehand
+
+
+							
 			$this->aliasPrimaryKey("{$class}_id");		
 			
+		
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
 			if (isset($this->status_id)           &&
