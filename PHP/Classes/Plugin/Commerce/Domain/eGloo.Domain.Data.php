@@ -700,4 +700,4 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		);
 	}
 		
-} 
+}

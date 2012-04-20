@@ -684,21 +684,39 @@ function throws( $mixed ) {
 }
 
 function print_backtrace_header( $backtrace ) {
-	if ( isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
-		$header = $backtrace[0]['function'] . ' invoked in "' . $backtrace[1]['function'] . '" on class "' . $backtrace[1]['class'];
-		$header .= '" on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
-		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+	$app_name_index = strpos( $backtrace[0]['file'], eGlooConfiguration::getApplicationName() );
+
+	if ( $app_name_index !== false ) {
+		$pretty_path = substr( $backtrace[0]['file'], $app_name_index );
 	} else {
-		$header = $backtrace[0]['function'] . ' invoked on line ' . $backtrace[0]['line'] . "<br />\n<br />\n";
-		$header .= 'File location: ' . $backtrace[0]['file'] . "<br />\n";
+		$pretty_path = $backtrace[0]['file'];
+	}
+
+	if ( $backtrace[1]['function'] !== 'global_exception_handler' && isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
+		$header = $backtrace[0]['function'] . ' invoked in "' . $backtrace[1]['function'] . '" on class "' . $backtrace[1]['class'];
+
+		$header .= '" on line ' . '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' .
+			$backtrace[0]['line'] . '">' . $backtrace[0]['line'] . '</a>' . "<br />\n<br />\n";
+
+		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' .
+			$backtrace[0]['line'] . '">' . $pretty_path . '</a>' . "<br />\n";
+	} else if ( $backtrace[1]['function'] !== 'global_exception_handler' ) {
+		$header = $backtrace[0]['function'] . ' invoked on line ' .
+			'<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' . $backtrace[0]['line'] . '">' .
+			$backtrace[0]['file'] . '</a>' . "<br />\n<br />\n";
+
+		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' . $backtrace[0]['line'] . '">' .
+			$pretty_path . '</a>' . "<br />\n";
+	} else {
+		$header = '';
 	}
 
 	echo $header;
 }
 
-function vprint_r( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
+function vprint_r( $mixed, $arg_count = 1 ) {
+	if ( $arg_count > 1 ) {
+		foreach( $mixed as $name => $value ) {
 			echo '<pre>';
 			print_r( '<b>Argument #' . $name . '</b>' );
 			echo '</pre>';
@@ -714,9 +732,9 @@ function vprint_r( $mixed ) {
 	}
 }
 
-function vvar_dump( $mixed ) {
-	if ( func_num_args() > 1 ) {
-		foreach( func_get_args() as $name => $value ) {
+function vvar_dump( $mixed, $arg_count = 1 ) {
+	if ( $arg_count > 1 ) {
+		foreach( $mixed as $name => $value ) {
 			echo '<pre>';
 			var_dump( '<b>Argument #' . $name . '</b>' );
 			echo '</pre>';
@@ -737,12 +755,22 @@ function vvar_dump( $mixed ) {
  */
 function echo_r( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vprint_r( $mixed );
+
+	if ( func_num_args() > 1 ) {
+		vprint_r( func_get_args(), func_num_args() );
+	} else {
+		vprint_r( $mixed );
+	}
 }
 
 function echo_d( $mixed ) {
 	print_backtrace_header( debug_backtrace() );
-	vvar_dump( $mixed );
+
+	if ( func_num_args() > 1 ) {
+		vvar_dump( func_get_args(), func_num_args() );
+	} else {
+		vvar_dump( $mixed );
+	}
 }
 
 /**
@@ -756,7 +784,7 @@ function die_r( $mixed ) {
 	}
 
 	print_backtrace_header( debug_backtrace() );
-	vprint_r( $mixed );
+	vprint_r( func_get_args(), func_num_args() );
 
 	die;
 }
@@ -769,7 +797,7 @@ function die_d( $mixed ) {
 	}
 
 	print_backtrace_header( debug_backtrace() );
-	vvar_dump( $mixed );
+	vvar_dump( func_get_args(), func_num_args() );
 
 	die;
 }
