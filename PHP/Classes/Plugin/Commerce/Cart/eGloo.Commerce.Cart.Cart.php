@@ -5,6 +5,7 @@ use \eGloo\Commerce,
     \eGloo\Utility,
     \eGloo\Domain; 
 
+use \Common\Domain\Model\Session;
 
 /**
  * Address Class File
@@ -72,55 +73,93 @@ class Cart extends Domain\Model {
 	
 	protected $currency					= 'USD';
 
-	protected $shipping_line_id			= 0;
+	public static function newActiveCart() {
+		static::setActiveCartID();
+	}
 
-	public static function setCartID( $cart_id = null ) {
-		if (!is_null($cart_id) && $cart_id > 0) {
-			self::$cart_id = $cart_id;		
-			$_SESSION['cart_id'] = self::$cart_id;
-			
-			// Generate Cookies and set it to expires in 3 days
-			setcookie('cart_id', self::$cart_id, time()+24*60*60*3, '/');
-		} else {
-						
-			if (isset($_SESSION['cart_id'])) {
-				self::$cart_id = $_SESSION['cart_id'];
-				
-				// Regenerate Cookies and set it to expires in 1 days
-				setcookie('cart_id', self::$cart_id, time()+24*60*60, '/');
-			
-			} elseif (isset ($_COOKIE['cart_id'])) {
-				self::$cart_id = $_COOKIE['cart_id'];
-				$_SESSION['cart_id'] = self::$cart_id;
-				
-				// Regenerate Cookies and set it to expires in 1 days
-				// setcookie('cart_id', self::$cart_id, time()+24*60*60);
-			} else {
-				self::$cart_id = md5(uniqid(rand(), true));
-				
-				// Generate Cookies and set it to expires in 1 days
-				setcookie('cart_id', self::$cart_id, time()+24*60*60, '/');
-			}
+	public static function setActiveCartID( $cart_id = null, $cart_session_id = null, $cart_user_id = null, $create_cart = true ) {
+		if ( !is_null($cart_id) && is_numeric($cart_id) && $cart_id > 0 ) {
+			// Look up via cart_id
+			$_SESSION['cart_id'] = static::$cart_id = $cart_id;
+		} else if ( is_null($cart_id) && !is_null($cart_session_id) ) {
+			// Look up via session_id
+			// static::$cart_id = $cart_id;
+			// $_SESSION['cart_id'] = static::$cart_id;
+		} else if ( is_null($cart_id) && is_null($cart_session_id) && !is_null($cart_user_id) ) {
+			// Look up via user_id
+			// static::$cart_id = $cart_id;
+			// $_SESSION['cart_id'] = static::$cart_id;
+		} else if ( $create_cart ) {
+			// Generate one
+			$session = Session::find_one_by_php_session_id( session_id() );
+
+			$cart = new static(
+				array
+					(
+					'session_id' => $session->id,
+					'user_id' => \User::getActiveUserID(),
+					'cart_progress_id' => self::CART_PROGRESS_ADD,
+					'last_action' => 'I',
+					'last_action_taken' => date('Y-m-d H:i:s', time()),
+					'action_by' => \User::getActiveUserID(),
+					)
+			);
+
+			$cart->save();
+
+			static::$cart_id = $_SESSION['cart_id'] = $cart->id;
 		}
+
 		return true;
 	}
 
-	
-	public static function getCartID() {
-		if (!isset(self::$cart_id)) {
-			self::setCartID();
+	public static function getActiveCartID( $cart_session_id = null, $cart_user_id = null, $create_cart = true ) {
+		$retVal = null;
+
+		if ( !is_null(static::$cart_id) && is_numeric(static::$cart_id) && static::$cart_id > 0 ) {
+			// Look up via cart_id
+			$retVal = $_SESSION['cart_id'] = static::$cart_id;
+		} else if ( is_null(static::$cart_id) && !is_null($cart_session_id) ) {
+			// Look up via session_id
+			// static::$cart_id = $cart_id;
+			// $_SESSION['cart_id'] = static::$cart_id;
+		} else if ( is_null(static::$cart_id) && is_null($cart_session_id) && !is_null($cart_user_id) ) {
+			// Look up via user_id
+			// static::$cart_id = $cart_id;
+			// $_SESSION['cart_id'] = static::$cart_id;
+		// } else if ( isset(static::$cart_id) ) {
+		// 	// Grab from session
+		} else if ( isset($_SESSION['cart_id']) ) {
+			$retVal = static::$cart_id = $_SESSION['cart_id'];
+		} else if ( $create_cart ) {
+			// Generate one
+			$session = Session::find_one_by_php_session_id( session_id() );
+
+			$cart = new static(
+				array
+					(
+					'session_id' => $session->id,
+					'user_id' => \User::getActiveUserID(),
+					'cart_progress_id' => self::CART_PROGRESS_ADD,
+					'last_action' => 'I',
+					'last_action_taken' => date('Y-m-d H:i:s', time()),
+					'action_by' => \User::getActiveUserID(),
+					)
+			);
+
+			$cart->save();
+
+			static::$cart_id = $_SESSION['cart_id'] = $cart->id;
 		}
-		return self::$cart_id;
+
+		return $retVal;
 	}
-	
+
 	public static function destroyCart() {
-		self::$cart_id = null;
+		static::$cart_id = null;
 		unset($_SESSION['cart_id']);
-		setcookie('cart_id', self::getCartID(), time() - 24*60*60, '/');
 		return true;
 	}
-
-
 
 	public function addItem($item_id, $qty = 1, $price = null) {
 		if ((int)$qty < 1) {
@@ -134,8 +173,7 @@ class Cart extends Domain\Model {
 		}
 		return true;
 	}
-	
-	
+
 	public function removeItem($item_id) {
 		foreach ($this->items as $key => $value) {
 			if ($item_id == $key) {
@@ -144,16 +182,7 @@ class Cart extends Domain\Model {
 		}
 		return true;
 	}
-	
-	
-	public function clearCart() {
-		
-	}
-	
-	public function getCartTotal() {
-		
-	}
-	
+
 	public function getItems() {
 		return $this->items;
 	}
