@@ -411,7 +411,6 @@ abstract class Model extends Delegator
 		if (is_null($lambda)) {
 			// @TODO this is not a foolproof scheme of determining whether relationship
 			// is truely a 'belongs_to', but will do for now
-			
 			return $this->hasRelationship($name) &&
 		         \property_exists($this, $name);
 			
@@ -670,17 +669,22 @@ abstract class Model extends Delegator
 				$result = $result[0];
 			}
 			
+						
+
 			// check finally if result is set; if the case, pass in our association
 			// meta data
 			// @TODO is there a reason to set results of type Model with association
 			// as well
 			//$result->association = $association;
 			if ($result instanceof Model) {
+
 				// the the result belongs to this model - meaning
 				// that result has a foreign key with the same signature
 				// as this model, then aliasAttribute on result to top this
-				// model primary key 	
-				if ($result->belongsTo($self)) {
+				// model primary key 
+					
+				if ($result->send('belongsTo', $self->class->name)) {
+											
 					$result->send('aliasAttribute', $self->primaryKeyName(), function & () {
 						return $result->id;
 					});
@@ -690,6 +694,9 @@ abstract class Model extends Delegator
 			else if ($result instanceof Model\Set) {
 				$result->association = $association;
 			}
+
+			
+
 			
 			// otherwise we return result as is, which can be any value outside
 			// of null
@@ -1885,8 +1892,7 @@ abstract class Model extends Delegator
 			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
 			$fields  = explode('_and_', $match[2]);
 			$findOne = !empty($match[1]); 
-			
-						
+	
 			// now lets define out dynamic finder function
 			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
 				
@@ -1910,7 +1916,9 @@ abstract class Model extends Delegator
 				
 				try {
 					
-				
+							
+
+					
 					$result = $class::sendStatic('process', $class::where(
 						$conditions, $arguments
 					));
@@ -1926,6 +1934,7 @@ abstract class Model extends Delegator
 				if ($findOne && $result instanceof Model\Set) {
 					$result = $result[0];
 				}
+				
 				
 				return $result;
 				

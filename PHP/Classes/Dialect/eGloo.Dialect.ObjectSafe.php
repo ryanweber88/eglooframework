@@ -1061,7 +1061,9 @@ abstract class ObjectSafe {
 	protected        $_defers            = array();
 	protected        $_aliasedProperties = array(); 
 	protected        $_attributes        = array();
-	protected        $class;
+	
+	// @TODO return to protected and set as attr_reader
+	public           $class;
 	
 	
 	
