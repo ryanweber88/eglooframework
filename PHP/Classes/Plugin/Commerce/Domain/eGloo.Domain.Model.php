@@ -442,7 +442,7 @@ abstract class Model extends Delegator
 		// look for join table definition
 		$join = null;
 		
-		if (preg_match($pattern = '/through\s+?([a-z]+)$/i', $name, $match)) {
+		if (preg_match($pattern = '/\s+through\s+?([a-z]+)$/i', $name, $match)) {
 			
 			// reomve from pattern	name
 			$name = preg_replace($pattern, null, $name);
@@ -1838,7 +1838,8 @@ abstract class Model extends Delegator
 		// __call chain, determine if a dynamic finder
 		if (preg_match('/^delete_by_(.+)$/', $name, $match)) {
 			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
-			$fields  = explode('_and_', $match[2]);
+			$fields  = explode('_and_', $match[1]);
+			
 									
 			// now lets define out dynamic finder function
 			// @TODO most of the funcitonality here should be moved
@@ -1846,25 +1847,37 @@ abstract class Model extends Delegator
 			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $name) {
 				//$disguisedClass = $class::classFullName();
 				$conditions = array();
-				
+				$arguments  = Collection::flatten(func_get_args());
+
 				foreach($fields as $field) {
 					$conditions[] = "$field = ?"; 	
 				}
 				
 				$conditions = implode(' AND ', $conditions);
-				$table = $class::signature();
+				$table = $class::sendStatic('signature');
 				
-				$class::statement("
-					DELETE FROM
-						$table
-					
-					WHERE
-							( $conditions )		
-					
-					
-				", array_slice($args = func_get_args(), 0, count($args) - 1));
+				try { 
+					Data::statement("
+						DELETE FROM
+							$table
+						
+						WHERE
+								( $conditions )		
+						
+						
+					", $arguments);
+				}
 				
+				catch(\Exception $pass) {
+					throw $pass;
+				}
 			});
+			
+			
+			
+			return call_user_func_array(
+				$block, $arguments
+			);
 			
 		}		
 		

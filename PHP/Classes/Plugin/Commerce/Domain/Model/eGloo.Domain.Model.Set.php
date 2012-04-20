@@ -681,11 +681,25 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					$ns    = \eGloo\Dialect\_Namespace::name(
 						$this->association->target
 					);
-					$target     = $this->association->target;	
-					$owner      = $this->association->owner;
-					$joinModel  = \class_exists($class = "$ns\\$target")
-						? $class
-						: "$ns\\Generic";
+					
+					$target = $this->association->through;	
+					$owner  = $this->association->owner;
+
+					if (\class_exists($class = "$ns\\$target")) {
+						$joinModel = $class;
+					}
+					
+					else {
+						$generic = "$ns\\Generic";
+						
+						$joinModel = $generic::factory(
+							$class
+						);
+						
+					}
+
+						
+					
 					
 					// now use the primary key of owner to determine our
 					// dynamic delete method; we are making an assumption 
@@ -693,7 +707,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					// join table; if it is not, we will catch the resulting
 					// exception and pass to handler
 					$deleteMethod = "delete_by_{$owner::primaryKey()}";
-					
+
 					try {
 						$joinModel::$deleteMethod($owner->id);
 					}
@@ -714,7 +728,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				
 			}
 			
-			else { 
+			else {
+				exit('asdf'); 
 				// iterate through models, grab keys and push onto stack
 				foreach($this as $model) {
 					$keys[] = $model->id;
