@@ -665,6 +665,136 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			: $this->collection;
 	}
 	
+	public function join() {
+		if (!is_null($this->association)    && 
+	      $this->association->usesJoin()) {
+	      
+			if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
+				
+								
+				// determine if model exists, if not, use generic
+				// @TODO going to have to account for different namespaces
+				// once heirarchy extends past Common
+				$ns    = \eGloo\Dialect\_Namespace::name(
+					$this->association->target
+				);
+				
+				$target = $this->association->through;	
+				$owner  = $this->association->owner;
+
+				if (\class_exists($class = "$ns\\$target")) {
+					$joinModel = $class;
+				}
+				
+				else {
+					$generic = "$ns\\Generic";
+					
+					$joinModel = $generic::factory(
+						$class
+					);
+					
+				}
+				
+				foreach(array($owner, $model) as $amodel) { 
+					if (isset($amodel->id)) {
+						$key             = $amodel->primaryKeyName();
+						$joinModel->$key = $amodel->id; 
+					}
+					
+					else {
+						throw new \Exception(
+							"Failed to create join '$target' because model '{$model->ident()}' does not exist"
+						);
+					}
+				}
+				
+				
+				// finally attempt save on model
+				
+				try {
+					$joinModel->save();
+				}
+				
+				catch(\Exception $pass) {
+					throw $pass;
+				} 
+			
+			}	
+		}	
+
+		else {
+			throw new \Exception(
+				"Failed to join '$this' because join association '{$this->association}' has not been specified"
+			);
+		} 	
+	}	
+
+	/**
+	 * Alias to join
+	 */
+	public function link() {
+		return $this->join();
+	}
+
+	public function unlink() {
+		if (!is_null($this->association)    && 
+	      $this->association->usesJoin()) {
+		
+			if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
+				
+				// determine if model exists, if not, use generic
+				// @TODO going to have to account for different namespaces
+				// once heirarchy extends past Common
+				$ns    = \eGloo\Dialect\_Namespace::name(
+					$this->association->target
+				);
+				
+				$target = $this->association->through;	
+				$owner  = $this->association->owner;
+	
+				if (\class_exists($class = "$ns\\$target")) {
+					$joinModel = $class;
+				}
+				
+				else {
+					$generic = "$ns\\Generic";
+					
+					$joinModel = $generic::factory(
+						$class
+					);
+					
+				}
+	
+			
+				// now use the primary key of owner to determine our
+				// dynamic delete method; we are making an assumption 
+				// here that primary key name is a foreign key in
+				// join table; if it is not, we will catch the resulting
+				// exception and pass to handler
+				$deleteMethod = "delete_by_{$owner::primaryKey()}";
+	
+				try {
+					$joinModel::$deleteMethod($owner->id);
+				}
+				
+				catch(\Exception $pass) {
+					throw $pass;
+				} 
+			
+			}
+			
+			else {
+				
+				throw new \Exception(
+					"Failed unlinking target '$target' from owner '$owner' because owner must be an instance of Model"
+				);
+			}
+			
+			
+		}
+	}	
+	
+	
 	/**
 	 * Also a convenience method; this needs to be moved to Model.Relation
 	 */
@@ -673,7 +803,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			
 			// first we save our model
 			try {
-				$model->save();
+				
+				// @TODO this needs to be changed to 'model->changed'
+				if (!$model->exists()) {
+					$model->save();
+				}
 			}
 			
 			catch (\Exception $pass)	{
@@ -749,8 +883,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// a set changes to unlink (via destruction of the join table) as opposed
 		// to deleting of models themselves
 		if (count($this)) {
-		    if (!is_null($this->association)    && 
-		        $this->association->usesJoin()) {
+			if (!is_null($this->association)    && 
+	        $this->association->usesJoin()) {
 			
 				if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
 					
@@ -808,7 +942,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			}
 			
 			else {
-				exit('asdf'); 
+
 				// iterate through models, grab keys and push onto stack
 				foreach($this as $model) {
 					$keys[] = $model->id;

@@ -534,7 +534,7 @@ abstract class ObjectSafe {
 		
 		throw new \Exception(
 			"Attempted alias '$alias' on property '$from' failed because it ".
-			"already exists as a property on receiver " . get_class($this)   .
+			"already exists as a property on receiver {$this->ident()} "     .
 			"with value '{$this->$alias}'"		
 		);
 	}

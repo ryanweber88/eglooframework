@@ -36,6 +36,11 @@ abstract class Model extends Delegator
 		$this->__callbacks();
 		
 
+		
+		// finally call attributes, which sets up convience attributes for
+		// instance		
+		$this->__attributes();
+		
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
@@ -43,12 +48,7 @@ abstract class Model extends Delegator
 			
 			$this->initialize($__mixed);
 		}
-				
-		
-		// finally call attributes, which sets up convience attributes for
-		// instance		
-		$this->__attributes();
-				
+					
 		
 	}
 
@@ -579,10 +579,16 @@ abstract class Model extends Delegator
 				// @TODO should we add associations on single models as well 
 				// is there any purpose
 
+
+				
+				try {
+					$result = $lambda($model);
+				}
+				catch(\Exception $pass) {
+					throw $pass;
+				} 
+				
 			
-				
-				$result = $lambda($model);
-				
 				
 				// if returned result is an instance of relationship, which is a query build tool
 				// then evaluate and pass to statement
@@ -599,6 +605,7 @@ abstract class Model extends Delegator
 					}
 
 				}
+				
 
 				// check if singular result or hash (which would indicate
 				// a single record being returned); if an array is returned
@@ -608,7 +615,7 @@ abstract class Model extends Delegator
 					
 					
 					if (\eGloo\Utilities\Collection::isHash($result)) {						
-						$result              = new $model($result);
+						$result = new $model($result);
 						
 			
 						// @TODO this is a shortcut to we establish a better rule
@@ -1129,12 +1136,13 @@ abstract class Model extends Delegator
 		// from ClassNameYada derive pattern class_class1_class2
 		$class = static::signature();
 		
-		// @TODO this is a temporary measure, don't know if it will work, but
-		// some code still refers to properties
-		//$this->aliasProperty('properties', 'attributes');
-			
+
+		// auto-alias our primary key; please note that it is not 
+		// gaurenteed that there will be a primary key, nor that it
+		// will follow this convention; this behavior can be overriden
+		// in child constructor classes
+		$this->aliasPrimaryKey("{$class}_id");		
 				
-		
 		
 		if ($this->initialized()) {
 
@@ -1207,7 +1215,7 @@ abstract class Model extends Delegator
 
 
 							
-			$this->aliasPrimaryKey("{$class}_id");		
+			//$this->aliasPrimaryKey("{$class}_id");		
 			
 		
 			// check if model has status relationship
@@ -1690,9 +1698,10 @@ abstract class Model extends Delegator
 		);
 		
 		
+		// @TODO fix below; not suitable for ternary operator
 		$aliases = is_callable($lambda = $arguments[count($arguments) - 1])
 			? array_slice($arguments, 0, count($arguments) - 1)
-			: $arguments;
+			: array_slice($arguments, 0, count($arguments) - 1);
 		
 				
 
@@ -1715,6 +1724,12 @@ abstract class Model extends Delegator
 					
 					// unset our attribute; this will make sure referenced values
 					// are not unset as well
+					$initialValue = null;
+					
+					if (isset($self->$alias)) {
+						$initialValue = $self->$alias;
+					}
+					
 					unset($this->$alias);			
 					
 					// for the moment, simply set aliasedProperties with alias
@@ -1724,11 +1739,19 @@ abstract class Model extends Delegator
 							
 					 
 					//$this->defineMethod($alias, $lambda);
-					$this->defer($alias, function() use ($alias, $self, $lambda) {
+					$this->defer($alias, function() use ($alias, $self, $lambda, $initialValue) {
 						
 						// bind by reference alias to return of lambda (which should be
 						// a reference to a relationship attribute)
+						if (isset($self->$alias)) {
+							$currentValue = $self->alias;
+						}
+						
 						$self->$alias = &$lambda();
+						
+						if (!is_null($initialValue)) {
+							$self->$alias = $initialValue;
+						}
 						
 						// make note of alias within 
 						
@@ -1749,9 +1772,9 @@ abstract class Model extends Delegator
 		}
 		
 		else {
-			foreach($aliases as $alias) {
-				$this->aliasProperty($alias, $attribute);
-			}
+			//foreach($aliases as $alias) {
+				$this->aliasProperty($arguments[0], $arguments[1]);
+			//}
 		}
 	}
 	
@@ -1919,10 +1942,7 @@ abstract class Model extends Delegator
 				} 
 				
 				try {
-					
-							
 
-					
 					$result = $class::sendStatic('process', $class::where(
 						$conditions, $arguments
 					));
@@ -2270,7 +2290,9 @@ abstract class Model extends Delegator
 					);
 				}
 				
-				catch(\Exception $ignore) { }
+				catch(\Exception $pass) {
+					throw $pass;
+				}
 				
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
