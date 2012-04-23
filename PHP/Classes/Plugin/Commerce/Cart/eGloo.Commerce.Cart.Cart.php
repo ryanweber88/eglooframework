@@ -48,12 +48,9 @@ use \Common\Domain\Model\Session;
  */
 class Cart extends Domain\Model {
 
-	protected $user_id		= 0;
 	
 	public static $cart_id	= null;
-	
 	public $items			= array();
-	
 	protected $total		= 0.0;
 
 	const	CART_ACTION_USER_ADD		= 1,
@@ -135,6 +132,7 @@ class Cart extends Domain\Model {
 			// Generate one
 			$session = Session::find_one_by_php_session_id( session_id() );
 
+			
 			$cart = new static(
 				array
 					(

@@ -373,6 +373,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				$arguments = array();
 				$counter   = 0;
 				
+				
 				foreach($fields as $attribute) {
 					if (isset($model->$attribute) && !is_null($model->$attribute)) {				
 						$arguments[ isset($arguments[$attribute]) ? $attribute . $counter++ : $attribute ] = $model->$attribute;
@@ -524,7 +525,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
-		
 		
 		$result = $dataAccess->$method($statement, $arguments);
 		
