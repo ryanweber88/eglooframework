@@ -532,7 +532,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// onto queue
 		if (!isset($model)) {
 			$model  = new $this->model;
-			$this[] = new $this->model;
+			$this[] = $model;
 		}
 		
 		return $model;
@@ -680,9 +680,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				throw $pass;
 			}
 			
+			
 	    if (!is_null($this->association)    && 
 	        $this->association->usesJoin()) {
-		
+	      
 				if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
 					
 									
@@ -721,6 +722,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 							);
 						}
 					}
+					
 					
 					// finally attempt save on model
 					

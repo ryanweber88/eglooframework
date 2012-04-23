@@ -854,7 +854,6 @@ abstract class Model extends Delegator
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
 			
-
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
 			// @TODO since this was added late in the lifecycle of model design, there already
@@ -863,6 +862,7 @@ abstract class Model extends Delegator
 			$callbacks = &$self->reference('callbacks');
 			
 			if ($self->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
+				
 				// get instance attributes - strip the primary key if 
 				// is in list of attributes and has a null value
 				$attributes = $self->attributes();
@@ -884,7 +884,7 @@ abstract class Model extends Delegator
 						'into'         => $self->send('signature'),
 						'using'        => $self
 					));	
-					
+										
 					// calling false will halt callback chain
 					if (!is_null($self->id) ||  $self->id === false) {
 						return false;
@@ -895,6 +895,7 @@ abstract class Model extends Delegator
 				// since we guesing on this insert, we ignore sql errors and make a determination
 				// in inherited classes whether insert was successful
 				catch(\Exception $pass) {
+					echo $pass; exit;
 					throw $pass;
 					//throw new \Exception(
 					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
@@ -1310,7 +1311,6 @@ abstract class Model extends Delegator
 	 */
 	
 	public function save($cascade = true) {
-		
 		
 		// we ask the question again, if valid, after performing
 		// our validation routines
@@ -2042,7 +2042,7 @@ abstract class Model extends Delegator
 	 */
 	public function __set($key, $value) {
 		
-		//echo "attempting set on $key\n";
+		//echo "attempting set on $key on {$this->ident()}\n";
 		
 
 

@@ -56,7 +56,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * our statement method
 	 */
 	public static function inserts(array $idioms) {
-				
+						
 		// check that idiom 'into' exists
 		if (isset($idioms['into'])) {
 			
@@ -86,6 +86,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				// build query 
 				// @TODO this should be abstracted out a bit, but i don't like
 				// this solution in the first place
+				
 				return static::statement("
 					INSERT INTO 
 						{$idioms['into']} ( $columns )
@@ -306,6 +307,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			? 'getList'
 			: 'execute' . ucfirst($classification);
 			
+
 					
 		$fields = array();
 		
@@ -456,6 +458,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					
 		}
 
+
 		// if running an execute statement and argument isn't available
 		// remove from query
 		// @TODO this shouldn't be done this way, but for the time being
@@ -485,12 +488,12 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 				
 			}
+
 			
 			
 			
 			if ($classification == "insert") {
 				// replace argument/value lists
-				
 				$statement = preg_replace(
 					'/\(.*?\).*?(values).*?\(.*\)/is', '(#keys#) $1 (#values#)', $statement
 				);
@@ -597,107 +600,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		return $result;
 	
 	}	
-	
-	
-	/**
-	 * The 'find' method serves as a alias to loadById method, employed by many of the domain model
-	 * classes; dynamic finders are also used by EPA, which will make transition easier
-	 * @TODO this needs to be replaced with override or method alias - because not all will load
-	 * unless loadById exists - method_alias is much more flexible
-	 * @return Model | Model[]
-	 */
-	
-	/*
-	public static function find($key) {
-	
-		$className = get_called_class();
-	
-		if (method_exists($className, 'loadByID')) {
-			exit('there');
-			// convert key to array, in instances where we want to return
-			// a set, as opposed to individual object
-			$key = count(func_get_args()) > 1
-				? func_get_args()
-				: array($key);
-	
-				
-			if (count(func_get_args()) > 1) {
-				$key = func_get_args();
-			}
-				
-			$models = array();
-				
-			foreach($key as $key) {
-				$models[] = $className::loadByID($key);
-			}
-				
-			if (count($models)) {
-				return count($models) > 1
-					? $models
-					: array_pop($models);
-			}
-				
-			return false;
-		}
-		
-		// lets try and run a generic find on database
-		else {
-			exit('here');	
-		}
-	
-		//throw new \Exception(
-		//		"Cannot alias to loadByID because it does not exist in domain class $className"
-		//);
-	
-	}
-	*/
-	
 
 	
-	// These are stubbed for the time being - we can't really do a full
-	// orm implementation, so they will accept variable arguments and
-	// will be drastically different in inherited classes - the point
-	// is to provide a single, comprehensive interface from which to 
-	// work - if an attempt is made to call on these method, an
-	// exception will be thrown as they cannot know their
-	// definition until defined in child classes
-	/**
-	 * Acts as retrieve all - in most cases this will serve as an alias to load*List in
-	 * domain model classes; this method should be declared abstract, but since it
-	 * was provided after the meat of the domain has been built, and because I don't
-	 * want to go through every single domain class and add method, an exception
-	 * has been added so user can override in calling child individualy
-	 */
-	// public static function all($lamba = null) {
-	// 	static::fakeAbstractMethod(__FUNCTION__);
-	// }	
-	// 
-	// public static function create($arguments = null) {
-	// 	static::fakeAbstractMethod(__FUNCTION__);
-	// }
-	// 
-	// 
-	// public function update($arguments = null) { 
-	// 	static::fakeAbstractMethod(__FUNCTION__);
-	// }
-	// 
-	// public function save($arguments = null)   {
-	// 	static::fakeAbstractMethod(__FUNCTION__);
-	// }
-	// 
-	// public function delete($arguments = null) {
-	// 	static::fakeAbstractMethod(__FUNCTION__);
-	// }
-	
-	private static function fakeAbstractMethod($method) {
-		// since this class and its descendants are delegated too, and
-		// because its descendants are numerous and I don't feel like going
-		// through each to manage an abstract method definition, we 
-		// provide this method to throw an exception if method
-		// is not overriden in calling class
-		throw new \Exception(
-			"You must override $method in " . get_called_class()
-		);
-	}
+
 		
 }
