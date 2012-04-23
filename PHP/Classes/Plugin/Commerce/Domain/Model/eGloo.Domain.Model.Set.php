@@ -723,7 +723,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					}
 					
 					// finally attempt save on model
-					var_export($joinModel); exit;
 					
 					try {
 						$joinModel->save();
