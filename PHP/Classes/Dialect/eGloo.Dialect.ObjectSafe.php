@@ -657,7 +657,7 @@ abstract class ObjectSafe {
 		// if we have reached this point, all dynamic get options have been
 		// exhausted and we trigger an error
 		throw new \Exception(
-			"Instance property '$name' does not exist in receiver " . get_called_class()		
+			"Instance property '$name' does not exist in receiver '{$this->ident()}'"	
 		);
 		
 	}	

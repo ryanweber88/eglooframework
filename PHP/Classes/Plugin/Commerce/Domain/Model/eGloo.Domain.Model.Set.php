@@ -541,10 +541,13 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	
 	public function offsetSet($offset, $model) {
 		
+		
+		
 		if ($model instanceof $this->model) { 
 			$index = empty($offset)
 				? count($this->collection)
 				: $offset;
+							
 			
 			// if model being added to set "belongsTo" another model,
 			// as indicated by the presence of association and set within
@@ -555,14 +558,16 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				$owner = $this->association->owner;
 				$field = $owner->primaryKeyName();
 				
-				$model->send('aliasAttribute', $owner->primaryKeyName(), function & () use ($owner) {
-					return $owner->id;
-				});
-				
+				if ($model->send('belongsTo', $owner->class->name)) { 
+					$model->send('aliasAttribute', $owner->primaryKeyName(), function & () use ($owner) {
+						return $owner->id;
+					});
+				}
+					
 				// @TODO right now alias is deferred, so it doesnt exist until actually called upon
 				// so we debunk the deferral - this may be ok, as we only care about foreign key value
 				// on crud ops, where it will automatically be called
-				$model->$field;
+				//$model->$field;
 			}	
 						
 			$this->collection[$index] = $model;
@@ -658,6 +663,79 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			? $this->__toArray() 
 			
 			: $this->collection;
+	}
+	
+	/**
+	 * Also a convenience method; this needs to be moved to Model.Relation
+	 */
+	public function save() {
+		foreach($this as $model) {
+			
+			// first we save our model
+			try {
+				$model->save();
+			}
+			
+			catch (\Exception $pass)	{
+				throw $pass;
+			}
+			
+	    if (!is_null($this->association)    && 
+	        $this->association->usesJoin()) {
+		
+				if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
+					
+									
+					// determine if model exists, if not, use generic
+					// @TODO going to have to account for different namespaces
+					// once heirarchy extends past Common
+					$ns    = \eGloo\Dialect\_Namespace::name(
+						$this->association->target
+					);
+					
+					$target = $this->association->through;	
+					$owner  = $this->association->owner;
+	
+					if (\class_exists($class = "$ns\\$target")) {
+						$joinModel = $class;
+					}
+					
+					else {
+						$generic = "$ns\\Generic";
+						
+						$joinModel = $generic::factory(
+							$class
+						);
+						
+					}
+					
+					foreach(array($owner, $model) as $amodel) { 
+						if (isset($amodel->id)) {
+							$key             = $amodel->primaryKeyName();
+							$joinModel->$key = $amodel->id; 
+						}
+						
+						else {
+							throw new \Exception(
+								"Failed to create join '$target' because model '{$model->ident()}' does not exist"
+							);
+						}
+					}
+					
+					// finally attempt save on model
+					var_export($joinModel); exit;
+					
+					try {
+						$joinModel->save();
+					}
+					
+					catch(\Exception $pass) {
+						throw $pass;
+					} 
+				
+				}	
+			}		
+		}
 	}
 	
 	/**

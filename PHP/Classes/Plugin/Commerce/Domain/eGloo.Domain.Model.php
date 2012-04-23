@@ -407,7 +407,12 @@ abstract class Model extends Delegator
 	 * Either provides an alias to hasOne (but more idiomatic), or answers the question
 	 * of whether model belongsTo another
 	 */
-	protected function belongsTo($name, $lambda = null) {
+	protected function belongsTo($mixed, $lambda = null) {
+		
+		$name = $mixed instanceof Model 
+			? $mixed->class->name
+			: $mixed;
+		
 		if (is_null($lambda)) {
 			// @TODO this is not a foolproof scheme of determining whether relationship
 			// is truely a 'belongs_to', but will do for now
@@ -684,7 +689,6 @@ abstract class Model extends Delegator
 				// model primary key 
 					
 				if ($result->send('belongsTo', $self->class->name)) {
-											
 					$result->send('aliasAttribute', $self->primaryKeyName(), function & () {
 						return $result->id;
 					});
@@ -845,11 +849,11 @@ abstract class Model extends Delegator
 	protected function __callbacks() {
 		
 		$self = $this;
-
+		
 		// define a generic create callback based on
 		// model convention if there currently 
-
 		$this->defineCallback('create', function() use ($self) {
+			
 
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
@@ -863,13 +867,12 @@ abstract class Model extends Delegator
 				// is in list of attributes and has a null value
 				$attributes = $self->attributes();
 				$signature  = $self->send('signature');
-
+				
 				// apparently an associative array key with an associated value of nil is
 				// considered unset, #wtfphp
 				//if (isset($attributes[$pk = $self->primaryKeyName()]) || 
 				//    is_null($attributes[$pk])) {
-
-				unset($attributes['id']);
+				
 				unset($attributes[$self->primaryKeyName()]);			
 				//}
 												
@@ -1234,7 +1237,7 @@ abstract class Model extends Delegator
 	 * @param  variable-length[] $__mixed
 	 */
 	public static function create($__mixed = null) {
-
+				
 		// because create can be sent to both instance and class
 		// receivers, we have to explicitly check to determine 
 		// who are reciever is; in the former case, receiver is
@@ -1307,6 +1310,8 @@ abstract class Model extends Delegator
 	 */
 	
 	public function save($cascade = true) {
+		
+		
 		// we ask the question again, if valid, after performing
 		// our validation routines
 		if ($this->valid()) { 
@@ -1335,6 +1340,7 @@ abstract class Model extends Delegator
 			}
 			
 			else {
+				
 				// unfortunately this has be passed here as we can call static
 				// context, but not have static funciton be aware of instance
 				$model = $this->create($this);
