@@ -96,13 +96,15 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function where($mixed, $__arguments = null) {
 
 		$conditions = array();
-		$groups     = array();
 		
 				
 		// it is assumed that if hash, we have passed key:value pairs, and
 		// not key:? placeholders.. we push our values into arguments
 		if (is_array($mixed) && Collection::isHash($arguments = $mixed)) {
 			foreach($arguments as $field => $value) {
+				
+				$groups = array();
+				
 				// @TODO should the where here be cleaning argument input, or should
 				// that job rest with extrinsic callers?
 				$operator = 'AND';

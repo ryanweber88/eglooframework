@@ -832,7 +832,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					$owner  = $this->association->owner;
 	
 					if (\class_exists($class = "$ns\\$target")) {
-						$joinModel = $class;
+						$joinModel = new 
+						$class;
 					}
 					
 					else {
@@ -841,8 +842,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 						$joinModel = $generic::factory(
 							$class
 						);
-						
 					}
+					
 					
 					foreach(array($owner, $model) as $amodel) { 
 						if (isset($amodel->id)) {

@@ -35,8 +35,6 @@ abstract class Model extends Delegator
 		// of instance
 		$this->__callbacks();
 		
-
-		
 		// finally call attributes, which sets up convience attributes for
 		// instance		
 		$this->__attributes();
@@ -48,6 +46,25 @@ abstract class Model extends Delegator
 			
 			$this->initialize($__mixed);
 		}
+
+		//echo static::signature();
+		//static::columns();
+		//echo "{$this->class}\n";
+		if (!in_array($signature = static::signature(), array('user')) && 
+		    is_array($columns = Data::columns($signature)))            {
+		    	
+			foreach($columns as $attribute) {
+				if (!isset($this->$attribute)) {
+					$this->$attribute = null;
+				}
+			}
+			
+		}
+		
+		//$columns = $this::columns();
+				
+		//foreach($columns as $column) { }
+		
 					
 		
 	}
@@ -1663,8 +1680,13 @@ abstract class Model extends Delegator
 		return static::shape($result);
 	}
 	
-	
-
+	/**
+	 * "Overrides" delegated "columns" method
+	 */
+	protected static function columns() {
+		$class = get_called_class();
+		return $class::columns(static::signature());
+	}
 	
 	/**
 	 * Aliases our primary key to 'id'

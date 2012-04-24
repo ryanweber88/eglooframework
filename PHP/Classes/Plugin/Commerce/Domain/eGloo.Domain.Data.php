@@ -28,7 +28,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	/**
 	 * Uses information schema to retrieve column names
 	 */
-	protected static function columns($table) {
+	public static function columns($table) {
 		$class = get_called_class();
 		$key =   __FUNCTION__ . "/$table";
 
@@ -437,7 +437,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 					$arguments = $hold;
 				}
 				
-				else {					
+				else {
+					echo $statement; exit;					
 					throw new \Exception(
 						'Statement failed because count of argument values does not match number of ' .
 						'required fields' . echo_r(array(
