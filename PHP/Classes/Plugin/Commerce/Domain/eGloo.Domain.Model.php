@@ -957,7 +957,7 @@ abstract class Model extends Delegator
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
 			
-			echo "calling create on $self";
+			//echo "calling create on $self";
 			
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
