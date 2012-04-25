@@ -751,7 +751,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				
 				$target = $this->association->through;	
 				$owner  = $this->association->owner;
-	
+					
 				if (\class_exists($class = "$ns\\$target")) {
 					$joinModel = $class;
 				}
@@ -762,6 +762,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					
 					// @TODO this is a hack; determine correct namespace by 
 					// examining target
+					$class = '\\Common\\Domain\\Model\\' . $target;
+					
+					
 					$joinModel = \Common\Domain\Model\Generic::factory(
 						$class
 					);

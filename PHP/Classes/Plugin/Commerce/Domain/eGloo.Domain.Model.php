@@ -1921,7 +1921,7 @@ abstract class Model extends Delegator
 				
 				$conditions = implode(' AND ', $conditions);
 				$table = $class::sendStatic('signature');
-				
+
 				try { 
 					Data::statement("
 						DELETE FROM
