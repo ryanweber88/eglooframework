@@ -687,9 +687,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				}
 				
 				else {
-					$generic = "$ns\\Generic";
+					//$generic = "$ns\\Generic";
 					
-					$joinModel = $generic::factory(
+					$joinModel = \Common\Domain\Model\Generic::factory(
 						$class
 					);
 					
@@ -757,9 +757,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				}
 				
 				else {
-					$generic = "$ns\\Generic";
+					//$generic = "$ns\\Generic";
+					//$generic = '\\Common\\Domain\\Model\'
 					
-					$joinModel = $generic::factory(
+					// @TODO this is a hack; determine correct namespace by 
+					// examining target
+					$joinModel = \Common\Domain\Model\Generic::factory(
 						$class
 					);
 					

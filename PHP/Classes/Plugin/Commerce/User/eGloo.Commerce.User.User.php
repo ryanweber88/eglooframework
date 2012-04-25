@@ -44,7 +44,7 @@ class User extends Domain\Model {
 	protected static $logged_in = false;
 
 	/** * @var type Anonymous	 */
-	protected static $active_user_id = 0;
+	public static $active_user_id = 0;
 
 	const USER_TYPE_NORMAL			= 1,
 	      USER_TYPE_EMPLOYEE		= 2,

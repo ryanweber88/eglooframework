@@ -439,12 +439,44 @@ abstract class Model extends Delegator
 		$name = $mixed instanceof Model 
 			? $mixed->class->name
 			: $mixed;
+			
+		$self = $this;
 		
 		if (is_null($lambda)) {
 			// @TODO this is not a foolproof scheme of determining whether relationship
 			// is truely a 'belongs_to', but will do for now
-			return $this->hasRelationship($name) &&
-		         \property_exists($this, $name);
+			//return $this->hasRelationship($name) &&
+		  //       \property_exists($this, $name);
+		  
+		  $this->hasOne($name, function($model) use ($self) {
+		  	// belongs to convention dictates that a foreign key with name
+		  	// signature_id exists on calling model	
+		  	$field = $model::signature() . '_id';
+				
+				// set self->foreign_key to null value, so that it
+				// exists on self and can be aliased to model->primarykey
+				//$self->$field = null;
+		  	
+		  	if (isset($self->$field)) {
+					// find, using belonged_to primary key
+			  	$result = $model::find($self->$field);
+					
+					
+					// finally aliasAttribute between foreign/primary key
+					$self->send('aliasAttribute', $field, function & () use ($result) {
+						return $result->id;
+					});
+					
+					
+					return $result;
+				}
+				
+				else {
+					throw new \Exception(
+						"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
+					);
+				}
+		  });
 			
 		}
 		
@@ -722,11 +754,7 @@ abstract class Model extends Delegator
 				// as this model, then aliasAttribute on result to top this
 				// model primary key 
 					
-				if ($result->send('belongsTo', $self->class->name)) {
-					$result->send('aliasAttribute', $self->primaryKeyName(), function & () {
-						return $result->id;
-					});
-				}
+
 			}
 			
 			else if ($result instanceof Model\Set) {

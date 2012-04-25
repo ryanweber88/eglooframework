@@ -126,9 +126,13 @@ class Cart extends Domain\Model {
 			// $_SESSION['cart_id'] = static::$cart_id;
 		// } else if ( isset(static::$cart_id) ) {
 		// 	// Grab from session
+		
 		} else if ( isset($_SESSION['cart_id']) ) {
 			$retVal = static::$cart_id = $_SESSION['cart_id'];
+		
+		
 		} else if ( $create_cart ) {
+			
 			// Generate one
 			$session = Session::find_one_by_php_session_id( session_id() );
 
