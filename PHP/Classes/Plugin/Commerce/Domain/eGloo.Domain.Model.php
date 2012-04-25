@@ -45,11 +45,15 @@ abstract class Model extends Delegator
 				\eGloo\Utilities\Collection::isHash($__mixed)) {
 			
 			$this->initialize($__mixed);
+					
 		}
-
-		//echo static::signature();
-		//static::columns();
-		//echo "{$this->class}\n";
+				
+				
+		
+			
+		// assign left-over columns to model
+		// @TODO delegate this to overrideable method, or place into
+		// 'after' initialize
 		if (!in_array($signature = static::signature(), array('user')) && 
 		    is_array($columns = Data::columns($signature)))            {
 		    	
@@ -61,9 +65,6 @@ abstract class Model extends Delegator
 			
 		}
 		
-		//$columns = $this::columns();
-				
-		//foreach($columns as $column) { }
 		
 					
 		
@@ -186,7 +187,7 @@ abstract class Model extends Delegator
 			
 										
 			static::defineMethod('find', function($__mixed, $class) {
-												
+																
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = \eGloo\Utilities\Collection::flatten(func_get_args());
@@ -222,6 +223,7 @@ abstract class Model extends Delegator
 								
 								return $result;
 							});
+							
 						}
 
 					}
@@ -335,8 +337,8 @@ abstract class Model extends Delegator
 	protected function initialize(array $arguments) {
 		
 		$self = $this;
-		
-		$this->runCallbacks(__METHOD__, function() use ($self, $arguments) {
+			
+		$this->runCallbacks(__FUNCTION__, function() use ($self, $arguments) {
 			 
 			foreach($arguments as $name => $value) {
 
@@ -366,12 +368,20 @@ abstract class Model extends Delegator
 						//$self->send('attr', $name);
 					//}
 				}
+				
 	
 				// now set value of attribute; if it has been defined as a callable attribute
 				// then value will be routed through closure that $self->$name defines
 				$self->$name = $value;
-				
+					
 			}
+
+
+			//if ($self instanceof \Common\Domain\Model\Cart) {
+			//	var_export($self);
+			//	exit;
+			//}	
+
 		});
 				
 		// set flag 'initialized' to true
@@ -872,11 +882,82 @@ abstract class Model extends Delegator
 
 	protected function __callbacks() {
 		
-		$self = $this;
+		$self      = $this;
+		$class     = $this->class->qualified_name;
+		$signature = static::signature(); 
+		
+		$this->defineCallback('initialize', 'after', function() use ($self, $class, $signature) {
+
+			$attributes = $class::cache($signature, function() use ($self) {
+				return $self->reference('attributes');
+			});
+
+			foreach($attributes as $name) {
+				
+				
+				// in some instances, for sub model types, like coupon\type, our convention doesn't work for
+				// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
+				// look for a field matching the exact name
+				$match = array();
+				
+				if (preg_match("/^{$signature}_(.+)/", $name, $match) || $name == $signature) {
+					
+					// first lets alias 'name' to 'signature'
+					if ($name == $signature) {
+						
+						try { 
+							$self->send('aliasProperty', 'name', $name);
+						}
+						
+						// the only reason an exception would be thrown, is if 
+						// 'name' attribute already exists
+						catch(\Exception $ignore) { }
+					}
+					
+					else {
+						$alias = $match[1];
+					}
+					
+					
+					$alias = $name == $signature
+						? preg_replace('/^.+_/', null, $name)
+						: $match[1];
+						
+
+					try { 
+						$self->send('aliasProperty',
+							strtolower($alias), $name	
+						);
+					}
+	
+					catch(\Exception $ignore) {
+						
+					}
+				}
+			}	
+			
+		
+			// check if model has status relationship
+			// @TODO this may be a bit too specific for this instance
+			if (isset($self->status_id)                   &&
+			    $self->send('hasRelationship', 'Status')) {
+
+			    	
+				$field = "{$signature}_status";
+				$self  = $self;
+				
+				$self->send('aliasAttribute', 'status', function & () use ($self, $field) {
+					return $self->Status->$field;
+				});
+			}		
+					
+		});
 		
 		// define a generic create callback based on
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
+			
+			echo "calling create on $self";
 			
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
@@ -959,11 +1040,6 @@ abstract class Model extends Delegator
 				// update succeeded in child classes
 				catch(\Exception $pass) {
 					throw $pass; 	
-					//var_export($append); exit;
-					//throw new \Exception(
-					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
-					//	"The following message was returned : \n$append "
-					//);
 				}		
 			}
 		});
@@ -1148,108 +1224,14 @@ abstract class Model extends Delegator
 	protected function __attributes() {
 		// call our parent method to ensure any property work is done
 		// up hierarchy chain
-		//parent::__properties();
-		
-		// from ClassNameYada derive pattern class_class1_class2
-		$class = static::signature();
-		
+		parent::__properties();
 
-		// auto-alias our primary key; please note that it is not 
-		// gaurenteed that there will be a primary key, nor that it
-		// will follow this convention; this behavior can be overriden
-		// in child constructor classes
-		$this->aliasPrimaryKey("{$class}_id");		
-				
-		
-		if ($this->initialized()) {
-
-					
-					
-			// iterate across properties and determine if they
-			// fit pattern of $class_(name)
-			// @TODO replace self reference - stupid 5.3 issue
-			$self = $this;
-					
+		// alias our primary key, using convention of tablename_id - this
+		// is important as primary keys can now be accessed via instance->id
+		$this->aliasPrimaryKey(
+			static::signature() . '_id'
+		);
 			
-			// @TODO static cache is not working here - needs to be
-			// polymorphic
-			$attributes = static::cache($class, function() use ($self) {
-				return $self->reference('attributes');
-			});
-			
-
-
-								
-			foreach($attributes as $name) {
-	
-				
-				// in some instances, for sub model types, like coupon\type, our convention doesn't work for
-				// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
-				// look for a field matching the exact name
-				$match = array();
-				
-				if (preg_match("/{$class}_(.+)/", $name, $match) || $name == $class) {
-					
-					if ($name == $class) {
-						$alias = preg_replace('/^.+_/', null, $name);
-						
-						try { 
-							$this->aliasProperty('name', $name);
-						}
-						
-						// the only reason an exception would be thrown, is if 
-						// 'name' attribute already exists
-						catch(\Exception $ignore) { }
-					}
-					
-					else {
-						$alias = $match[1];
-					}
-					
-					$alias = $name == $class
-						? preg_replace('/^.+_/', null, $name)
-						: $match[1];
-						
-						
-					try { 
-						$this->aliasProperty(
-							strtolower($alias), $name	
-						);
-					}
-	
-					catch(\Exception $ignore) { }
-				}
-				
-				if ($name == $class) {
-					
-				}
-				
-			}
-			
-			// @TODO right now we are auto aliasing primary key, but this will cause corrupted data
-			// with model; in the future need to determine existence of primary key and cache 
-			// beforehand
-
-
-							
-			//$this->aliasPrimaryKey("{$class}_id");		
-			
-		
-			// check if model has status relationship
-			// @TODO this may be a bit too specific for this instance
-			if (isset($this->status_id)           &&
-			    $this->hasRelationship('Status')) {
-
-			    	
-				$field = "{$this->signature()}_status";
-				$self  = $this;
-				
-				$this->aliasAttribute('status', function & () use ($self, $field) {
-					return $self->Status->$field;
-				});
-			}		
-		}
-	
 			
 	}
 	
@@ -1570,7 +1552,7 @@ abstract class Model extends Delegator
 	
 		
 	protected function runCallbacks($event, $lambda = null) {
-		
+				
 		// we use inject idea to pass values between callbacks,
 		// if needed; if any callback returns false, then
 		// we short-circuit execution

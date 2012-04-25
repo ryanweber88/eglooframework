@@ -492,19 +492,22 @@ abstract class ObjectSafe {
 		
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 		
+
 		
 		// check that we are not overwriting a "concretely" defined property, with an 
 		// an alias, but we are safe to overwrite dynamically determined aliases
 		// (those that are determined at runtime)
 		if (!\property_exists($this, $alias) || isset($this->_aliasedProperties[$alias])) {
-			
+
 			// in the case that our from property doesn't exist, we
 			// force it into existense - it is upon the onus of the
-			// developer to not absuse this principle
-			if (!\property_exists($this, $from)) {
+			// developer to not absuse this principle			
+			if (!isset($this->$from)) {
+
 				$this->$from = null;
-			} 
+			} 		
 			
+					
 			// this is a wtfphp issue; when assigning by reference, the __get
 			// dump is called, which throws an exception at this level; to get
 			// around, you must first assign ANY non-reference value, which

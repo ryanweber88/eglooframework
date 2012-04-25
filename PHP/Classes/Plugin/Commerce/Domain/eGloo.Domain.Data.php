@@ -239,7 +239,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	public static function statement($statement, $__mixed = null) {
 		
 
-	
+		
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
 		// to callable is found
@@ -530,7 +530,11 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// point in return a multi-result set if performing an insert
 		// for example
 		
+
+		
 		$result = $dataAccess->$method($statement, $arguments);
+		
+		
 		
 		// set result to false if we don't have a match
 		// @TODO this should be fixed at connection level,
@@ -595,7 +599,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			}
 			
 		}
-		
+
 		// return result, which is being referenced by $set and whose
 		// value may have been manipulated based on the return result
 		return $result;

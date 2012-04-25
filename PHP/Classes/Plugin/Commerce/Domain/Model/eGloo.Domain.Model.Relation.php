@@ -227,13 +227,14 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		
 		catch(\Exception $deferred) { }
 		
-			
+		
 		// our query method should always return set, so we
 		// wrap in set if we have only returned on record, which would
 		// result in a single model instance
 		if (isset($result) && $result instanceof Domain\Model) {
 			$result = new Domain\Model\Set($result);
 		}
+		
 							
 		// now lets flush our chain and arguments to prepare
 		// for fresh query
