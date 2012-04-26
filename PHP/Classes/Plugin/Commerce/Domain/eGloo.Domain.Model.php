@@ -428,67 +428,75 @@ abstract class Model extends Delegator
 	 */
 	protected function belongsTo($mixed, $lambda = null) {
 		
-		$name = $mixed instanceof Model 
-			? $mixed->class->name
-			: $mixed;
-			
-		$self = $this;
+		$self       = $this;
+		$arguments  = Collection::flatten( func_get_args() );
 		
-		if (is_null($lambda)) {
-			// @TODO this is not a foolproof scheme of determining whether relationship
-			// is truely a 'belongs_to', but will do for now
-			//return $this->hasRelationship($name) &&
-		  //       \property_exists($this, $name);
-		  
-		  $this->hasOne($name, function($model) use ($self) {
-		  	// belongs to convention dictates that a foreign key with name
-		  	// signature_id exists on calling model	
-		  	$field = $model::signature() . '_id';
-				
-				// set self->foreign_key to null value, so that it
-				// exists on self and can be aliased to model->primarykey
-				//$self->$field = null;
-		  	
-		  	if (isset($self->$field)) {
-					// find, using belonged_to primary key
-			  	$result = $model::find($self->$field);
-					
-					
-					// finally aliasAttribute between foreign/primary key
-					$self->send('aliasAttribute', $field, function & () use ($result) {
-						return $result->id;
-					});
-					
-					
-					return $result;
-				}
-				
-				else {
-					throw new \Exception(
-						"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
-					);
-				}
-		  });
-			
+		// check if the last argument is a lambda
+		if (is_callable($arguments[count($arguments) - 1])) {
+			$lambda = array_pop($arguments);
 		}
 		
-		// otherwise, we follow convention that foreign reference is within
-		// table, so we set property
-		// @TODO we need to grab an actual signature as opposed to making a 
-		// guess in terms 
-		$foreignKey = strtolower(\eGlooString::toUnderscores(
-			$name
-		));
+		$relationships = $arguments;
 		
-		$foreignKey .= '_id';
+			
+		foreach($relationships as $name) { 
 		
-
-		// set value to null, we'll check against whether property exists
-		// when relationship is evaluated
-		$this->$foreignKey = null;
+			if (is_null($lambda)) {
+				// @TODO this is not a foolproof scheme of determining whether relationship
+				// is truely a 'belongs_to', but will do for now
+				//return $this->hasRelationship($name) &&
+			  //       \property_exists($this, $name);
+			  
+			  $this->hasOne($name, function($model) use ($self) {
+			  	// belongs to convention dictates that a foreign key with name
+			  	// signature_id exists on calling model	
+			  	$field = $model::signature() . '_id';
+					
+					// set self->foreign_key to null value, so that it
+					// exists on self and can be aliased to model->primarykey
+					//$self->$field = null;
+			  	
+			  	if (isset($self->$field)) {
+						// find, using belonged_to primary key
+				  	$result = $model::find($self->$field);
+						
+						
+						// finally aliasAttribute between foreign/primary key
+						$self->send('aliasAttribute', $field, function & () use ($result) {
+							return $result->id;
+						});
+						
+						
+						return $result;
+					}
+					
+					else {
+						throw new \Exception(
+							"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
+						);
+					}
+			  });
+				
+			}
+			
+			// otherwise, we follow convention that foreign reference is within
+			// table, so we set property
+			// @TODO we need to grab an actual signature as opposed to making a 
+			// guess in terms 
+			$foreignKey = strtolower(\eGlooString::toUnderscores(
+				$name
+			));
+			
+			$foreignKey .= '_id';
 		
-		// finally, we create our 1 - 1 relationship
-		return $this->hasOne($name, $lambda);		
+			// set value to null, we'll check against whether property exists
+			// when relationship is evaluated
+			$this->$foreignKey = null;
+			
+			// finally, we create our 1 - 1 relationship
+			$this->hasOne($name, $lambda);	
+			
+		}	
 
 	}
 	
