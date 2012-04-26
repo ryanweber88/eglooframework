@@ -337,56 +337,34 @@ abstract class Model extends Delegator
 	protected function initialize(array $arguments) {
 		
 		$self = $this;
+		
+		$this->runCallbacks(__FUNCTION__, 'before');
 			
-		$this->runCallbacks(__FUNCTION__, function() use ($self, $arguments) {
 			 
-			foreach($arguments as $name => $value) {
+		foreach($arguments as $name => $value) {
 
-				// first check if a method exists with the same name
-				// or if value is a lambda, in which case we define
-				// as "callable" attribute
-				$attributeAccessor = \method_exists($self, "get_$name") ||
-				                     \method_exists($self, "set_$name");
-				                   //  \method_exists($self, $name) // this feature needs to be fleshed out more
-				
-				if ($attributeAccessor || is_callable($value)) {
-					
-					$self->send('attr', $name);
-					
-					//$reflection     = new ReflectionMethod($this, $name);
-					
-					
-					// check parameter count is 1; we do this because we are assigning
-					// one value in the context of intialize and we want to at least
-					// try to avoid collisions; this isn't a fullproof method to
-					// avoid collisions but will help
-					//if ($reflection->getDeclaringClass()->getName() == $self->classNameFull() &&
-					 //   $reflection->getNumberOfParameters() == 1) {
-						
-						// we want a method with the same name to act as arbiter to model
-						// attribute
-						//$self->send('attr', $name);
-					//}
-				}
-				
-	
-				// now set value of attribute; if it has been defined as a callable attribute
-				// then value will be routed through closure that $self->$name defines
-				$self->$name = $value;
-					
+			// first check if a method exists with the same name
+			// or if value is a lambda, in which case we define
+			// as "callable" attribute
+			$attributeAccessor = \method_exists($self, "get_$name") ||
+			                     \method_exists($self, "set_$name");
+			                   //  \method_exists($self, $name) // this feature needs to be fleshed out more
+			
+			if ($attributeAccessor || is_callable($value)) {	
+				$this->attr_accessor($name);
 			}
-
-
-			//if ($self instanceof \Common\Domain\Model\Cart) {
-			//	var_export($self);
-			//	exit;
-			//}	
-
-		});
+		
+			// now set value of attribute; if it has been defined as a callable attribute
+			// then value will be routed through closure that $self->$name defines
+			$this->$name = $value;
+				
+		}
 				
 		// set flag 'initialized' to true
 		$this->initialized = true;
-		
+
+		$this->runCallbacks(__FUNCTION__, 'after');
+				
 	}
 
 	/**
@@ -613,8 +591,7 @@ abstract class Model extends Delegator
 			// check if the model exists in the database to ensure we are
 			// not running queries against an empty/shallow model - because
 			// there is nothing to match against here
-			
-			if ($self->initialized()) {
+			if ($self->exists()) {
 
 				// @TODO replace with Model.Association
 				//$association->owner = $self;
@@ -831,7 +808,7 @@ abstract class Model extends Delegator
 	public function valid() {
 		
 		// run our validation callbacks
-		$this->runCallbacks('validate');
+		$this->runCallbacks('validate', 'before');
 		
 		// explicitly check fields
 		foreach($this->validates as $attribute) {	
@@ -841,6 +818,8 @@ abstract class Model extends Delegator
 				return false;
 			}
 		}
+		
+		$this->runCallbacks('validate', 'after');
 				
 		return true;
 	}
@@ -919,6 +898,8 @@ abstract class Model extends Delegator
 			$attributes = $class::cache($signature, function() use ($self) {
 				return $self->reference('attributes');
 			});
+			
+
 
 			foreach($attributes as $name) {
 				
@@ -929,6 +910,8 @@ abstract class Model extends Delegator
 				$match = array();
 				
 				if (preg_match("/^{$signature}_(.+)/", $name, $match) || $name == $signature) {
+					
+
 					
 					// first lets alias 'name' to 'signature'
 					if ($name == $signature) {
@@ -951,11 +934,11 @@ abstract class Model extends Delegator
 						? preg_replace('/^.+_/', null, $name)
 						: $match[1];
 						
+					
+						
 
 					try { 
-						$self->send('aliasProperty',
-							strtolower($alias), $name	
-						);
+						$self->send( 'aliasProperty', strtolower($alias), $name );							
 					}
 	
 					catch(\Exception $ignore) {
@@ -1236,7 +1219,7 @@ abstract class Model extends Delegator
 			
 			// @TODO there is a chance here that an alias may have the same
 			// name as a property
-			if (!$this->isAliasedProperty($field)    &&
+			if (//!$this->isAliasedProperty($field)    &&
 			    !$this->hasRelationship($field))     {
 			    	
 				$values[$field] = $this->$field;
@@ -1351,7 +1334,7 @@ abstract class Model extends Delegator
 		// our validation routines
 		if ($this->valid()) { 
 			// execute our save callbacks
-			$this->runCallbacks(__FUNCTION__);
+			$this->runCallbacks(__FUNCTION__, 'before');
 			
 			// flag to detemrine if running a create operation; this is important
 			// for cascading save operations, as updates do not cascade save
@@ -1382,10 +1365,12 @@ abstract class Model extends Delegator
 			
 			}
 			
-			
 			// reset our changed, since model is now (theoretically) in 
 			// parrallel to database
 			$model->changed = array();
+			
+			// finally call after callback
+			$this->runCallbacks(__FUNCTION__, 'after');
 		}
 		
 		// lets see what is missing for validation and throw exception
@@ -1525,7 +1510,7 @@ abstract class Model extends Delegator
 	
 		else {
 			throw new \Exception(
-					"A block/lambda must be provided when defining a callback"
+				"A block/lambda/closure must be provided when defining a callback on receiver {$this->ident()}"
 			);
 		}
 	
@@ -1579,18 +1564,33 @@ abstract class Model extends Delegator
 
 	
 		
-	protected function runCallbacks($event, $lambda = null) {
+	protected function runCallbacks($event, $mixed = null) {
 				
 		// we use inject idea to pass values between callbacks,
 		// if needed; if any callback returns false, then
 		// we short-circuit execution
 		$inject = true;
+		$points = null;
+		
+		if (is_null($mixed)) {
+			$points = array(
+				'before', 'around', 'after'
+			);
+		}
+		
+		else {			
+			if (is_array($mixed)) {
+				$points = $mixed;
+			}
+			
+			else {
+				$points = array( $mixed );
+			}
+		}
 		
 		
 		// run our before/around callbacks
-		
-		
-		foreach(array('before', 'around') as $point) {
+		foreach($points as $point) {
 			if (isset($this->callbacks[$event][$point])) {
 				foreach($this->callbacks[$event][$point] as $callback) {
 					if (($inject = $callback($inject)) === false) {
@@ -1599,22 +1599,7 @@ abstract class Model extends Delegator
 				}
 			}		
 		}
-		
-		// if we have wrapped functionality into our lambda
-		// parameter; the intention is to run in between our before
-		// and after callback events
-		if (is_callable($lambda)) {
-			$lambda();
-		}
-		
-		// run our after callbacks in reverse order
-		if (isset($this->callbacks[$event]['after'])) { 
-			foreach(array_reverse($this->callbacks[$event]['after']) as $callback) {
-				if (($inject = $callback($inject)) === false) {
-					return ;
-				}
-			}
-		}
+
 		
 		// @TODO retrieving a value from a callback seems 
 		// like it is not the best idea, make but
@@ -2302,12 +2287,14 @@ abstract class Model extends Delegator
 	 *
 	 */
 	public function __get($name) {
+		
 				
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
 	
+
 
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
@@ -2324,6 +2311,8 @@ abstract class Model extends Delegator
 			// to __call, but simply to call methods, which look like
 			// properties, where it makes sense 
 			if (count($reflection->getParameters()) == 0) {
+		
+			
 				// for some reason, removing this allows us to see relationship in 
 				// export statements (even the valid relationship model value is there..)
 				try {
@@ -2337,6 +2326,9 @@ abstract class Model extends Delegator
 					throw $pass;
 				}
 				
+
+				
+						
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
 				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
