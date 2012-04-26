@@ -221,14 +221,27 @@ class BrandDataAccess extends Domain\Data {
 		if ($brand_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: brand_id is required!!');
 		}
-		
-		$sql = 'SELECT cf.cloudfront_file_id, cf.cloudfront_file_name, cf.cloudfront_bucket,'
-			 . 'cb.distribution_url, cf.file_bucket, cf.file_store, cf.mime_type,'
-			 . 'cf.file_uri, cf.file_zone, cf.original_file_path, cf.file_association_type,'
-			 . 'bf.brand_id, bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb'
-			 . ' INNER JOIN cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
-			 . ' INNER JOIN brand_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id '
-			 . ' WHERE brand_id=?';
+
+		$sql = 
+			'SELECT
+				data_store_file_id as cloudfront_file_id,
+				file_name as cloudfront_file_name,
+				cloudfront_bucket,
+				distribution_url,
+				file_bucket,
+				file_store,
+				mime_type,
+				file_uri,
+				file_zone,
+				original_file_path,
+				file_association_type,
+				brand_id,
+				file_modulation,
+				file_descriptor
+			FROM
+				brand_file_view
+			WHERE brand_id=?';
+
 		$params = array($brand_id);
 		return parent::getList($sql, $params);
 	}
