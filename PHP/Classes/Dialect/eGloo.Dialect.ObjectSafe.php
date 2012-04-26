@@ -310,6 +310,11 @@ abstract class ObjectSafe {
 			return $cache[$class][$key];		
 		});
 		
+		static::defineMethod('clear_cache', function($key, $class = null) {
+			$cache = &$class::referenceStatic('_scache');
+			unset($cache[$class][$key]);
+		});
+		
 		static::defineMethod('method', function($method, $class) {
 			$methods                = &$class::referenceStatic('_methodsStatic');
 						
