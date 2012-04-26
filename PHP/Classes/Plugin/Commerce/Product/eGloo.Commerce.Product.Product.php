@@ -40,54 +40,6 @@ use \eGloo\Domain;
  */
 class Product extends Domain\Model {
 
-	public function loadProductImages() {
-		if (empty ($this->product_images)) {
-			$this->product_images = ProductDataAccess::fetch()->loadProductImages($this->product_id);
-		}
-		$this->product_images;
-		return $this;
-	}
-	
-	public function loadProductIngredients() {
-		if (empty ($this->ingredients)) {
-			$this->ingredients = ProductDataAccess::fetch()->loadProductIngredients($this->product_id);
-		}
-		$this->ingredients;
-		return $this;
-	}
-	
-	public function loadProductDescription() {
-		if (empty ($this->description)) {
-			$this->description = ProductDataAccess::fetch()->loadProductDescription($this->product_id);
-		}
-		$this->description;
-		return $this;
-	}
-	
-	public function loadSlugDestination() {
-		if (empty ($this->friendly_url)) {
-			$this->friendly_url = ProductDataAccess::fetch()->loadSlugDestination($this->product_id);
-		}
-		$this->friendly_url;
-		return $this;
-	}
-
-	public function loadProductLineProducts() {
-		if (empty ($this->product_images)) {
-			$this->loadProductSizes();
-		}
-		return $this->product_sizes;
-	}
-	
-	public function loadProductSizes() {
-		if (empty ($this->product_sizes)) {
-			$this->product_sizes = ProductDataAccess::fetch()->loadProductSizes($this->product_id);
-		}
-		
-		//$this->product_sizes;
-		return $this;
-	}
-
 	public function getSizes() {
 		return $this->__get('sizes');
 	}
@@ -100,14 +52,5 @@ class Product extends Domain\Model {
 	public function getProductArray(){
 		return (array) $this->properties;
 	}
-	
-	// public static function loadProductById($product_id) {
-	// 	if ((int)$product_id <= 0) {
-	// 		throw new \InvalidArgumentException();
-	// 	}
-	// 	$rows = ProductDataAccess::fetch()->loadProductById($product_id);
-	// 	//echo $product_id; exit;
-	// 	return new static($rows);
-	// }
 
 }

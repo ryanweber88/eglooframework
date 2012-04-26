@@ -164,16 +164,27 @@ class ProductDataAccess extends Domain\Data {
 		if ($product_id == '') {
 			throw new \InvalidArgumentException('::Missing argument error: product_id is required!', __METHOD__);
 		}
-		$sql = 'SELECT cf.cloudfront_file_id, cf.cloudfront_file_name, cf.cloudfront_bucket,'
-			 . 'cb.distribution_url, cf.file_bucket, cf.file_store, cf.mime_type, cf.file_uri,'
-			 . 'cf.file_zone, cf.original_file_path, cf.file_association_type, bf.product_id,'
-			 . 'bf.file_modulation, bf.file_descriptor FROM cloudfront_bucket cb INNER JOIN'
-			 . ' cloudfront_file cf ON cb.cloudfront_bucket=cf.cloudfront_bucket'
-			 . ' INNER JOIN product_file bf ON cf.cloudfront_file_id=bf.cloudfront_file_id'
-			 . ' WHERE product_id=?';
 
-		//$result = parent::getList($sql, array($product_id));
-		//echo_r($result);
+		$sql =
+			'SELECT
+				data_store_file_id as cloudfront_file_id,
+				file_name as cloudfront_file_name,
+				cloudfront_bucket,
+				distribution_url,
+				file_bucket,
+				file_store,
+				mime_type,
+				file_uri,
+				file_zone,
+				original_file_path,
+				file_association_type,
+				product_id,
+				file_modulation,
+				file_descriptor
+			FROM
+				product_file_view
+			WHERE product_id=?';
+
 		return parent::getList($sql, array($product_id));
 	}
 
