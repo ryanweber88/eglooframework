@@ -823,9 +823,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			try {
 				
 				// @TODO this needs to be changed to 'model->changed'
-				//if (!$model->exists()) {
+				if ($model->valid()) {
 					$model->save();
-				//}
+				}
 			}
 			
 			catch (\Exception $pass)	{
