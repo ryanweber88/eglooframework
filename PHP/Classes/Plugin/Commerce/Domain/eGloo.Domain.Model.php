@@ -399,8 +399,22 @@ abstract class Model extends Delegator
 	 * must still follow plurality conventions
 	 */
 	protected function hasOne($name, $lambda) {
+		
+		// look for join table definition
+		// @TODO replace search for "through" with method
+		$join = null;
+		
+		if (preg_match($pattern = '/\s+through\s+?([a-z]+)$/i', $name, $match)) {
+			
+			// reomve from pattern	name
+			$name = preg_replace($pattern, null, $name);
+			
+			// retrieve join from match
+			$join = $match[1];	
+		}
+				
 		if (InflectionsSafe::isSingular($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
-			return $this->defineRelationship($name, $lambda, true);
+			return $this->defineRelationship($name, $lambda, true, $join);
 		}
 		
 		throw new \Exception(
@@ -575,7 +589,7 @@ abstract class Model extends Delegator
 		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join) {
 		 
 			$association = new Model\Association(array(
-				'owner'      => $self,
+				'owner'       => $self,
 				'target'      => $model,
 				'through'     => $join,
 				'cardinality' => $singular 
@@ -730,6 +744,7 @@ abstract class Model extends Delegator
 				// that result has a foreign key with the same signature
 				// as this model, then aliasAttribute on result to top this
 				// model primary key 
+				
 					
 
 			}
