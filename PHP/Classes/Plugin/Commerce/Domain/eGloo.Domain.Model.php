@@ -1586,7 +1586,10 @@ abstract class Model extends Delegator
 		// we short-circuit execution
 		$inject = true;
 		
+		
 		// run our before/around callbacks
+		
+		
 		foreach(array('before', 'around') as $point) {
 			if (isset($this->callbacks[$event][$point])) {
 				foreach($this->callbacks[$event][$point] as $callback) {
@@ -1921,8 +1924,13 @@ abstract class Model extends Delegator
 				
 				$conditions = implode(' AND ', $conditions);
 				$table = $class::sendStatic('signature');
+				
+				// @TODO arguments is appended with classname, sometimes??; for now,
+				// removing appended value
+				$arguments = array_slice($arguments, 0, count($conditions));
 
-				try { 
+				
+				try {			 
 					Data::statement("
 						DELETE FROM
 							$table
@@ -1932,8 +1940,11 @@ abstract class Model extends Delegator
 						
 						
 					", $arguments);
+					
+									
 				}
 				
+
 				catch(\Exception $pass) {
 					throw $pass;
 				}

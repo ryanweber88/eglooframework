@@ -432,6 +432,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	
 	public function offsetGet($offset) {
 
+
 		// if a string we are attempting to match by "natural_key" 
 		// or a field that is representative of the model in a 
 		// collection
@@ -455,7 +456,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			// if our natural field exist, iterate through collection and
 			// determine if we can field a match to offset
 			if (!is_null($field = $this->key)) {
-		
+
 				// since we allow regular expression filtering, determine
 				// if offset is valid regular expression (this is still a bit
 				// dicey since preg_last_error seems to not fucking work, so
@@ -477,9 +478,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				
 				else {
 					
-		
-					foreach($this as $key => $model) {
-						if ($model->$field == $offset) {
+	
+					foreach($this as $key => $amodel) {
+						if ($amodel->$field == $offset) {
 							$model = $this->collection[$key];
 						}
 					}
@@ -490,9 +491,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 						// please note though, there are no constraints in regards to
 						// the domain of model->natural_key values
 						// @TODO this doesn't fucking work right now
-											
+
 					if (!isset($model)) {
-				
+
 						$model  = new $this->model(array($field => $offset));
 						$this[] = $model;						
 					}
@@ -558,16 +559,24 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				$owner = $this->association->owner;
 				$field = $owner->primaryKeyName();
 				
-				if ($model->send('belongsTo', $owner->class->name)) { 
-					$model->send('aliasAttribute', $owner->primaryKeyName(), function & () use ($owner) {
+				//if ($model->send('belongsTo', $owner->class->name)) {
+				if (\property_exists($model, $pk = $owner->primaryKeyName())) { 
+					$model->send('aliasAttribute', $pk, function & () use ($owner) {
 						return $owner->id;
 					});
+					
+					//$owner->send('aliasAttribute', $pk, function & () use ($model, $pk) {
+					//	return $owner->$pk;
+					//});
+					
+					// @TODO right now alias is deferred, so it doesnt exist until actually called upon
+					// so we debunk the deferral - this may be ok, as we only care about foreign key value
+					// on crud ops, where it will automatically be called					
+					$model->$field;
 				}
 					
-				// @TODO right now alias is deferred, so it doesnt exist until actually called upon
-				// so we debunk the deferral - this may be ok, as we only care about foreign key value
-				// on crud ops, where it will automatically be called
-				//$model->$field;
+
+				
 			}	
 						
 			$this->collection[$index] = $model;
@@ -784,8 +793,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				}
 				
 				catch(\Exception $pass) {
+					
 					throw $pass;
 				} 
+				
+				$this->clear();
+				
 			
 			}
 			
@@ -795,7 +808,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					"Failed unlinking target '$target' from owner '$owner' because owner must be an instance of Model"
 				);
 			}
-			
 			
 		}
 	}	
@@ -811,19 +823,21 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			try {
 				
 				// @TODO this needs to be changed to 'model->changed'
-				if (!$model->exists()) {
+				//if (!$model->exists()) {
 					$model->save();
-				}
+				//}
 			}
 			
 			catch (\Exception $pass)	{
 				throw $pass;
 			}
 			
+
+			
 			
 	    if (!is_null($this->association)    && 
 	        $this->association->usesJoin()) {
-	      
+
 				if (is_object($owner = $this->association->owner) && $owner instanceof Domain\Model) {
 					
 									
@@ -843,9 +857,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					}
 					
 					else {
-						$generic = "$ns\\Generic";
+						//$generic = "$ns\\Generic";
+						$class = '\\Common\\Domain\\Model\\' . $target;
 						
-						$joinModel = $generic::factory(
+						$joinModel = \Common\Domain\Model\Generic::factory(
 							$class
 						);
 					}
@@ -910,9 +925,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					}
 					
 					else {
-						$generic = "$ns\\Generic";
+						//$generic = "$ns\\Generic";
+						$class = '\\Common\\Domain\\Model\\' . $target;
 						
-						$joinModel = $generic::factory(
+						$joinModel = \Common\Domain\Model\Generic::factory(
 							$class
 						);
 						

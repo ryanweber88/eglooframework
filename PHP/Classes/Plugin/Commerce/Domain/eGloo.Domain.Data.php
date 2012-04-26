@@ -177,6 +177,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 							
 				$conditions = implode("AND\n ", $conditions);			
 				
+				
 				// build query 
 				// @TODO this should be abstracted out a bit, but i don't like
 				// this solution in the first place
@@ -308,7 +309,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			: 'execute' . ucfirst($classification);
 			
 
-					
+			
 		$fields = array();
 		
 
@@ -438,7 +439,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 				
 				else {
-					echo $statement; exit;					
+					//var_export($arguments); exit;
+								
 					throw new \Exception(
 						'Statement failed because count of argument values does not match number of ' .
 						'required fields' . echo_r(array(
@@ -523,12 +525,16 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 			
 		}
+
+
 				
 	
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
+		
+		//echo "$statement<br /><br /><br />";
 		
 		$result = $dataAccess->$method($statement, $arguments);
 		
