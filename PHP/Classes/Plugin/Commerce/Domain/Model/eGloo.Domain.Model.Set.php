@@ -691,18 +691,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				$target = $this->association->through;	
 				$owner  = $this->association->owner;
 
-				if (\class_exists($class = "$ns\\$target")) {
-					$joinModel = $class;
-				}
-				
-				else {
-					//$generic = "$ns\\Generic";
+				$joinModel = \class_exists($class = "$ns\\$target")
+					? new $class
+					: Generic::factory($target);
 					
-					$joinModel = \Common\Domain\Model\Generic::factory(
-						$class
-					);
-					
-				}
 				
 				foreach(array($owner, $model) as $amodel) { 
 					if (isset($amodel->id)) {
@@ -760,26 +752,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				
 				$target = $this->association->through;	
 				$owner  = $this->association->owner;
-					
-				if (\class_exists($class = "$ns\\$target")) {
-					$joinModel = $class;
-				}
 				
-				else {
-					//$generic = "$ns\\Generic";
-					//$generic = '\\Common\\Domain\\Model\'
-					
-					// @TODO this is a hack; determine correct namespace by 
-					// examining target
-					$class = '\\Common\\Domain\\Model\\' . $target;
+				$joinModel = \class_exists($class = "$ns\\$target")
+					? new $class
+					: Generic::factory($target);
 					
 					
-					$joinModel = \Common\Domain\Model\Generic::factory(
-						$class
-					);
-					
-				}
-	
 			
 				// now use the primary key of owner to determine our
 				// dynamic delete method; we are making an assumption 
@@ -787,7 +765,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				// join table; if it is not, we will catch the resulting
 				// exception and pass to handler
 				$deleteMethod = "delete_by_{$owner::primaryKey()}";
-	
+					
 				try {
 					$joinModel::$deleteMethod($owner->id);
 				}
@@ -851,21 +829,11 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					$target = $this->association->through;	
 					$owner  = $this->association->owner;
 	
-					if (\class_exists($class = "$ns\\$target")) {
-						$joinModel = new 
-						$class;
-					}
-					
-					else {
-						//$generic = "$ns\\Generic";
-						$class = '\\Common\\Domain\\Model\\' . $target;
+					$joinModel = \class_exists($class = "$ns\\$target")
+						? new $class
+						: Generic::factory($target);
 						
-						$joinModel = \Common\Domain\Model\Generic::factory(
-							$class
-						);
-					}
-					
-					
+										
 					foreach(array($owner, $model) as $amodel) { 
 						if (isset($amodel->id)) {
 							$key             = $amodel->primaryKeyName();
@@ -920,19 +888,10 @@ class Set extends \eGloo\Dialect\ObjectSafe
 					$target = $this->association->through;	
 					$owner  = $this->association->owner;
 
-					if (\class_exists($class = "$ns\\$target")) {
-						$joinModel = $class;
-					}
+					$joinModel = \class_exists($class = "$ns\\$target")
+						? new $class
+						: Generic::factory($target);
 					
-					else {
-						//$generic = "$ns\\Generic";
-						$class = '\\Common\\Domain\\Model\\' . $target;
-						
-						$joinModel = \Common\Domain\Model\Generic::factory(
-							$class
-						);
-						
-					}
 
 						
 					

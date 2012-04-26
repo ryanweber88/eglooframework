@@ -744,7 +744,22 @@ abstract class Model extends Delegator
 				// that result has a foreign key with the same signature
 				// as this model, then aliasAttribute on result to top this
 				// model primary key 
-				
+				if ($association->usesJunction()) {
+					
+					/*
+					$owner  = $association->owner;
+					$target = $association->target;
+					$join   = $association->through; 
+						
+					
+					$joinModel = class_exists($class = "{$owner->class->namespace}\\$join")
+						? $class 
+						: Model\Generic::factory($join);
+						
+					// @TODO this should be accomplished in a single query
+					$joinModel::find_one_by
+					*/
+				}
 					
 
 			}
@@ -1580,7 +1595,7 @@ abstract class Model extends Delegator
 	
 		
 	protected function runCallbacks($event, $mixed = null) {
-				
+		
 		// we use inject idea to pass values between callbacks,
 		// if needed; if any callback returns false, then
 		// we short-circuit execution

@@ -10,7 +10,7 @@ use \eGloo\Utilities\Delegator;
  * be used as a dynamically determined model so we can avoid stubbing every single godamn
  * table
  */
-abstract class Generic extends Domain\Model {
+class Generic extends Domain\Model {
 	
 	function __construct($pseudonym, $__mixed = null) {
 		
@@ -42,7 +42,14 @@ abstract class Generic extends Domain\Model {
 	 * as identified by $name
 	 * 
 	 */
-	abstract public static function tangible($name);
+	public static function tangible($name) {
+		$class = static::classnamefull();
+		
+		throw new \Exception(
+			"Failed send method 'tangible' to class receiver '$class' because ".
+			"it cannot be determined at framework level"
+		);
+	}
 
 	
 	protected static function signature() {

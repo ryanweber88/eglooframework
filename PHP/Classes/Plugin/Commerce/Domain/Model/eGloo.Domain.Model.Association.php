@@ -32,6 +32,10 @@ class Association extends \eGloo\Dialect\ObjectSafe {
 		return $this->through !== null;
 	}
 	
+	public function usesJunction() {
+		return $this->through !== null;
+	}
+	
 	public function through() {
 		return preg_replace('/(.|::)/', '\\', $this->target);
 	}
