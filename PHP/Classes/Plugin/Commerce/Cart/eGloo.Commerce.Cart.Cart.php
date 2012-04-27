@@ -112,7 +112,7 @@ class Cart extends Domain\Model {
 
 	public static function getActiveCartID( $cart_session_id = null, $cart_user_id = null, $create_cart = true ) {
 		$retVal = null;
-		
+
 		if ( !is_null(static::$cart_id) && is_numeric(static::$cart_id) && static::$cart_id > 0 ) {
 			// Look up via cart_id
 			$retVal = $_SESSION['cart_id'] = static::$cart_id;
@@ -129,8 +129,6 @@ class Cart extends Domain\Model {
 		
 		} else if ( isset($_SESSION['cart_id']) ) {
 			$retVal = static::$cart_id = $_SESSION['cart_id'];
-		
-		
 		} else if ( $create_cart ) {
 			
 			// Generate one
@@ -153,7 +151,7 @@ class Cart extends Domain\Model {
 
 			static::$cart_id = $_SESSION['cart_id'] = $cart->id;
 		}
-				
+
 		return $retVal;
 	}
 
