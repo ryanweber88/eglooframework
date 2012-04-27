@@ -421,8 +421,121 @@ final class eGlooLogger {
 				'<br />' . '<b>Server IP:</b> ' . $server_address .
 				'<br />' . '<b>Server Port:</b> ' . $server_port .
 				'<br />' . '<b>Using SSL:</b> ' . $using_ssl .
-				'<br /><br /><b>Backtrace:</b><br />' .
-				$exception->getTraceAsString();
+				'<br /><br /><b>Backtrace:</b><br /><br />';
+
+			foreach( $exception->getTrace() as $key => $value ) {
+				$backtrace_line = $value;
+
+				$html_output .= '#' . $key . ' => ';
+
+				if ( isset($backtrace_line['class']) && $backtrace_line['class'] === 'eGlooLogger' && $backtrace_line['function'] === 'global_error_handler' ) {
+					$backtrace_line['file'] = $backtrace_line['args'][2];
+					$backtrace_line['line'] = $backtrace_line['args'][3];
+
+					$backtrace_line['context'] = $backtrace_line['args'][4];
+
+					// For now
+					$backtrace_line['class'] = null;
+					$backtrace_line['function'] = null;
+					$backtrace_line['type'] = null;
+					$backtrace_line['args'] = null;
+				}
+
+				if ( isset($backtrace_line['file']) && isset($backtrace_line['line']) ) {
+					$app_name_index = strpos( $backtrace_line['file'], eGlooConfiguration::getApplicationName() );
+
+					$common_path = str_replace( '../', '', eGlooConfiguration::getExtraClassPath() );
+					$common_index = strpos( $backtrace_line['file'], $common_path );
+
+					if ( $app_name_index !== false ) {
+						$pretty_path = substr( $backtrace_line['file'], $app_name_index );
+					} else if ( $common_index !== false ) {
+						$pretty_path = substr( $backtrace_line['file'], $common_index );
+					}
+
+					if ( $backtrace_line['function'] !== 'global_exception_handler' && $backtrace_line['function'] !== 'global_error_handler' ) {
+						$html_output .= '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace_line['file']) . '&line=' . $backtrace_line['line'] . '">' .
+							$pretty_path . '(' . $backtrace_line['line'] . ')' . '</a>: ' . "<br /><p><dd>";
+					} else {
+						$html_output .= '';
+					}
+
+				} else {
+					$html_output .= 'No PHP file found in trace (PHP engine error): ' . "<br /><p><dd>";
+				}
+
+				if ( isset($backtrace_line['class']) && isset($backtrace_line['type']) ) {
+					$html_output .= $backtrace_line['class'] . $backtrace_line['type'];
+				}
+
+				if ( isset($backtrace_line['function']) ) {
+					$html_output .= $backtrace_line['function'] . '(';
+				}
+
+				if ( isset($backtrace_line['args']) && !empty($backtrace_line['args']) ) {
+					$html_output .= "<p><dd>";
+
+					for( $arg_index = 0; $arg_index < count($backtrace_line['args']); $arg_index++ ) {
+						$argument = $backtrace_line['args'][$arg_index];
+						$tab_padding = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+
+						if ( !is_array($argument) && !is_object($argument) ) {
+							if ( is_string($argument) ) {
+								$argument = 'string => "' . substr( $argument, 0, 100 ) . '"';
+							} else if ( is_numeric($argument) ) {
+								$argument = 'numeric => ' . $argument;
+							}
+
+							$html_output .= $tab_padding . '#' . $arg_index . ' => ' . $argument;
+						} else if ( is_array($argument) ) {
+							$argument_string_form = str_replace(', ', ',<br />', getArrayDefinitionString($argument) );
+							$argument_string_form = str_replace('array(', 'array(<br />', $argument_string_form );
+							$argument_string_form = str_replace('<br />', '<br />' . $tab_padding . $tab_padding, $argument_string_form );
+
+							$html_output .= $tab_padding . '#' . $arg_index . ' => ' . $argument_string_form;
+						} else if ( is_object($argument) ) {
+							$html_output .= $tab_padding . '#' . $arg_index . ' => ' . get_class($argument);
+						}
+
+						$html_output .= "\n";
+					}
+
+					$html_output .= "<br />)</dd></p>";
+				} else if ( isset($backtrace_line['function']) ) {
+					$html_output .= ")";
+				}
+
+				if ( isset($backtrace_line['context']) ) {
+					$html_output .= 'Context:';
+					$html_output .= "<p><dd>";
+
+					foreach( $backtrace_line['context'] as $context_arg => $context_value ) {
+						$argument = $context_value;
+
+						if ( !is_array($argument) && !is_object($argument) ) {
+							if ( is_string($argument) ) {
+								$argument = 'string => "' . substr( $argument, 0, 100 ) . '"';
+							} else if ( is_numeric($argument) ) {
+								$argument = 'numeric => ' . $argument;
+							}
+
+							$html_output .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '$' . $context_arg . ' => ' . $argument;
+						} else if ( is_array($argument) ) {
+							$html_output .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '$' . $context_arg . ' => ' . 'Array';
+						} else if ( is_object($argument) ) {
+							$html_output .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' . '$' . $context_arg . ' => ' . get_class($argument);
+						}
+
+						$html_output .= "\n";
+					}
+
+					$html_output .= "</dd></p>";
+				}
+
+				$html_output .= "</dd></p>";
+			}
+
+			$html_output .= '<br />';
 
 			if ( (self::DEVELOPMENT & self::$loggingLevel) && eGlooConfiguration::getDisplayTraces() ) {
 				echo_r( $html_output );
@@ -476,7 +589,7 @@ final class eGlooLogger {
 		}
 	}
 
-	public static function global_error_handler($severity, $message, $filename, $linenum, $context ) {
+	public static function global_error_handler( $severity, $message, $filename, $linenum, $context ) {
 		throw new ErrorException($message, 0, $severity, $filename, $linenum);
 	}
 
