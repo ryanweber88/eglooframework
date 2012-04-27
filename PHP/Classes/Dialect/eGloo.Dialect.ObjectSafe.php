@@ -315,6 +315,7 @@ abstract class ObjectSafe {
 			unset($cache[$class][$key]);
 		});
 		
+		
 		static::defineMethod('method', function($method, $class) {
 			$methods                = &$class::referenceStatic('_methodsStatic');
 						

@@ -427,9 +427,10 @@ abstract class Model extends Delegator
 	 * of whether model belongsTo another
 	 */
 	protected function belongsTo($mixed, $lambda = null) {
-		
+
 		$self       = $this;
 		$arguments  = Collection::flatten( func_get_args() );
+		
 		
 		// check if the last argument is a lambda
 		if (is_callable($arguments[count($arguments) - 1])) {
@@ -450,7 +451,7 @@ abstract class Model extends Delegator
 			  $this->hasOne($name, function($model) use ($self) {
 			  	// belongs to convention dictates that a foreign key with name
 			  	// signature_id exists on calling model	
-			  	$field = $model::signature() . '_id';
+			  	$field = $model::sendStatic('signature') . '_id';
 					
 					// set self->foreign_key to null value, so that it
 					// exists on self and can be aliased to model->primarykey
@@ -478,23 +479,27 @@ abstract class Model extends Delegator
 			  });
 				
 			}
+
+			else {
 			
-			// otherwise, we follow convention that foreign reference is within
-			// table, so we set property
-			// @TODO we need to grab an actual signature as opposed to making a 
-			// guess in terms 
-			$foreignKey = strtolower(\eGlooString::toUnderscores(
-				$name
-			));
+				// otherwise, we follow convention that foreign reference is within
+				// table, so we set property
+				// @TODO we need to grab an actual signature as opposed to making a 
+				// guess in terms 
+				$foreignKey = strtolower(\eGlooString::toUnderscores(
+					$name
+				));
+				
+				$foreignKey .= '_id';
 			
-			$foreignKey .= '_id';
-		
-			// set value to null, we'll check against whether property exists
-			// when relationship is evaluated
-			$this->$foreignKey = null;
-			
-			// finally, we create our 1 - 1 relationship
-			$this->hasOne($name, $lambda);	
+				// set value to null, we'll check against whether property exists
+				// when relationship is evaluated
+				$this->$foreignKey = null;
+				
+				// finally, we create our 1 - 1 relationship
+				$this->hasOne($name, $lambda);	
+				
+			}
 			
 		}	
 
