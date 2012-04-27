@@ -1667,9 +1667,12 @@ abstract class Model extends Delegator
 			$class     = static::classNameFull();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($class, $key, function($class) use ($result) {
-					return new $class($result);
-				});					
+				//$result = $manager->find($class, $key, function($class) use ($result) {
+				//    if (strpos($class, 'CreditDebitCard') !== false) {
+				//        var_export($result); 
+				//    }
+				return new $class($result);
+				//});                    
 			}
 					
 			// otherwise, we manually build set with model instances

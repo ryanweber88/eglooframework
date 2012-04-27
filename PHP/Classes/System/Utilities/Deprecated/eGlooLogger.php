@@ -451,6 +451,8 @@ final class eGlooLogger {
 						$pretty_path = substr( $backtrace_line['file'], $app_name_index );
 					} else if ( $common_index !== false ) {
 						$pretty_path = substr( $backtrace_line['file'], $common_index );
+					} else {
+						$pretty_path = $backtrace_line['file'];
 					}
 
 					if ( $backtrace_line['function'] !== 'global_exception_handler' && $backtrace_line['function'] !== 'global_error_handler' ) {
