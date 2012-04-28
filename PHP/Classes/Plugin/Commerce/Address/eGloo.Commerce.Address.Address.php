@@ -3,7 +3,7 @@ namespace eGloo\Commerce\Address;
 
 use \eGloo\Commerce,
     \eGloo\Utility,
-    \egloo\Domain;
+    \eGloo\Domain;
 
 /**
  * Address Class File

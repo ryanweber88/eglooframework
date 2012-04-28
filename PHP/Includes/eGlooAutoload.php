@@ -692,7 +692,7 @@ function print_backtrace_header( $backtrace ) {
 		$pretty_path = $backtrace[0]['file'];
 	}
 
-	if ( $backtrace[1]['function'] !== 'global_exception_handler' && isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
+	if ( isset($backtrace[1]) && $backtrace[1]['function'] !== 'global_exception_handler' && isset($backtrace[1]) && isset($backtrace[1]['class']) ) {
 		$header = $backtrace[0]['function'] . ' invoked in "' . $backtrace[1]['function'] . '" on class "' . $backtrace[1]['class'];
 
 		$header .= '" on line ' . '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' .
@@ -700,7 +700,7 @@ function print_backtrace_header( $backtrace ) {
 
 		$header .= 'File location: ' . '<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' .
 			$backtrace[0]['line'] . '">' . $pretty_path . '</a>' . "<br />\n";
-	} else if ( $backtrace[1]['function'] !== 'global_exception_handler' ) {
+	} else if ( isset($backtrace[1]) && $backtrace[1]['function'] !== 'global_exception_handler' ) {
 		$header = $backtrace[0]['function'] . ' invoked on line ' .
 			'<a href="txmt://open/?url=file://' . str_replace(' ', '%20', $backtrace[0]['file']) . '&line=' . $backtrace[0]['line'] . '">' .
 			$backtrace[0]['file'] . '</a>' . "<br />\n<br />\n";
