@@ -602,7 +602,7 @@ abstract class ObjectSafe {
 		// fire lambda, and set property value with return from lambda; defers
 		// can only be used once, so the deferrable will be dropped after execution 
 		if (isset($this->_defers[$name])) {
-			
+				
 			// first we unset our property - it may be the case that it is a 
 			// reference, in which case we are creating a fuck-you hard bug
 			// to find
@@ -612,6 +612,7 @@ abstract class ObjectSafe {
 			if (!is_null($value = $this->_defers[$name]())) {
 				$this->$name = $value;
 			};
+				
 			
 			// unset deferrable from collection because remember that deferred
 			// operations, while deferred, only supposed to run once
@@ -713,7 +714,7 @@ abstract class ObjectSafe {
 		$class = get_called_class();
 		
 		throw new \Exception(
-			"Failed setting instance property '$name' in receiver '$class' because it does not exist "		
+			"Failed setting instance property '$name' in receiver '{$this->ident()}' because it does not exist "		
 		);
 	}
 	

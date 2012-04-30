@@ -258,11 +258,16 @@ abstract class Model extends Delegator
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
 				try {
-			
 					
-					return $class::sendStatic('process', $class::statement("
+					$result = $class::sendStatic('process', $class::statement("
 						SELECT * FROM $table	
 					"));
+					
+					// our 'all' method should return an empty set if failed to return
+					// result
+					return $result === false
+						? new Model\Set($class)
+						: $result;
 					
 					
 				}
@@ -621,29 +626,6 @@ abstract class Model extends Delegator
 			
 		
 			if ($self->exists()) {
-
-				// @TODO replace with Model.Association
-				//$association->owner = $self;
-	
-				
-				/*
-				try { 	
-					$result = $self::sendStatic(
-						'process', $lambda($model)
-					);
-				}
-				
-				catch(\Exception $pass) {
-					throw $pass;
-				}
-				*/
-			
-				
-				
-				// define association on result
-				// @TODO should we add associations on single models as well 
-				// is there any purpose
-
 
 				
 				try {
@@ -1807,9 +1789,9 @@ abstract class Model extends Delegator
 						
 						// bind by reference alias to return of lambda (which should be
 						// a reference to a relationship attribute)
-						if (isset($self->$alias)) {
-							$currentValue = $self->alias;
-						}
+						//if (isset($self->$alias)) {
+						//	$currentValue = $self->alias;
+						//}
 						
 						$self->$alias = &$lambda();
 						
@@ -2145,7 +2127,7 @@ abstract class Model extends Delegator
 		// exception will be thrown, which in this case is ignored
 		// because we DO want dynamic properties/attributes added
 		// to our receiver
-		$continue = true;
+		$continue = false;
 		
 		
 		try {
@@ -2153,6 +2135,9 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore)  {
+			if ($key == 'size_description') {
+				echo $ignore; 
+			}
 			//echo $ignore; 
 			$continue = true;
 		}
@@ -2332,7 +2317,7 @@ abstract class Model extends Delegator
 	 */
 	public function __get($name) {
 		
-				
+
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
