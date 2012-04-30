@@ -618,6 +618,8 @@ abstract class Model extends Delegator
 			// check if the model exists in the database to ensure we are
 			// not running queries against an empty/shallow model - because
 			// there is nothing to match against here
+			
+		
 			if ($self->exists()) {
 
 				// @TODO replace with Model.Association
@@ -1011,7 +1013,6 @@ abstract class Model extends Delegator
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
 			
-			//echo "calling create on $self";
 			
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
@@ -1672,7 +1673,7 @@ abstract class Model extends Delegator
 			$class     = static::classNameFull();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($class, $key, function($class) use ($result) {
+				return $manager->find($class, $key, function($class) use ($result) {
 					return new $class($result);
 				});					
 			}

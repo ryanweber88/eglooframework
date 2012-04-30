@@ -439,14 +439,17 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 				
 				else {
+					
+					//echo $statement; 
 					//var_export($arguments); exit;
+					
+					exit('exception');
 								
 					throw new \Exception(
 						'Statement failed because count of argument values does not match number of ' .
-						'required fields' . echo_r(array(
-							'arguments' => $arguments,
-							'fields'    => $fields
-					)));
+						'required fields'
+					);
+					 
 					
 				}
 			} 
