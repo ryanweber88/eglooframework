@@ -8,9 +8,6 @@ namespace eGloo\Utilities;
 trait MagicMethodTrait {
 	
 	protected function callMagicOn($name, $arguments, $container) {
-		
-		//echo "caling magic on $name from ". get_class($this) ."\n";
-		
 		$functionContainer = 
 			is_object($container) && $container instanceof \eGloo\Dialect\Object
 				? $container->_methods
@@ -26,8 +23,6 @@ trait MagicMethodTrait {
 		}
 		
 		else { 
-			//echo "calling magic on $name from " . get_class($this) . "\n";
-			
 			$actions = &static::$actions;
 					
 			// find property name and action
@@ -162,7 +157,7 @@ trait MagicMethodTrait {
 						    	// each does not implicitly require return value
 						    	// so boolean true is returned to indicate successful
 						    	// exit from find
-						    	return true;					    	
+						    	return true;
 							};
 					    	
 							return $functionContainer[$name]($lambda);

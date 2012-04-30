@@ -112,7 +112,6 @@ class Cart extends Domain\Model {
 
 	public static function getActiveCartID( $cart_session_id = null, $cart_user_id = null, $create_cart = true ) {
 		$retVal = null;
-
 		if ( !is_null(static::$cart_id) && is_numeric(static::$cart_id) && static::$cart_id > 0 ) {
 			// Look up via cart_id
 			$retVal = $_SESSION['cart_id'] = static::$cart_id;
@@ -130,11 +129,11 @@ class Cart extends Domain\Model {
 		} else if ( isset($_SESSION['cart_id']) ) {
 			$retVal = static::$cart_id = $_SESSION['cart_id'];
 		} else if ( $create_cart ) {
-			
+			\SessionHandler::startSession();
+
 			// Generate one
 			$session = Session::find_one_by_php_session_id( session_id() );
 
-			
 			$cart = new static(
 				array
 					(
@@ -149,7 +148,7 @@ class Cart extends Domain\Model {
 
 			$cart->save();
 
-			static::$cart_id = $_SESSION['cart_id'] = $cart->id;
+			$retVal = static::$cart_id = $_SESSION['cart_id'] = $cart->id;
 		}
 
 		return $retVal;

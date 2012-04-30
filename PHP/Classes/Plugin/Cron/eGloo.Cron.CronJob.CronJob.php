@@ -77,7 +77,7 @@ class CronJob extends Domain\Model {
 			throw new \InvalidArgumentException();
 		}
 		$rows = ProductDataAccess::fetch()->loadProductById($product_id);
-		//echo $product_id; exit;
+
 		return new static($rows);
 	}
 

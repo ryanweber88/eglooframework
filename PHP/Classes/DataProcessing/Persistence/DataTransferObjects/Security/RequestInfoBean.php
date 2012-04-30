@@ -799,8 +799,6 @@ class RequestInfoBean implements \ArrayAccess {
 			);
 		}
 
-		//var_export($values); exit;
-
 		// how much overhead is associated with md5 value here?
 		// enough to worry about if signature is singleton?
 		//static::$signature = md5(implode(':', $values));

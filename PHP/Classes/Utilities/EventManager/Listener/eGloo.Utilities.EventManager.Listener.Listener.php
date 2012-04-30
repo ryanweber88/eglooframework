@@ -18,8 +18,6 @@ class Listener extends \eGloo\Dialect\Object implements ListenerAggregate {
 		$reflection = new \ReflectionClass($this);
 		
 		foreach ($reflection->getMethods() as $method) { 
-			//echo "{$method->getName()}\n";
-			
 			if (strpos($method->getName(), 'event') === 0) { 
 				$eventName = strtolower(str_replace(
 					'event', null, $method->getName())

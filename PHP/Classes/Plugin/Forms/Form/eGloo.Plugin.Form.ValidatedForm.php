@@ -110,7 +110,6 @@ class ValidatedForm extends Form {
 		}
 
 		$this->setIsValid( $retVal );
-		// die_r($this);
 
 		return $retVal;
 	}

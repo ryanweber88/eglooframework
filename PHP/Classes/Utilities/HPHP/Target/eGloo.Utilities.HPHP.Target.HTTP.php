@@ -93,9 +93,7 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 	 */
 	protected function call() { 
 		$content = curl_exec($this->curl);
-		
-		//return var_export(curl_getinfo($this->curl), true);
-		
+
 		// check if an error was generated on curl request
 		if (curl_errno($this->curl)) { 
 			return false;
@@ -123,9 +121,7 @@ abstract class HTTP extends \eGloo\Utilities\HPHP\Target {
 				);
 			}
 		}
-		
-		//var_export(json_encode($this->parameters)); exit;
-				
+
 		// encode parameters and set payload
 		//return json_encode($this->parameters());
 		return self::VARIABLE_PAYLOAD . '=' . urlencode(json_encode($this->parameters));

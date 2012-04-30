@@ -37,8 +37,7 @@ class Builder extends \eGloo\Dialect\Object implements \eGloo\Utilities\BuilderI
 				'Builder requires entity property'
 			);
 		}
-		
-		//echo $this->entity->state;		
+
 		// use simplexml to load/parse entities file
 		// TODO abstract parsing mechanism, as we should be able
 		// to load entity information from any storage scheme			

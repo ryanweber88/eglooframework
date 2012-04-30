@@ -106,7 +106,6 @@ final class eGlooLogger {
 	public static function setLoggingLevel( $level ) {
 		self::$loggingLevel = $level;
 
-
 		self::$logLevelStrings = array( self::EMERGENCY => "EMERGENCY", self::ALERT => "ALERT",
 										self::CRITICAL => "CRITICAL",	self::ERROR => "ERROR",
 										self::WARN => "WARNING",		self::NOTICE => "NOTICE",
@@ -451,6 +450,8 @@ final class eGlooLogger {
 						$pretty_path = substr( $backtrace_line['file'], $app_name_index );
 					} else if ( $common_index !== false ) {
 						$pretty_path = substr( $backtrace_line['file'], $common_index );
+					} else {
+						$pretty_path = $backtrace_line['file'];
 					}
 
 					if ( $backtrace_line['function'] !== 'global_exception_handler' && $backtrace_line['function'] !== 'global_error_handler' ) {

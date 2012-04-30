@@ -36,8 +36,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 			'evaluate' => function(Event $event) { 
 				// evaluates entity for substance (is this
 				// a fake entity or what not eh)
-				//echo "calling evaluate on queryset\n";		
-		
+
 				if (is_null($event->getTarget())) {
 					throw new DDL\Exception\Exception(
 						'Must provide a target to evaluate event'
@@ -122,8 +121,6 @@ class QuerySet extends \eGloo\Dialect\Object implements
  		// check if callback data is valid - returned results will
  		// ALWAYS be 1+N records, or entity is invalid (empty)
  		if (($results = $this->callbacks->batch()) !== false) { 
-			//var_export($results); exit;
-			
  			// middleware has ran - do we need to do anything here
 			// TODO write some measure of intelligence in the number
 			// of entities built on an evaluation
@@ -150,14 +147,10 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 				$this->entities[$counter++] = $manager->find(
 	 					$this->entity, 
 	 					$record[$this->entity->definition->primary_key], function() use ($record) { 
-
-	 						//echo "in queryset, cannot find entity, calling fallback\n";
-	 						
 	 						// instantiate entity
 	 						//$entity = clone $this->entity;
 	 						//$entityClass = $this->entity->_class->class;
 	 						//$entity = new $entityClass;
-	 						//exit('fuck yourself');
 	 						$entity = $this->entity->_class->instantiate(); 
 	 						//$entity->attributes = $record;
 	 							 						
@@ -168,18 +161,13 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 						// entity and keep callback structure
 	 						
 	 						$entity->callbacks->push(new DDL\Utility\Callback('attributes', function(array $pass = [ ]) use ($record) { 
-	 							//echo "calling attributes callback\n";
 	 							// entity must be passed multidimensional array when using injection/passthrough method
 	 							return [ $record ];
 	 						}));
-	 						
-	 						//echo "entity has # callbacks = " . count($entity->callbacks) . "\n";
 
 	 						// returning entity to manager to handle persistence - call
 	 						// on valid will trigger evaluation of entity
 	 						if ($entity->valid()) {
-	 							//var_export($entity->attributes); 
-	 							//echo "entity should be valid, and its primary key is {$entity->nid}\n";
 	 							return $entity;
 	 						}
 	 						
@@ -191,11 +179,7 @@ class QuerySet extends \eGloo\Dialect\Object implements
 	 						
 	 					}
 	 				); 	
-	 				
-	 				
-	 				//echo "adding entity\n";
-	 				
-	 				
+
 	 				// now do side associations
 	 				// @todo abstract this into something nicer than associative
 	 				// array 

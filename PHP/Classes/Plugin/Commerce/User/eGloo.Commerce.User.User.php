@@ -75,8 +75,7 @@ class User extends Domain\Model {
 		// explicitly linked to an anonymous user; thus commenting out our
 		// invalid exception
 		} else { 
-			//throw new \InvalidArgumentException("User does not exist in the System");
-			exit('here');
+			// TODO handle this
 		}
 		
 	}

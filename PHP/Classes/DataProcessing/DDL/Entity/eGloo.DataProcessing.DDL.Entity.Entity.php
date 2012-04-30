@@ -46,11 +46,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// construct from within an entity, in which case, we need
 		// a short circuit on evaluation
 		$evaluate = is_bool($mixed) && $mixed === true;
-		
-		
-		
-		//echo "entity::construct on " . get_class($this) . "\n";
-		
+
 		// CALL INITILIZATION METHOD
 		$this->init();
 		$this->initStatTrait();
@@ -119,7 +115,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				'evaluate' => function(Event $event) { 
 					// evaluates entity for substance (is this
 					// a fake entity or what not eh)
-					//echo "calling evaluate\n";		
 					if (is_null($event->getTarget())) {
 						throw new DDL\Exception\Exception(
 							"A target has not been provided to evaluate event on reciever " . get_class($this)
@@ -140,8 +135,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// STATIC 
 				
 		// add columns to meta object
-		//echo get_class($this); exit('exit on entity.construct');
-		
 
 		// fire 'created' event
 		$this->events->trigger('created', $this);
@@ -197,7 +190,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		// but are vital to entity evaluation
 		// !!An entity must be evaluated (either from database
 		// or from persistence context) prior to initcallbacks!!
-		//echo 'entity::initCallbacks on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
 		
 		return array_merge(
 			
@@ -207,8 +199,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 				  
 			  new DDL\Utility\Callback(
 				'meta_columns', function(array $pass = [ ]) {   
-			  
-			  		//echo 'entity::initCallbacks::meta_columns on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
 
 					if (isset($pass[0])) { 
 				 		foreach(static::columns() as $column) {
@@ -239,12 +229,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 			  // defines relationship initialization 
 			  new DDL\Utility\Callback(
 				'relationships', function(array $pass = [ ]) { 
-			  
-			  		//echo 'entity::initCallbacks::relationships on ' . get_class($this) . " with id ". $this->_singleton->id . "\n";
-			  
-					
-					//echo "running relationships callback\n";
-					//var_export($pass);
 					// @todo change this - need a way to determine if entity is valid without
 					// explicit checks on attributes - current valid method is cyclical and
 					// will perform an evaluate 
@@ -272,13 +256,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 						
 							//$class = new \eGloo\Dialect\_Class("{$this->_class->namespace}\\{$relationship->to}");
 							//$entityRelation = $class->instantiate([true]);
-							
-							//echo "{$this->_class->namespace}\\{$relationship->to}"; exit;
-							
-							
-							//echo "$relationship\n";
-							//echo $this->uid; exit;
-							
+
 							// if has-many relationship, then a queryset is instantiated with a single 
 							// callback on stack (a call to find_xxx statement)
 							if ($relationship->hasMany()) {							
@@ -382,9 +360,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		
 		// evaluate is responsible for running callback stack
 		// and acting upon resulting data
-				
-		//echo "calling eval on entity\n";
-				
+
 		// evaluates entity if it has not yet been
 		// "touched" by underlying data layer
 		// callbacks->batch must always return mutlidim
@@ -598,9 +574,6 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 	 * entirety of table will be loaded into memory
 	 */
 	public static function all() {
-		//echo "entity::all on " . get_called_class() . "\n";
-		
-		
 		$manager = Manager\Factory::factory(); 
 		$entity  = new static(false);
 		$pk      = $entity->definition->primary_key;
@@ -980,7 +953,7 @@ abstract class Entity extends \eGloo\Dialect\Object implements EvaluationInterfa
 		try {
 			return parent::__get($name);
 		} catch(\Exception $ignore) { 
-			//echo "exception ignore is {$ignore->getMessage()}";
+			// TODO handle this
 		}
 
 			

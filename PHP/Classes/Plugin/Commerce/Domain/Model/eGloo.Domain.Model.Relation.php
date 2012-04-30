@@ -181,14 +181,13 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 */
 	public function joins($table) {
 		$this->chain = $this->chain->join($table);
-		//var_export($this->chain); exit;
-		
+
 		return $this;
 	}
 	
 	public function order($column) {
 		$this->chain = $this->chain->order($column);
-		
+
 		return $this;
 	}
 
@@ -215,7 +214,6 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 * @return Set
 	 */
 	public function build() {
-		//echo $this->chain->to_sql(); exit;
 		$model  = $this->model;
 		$result = null;
 				

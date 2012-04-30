@@ -99,14 +99,9 @@ class Context extends \eGloo\Dialect\Object {
 		// TODO this is oversimplified at the moment; needs cache support and
 		// check for boolean true		
 		if (!$this->exists($signature) || $this->store[$signature] === false) {
-			//echo "i\n";
 			if (!is_null($value = $lambda($this, $signature))) { 
 				$this->bind($signature, $value);
 			}
-			
-			//echo "\n\n$value";
-			
-			//return $value;
 		}
 		
 		// otherwise the value (should) exist, return it via a retrieve call

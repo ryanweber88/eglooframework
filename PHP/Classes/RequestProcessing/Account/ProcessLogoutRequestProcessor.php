@@ -43,35 +43,6 @@ class ProcessLogoutRequestProcessor extends RequestProcessor {
         session_regenerate_id( true );
         session_destroy();
         header('Location: /');
-//        
-//
-//        $this->_templateEngine = new XHTMLDefaultTemplateEngine( 'dev', 'us' );
-//        header("Content-type: text/html; charset=UTF-8");
-//
-//
-//        $username = $this->requestInfoBean->getPOST('username');
-//        $password = $this->requestInfoBean->getPOST('password');
-//        
-//        eGlooLogger::writeLog( eGlooLogger::DEBUG, "USERNAME! " . $username );
-//        eGlooLogger::writeLog( eGlooLogger::DEBUG, "PASSWORD! " . $password );
-//        
-//        
-//        $daoFactory = AbstractDAOFactory::getInstance();
-//        $accountDAO = $daoFactory->getAccountDAO();
-//        $userDTO = $accountDAO->userLogin($username, $password, '1', '2');
-//                
-//        if( $userDTO->getUserID() !== null){
-//            //login successful
-//            $_SESSION['USER_ID'] = $userDTO->getUserID();
-//            echo "{'LOGGED_IN': 'true', 'whatever': 'dudes'}";
-//            
-//        } else {
-//            //login failed
-//            echo "{LOGGED_IN: false}";
-//            
-//        }
-//            
-//        exit;
+
     }
  }
-?>

@@ -55,12 +55,8 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	exit;
 }
 
-
-
-
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
-
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {

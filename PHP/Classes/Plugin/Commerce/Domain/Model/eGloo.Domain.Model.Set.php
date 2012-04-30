@@ -554,7 +554,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			// as indicated by the presence of association and set within
 			// Model#defineRelationship, then we link/reference foreign key
 			// to relationship model primary key 
-			//var_export($this->association); exit('here');
 			if (!is_null($this->association)) {
 				$owner = $this->association->owner;
 				$field = $owner->primaryKeyName();
@@ -640,7 +639,6 @@ class Set extends \eGloo\Dialect\ObjectSafe
 						}
 						
 						else {
-							//var_export($model); exit;
 							$class = $model::classNameFull();
 							
 							throw new \Exception (

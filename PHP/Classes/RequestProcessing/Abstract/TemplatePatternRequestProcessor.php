@@ -117,19 +117,12 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		// begin -200 t/s
 		$this->populateTemplateVariables();
 		// end
-		
-		//echo $GLOBALS['payload']; return;
 
 		// add nil value to all templates as empty placeholder
 		$this->setTemplateVariable('nil', '');
 		
 		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
 		$output = $templateDirector->processTemplate();
-		
-		//echo $output;
-		//echo 'here'; exit;
-		//echo $GLOBALS['payload'];
-		//return ;
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
 
@@ -137,8 +130,6 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
 			$this->setOutputHeaders();
-			
-
 			echo $output;
 		}
 
@@ -230,12 +221,10 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		} else {
 			// TODO replace test case with dynamic di load from app context
 			//$application = &\eGloo\System\Server\Application::instance(); 
-			//echo get_class($application); return;
-			
+
 			// preinstatiation proves useless in this instance and a memory succubus
 			// TODO profile with larger seige
 			//$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
-			//	echo 'templatebuilder';
 			//	return new \XHTMLBuilder();
 			//});
 			

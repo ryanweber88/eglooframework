@@ -155,9 +155,7 @@ class XHTMLBuilder extends TemplateBuilder {
 
 		
 		//$requestInfoBean = &$this->requestInfoBean;
-				
-		//new \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine\Smarty(); exit;
-		
+
 		//$implementor = $application->context()->run(function() { 
 		//	return new XHTMLDefaultTemplateEngine( 
 		//		$this->requestInfoBean->getInterfaceBundle(), 'US', 'en'
@@ -174,7 +172,6 @@ class XHTMLBuilder extends TemplateBuilder {
 		// Instead of instantiating new Smarty engine (expensive) we are cloning a preinstantiated one, which
 		// profiling has determined to be far more cpu efficient
 		//$this->templateEngine = //clone $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
-			//echo 'closure';
 			//return new XHTMLDefaultTemplateEngine( $requestInfoBean->getInterfaceBundle(), 'US', 'en' );
 		//});    
 	}

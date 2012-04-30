@@ -364,7 +364,7 @@ final class DBConnectionManager extends ConnectionManager {
 				$mysqli = new mysqli($host, $user, $password, $dbname, $port);
 			} 
 			catch (Exception $e) { 
-				echo $e->getMessage();
+				// TODO handle this
 			}
 
 			if (mysqli_connect_errno()) {

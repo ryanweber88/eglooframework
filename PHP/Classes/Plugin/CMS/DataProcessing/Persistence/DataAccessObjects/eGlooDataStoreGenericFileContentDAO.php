@@ -106,14 +106,10 @@ class eGlooDataStoreGenericFileContentDAO extends GenericFileContentDAO {
 
 				mkdir( $data_store_file_folder_path, $mode, $recursive );
 			} catch (Exception $e){
-				echo_r($e->getMessage());
+				// TODO handle this
 			}
 		}
 
-		// die_r($fileContentDTO);
-		// TODO make sure the file uploaded properly, no errors
-		echo_r($fileContentDTO->getFilePath());
-		echo_r($data_store_file_path);
 		copy($fileContentDTO->getFilePath(), $data_store_file_path);
 
 		return $data_store_file_path;

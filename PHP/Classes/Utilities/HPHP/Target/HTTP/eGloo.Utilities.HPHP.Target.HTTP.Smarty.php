@@ -48,7 +48,6 @@ class Smarty extends \eGloo\Utilities\HPHP\Target\HTTP {
 	
 
 	protected function root($path = null) { 
-		//echo parent::root(self::DIR_ROOT . "/$path");
 		return parent::root(self::DIR_ROOT . $path); 
 	}
 	

@@ -212,8 +212,6 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 			}
 		}
 
-		// die_r($localizationNode);
-
 		// TODO move this drilling code, along with the code from the CSS and JS Dispatch, into
 		// a utility class.	 No sense duplicating lines
 		if ( $localizationNode !== null ) {
