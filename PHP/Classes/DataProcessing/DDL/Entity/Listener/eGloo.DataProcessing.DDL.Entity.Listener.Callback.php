@@ -34,9 +34,6 @@ class Callback extends Listener {
 		if (property_exists($target, 'callbacks')) {
 			$target->callbacks->push(new DDL\Utility\Callback(
 				$params['name'], function(array $pass = [ ]) use ($params) {
-
-					echo "Callback::eventCall firing callback on {$params['name']}\n";
-					
 					// @todo this entire callback mechanism needs to be refactored
 					// - to many odd parameters being passed
 					if (isset($params['definition']) && is_callable($params['definition'])) {

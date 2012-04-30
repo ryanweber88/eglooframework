@@ -41,12 +41,6 @@ class Statement extends \eGloo\Dialect\Object {
 	 * @todo   refactor statement call-chain to replace any uneeded steps
 	 */	
 	public function execute($statement) { 
-		
-		//if (strpos($statement, 'dr_content_type_product') !== false) {
-			//echo "\n\n$statement\n\n";
-			//exit;
-		//}
-		
 		$preparedStatement = new \QueryTransaction($statement);
 		$preparedStatement->setQueryDialect(\DBConnectionManager::getConnection( $this->_connection_name )->getConnectionDialect());
 		

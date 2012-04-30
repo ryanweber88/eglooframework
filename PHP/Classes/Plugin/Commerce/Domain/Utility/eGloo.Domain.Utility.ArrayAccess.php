@@ -50,7 +50,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// of they could potentially produce unexpected results that
 		// are very difficult to track
 		//$exceptions = array();
-		//echo "offset is $offset\n";
 		try {
 			$result = parent::offsetGet($offset);
 		}
@@ -58,14 +57,10 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 		// the only point of catching exception is to ensure that
 		// result is absolute false
 		catch(\Exception $ignore) {
-			//echo $ignore->getMessage();exit;
 			$result = null;
 		}
-		
-		
+
 		if ( !is_null($result) ) {
-			
-		
 			// check if result delegate is instanceof of set; in which case
 			// we directly return the set, because we want to work directly
 			// on it in most cases
@@ -160,7 +155,7 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				return $this->delegated->__toString();
 			}
 			catch(\Exception $ignore) {
-				echo get_class($this->delegated); exit;
+				// TODO handle this
 			}
 		}
 		

@@ -176,7 +176,6 @@ class CronJobDataAccess extends Domain\Data {
 			 . ' WHERE product_id=?';
 
 		//$result = parent::getList($sql, array($product_id));
-		//echo_r($result);
 		return parent::getList($sql, array($product_id));
 	}
 

@@ -258,10 +258,6 @@ class Gateway {
 					// 	'Creating eGloo cache file...', 'Cache' );
 					$this->_filecache = array();
 				}
-				
-				// $this->_filecache = var_export(, true);
-				// file_put_contents('ConfigCache.php', $config_dump);
-
 		} else {
 			
 		}

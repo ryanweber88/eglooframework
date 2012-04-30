@@ -28,9 +28,7 @@ class ClassVariable extends Middleware {
 		Server\Application::instance()->context()->retrieve('logger.test')->log(
 			print_r(get_declared_classes(), true)
 		);
-		
-		exit;
-		
+
 		return $response;
-	}		
+	}
 }

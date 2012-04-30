@@ -127,10 +127,6 @@ class CacheManagementUIBaseCoreeGlooRequestProcessor extends TemplatePatternRequ
 			$errors[] = 'Required parameter \'' . $argument . '\' not provided';
 		}
 
-		// echo_r($this->requestInfoBean->getUnsetGETArray());
-		// echo_r($this->requestInfoBean->getUnsetPOSTArray());
-		// Test
-
 		$this->setTemplateVariable('errors', $errors);
 		$this->setTemplateVariable('highlighted_entry', array());
 		$this->setTemplateVariable('cacheData', array());

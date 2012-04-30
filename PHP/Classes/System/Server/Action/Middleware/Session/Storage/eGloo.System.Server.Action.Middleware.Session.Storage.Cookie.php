@@ -49,9 +49,6 @@ class Cookie extends \photon\session\storage\Cookies {
 	}
 	
 	public function commit($response) { 
-
-		//echo "commiting\n"; 
-	
 		// if session id has not yet been set, which actually should be impossible (if underlying framework has been evoked)
 		// then commit to response header
         if (!isset($this->cookie[self::NS_COOKIE])) {
@@ -62,7 +59,6 @@ class Cookie extends \photon\session\storage\Cookies {
         }
         
         if (0 === strlen($this->iv)) {
-        	exit ('should never be here');
             //$this->iv = Crypt::getiv();
             $response->COOKIE->setCookie('scsiv', $this->iv, $timeout);
         }

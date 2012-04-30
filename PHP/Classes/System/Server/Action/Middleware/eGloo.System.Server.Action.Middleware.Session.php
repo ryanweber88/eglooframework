@@ -48,8 +48,6 @@ class Session extends \photon\session\Session implements MiddlewareInterface, Se
 
 	
 	public function processRequest(Request  &$request) { 
-		
-		//var_export($request->COOKIE); exit;
 		// initialize storage, or retrieve cookies from request object
 		if ($request->isHTML()) { 
 			$this->store->init($request);
@@ -65,9 +63,7 @@ class Session extends \photon\session\Session implements MiddlewareInterface, Se
 			// from this object, so that $_SESSION transparently contains
 			// values retrieved from request
 			$GLOBALS['_SESSION'] = [ ];
-			
-			//echo get_class($request->COOKIE); exit;
-			
+
 			// store should save to data, but unfortunately, saves to cookie hash, which suggest that
 			// storage must be cookie based - very bad design mf'er
 			$data = &$this->store->cookie;

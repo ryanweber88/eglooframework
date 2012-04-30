@@ -729,7 +729,6 @@ final class Configuration {
 
 			// TODO Error handling
 			// $errors = libxml_get_errors();
-			// echo_r($errors);
 
 			// Load applications after system... 
 			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:Applications/tns:Component' ) as $component ) {
@@ -883,7 +882,6 @@ final class Configuration {
 
 			// TODO Error handling
 			// $errors = libxml_get_errors();
-			// echo_r($errors);
 
 			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:System/tns:Component' ) as $component ) {
 				$componentID = (string) $component['id'];
@@ -983,15 +981,12 @@ final class Configuration {
 		if ( file_exists($config_xml_path) ) {
 			$full_config_xml_path = realpath($config_xml_path);
 			$folder = dirname($full_config_xml_path);
-			echo $full_config_xml_path;
-			die_r($folder);
 		} else {
 			$full_parent_directory_path = realpath(preg_replace('~^([a-zA-Z0-9. ]+/)*?([a-zA-Z0-9.]*)$~', '$1', $config_xml_path));
 			$config_xml_filename = preg_replace('~^([a-zA-Z0-9. ]+/)*?([a-zA-Z0-9.]*)$~', '$2', $config_xml_path);
 
 			if (is_writable($full_parent_directory_path)) {
-				// echo_r("Writing");
-				// echo_r($config_xml_filename);
+				// Why is this here?
 			}
 
 			$xmlData = '';
@@ -1158,7 +1153,6 @@ final class Configuration {
 
 			// // TODO Error handling
 			// $errors = libxml_get_errors();
-			// echo_r($errors);
 
 			$system_configuration = array();
 
@@ -1345,7 +1339,6 @@ final class Configuration {
 
 			// TODO Error handling
 			// $errors = libxml_get_errors();
-			// echo_r($errors);
 
 			$system_configuration = array();
 
@@ -1421,8 +1414,6 @@ final class Configuration {
 			trigger_error('System configuration XML exists - will not overwrite');
 			// $full_config_xml_path = realpath($config_xml_path);
 			// $folder = dirname($full_config_xml_path);
-			// echo $full_config_xml_path;
-			// die_r($folder);
 		} else {
 			if (!is_writable($full_parent_directory_path)) {
 				trigger_error('Destination for generated system configuration XML is not writable');

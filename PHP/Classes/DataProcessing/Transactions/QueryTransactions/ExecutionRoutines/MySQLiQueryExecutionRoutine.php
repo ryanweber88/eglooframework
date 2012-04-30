@@ -76,7 +76,6 @@ class MySQLiQueryExecutionRoutine extends QueryExecutionRoutine {
 		$metadata->close();
 		$statement->close();
 
-		die_r($resultSet);
 		return $resultSet;
 
 		$queryResultResource = mysql_query($queryTransaction->getDataPackageString(), $connection);

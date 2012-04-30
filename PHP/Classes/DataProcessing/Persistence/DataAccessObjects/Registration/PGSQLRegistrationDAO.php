@@ -47,29 +47,18 @@ class PGSQLRegistrationDAO extends RegistrationDAO {
 		$username_id = null;
 
 		if ( !$this->usernameAvailable( $username ) ) {
-			echo_r('Username not available');
+			// Username not available
 		} else {
-			echo_r('Username available');
-			// $username_id = $this->createUsername( $username );
-			
-			// if ($username_id !== false && $username_id !== null) {
-			// 	echo_r('Username creation success: ' . $username_id);
-			// } else {
-			// 	echo_r('Failure: ');
-			// 	echo_r($username_id);
-			// }
+			// Username available
 		}
-die;
+
 		//Prepare a query for execution
 		$result = pg_prepare($db_handle, "query", 'INSERT INTO profilelayout (profile_id, element_id, layoutcolumn, layoutrow ) VALUES ($1, $2, $3, $4)');
 
 		// Execute the prepared query.	Note that it is not necessary to escape
 		$result = pg_execute($db_handle, "query", array($profileID, $cubeID, $column, $row ));
 
-		pg_close( $db_handle );		
-
-		echo_r($formDTO);
-		die_r('here2');
+		pg_close( $db_handle );
 	}
 
 	public function CRUDRead( $formDTO ) {

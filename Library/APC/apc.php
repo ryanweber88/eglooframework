@@ -102,7 +102,7 @@ $scope_list=array(
 	'A' => 'cache_list',
 	'D' => 'deleted_list'
 );
-// die_r($_REQUEST);
+
 $requestInfoBean = RequestInfoBean::getInstance();
 
 $getArray = $requestInfoBean->getGETArray();

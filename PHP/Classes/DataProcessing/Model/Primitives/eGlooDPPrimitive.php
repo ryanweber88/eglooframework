@@ -177,7 +177,6 @@ abstract class eGlooDPPrimitive extends eGlooDPObject {
 	}
 
 	public static function executeOnce() {
-		echo 'b';
 	}
 
 }

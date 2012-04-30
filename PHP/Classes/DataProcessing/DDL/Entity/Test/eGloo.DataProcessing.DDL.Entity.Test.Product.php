@@ -16,7 +16,7 @@ class Product extends Entity {
 			$this->events->trigger('evaluate', $this);
 		}
 		catch (\Exception $e) {
-			echo $e->getMessage(); exit;
+			// TODO handle this
 		}
 			return $this->title;
 		//}

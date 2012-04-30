@@ -63,8 +63,6 @@ abstract class ObjectSafe {
 
 		$self = $this;
 
-		//echo "creating define method on receiver " . get_called_class() . "<br />"; 
-
 		// we need to immediately call define method, this will be the basis for
 		// all runtime defined methods
 		$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
@@ -116,11 +114,8 @@ abstract class ObjectSafe {
 		});
 		
 		$this->defineMethod('namespace', function() use ($self) {
-			//return $self->cache(function() use ($self) {
-				//exit('adsf');
-				$reflection = new \ReflectionClass($self);
-				return $reflection->getNamespaceName();
-			//});
+			$reflection = new \ReflectionClass($self);
+			return $reflection->getNamespaceName();
 		});
 		
 		
@@ -331,9 +326,6 @@ abstract class ObjectSafe {
 	
 		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
-				
-			//echo "alias $alias to $from for class $class <br/>";exit;
-				
 			if (($nativeMethod = \method_exists($class, $from))) {
 					
 				if (!\method_exists($class, $alias)) {
@@ -531,16 +523,10 @@ abstract class ObjectSafe {
 			
 			// keep track of alias properties
 			$this->_aliasedProperties[$alias] = $from;
-			
-			//echo "aliased '$from' with alias '$alias' on receiver '{$this->identifyInstance()}'\n";
-			//echo "in $class with " . var_export($this->_aliasedProperties, true) . "<br />"; 
-						
+
 			return $this;
 		}
-		
-		//die_r($this->_aliasedProperties); exit;
-		
-		
+
 		throw new \Exception(
 			"Attempted alias '$alias' on property '$from' failed because it ".
 			"already exists as a property on receiver {$this->ident()} "     .
@@ -628,11 +614,6 @@ abstract class ObjectSafe {
 		$attr = &$this->_attributes;
 		
 		if (isset($attr[$name])) {
-			
-			
-			//exit('asdf');
-			//var_export(isset($attr[$name]['reader']));
-			
 			// determine lambda method, since we are in __get context, reader will
 			// take presedence over accessor
 			$lambda = isset($attr[$name]['reader'])
@@ -645,8 +626,7 @@ abstract class ObjectSafe {
 		// specify our meta properties; these are properties that follow
 		// specific patterns to allow for returning meta/descriptive
 		// information in regards to product
-		//echo "attempting get on $name\n";
-		
+
 		// patterns in the form has_fieldname will check to
 		// determine that fieldname isset on class
 		// @TODO cache results as singleton (available to instance) methods
@@ -813,9 +793,6 @@ abstract class ObjectSafe {
 	 * have a fallback to method missing
 	 */
 	public function __call($name, $arguments) { 
-		
-		//echo "calling $name on receiver " . get_called_class() . "<br />";exit;
-		
 		// create an instancer of Caller so we can determine
 		// origin or caller context
 		$caller = static::caller();
@@ -861,9 +838,6 @@ abstract class ObjectSafe {
 	}
 	
 	public static function __callstatic($name, $arguments) { 
-		
-		//echo "calling static $name on receiver " . get_called_class() . "\n";
-		
 		// check against dynamically defined methods - since we
 		// are working class scope, we want to mimic the idea of
 		// inheritence; to do this, we move up class hierarchy,
@@ -897,7 +871,6 @@ abstract class ObjectSafe {
 				// otherwise pass exception to caller to handle as appropriate
 				catch(\Exception $passthrough) {
 					throw $passthrough;
-					//die_r($passthrough);
 				}
 			}
 			

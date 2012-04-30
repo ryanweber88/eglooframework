@@ -57,7 +57,6 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 		$templateVariables = array();
 
 		if ($this->requestInfoBean->issetPOST('application_group_selected')) {
-			// die_r("Junk");
 			$templateVariables['application_group_selected'] = $this->requestInfoBean->getPOST('application_group_selected');
 		} else {
 			$application_groups = array();
@@ -160,11 +159,6 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 			}
 			
 		}
-		// echo_r($countries_selected);
-		// echo_r($languages_selected);
-		// echo_r($localizations);
-		// die;
-
 
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
 		$templateBuilder = new XHTMLBuilder();
@@ -190,7 +184,6 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 		$templateVariables['languages_selected'] = $languages_selected;
 
 		$templateDirector->setTemplateVariables( $templateVariables );            
-		// echo_r(file('.htaccess'));
 		$output = $templateDirector->processTemplate();
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "ConfigureApplicationCacheCoreeGlooRequestProcessor: Echoing Response" );

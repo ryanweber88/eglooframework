@@ -128,8 +128,6 @@ class MySQLiQueryPopulationRoutine extends QueryPopulationRoutine {
 
 			self::$numberOfQueriesPopulated += 1;
 		}
-
-		die_r('for the lulz');
 	}
 
 }

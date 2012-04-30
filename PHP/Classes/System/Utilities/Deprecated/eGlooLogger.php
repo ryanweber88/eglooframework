@@ -106,7 +106,6 @@ final class eGlooLogger {
 	public static function setLoggingLevel( $level ) {
 		self::$loggingLevel = $level;
 
-
 		self::$logLevelStrings = array( self::EMERGENCY => "EMERGENCY", self::ALERT => "ALERT",
 										self::CRITICAL => "CRITICAL",	self::ERROR => "ERROR",
 										self::WARN => "WARNING",		self::NOTICE => "NOTICE",

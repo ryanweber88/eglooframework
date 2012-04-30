@@ -99,8 +99,6 @@ class PGSQLAccountDAO extends AccountDAO {
         //TODO: make appropriate database call
         $db_handle = DBConnectionManager::getConnection()->getRawConnectionResource();
 
-//        echo "connected to ". pg_dbname( $db_handle ) . "<br>";
-
         //Prepare a query for execution
         $result = pg_prepare($db_handle, "query", 'SELECT userLogin($1,$2,$3,$4)');
  

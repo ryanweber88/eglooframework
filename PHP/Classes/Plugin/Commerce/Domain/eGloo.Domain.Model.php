@@ -117,9 +117,6 @@ abstract class Model extends Delegator
 						$from  = $method->getName();
 												
 						try {
-							
-							//echo "$alias to {$method->getName()} on $class<br />";
-							//echo "found alias $alias for $from on class $class<br />"; 
 							static::defineMethod($alias, function($arguments) use ($class, $from, $alias) {
 								$arguments = func_get_args();
 																
@@ -163,8 +160,7 @@ abstract class Model extends Delegator
 						// method does not exist - the only caveat here is
 						// that
 						catch(\Exception $ignore) {
-							//exit('bizarre');
-							echo $ignore->getMessage() . "<br />"; 
+							// TODO handle this
 						}
 						
 						break ;
@@ -543,9 +539,7 @@ abstract class Model extends Delegator
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
-		//echo static::namespaceName(); exit;
-		
-				
+
 		// check if an 'as Alias' has been specified
 		$aliases = array();
 		
@@ -564,10 +558,7 @@ abstract class Model extends Delegator
 		$name             = ucfirst(\eGloo\Utilities\InflectionsSafe::instance()
 						          ->singularize($name));
 		//$ns               = $this->namespace();
-		
-		//echo "-- " . static::classNameFull() . " has $name<br />"; 
-	
-		
+
 		// @TODO this has to be determined dynamically, but for the time being
 		// will ensure that proper model is instantiated if attempting an alias
 		// call on \Model will return \Common\Domain\Model\*
@@ -1010,9 +1001,6 @@ abstract class Model extends Delegator
 		// define a generic create callback based on
 		// model convention if there currently 
 		$this->defineCallback('create', function() use ($self) {
-			
-			//echo "calling create on $self";
-			
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
 			// @TODO since this was added late in the lifecycle of model design, there already
@@ -1054,12 +1042,8 @@ abstract class Model extends Delegator
 				// since we guesing on this insert, we ignore sql errors and make a determination
 				// in inherited classes whether insert was successful
 				catch(\Exception $pass) {
-					echo $pass; exit;
+					// TODO handle this
 					throw $pass;
-					//throw new \Exception(
-					//	"Default create failed but can be overriden using setCallback(create, lambda). " . 
-					//	"The following message was returned : \n$append "
-					//);
 				}	
 			}	
 			
@@ -1310,7 +1294,6 @@ abstract class Model extends Delegator
 		
 		// check if receiver has beenb passed as argument 
 		if (isset($arguments[0]) && ($model = $arguments[0]) instanceof Model) {
-			//echo "calling create callbacks"; exit;
 			// because runCallbacks is a protected method, we use the send method 
 			// to by-pass access modifier; sorry folks, this is the only way to do
 			// this without creating a static create and instance create method
@@ -1443,8 +1426,6 @@ abstract class Model extends Delegator
 						!$relation->exists())      {
 														
 					try {
-						//echo "updating relation {$relation->ident()}\n";exit;
-						 
 						$relation->save();
 					}
 					
@@ -1673,9 +1654,7 @@ abstract class Model extends Delegator
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				//$result = $manager->find($class, $key, function($class) use ($result) {
-				//    if (strpos($class, 'CreditDebitCard') !== false) {
-				//        var_export($result); 
-				//    }
+
 				return new $class($result);
 				//});                    
 			}
@@ -1743,7 +1722,6 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore) {
-			//var_export($ignore); exit('asdf');
 		}
 		
 
@@ -1927,8 +1905,6 @@ abstract class Model extends Delegator
 		
 		
 		try {
-			//echo get_called_class() . "\n";
-			//echo "calling static $name on receiver " . get_called_class() . "<br />";
 			return parent::__callstatic($name, $arguments);
 		}
 		catch(\Exception $deferred) { }
@@ -2135,12 +2111,6 @@ abstract class Model extends Delegator
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
-		
-		//echo "attempting set on $key on {$this->ident()}\n";
-		
-
-
-		
 		// we first attempt to resolve set within parent, which
 		// is responsible for evaluating meta patterns. If they
 		// do not exist, and property does not exist, then an 
@@ -2155,7 +2125,6 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore)  {
-			//echo $ignore; 
 			$continue = true;
 		}
 		
@@ -2345,14 +2314,10 @@ abstract class Model extends Delegator
 		// check if name has been defined in methods - if so, 
 		// and method does not take arguments, call method
 		if (isset($this->_methods[$name])) {
-			
-			//var_export($this->_methods)
 			$reflection = new \ReflectionFunction(
 					$this->_methods[$name]
 			);
-			
-			
-			
+
 			// we don't want to use __get as replacement or alternative
 			// to __call, but simply to call methods, which look like
 			// properties, where it makes sense 
@@ -2486,7 +2451,6 @@ abstract class Model extends Delegator
 		// about legitimacy
 		/*
 		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
-		echo "$class + $name<br />";
 		
 		if (property_exists($this, $field = "{$class}_$name")) {
 			// @TODO having issues with alias property - doing it old fashioned way for now

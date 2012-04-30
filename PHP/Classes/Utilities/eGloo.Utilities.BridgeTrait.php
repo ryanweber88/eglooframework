@@ -12,13 +12,7 @@ trait BridgeTrait {
 		// use reflection on implementors interfaces to
 		// dynamically call interface methods
 		$reflectionClass = new \ReflectionClass($this->implementor);
-		
-		//echo get_class($this->implementor) . "\n";
-		//echo $this->implementor->assign('key', 'value');
-		//exit ('check');
-		
-		
-		
+
 		// search for method whose signature matches $name, $arguments
 		// that ONLY exists in TemplateEngineInterface
 		foreach ($reflectionClass->getInterfaces() as $interface) { 

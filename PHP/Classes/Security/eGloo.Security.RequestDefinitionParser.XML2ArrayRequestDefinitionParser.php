@@ -752,9 +752,6 @@ class XML2ArrayRequestDefinitionParser extends RequestDefinitionParser {
 			'XML2ArrayRequestDefinitionParser::NodesCached', 'RequestValidation', true );
 		$requestNode = $requestProcessingCacheRegionHandler->getObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'XML2ArrayRequestDefinitionParserNodes::' .
 			$requestLookup, 'RequestValidation', true );
-			
-		//var_export($requestNode); exit('requestNode');
-		//var_export ($allNodesCached); exit;
 
 		if ( !$requestNode && $allNodesCached ) {
 <<<<<<< HEAD:PHP/Classes/Security/XML2ArrayRequestDefinitionParser.php

@@ -114,7 +114,7 @@ class eGlooDataStoreImageContentDAO extends ImageContentDAO {
 
 				mkdir( $data_store_file_folder_path . $external_path, $mode, $recursive );
 			} catch (Exception $e){
-				echo_r($e->getMessage());
+				// TODO handle this
 			}
 		}
 
@@ -124,11 +124,6 @@ class eGlooDataStoreImageContentDAO extends ImageContentDAO {
 
 		$data_store_file_path = $data_store_file_folder_path . $external_path;
 
-
-		// die_r($imageContentDTO);
-		// TODO make sure the file uploaded properly, no errors
-		// echo_r($imageContentDTO->getImageFilePath());
-		// echo_r($data_store_file_path);
 		copy($imageContentDTO->getImageFilePath(), $data_store_file_path);
 
 		$imageContentDTO->setImageBucket( $image_bucket );

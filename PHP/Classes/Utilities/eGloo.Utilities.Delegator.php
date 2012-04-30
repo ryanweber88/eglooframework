@@ -99,9 +99,6 @@ abstract class Delegator extends Object {
 	 * scope
 	 */
 	public static function __callstatic($name, $arguments) {
-		
-		//echo "calling $name on delegator\n";
-		
 		try { 
 			return parent::__callstatic($name, $arguments);
 		}
@@ -132,11 +129,6 @@ abstract class Delegator extends Object {
 					
 					catch(\Exception $passthrough) {
 						throw new $passthrough;
-						//echo $ignore; exit;
-						
-						//throw new \Exception(
-						//	"Failed delegating method '$name' to receiver '$class' because method does not exist"
-						//);
 					}
 				}
 			}		

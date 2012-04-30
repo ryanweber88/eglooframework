@@ -62,8 +62,7 @@ class GrantAccountMoreUserInvitesRequestProcessor extends RequestProcessor {
 		} else {
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, "Granting Additional Invites FAILURE for user: $userProfileID"  );
 		}
-  		  		
-  		exit;
+
 	}
 	
 	private function processDAORequest($daoFunction, $inputValues){
@@ -73,4 +72,3 @@ class GrantAccountMoreUserInvitesRequestProcessor extends RequestProcessor {
 	}
 	
 }
-?>

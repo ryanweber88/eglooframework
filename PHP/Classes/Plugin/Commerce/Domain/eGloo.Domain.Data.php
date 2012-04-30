@@ -439,15 +439,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 				
 				else {
-					//var_export($arguments); exit;
-								
-					throw new \Exception(
-						'Statement failed because count of argument values does not match number of ' .
-						'required fields' . echo_r(array(
-							'arguments' => $arguments,
-							'fields'    => $fields
-					)));
-					
+					// TODO handle this (no echo_r's in production)
+					// throw new \Exception(
+					// 	'Statement failed because count of argument values does not match number of ' .
+					// 	'required fields' . echo_r(array(
+					// 		'arguments' => $arguments,
+					// 		'fields'    => $fields
+					// )));
 				}
 			} 
 			
@@ -520,26 +518,16 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			
 			else if ($classification == 'update') {
 				// don't know what to do here yet - specifying all columns explicitly
-				//var_export($statement); exit;
 			}
-			
-			
 		}
 
-
-				
-	
 		// retrieve data set
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
-		
-		//echo "$statement<br /><br /><br />";
-		
+
 		$result = $dataAccess->$method($statement, $arguments);
-		
-		
-		
+
 		// set result to false if we don't have a match
 		// @TODO this should be fixed at connection level,
 		// but that can be managed later - need to make sure

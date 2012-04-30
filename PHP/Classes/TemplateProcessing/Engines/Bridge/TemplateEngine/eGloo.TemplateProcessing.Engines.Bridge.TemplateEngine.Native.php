@@ -39,22 +39,15 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			
 			return $smartyNative;
 		});
-		
-		//return var_export($this->implementor->getTemplateVars(), true); exit;
-						
+
 		// assign smarty template variables to native bridge		
 		$smartyNative->assign($this->implementor->getTemplateVars());
 		$smartyNative->disabled = true;
-		
-		//var_export($this->implementor->getTemplateVars()); exit;
-		
+
 		// provide callback if native execution fails
 		return $smartyNative->execute(array(false => function($content, $smartyNative) use ($path, $cacheId) { 
-			
 			// TODO log execution failure
-			//echo 'in failed callback'; exit;
-			//var_export($_SERVER);exit;
-			
+
 			if ($smartyNative->disabled) { 
 				return $this->implementor->fetch($path, $cacheId);
 			}
@@ -86,9 +79,6 @@ class Native extends \eGloo\TemplateProcessing\Engines\Bridge\TemplateEngine {
 			return $content;			
 			
 		}));
-		
-		//echo $content; exit ('here we go');
-
 	}
 	
 

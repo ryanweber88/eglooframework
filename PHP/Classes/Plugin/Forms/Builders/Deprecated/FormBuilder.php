@@ -130,15 +130,13 @@ class FormBuilder extends TemplateBuilder {
 				$cacheGateway = CacheGateway::getCacheGateway();
 				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . $this->hardCacheID, $retVal, 'HardCache', $this->ttl);
 			} catch (Exception $e) {
-				echo_r($e->getMessage());
-				die;
+				// TODO handle this
 			}
 		} else {
 			try {
 				$retVal = $this->__fetch( $this->dispatchPath, $this->cacheID );
 			} catch (Exception $e) {
-				echo_r($e->getMessage());
-				die;
+				// TODO handle this
 			}
 		}
 
