@@ -555,14 +555,14 @@ final class eGlooLogger {
 							$mail_success = mail( $mail_to, $subject, $message );
 
 							if ( $mail_success ) {
-								$notice = 'Successfully sent uncaught exception email notification';
+								$notice = 'Successfully sent uncaught exception email notification to ' . $mail_to;
 
 								self::writeLog( self::EMERGENCY, $notice, 'Default', null, self::$timezone, self::$aggregateApplicationLogs );
 								if ( (self::DEVELOPMENT & self::$loggingLevel) && eGlooConfiguration::getDisplayTraces() ) {
 									echo_r( $notice );
 								}
 							} else {
-								$notice = 'Did not successfully send email notification';
+								$notice = 'Did not successfully send email notification to ' . $mail_to;
 
 								if ( (self::DEVELOPMENT & self::$loggingLevel) && eGlooConfiguration::getDisplayTraces() ) {
 									echo_r( $notice );
