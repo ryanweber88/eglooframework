@@ -583,7 +583,7 @@ abstract class ObjectSafe {
 	 */
 	public function __get($name) {
 		
-	
+
 		// check if property name is a "deferrable" property, in which case we
 		// fire lambda, and set property value with return from lambda; defers
 		// can only be used once, so the deferrable will be dropped after execution 
@@ -601,9 +601,8 @@ abstract class ObjectSafe {
 			// if a value has been returned, then call __set
 			// on property
 			if (!is_null($value)) {
-				$this->$field = $value;
+				$this->$name = $value;
 			};
-				
 		
 			// and now return value
 			return isset($this->$name) 

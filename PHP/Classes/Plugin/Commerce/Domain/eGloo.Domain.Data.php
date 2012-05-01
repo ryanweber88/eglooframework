@@ -524,6 +524,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// point in return a multi-result set if performing an insert
 		// for example
 
+
 		$result = $dataAccess->$method($statement, $arguments);
 
 		// set result to false if we don't have a match

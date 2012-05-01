@@ -1048,7 +1048,7 @@ abstract class Model extends Delegator
 		// define a generic create callback based on
 		// model convention
 		$this->defineCallback('update', function() use ($self) {
-			
+						
 			// check that a create callback has not already been created - this is to ensure
 			// we don't face double inserts
 			// @TODO since this was added late in the lifecycle of model design, there already
