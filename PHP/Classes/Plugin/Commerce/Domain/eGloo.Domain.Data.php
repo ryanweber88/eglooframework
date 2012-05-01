@@ -148,14 +148,11 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 								
 				if (isset($idioms['where'])) {
 					if (is_array($where = $idioms['where']) && count($where)) {
-						
-						// our where idiom is not required, persay, but will be
-						// used in most cases
-						foreach ($where as $condition) {
-							$conditions[] = $condition;
-						}
-						
-						//$conditions = implode(",\n", $conditions);
+						$conditions = $idioms['where'];
+					}
+					
+					else {
+						$conditions = array($idioms['where']);
 					}
 				}
 

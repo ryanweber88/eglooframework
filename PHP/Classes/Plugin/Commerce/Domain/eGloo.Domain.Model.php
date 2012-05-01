@@ -26,6 +26,9 @@ abstract class Model extends Delegator
 		// instance or Domain\Data
 		parent::__construct(static::data());
 
+		// call our validates method, which provides validation definitions
+		// for Model attributes
+		$this->__validates();
 		
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
@@ -331,6 +334,11 @@ abstract class Model extends Delegator
 		
 		
 	}
+	
+	/**
+	 * A "method space" to provide validation definitions
+	 */
+	protected function __validates() { }
 
 	/**
 	 * Responsible for initialize of model attributes
@@ -374,6 +382,8 @@ abstract class Model extends Delegator
 	public function initialized() {
 		return $this->initialized;
 	}
+	
+
 
 	/**
 	 * Determines if model exists as record in underlying database; 
@@ -2110,10 +2120,6 @@ abstract class Model extends Delegator
 		}
 		
 		catch(\Exception $ignore)  {
-			if ($key == 'size_description') {
-				echo $ignore; 
-			}
-
 			$continue = true;
 		}
 		
@@ -2123,20 +2129,23 @@ abstract class Model extends Delegator
 		// property
 		
 		if ($continue) {
+
 			
 			// if an aliased property and meta container (aliasedProperties)
 			// value is false, then this is a deferred alias, whose assignment
 			// must be proceeded by a call to __get on the property
+			// Deferred should never hit here!!
 			if ($this->isAliasedProperty($key) && 
 			    $this->_aliasedProperties[$key] === false) {
 				
+			
 				// this will fire the defer method attached to alias
 				// which will bind-by-reference the alias to the return
 				// value of deferred method
-				$this->$key;
+				//$this->$key;
 				
 				// now set value 
-				$this->$key = $value;
+				//$this->$key = $value;
 			}
 		 
 			// because we rely on certain instance fields being set

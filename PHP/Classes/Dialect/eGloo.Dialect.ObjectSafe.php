@@ -594,16 +594,17 @@ abstract class ObjectSafe {
 			// to find
 			unset($this->$name);
 			
-			// fire our deferrable closure and bind/set to $name property
-			if (!is_null($value = $this->_defers[$name]())) {
-				$this->$name = $value;
-			};
-				
-			
-			// unset deferrable from collection because remember that deferred
-			// operations, while deferred, only supposed to run once
+			// fire deferrable and unset from deferrable collection
+			$value = $this->_defers[$name]();
 			unset($this->_defers[$name]);
 			
+			// if a value has been returned, then call __set
+			// on property
+			if (!is_null($value)) {
+				$this->$field = $value;
+			};
+				
+		
 			// and now return value
 			return isset($this->$name) 
 				? $this->$name
@@ -653,7 +654,7 @@ abstract class ObjectSafe {
 	}	
 	
 	public function __set($name, $value) {
-			
+
 		// check if ruby-style attributes have been specified, in which case we
 		// fire our accessor method
 		$attr = &$this->_attributes;
@@ -673,18 +674,28 @@ abstract class ObjectSafe {
 			return false;
 		}			
 
+		// check if defer-property; in which case we have to call __get
+		// on property to initialize defer then properly call set
+		if (isset($this->_defers[$name])) {
+			// this will fire get method, which is responsible for
+			// firing defers method; if defers returns a reference
+			// then we will be setting reference value with value
+			$this->$name;
+			$this->$name = $value;
+		}
+		
 		// if property follows pattern name__ we are attempting conditional
 		// assignment; conditional assignment is equivalent to ruby's ||=
 		// method and will only set the property if it has not yet been set
 		
 		if (preg_match('/^(.+)\_\_$/', $name, $match)) {
 			$field = $match[1];
-			
+		
 			if (!isset($this->$field) || is_null($this->$field)) {
 				$this->$field = $value;
 			}
 			
-			
+		
 			return false;
 		}
 
@@ -692,6 +703,7 @@ abstract class ObjectSafe {
 		// otherweise throw exception, because arbitrarily setting instance
 		// properties is a bad fucking idea
 		$class = get_called_class();
+		
 		
 		throw new \Exception(
 			"Failed setting instance property '$name' in receiver '{$this->ident()}' because it does not exist "		
