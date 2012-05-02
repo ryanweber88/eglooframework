@@ -375,11 +375,18 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				$arguments = array();
 				$counter   = 0;
 				
+
+
 				
 				foreach($fields as $attribute) {
 					
 					// another great wtfphp moment, empty call on a variable with a 0 value return true
-					if (isset($model->$attribute) && (!empty($model->$attribute) || $model->$attribute === 0)) {				
+					if (isset($model->$attribute)     && 
+					
+					    (!empty($model->$attribute)   || 
+					     $model->$attribute === 0     || 
+					     $model->$attribute === '0')) {
+					     					
 						$arguments[ isset($arguments[$attribute]) ? $attribute . $counter++ : $attribute ] = $model->$attribute;
 					}
 					
@@ -389,7 +396,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						//);
 					}	
 				}
-				
+			
 								
 			}
 	
