@@ -215,7 +215,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function statement_sql($statement, $__mixed = null) {
 		echo_r(str_replace("\t", null, $statement)); 
-		echo_r($__mixed);
+		echo_r(func_get_args());
 		exit;
 	}
 	
@@ -223,7 +223,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * @TEMP
 	 */
 	public static function statement_result($statement, $__mixed = null) {
-		echo_r(static::statement($statement, $__mixed));
+		echo_r(static::statement($statement, array_slice(func_get_args(), 1)));
 		exit;
 	}
 		
@@ -352,6 +352,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 			}	
 
+
+			// trim fields in case our regexp above missed whitespace
 			foreach ($fields as $key => $value) {
 				$fields[$key] = trim($value);
 			}
@@ -363,7 +365,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			// work so use with caution
 
 			if (isset($arguments[0]) && 
-					($model = $arguments[0]) instanceof Model) {
+				  ($model = $arguments[0]) instanceof Model) {
 						
 
 									 
@@ -375,7 +377,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				
 				
 				foreach($fields as $attribute) {
-					if (isset($model->$attribute) && !is_null($model->$attribute)) {				
+					
+					// another great wtfphp moment, empty call on a variable with a 0 value return true
+					if (isset($model->$attribute) && (!empty($model->$attribute) || $model->$attribute === 0)) {				
 						$arguments[ isset($arguments[$attribute]) ? $attribute . $counter++ : $attribute ] = $model->$attribute;
 					}
 					

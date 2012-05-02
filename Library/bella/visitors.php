@@ -170,9 +170,12 @@ class SQLVisitor implements Visitor
 		if ( $froms = $node->froms)
 		{
 			$from = str_replace('\'', null, $this->visit($node->froms));
-			
+			$from = str_replace('"', null, $from);
+				
 			$from_sql = " FROM {$from}";
 		}
+		
+		
 
 		$projections_sql = "";
 		
@@ -192,7 +195,7 @@ class SQLVisitor implements Visitor
 		}
 		
 		else {
-			$projections_sql = " * ";
+			$projections_sql = " $from.* ";
 		}
 		
 		// sets see if we can add the fucking joins
