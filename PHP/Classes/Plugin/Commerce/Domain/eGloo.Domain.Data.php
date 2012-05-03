@@ -12,6 +12,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 
 		// pass resource to parent constructor, that is responsible for managing connection
 		parent::__construct($resource);
+		
+
 	}
 	
 
@@ -44,10 +46,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			', $table);	
 		});
 	}
-
-
-	
-
 
 	
 	/**
@@ -112,6 +110,25 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				"Failed inserts because idiom 'into' does not exist"
 			);
 		}
+	}
+
+	/**
+	 * Retrieve transaction instance for this data object 
+	 */
+	public static function transaction($lambda = null) {
+		$class = static::classnamefull();
+		
+		$transaction = static::cache(function() use ($class) {
+			return new Data\Transaction(
+				new $class
+			);
+		});
+		
+		if (!is_null($lambda) && is_callable($lambda)) {
+			$lambda($transaction);
+		}
+		
+		return $transaction;
 	}
 
 	public static function updates(array $idioms) {

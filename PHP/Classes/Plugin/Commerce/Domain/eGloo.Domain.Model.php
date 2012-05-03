@@ -299,20 +299,39 @@ abstract class Model extends Delegator
 	
 	protected function __methods() {
 		parent::__methods();
-
+		$self = $this;
+		
 		// Provides a callback/deferred space in which to group transactions;
 
-		$this->defineMethod('transaction', function($lambda) {
+		$this->defineMethod('transaction', function($lambda) use ($self) {
 
 			// @TODO trigger begin transaction
-		
+			$self->send('runCallbacks', 'transaction', 'before');
+			
 			try {
 				$result = $lambda();
 			} 
 			
 			catch(\Exception $pass) {
+				
+				// rollback our transaction
+				$self::transaction(function($t) {
+					$t->rollback();
+				});
+				
+				// now throw exception
 				throw $pass;
 			}
+			
+			// an absolute false value also indicates that transaction
+			// should be rolled back 
+			if ($result === false) {
+				$self::transaction(function($t) {
+					$t->rollback();
+				});	
+			}
+			
+			$self->send('runCallbacks', 'transaction', 'after');
 			
 			return $result;
 		
@@ -952,6 +971,19 @@ abstract class Model extends Delegator
 		$class     = $this->class->qualified_name;
 		$signature = static::signature(); 
 		
+		$this->defineCallback('transaction', 'before', function() use ($self) {
+			$self::transaction(function($t) {
+				$t->begin();
+			});
+		});
+		
+		$this->defineCallback('transaction', 'after', function() use ($self) {
+			$self::transaction(function($t) {
+				$t->end();
+			});
+		});	
+		
+		
 		$this->defineCallback('initialize', 'after', function() use ($self, $class, $signature) {
 
 			$attributes = $class::cache($signature, function() use ($self) {
@@ -1571,30 +1603,17 @@ abstract class Model extends Delegator
 	 * pushes on new event
 	 */
 	protected function setCallback($event, $mixed, $lambda = null) {
-	
-		$point = $mixed;
-	
-		if (is_null($lambda) && is_callable($mixed)) {
-			$lambda = $mixed;
 			
-			// @TODO 'around' should not be specified inline
-			$point  = 'around';
+		
+		$this->callbacks[$event] = array();
+		
+		try {
+			$this->defineCallback($event, $mixed, $lambda);
 		}
-	
-		if (is_callable($lambda)) {
-			// reset our callback stack
-			$this->callbacks[$event] = array();
-			
-			// now push first callback on stack
-			$this->callbacks[$event][$point][] = $lambda;
+		
+		catch(\Exception $pass) {
+			throw $pass;
 		}
-	
-		else {
-			throw new \Exception(
-					"A block/lambda must be provided when defining a callback"
-			);
-		}
-	
 	}
 	
 	/**
