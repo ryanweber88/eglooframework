@@ -61,7 +61,7 @@ abstract class Model extends Delegator
 		    is_array($columns = Data::columns($signature)))            {
 		    	
 			foreach($columns as $attribute) {
-				if (!isset($this->$attribute)) {
+				if (!\property_exists($this, $attribute)) {
 					$this->$attribute = null;
 				}
 			}
@@ -440,7 +440,7 @@ abstract class Model extends Delegator
 	 * of whether model belongsTo another
 	 */
 	protected function belongsTo($mixed, $lambda = null) {
-
+		
 		$self       = $this;
 		$arguments  = Collection::flatten( func_get_args() );
 		
@@ -450,71 +450,66 @@ abstract class Model extends Delegator
 			$lambda = array_pop($arguments);
 		}
 		
+		// otherwise provide a default lambda, which makes assumptions
+		// based on convention - that this model will contain a foreign
+		// key with the name pattern table_name + id; if this is not the case
+		// it is up to the developer to determine otherwise ( ie, provide your
+		// own lambda)
+		else {
+			$lambda = function($model) use ($self) {
+		  	// belongs to convention dictates that a foreign key with name
+		  	// signature_id exists on calling model	
+		  	$field = $model::sendStatic('signature') . '_id';
+				
+		  	if (isset($self->$field)) {
+					// find, using belonged_to primary key
+			  	$result = $model::find($self->$field);
+					
+					
+					// finally aliasAttribute between foreign/primary key
+					//$self->send('aliasAttribute', $field, function & () use ($result) {
+					//	return $result->id;
+					//});
+					
+					
+					return $result;
+				}
+				
+				else {
+					throw new \Exception(
+						"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
+					);
+				}
+		  };			
+		}
+		
+		
+		// finally assign relationships; if there was a lambda contained within arguments
+		// it has been popped off the back
 		$relationships = $arguments;
 		
-			
-		foreach($relationships as $name) { 
 		
-			if (is_null($lambda)) {
-				// @TODO this is not a foolproof scheme of determining whether relationship
-				// is truely a 'belongs_to', but will do for now
-				//return $this->hasRelationship($name) &&
-			  //       \property_exists($this, $name);
-			  
-			  $this->hasOne($name, function($model) use ($self) {
-			  	// belongs to convention dictates that a foreign key with name
-			  	// signature_id exists on calling model	
-			  	$field = $model::sendStatic('signature') . '_id';
-					
-					// set self->foreign_key to null value, so that it
-					// exists on self and can be aliased to model->primarykey
-					//$self->$field = null;
-			  	
-			  	if (isset($self->$field)) {
-						// find, using belonged_to primary key
-				  	$result = $model::find($self->$field);
-						
-						
-						// finally aliasAttribute between foreign/primary key
-						$self->send('aliasAttribute', $field, function & () use ($result) {
-							return $result->id;
-						});
-						
-						
-						return $result;
-					}
-					
-					else {
-						throw new \Exception(
-							"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
-						);
-					}
-			  });
-				
-			}
+		foreach($relationships as $name) {
+			
+			// otherwise, we follow convention that foreign reference is within
+			// table, so we set property
+			// @TODO we need to grab an actual signature as opposed to making a 
+			// guess in terms 
+			/*
+			$foreignKey = strtolower(\eGlooString::toUnderscores(
+				$name
+			));
+			
+			$foreignKey .= '_id';
+		
+			// set value to null, we'll check against whether property exists
+			// when relationship is evaluated
+			$this->$foreignKey = null;	
+			*/			
 
-			else {
-			
-				// otherwise, we follow convention that foreign reference is within
-				// table, so we set property
-				// @TODO we need to grab an actual signature as opposed to making a 
-				// guess in terms 
-				$foreignKey = strtolower(\eGlooString::toUnderscores(
-					$name
-				));
-				
-				$foreignKey .= '_id';
-			
-				// set value to null, we'll check against whether property exists
-				// when relationship is evaluated
-				$this->$foreignKey = null;
-				
-				// finally, we create our 1 - 1 relationship
-				$this->hasOne($name, $lambda);	
-				
-			}
-			
-		}	
+			// finally, we create our 1 - 1 relationship
+			$this->hasOne($name, $lambda);	
+		}		
 
 	}
 	
@@ -740,10 +735,28 @@ abstract class Model extends Delegator
 			//$result->association = $association;
 			if ($result instanceof Model) {
 
+				 
 				// the the result belongs to this model - meaning
 				// that result has a foreign key with the same signature
 				// as this model, then aliasAttribute on result to top this
 				// model primary key 
+				$foreignKey = $self->sendStatic('signature') . '_id';
+				
+				if(\property_exists($result, $foreignKey)) {
+					
+					// unset the property, otherwise our aliasAttribute call will never register
+					//unset($result->$foreignKey);
+					$result->$foreignKey = $self->id;
+					// now alias foreign key on result to primary key of this model
+					$result->send('aliasAttribute', $foreignKey, function & () use ($self) {
+						return $self->id;
+					});
+					
+					// @TODO this is temporary - our alias does not fucking exist because its
+					// being deferred, thus our isset calls will return false
+					$result->$foreignKey;
+				}
+				
 				if ($association->usesJunction()) {
 					
 					/*
@@ -844,6 +857,9 @@ abstract class Model extends Delegator
 		foreach($this->validates as $attribute) {	
 			//$hasAttribute = "has_$attribute";
 			
+			// unfortunately, motherfucking references and '0' values can be viewed 
+			// as !isset === true, so we have to check against !is_null to ensure
+			// that we are not returning false positive
 			if (!isset($this->$attribute)) {
 				return false;
 			}
@@ -865,6 +881,9 @@ abstract class Model extends Delegator
 		
 		foreach($this->validates as $attribute) {
 			
+			// wtfphp once again!! unfortunately, motherfucking references and '0' values can be viewed 
+			// as !isset === true, so we have to check against !is_null to ensure
+			// that we are not returning false positive			
 			if (!isset($this->$attribute)) {
 				$attributes[] = $attribute;
 			}
@@ -1771,6 +1790,7 @@ abstract class Model extends Delegator
 						$initialValue = $self->$alias;
 					}
 					
+					
 					unset($this->$alias);			
 					
 					// for the moment, simply set aliasedProperties with alias
@@ -1789,13 +1809,12 @@ abstract class Model extends Delegator
 						//}
 						
 						$self->$alias = &$lambda();
-						
+										
 						if (!is_null($initialValue)) {
 							$self->$alias = $initialValue;
 						}
-						
-						// make note of alias within 
-						
+											
+												
 						// returning null indicates that value should NOT be assigned
 						// to $this->$alias, since we have already done so above
 						return null;
@@ -2108,6 +2127,7 @@ abstract class Model extends Delegator
 	 * @param type $value
 	 */
 	public function __set($key, $value) {
+			
 		// we first attempt to resolve set within parent, which
 		// is responsible for evaluating meta patterns. If they
 		// do not exist, and property does not exist, then an 
@@ -2303,7 +2323,6 @@ abstract class Model extends Delegator
 	 */
 	public function __get($name) {
 		
-
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
@@ -2462,10 +2481,9 @@ abstract class Model extends Delegator
 		// processing
 
 		
+
 		return parent::__get($name);
-			
-		
-		
+					
 	}	
 
 	/**

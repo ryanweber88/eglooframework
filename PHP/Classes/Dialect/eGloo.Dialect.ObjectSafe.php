@@ -603,7 +603,7 @@ abstract class ObjectSafe {
 			if (!is_null($value)) {
 				$this->$name = $value;
 			};
-		
+				
 			// and now return value
 			return isset($this->$name) 
 				? $this->$name
