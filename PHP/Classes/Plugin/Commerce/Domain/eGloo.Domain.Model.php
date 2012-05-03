@@ -396,6 +396,16 @@ abstract class Model extends Delegator
 					 
 		//return $this->initialized();
 	}
+	
+	/**
+	 * Retrieves the name of underlying entity; entity is used as lcd term 
+	 * to describe table, document, etc.
+	 * @return string
+	 */
+	public static function entityName() {
+		return static::signature();
+	}
+
 
 	/**
 	 * Overrides Object::aliasProperty to place property

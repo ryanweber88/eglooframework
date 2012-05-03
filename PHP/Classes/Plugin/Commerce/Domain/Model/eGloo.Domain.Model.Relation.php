@@ -17,7 +17,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	implements \eGloo\Utilities\ToArrayInterface {
 	
 	function __construct($model) {
-		$this->builder = new \Bella\Table($model::sendStatic('signature'));
+		$this->builder = new \Bella\Table($model::sendStatic('entityName'));
 		$this->model   = $model; 
 		
 		$this->chain = $this->builder;
