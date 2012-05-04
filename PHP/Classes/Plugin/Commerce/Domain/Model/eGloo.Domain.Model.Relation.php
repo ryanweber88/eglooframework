@@ -36,8 +36,15 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		$conditions = array();
 		
 		foreach($arguments as $key => $value) {
-			$conditions[]    = "LOWER($key) like ?";
-			$arguments[$key] = strtolower($value); 
+			
+			if (!is_numeric($value) && strpos($value, '%') !== false) { 
+				$conditions[]    = "LOWER($key) like ?";
+				$arguments[$key] = strtolower($value); 
+			}
+			
+			else {
+				$conditions[] = "$key = ?";
+			}
 		}
 		
 		return $this->where(
