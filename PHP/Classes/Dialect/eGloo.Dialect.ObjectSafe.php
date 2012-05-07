@@ -123,15 +123,26 @@ abstract class ObjectSafe {
 			$key = $mixed;
 			
 			
-			if (is_callable($mixed)) {
-				$reflection = new \ReflectionFunction($mixed);
-				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
-				$lambda     = $mixed;
+			// check if mixed is an object, or callable; because php implements
+			// callable as an instance of type Closure, the second condition will
+			// never be called - it is simply there for idiomatic reasons alone.
+			// If we have passed an object, or a lambda, a signature can be generated
+			// that uniquely identifies the instance, thus creating a key for cached
+			// value
+			if (is_object($mixed) || is_callable($mixed)) {
+				//$reflection = new \ReflectionFunction($mixed);
+				//$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+				$key = spl_object_hash($mixed);
+				
+				// now we check if mixed is indeed a closure, in which case
+				// we set lambda to mixed
+				if (is_callable($mixed)) {
+					$lambda = $mixed;
+				}
 			}
 			
-			// we are going to tack the object hash id on the end for 
-			// good effect
-			$key   .= "::" . spl_object_hash($self);
+			
+
 			$cache = &$self->reference('_cache'); 
 			
 			if (!isset($cache[$key])) {
@@ -292,6 +303,27 @@ abstract class ObjectSafe {
 				$lambda     = $mixed;
 				
 			}
+			
+			// check if mixed is an object, or callable; because php implements
+			// callable as an instance of type Closure, the second condition will
+			// never be called - it is simply there for idiomatic reasons alone.
+			// If we have passed an object, or a lambda, a signature can be generated
+			// that uniquely identifies the instance, thus creating a key for cached
+			// value
+			if (is_object($mixed) || is_callable($mixed)) {
+				//$reflection = new \ReflectionFunction($mixed);
+				//$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
+				$key = spl_object_hash($mixed);
+				
+				// now we check if mixed is indeed a closure, in which case
+				// we set lambda to mixed
+				if (is_callable($mixed)) {
+					$lambda = $mixed;
+					$class  = $lambda;
+				}
+				
+			}
+						
 			
 			// now determine if static cache has been previously
 			// set for the given key and class 

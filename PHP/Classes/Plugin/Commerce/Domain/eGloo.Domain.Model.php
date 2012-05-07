@@ -1578,13 +1578,46 @@ abstract class Model extends Delegator
 	protected function defineCallback($event, $mixed, $lambda = null) {
 	
 		$point = $mixed;
+		
 	
-		if (is_null($lambda) && is_callable($mixed)) {
-			$lambda = $mixed;
+		if (is_null($lambda)) {
+			
+			// check if mixed is either callale or an object of type Callback; if callable,
+			// it will be set on is_callable check, if not, and instsance of Callback, we 
+			// can wrap 
+			if (!is_callable($lambda = $mixed) && $mixed instanceof Model\Callback) {
+				
+				// cache the process of checking for appropriate callback method on
+				// callback instance and wrapping within closure; this can be done
+				// at class level, as there should exist only one instance of callback
+				// type
+				$self   = $this;
+				$lambda = static::cache($mixed, function() use ($mixed, $event, $self) {
+
+					// check if callback class has like/appropriately named method;
+					// if so, return as closure
+					 
+					if (\method_exists($mixed, $event)) {
+						$reflection = new ReflectionMethod(
+							$mixed, $method = "{$point}_$event"
+						);
+						
+						return $reflection->getClosure();
+						
+					}
+					
+					throw new \Exception(
+						"Failed to define callback '$event/$point' because callback instance ".
+						"'{$mixed->ident()}' does not define method '{$point}_{$event}'"
+					);
+				});
+			}
 			
 			// @TODO 'around' should not be specified inline
 			$point  = 'around';
 		}
+		
+		
 	
 		if (is_callable($lambda)) {
 			$this->callbacks[$event][$point][] = $lambda;
