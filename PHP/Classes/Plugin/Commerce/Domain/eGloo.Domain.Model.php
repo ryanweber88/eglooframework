@@ -50,23 +50,7 @@ abstract class Model extends Delegator
 			$this->initialize($__mixed);
 					
 		}
-				
-				
-		
-			
-		// assign left-over columns to model
-		// @TODO delegate this to overrideable method, or place into
-		// 'after' initialize
-		if (!in_array($signature = static::signature(), array('user')) && 
-		    is_array($columns = Data::columns($signature)))            {
-		    	
-			foreach($columns as $attribute) {
-				if (!\property_exists($this, $attribute)) {
-					$this->$attribute = null;
-				}
-			}
-			
-		}
+
 		
 		
 					
@@ -1051,130 +1035,30 @@ abstract class Model extends Delegator
 				$self->send('aliasAttribute', 'status', function & () use ($self, $field) {
 					return $self->Status->$field;
 				});
-			}		
-					
-		});
-		
-		// define a generic create callback based on
-		// model convention if there currently 
-		$this->defineCallback('create', function() use ($self) {
+			}
 
-			// check that a create callback has not already been created - this is to ensure
-			// we don't face double inserts
-			// @TODO since this was added late in the lifecycle of model design, there already
-			// exist many create callbacks - until this is cleaned up, we have to specifically
-			// check for the existence of create
-			$callbacks = &$self->reference('callbacks');
-			
-			if ($self->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
-				
-				// get instance attributes - strip the primary key if 
-				// is in list of attributes and has a null value
-				$attributes = $self->attributes();
-				$signature  = $self->send('signature');
-				
-				// apparently an associative array key with an associated value of nil is
-				// considered unset, #wtfphp
-				//if (isset($attributes[$pk = $self->primaryKeyName()]) || 
-				//    is_null($attributes[$pk])) {
-				
-				unset($attributes[$self->primaryKeyName()]);			
-				//}
-												
-				try {
-					// set primary key with result of insert - if it has been succesfully aliased,
-					// then value will be updated on true primary key
-					// @TODO composite keys? 
-					$self->id = $self::inserts(array(
-						'into'         => $self->send('signature'),
-						'using'        => $self
-					));	
-										
-					// calling false will halt callback chain
-					if (!is_null($self->id) ||  $self->id === false) {
-						return false;
+			// assign left-over columns to model
+			// @TODO delegate this to overrideable method, or place into
+			// 'after' initialize
+			if (!in_array($signature, array('user'))            && 
+			    is_array($columns = Data::columns($signature))) {
+			    	
+				foreach($columns as $attribute) {
+					if (!\property_exists($self, $attribute)) {
+						$self->$attribute = null;
 					}
-												
 				}
-				
-				// since we guesing on this insert, we ignore sql errors and make a determination
-				// in inherited classes whether insert was successful
-				catch(\Exception $pass) {
-					// TODO handle this
-					throw $pass;
-				}	
-			}	
-			
-		});
-		
-		
-		// define a generic create callback based on
-		// model convention
-		$this->defineCallback('update', function() use ($self) {
-						
-			// check that a create callback has not already been created - this is to ensure
-			// we don't face double inserts
-			// @TODO since this was added late in the lifecycle of model design, there already
-			// exist many create callbacks - until this is cleaned up, we have to specifically
-			// check for the existence of create
-			$callbacks = &$self->reference('callbacks');
-			
-			if ($self->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
-				// get instance attributes
-				$attributes = $self->attributes();
-								
-												
-				try { 
-					$self::updates(array(
-						'against'      => $self->send('signature'),
-						'using'        => $self
-					));	
+			}							
 					
-				}
-				
-				// again, since this is a guess, we ignore exception and make determination that
-				// update succeeded in child classes
-				catch(\Exception $pass) {
-					throw $pass; 	
-				}		
-			}
 		});
 		
-		$this->defineCallback('delete', function() use ($self) {
-			
-			// check that a create callback has not already been created - this is to ensure
-			// we don't face double inserts
-			// @TODO since this was added late in the lifecycle of model design, there already
-			// exist many create callbacks - until this is cleaned up, we have to specifically
-			// check for the existence of create
-			$callbacks = &$self->reference('callbacks');
-			
-			if ($self->send('hasCallbacks', 'delete', 'around') && count($callbacks['delete']['around']) == 1) {
-				
-				// @TODO replace with a flexible mechanism for deleting records; especially consider composite
-				// keys
-				$table = $self->send('signature');
-				
-				try { 
-					$self::statement("
-						DELETE 
-						
-						FROM
-							$table
-							
-						WHERE
-							{$table}_id = ? 
-							
-					", $self->id);
-				}
-				
-				catch (\Exception $pass) {
-					throw $pass;
-				}
-				
-			}
-			
-		});		
+		// redefine our create/update callback to automatically
+		// account for meta fields (last_action, last_action_taken, action_by)
+		foreach(array('create', 'update', 'delete') as $name) {
+			$this->setCallback($name, Model\Callback\CRUD::instance());	
+		}		
+		
+
 				
 	}
 

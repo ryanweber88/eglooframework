@@ -23,6 +23,12 @@ class eGloo extends Object
 		
 	}
 	
-	public function 
+	public function offsetExists($offset) {
+		
+	}
+	
+	public function offsetUnset($offset) {
+		
+	}
 	
 }
