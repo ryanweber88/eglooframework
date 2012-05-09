@@ -4,6 +4,7 @@ namespace eGloo\Domain;
 use \eGloo\Utilities\Delegator;
 use \eGloo\Utilities\InflectionsSafe;
 use \eGloo\Utilities\Collection;
+use \eGloo\Domain\Model\Callback;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -955,23 +956,33 @@ abstract class Model extends Delegator
 	
 	/**
 	 * Serializes model; removes aliases and relationships
+	 * @TODO currently we are only caching attribute values; this should be expanded
+	 * to cover the many areas of Model, including callbacks
 	 */
 	public function serialize() {
+		$attributes = array();
+			
 		foreach($this->attributes() as $attribute) {
 			// @TODO currently aliased properties are NOT removed from
 			// return of attributes method, so we are doing so explictly
 			// here	
 			if (!$this->isAliasedProperty($attribute)) {
-				
+				$attributes[] = $attribute;		
 			}
-		}
+		}	
+		
+		return serialize($attributes);
 	}
 	
 	/**
 	 * Unserializes model
+	 * @TODO currently we are only caching attribute values; this should be expanded
+	 * to cover the many areas of Model, including callbacks 
 	 */
-	public function unserialize() {
-		
+	public function unserialize($serialized) {
+		return new static(unserialize(
+			$serialized
+		));
 	}
 	
 	/** Model Constructors *****************************************************/
@@ -1108,8 +1119,15 @@ abstract class Model extends Delegator
 		// redefine our create/update callback to automatically
 		// account for meta fields (last_action, last_action_taken, action_by)
 		foreach(array('create', 'update', 'delete') as $name) {
-			$this->setCallback($name, Model\Callback\CRUD::instance());	
+			$this->setCallback($name, Callback\CRUD::instance());	
 		}		
+		
+		$this->after_find( Callback\CRUD::instance() );
+		
+		// finally lets add cache callback
+		$this->after_save( Callback\Cache::instance() );
+		$this->after_delete( Callback\Cache::instance() );
+		
 		
 
 				
@@ -1711,7 +1729,9 @@ abstract class Model extends Delegator
 				// throughout Model
 				
 				foreach($set as $model) {
-					
+					$model->send(
+						'runCallbacks', 'find', 'after'
+					);
 				}
 				
 				// replace result with temporary
@@ -1911,9 +1931,9 @@ abstract class Model extends Delegator
 	}
 
 
-/**
+
 	public function __call($name, $arguments) {
-		
+		$self = $this;		
 
 		try { 
 			return parent::__call($name, $arguments);
@@ -1922,10 +1942,19 @@ abstract class Model extends Delegator
 		
 		// if unable to find matching meta call within
 		// __call chain, determine if 
+		// check for callback shortcut methods; instead of running 
+		// defineCallback, we can run this->before_create 
+		if (preg_match('/^(before|after|around)_(.+?)$/i', $subject, $match)) {
+			$block = $this->defineMethod($name, function($mixed) use ($self, $match) {
+				$self->send('defineCallback', $event = $match[2], $match[1], $mixed)	;			
+			});
+			
+			call_user_func_array($block, $arguments);
+		}		
 		
 		throw $deferred; 
 	}
-**/
+
 	
 	public static function __callstatic($name, $arguments) {
 		
@@ -1935,7 +1964,6 @@ abstract class Model extends Delegator
 		}
 		catch(\Exception $deferred) { }
 		
-
 		// if unable to find matching meta call within
 		// __call chain, determine if a dynamic finder
 		if (preg_match('/^delete_by_(.+)$/', $name, $match)) {

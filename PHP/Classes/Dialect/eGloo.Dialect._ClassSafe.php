@@ -4,6 +4,7 @@ namespace eGloo\Dialect;
 /**
  * 
  * Similar in scope to ruby's class class object
+ * @TODO defer evaluation of properties 
  * @author Christian Calloway
  *
  */
@@ -12,21 +13,18 @@ class _ClassSafe {
 	function __construct($mixed) { 
 		//parent::__construct();
 		
-		if (is_object($mixed)) {			
-			$this->class          = get_class($mixed);
-			$this->qualified_name = get_class($mixed); 
-			
-			//$this->instance = new \WeakRef($mixed);
-			//$this->instance = $mixed;
-		}
+		$this->class = static::cache($mixed, function() use ($mixed) {
+			return is_object($mixed)
+				? get_class($mixed)
+				: $mixed;
+		});
 		
-		else { 
-			$this->class          = $mixed;
-			$this->qualified_name = $mixed; 
-		}
+		$this->aliasProperty('class', 'qualified_name');
+	
 			
 		// get class name and namespace
-		if (class_exists($this->class)) { 
+		if (class_exists($this->class)) {
+			
 			$parts           = explode('\\', $this->class);
 			$this->name      = $parts[count($parts)-1];
 			
