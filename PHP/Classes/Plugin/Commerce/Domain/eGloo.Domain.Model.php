@@ -1548,21 +1548,23 @@ abstract class Model extends Delegator
 		// can wrap 
 		if (($object = $lambda) instanceof Model\Callback) {
 			
-			
+
 			// cache the process of checking for appropriate callback method on
 			// callback instance and wrapping within closure; this can be done
 			// at class level, as there should exist only one instance of callback
 			// type
 			$self   = $this;
-			$lambda = static::cache($object, function() use ($object, $event, $self, $point) {
+			$key    = "{$object->ident()}/$event";
+			//$lambda = static::cache($object, function() use ($object, $event, $self, $point) {
 
 				// check if callback class has like/appropriately named method;
 				// if so, return as closure
+
 				 
 				if (\method_exists($object, $method = $event)                    ||
 				    \method_exists($object, $method = $point . ucfirst($event))) {
-				  
-					return function($model) use ($object, $method) {
+					
+					$lambda = function($model) use ($object, $method) {
 						call_user_func_array(
 							array($object, $method), 
 							array( $model )
@@ -1578,7 +1580,7 @@ abstract class Model extends Delegator
 					);
 				}
 				
-			});
+			//});
 		}
 
 	
@@ -1588,7 +1590,6 @@ abstract class Model extends Delegator
 		}
 	
 		else {
-			var_export($lambda); exit;
 			throw new \Exception(
 				"A block/lambda/closure must be provided when defining a callback on receiver {$this->ident()}"
 			);
@@ -1638,7 +1639,7 @@ abstract class Model extends Delegator
 		// we short-circuit execution
 		$inject = true;
 		$points = null;
-		
+						
 		if (is_null($mixed)) {
 			$points = array(
 				'before', 'around', 'after'
@@ -1654,6 +1655,7 @@ abstract class Model extends Delegator
 				$points = array( $mixed );
 			}
 		}
+		
 		
 		
 		// run our before/around callbacks
