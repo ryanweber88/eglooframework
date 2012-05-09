@@ -10,7 +10,7 @@ use \eGloo\Utilities\Collection;
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess {
+	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -25,6 +25,10 @@ abstract class Model extends Delegator
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
+		
+		// calls our index method, in which we are responsible for defining
+		// attributes which will servce as cache indicies
+		$this->__indexes();
 
 		// call our validates method, which provides validation definitions
 		// for Model attributes
@@ -170,6 +174,8 @@ abstract class Model extends Delegator
 			
 										
 			static::defineMethod('find', function($__mixed, $class) {
+				
+				
 																
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
@@ -211,6 +217,13 @@ abstract class Model extends Delegator
 
 					}
 					
+					// @TODO perform an afterFind callback
+					if ($result !== false) {
+						foreach($set as $model) {
+							$model->send('runCallbacks', 'find', 'after');
+						}
+					}
+					
 					// if a set consisting of a single element; return element, as the likely
 					// intended purpose was to retrieve a single record; otherwise return set
 					// instance
@@ -226,7 +239,6 @@ abstract class Model extends Delegator
 			
 		}
 		
-		// explicitly define all, if not aliased and not explicitly defined
 		
 		if ( !static::respondTo('all') ) {
 			static::defineMethod('all', function($class) {
@@ -339,6 +351,13 @@ abstract class Model extends Delegator
 	}
 	
 	/**
+	 * A "method space" to provide cache/index definitions
+	 */
+	protected function __indexes() {
+		$this->index('id');
+	}
+	
+	/**
 	 * A "method space" to provide validation definitions
 	 */
 	protected function __validates() { }
@@ -394,10 +413,17 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return isset($this->id)    && 
-					 !empty($this->id);
-					 
-		//return $this->initialized();
+		return isset($this->id)   && 
+					 !empty($this->id);					 
+	}
+	
+	/**
+	 * Specifies index 
+	 */
+	public function index($__mixed = null) {
+		$arguments = Collection::flatten(func_get_args());
+		
+		
 	}
 	
 	/**
@@ -922,6 +948,33 @@ abstract class Model extends Delegator
 		return $values;
 	}
 
+
+	/** Serializable Interface *************************************************/
+	// Provides method to allow model to be serialized; this is mostly used for
+	// caching
+	
+	/**
+	 * Serializes model; removes aliases and relationships
+	 */
+	public function serialize() {
+		foreach($this->attributes() as $attribute) {
+			// @TODO currently aliased properties are NOT removed from
+			// return of attributes method, so we are doing so explictly
+			// here	
+			if (!$this->isAliasedProperty($attribute)) {
+				
+			}
+		}
+	}
+	
+	/**
+	 * Unserializes model
+	 */
+	public function unserialize() {
+		
+	}
+	
+	/** Model Constructors *****************************************************/
 	
 	/**
 	 * A stubb method here to be used by concrete model classes
@@ -1199,6 +1252,7 @@ abstract class Model extends Delegator
 		return $values;
 		
 	}
+	
 
 	
 	protected function __attributes() {
@@ -1481,7 +1535,9 @@ abstract class Model extends Delegator
 					// check if callback class has like/appropriately named method;
 					// if so, return as closure
 					 
-					if (\method_exists($mixed, $event)) {
+					if (\method_exists($mixed, $method = $event)                    ||
+					    \method_exists($mixed, $method = $point . ucfirst($event))) {
+					    	
 						$reflection = new ReflectionMethod(
 							$mixed, $method = "{$point}_$event"
 						);
@@ -1489,10 +1545,10 @@ abstract class Model extends Delegator
 						return $reflection->getClosure();
 						
 					}
-					
+										
 					throw new \Exception(
 						"Failed to define callback '$event/$point' because callback instance ".
-						"'{$mixed->ident()}' does not define method '{$point}_{$event}'"
+						"'{$mixed->ident()}' does not define method '$method'"
 					);
 				});
 			}
@@ -1648,6 +1704,14 @@ abstract class Model extends Delegator
 							return new $class($record);
 						});					
 					}
+				}
+				
+				// run after find callback
+				// @TODO centralize this behavior - at the moment its interspersed 
+				// throughout Model
+				
+				foreach($set as $model) {
+					
 				}
 				
 				// replace result with temporary
@@ -2490,6 +2554,7 @@ abstract class Model extends Delegator
 	private   $initialized    = false;
 	protected $changes        = array();
 	protected $relationships  = array();
+	protected $indicies       = array();
 	protected $primaryKeyName; 
 	protected $association;
 }

@@ -1,5 +1,6 @@
 <?php
 use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Performance\Caching;
 
 /**
  * Interface/access to system level resources.. 
@@ -7,6 +8,10 @@ use \eGloo\Dialect\ObjectSafe as Object;
  */
 class eGloo extends Object 
 	implements \ArrayAccess {
+		
+	static function __static() {
+		static::$cache = new Caching\Cache;
+	}
 	
 	/** ArrayAccess interface methods *****************/
 	// ArrayAccess interface methods are used as a DIC
@@ -31,4 +36,5 @@ class eGloo extends Object
 		
 	}
 	
+	protected static $cache;
 }

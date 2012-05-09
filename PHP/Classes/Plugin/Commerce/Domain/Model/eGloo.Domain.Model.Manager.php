@@ -2,6 +2,7 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain;
+use \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * 
@@ -14,9 +15,11 @@ use \eGloo\Domain;
  * be replaced
  *
  */
-class Manager extends \eGloo\Dialect\ObjectSafe {
+class Manager extends Object {
 	
 	function __construct() {
+		parent::__construct();
+		
 		// initialize pool
 		//$this->pool = new Model\Pool($this);	
 		
@@ -34,7 +37,7 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 		// we lock the model instance to read only and insert
 		// into persistence store		
 		$model->lock();
-		$this->pool[$model->classNameFull()][$model->id] = $model;
+		$this->pool[$model::classnamefull()][$model->id] = $model;
 	}
 	
 	/**
@@ -46,7 +49,7 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 		
 		// our mixed parameter may be of either type Model or a string
 		// representing a valid, fully qualified class name
-		$class = (is_object($mixed) && $mixed instanceof Domain\Model)  
+		$class = (is_object($mixed) && $mixed instanceof Object)  
 			? $mixed->class->qualified_name
 			: $mixed;
 						
@@ -88,7 +91,20 @@ class Manager extends \eGloo\Dialect\ObjectSafe {
 	/**
 	 * Remove the entity from the persistence context
 	 */
-	public function remove ($mixed) { }
+	public function remove (Domain\Model $model) {
+		
+		// we will NOT do an explicit check to see if model
+		// has previously been attached to persistence context
+		// as that onus is upon the developer to check explicitly
+		unset($this->pool[$model::classnamefull()][$model->id]);
+	}
+	
+	/**
+	 * This is stubbed for the time being: since our objects are currently all
+	 * references and locking hasn't yet been implemented, i don't know how
+	 * to proceed from this point
+	 */
+	public function merge(Domain\Model $model) { }
 	
 	/**
 	 * Synchronize the persistence context to the underlying database.

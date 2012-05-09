@@ -570,7 +570,15 @@ abstract class ObjectSafe {
 	 * Aliases to Singleton trait - will be replaced with 5.4
 	 */
 	public static function instance($arguments = null) {
-		if (is_null(static::$_singleton)) {
+		return static::singleton($arguments);
+	}
+	
+	/**
+	 * Aliases to singleton trait
+	 * @TODO replace in php 5.4
+	 */
+	public static function singleton($arguments = null) {
+		return static::cache(get_called_class(), function() use ($arguments) {
 			$reflection = new \ReflectionClass(
 				get_called_class()
 			);
@@ -581,8 +589,8 @@ abstract class ObjectSafe {
 			catch(\Exception $toCaller) {
 				throw $toCaller;
 			}
-		}
-	}
+		});
+	} 
 	
 	public function hash() {
 		return spl_object_hash($this);
