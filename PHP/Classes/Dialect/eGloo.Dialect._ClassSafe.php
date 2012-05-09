@@ -5,6 +5,7 @@ namespace eGloo\Dialect;
  * 
  * Similar in scope to ruby's class class object
  * @TODO defer evaluation of properties 
+ * @TODO extend with object; issue with recursive instantiation
  * @author Christian Calloway
  *
  */
@@ -13,13 +14,15 @@ class _ClassSafe {
 	function __construct($mixed) { 
 		//parent::__construct();
 		
-		$this->class = static::cache($mixed, function() use ($mixed) {
-			return is_object($mixed)
+		//$this->class = static::cache($mixed, function() use ($mixed) {
+		$this->class = is_object($mixed)
 				? get_class($mixed)
 				: $mixed;
-		});
+		//});
 		
-		$this->aliasProperty('class', 'qualified_name');
+		$this->qualified_name = &$this->class;
+		
+		//$this->aliasProperty('class', 'qualified_name');
 	
 			
 		// get class name and namespace

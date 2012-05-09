@@ -1538,50 +1538,57 @@ abstract class Model extends Delegator
 	
 		if (is_null($lambda)) {
 			
-			// check if mixed is either callale or an object of type Callback; if callable,
-			// it will be set on is_callable check, if not, and instsance of Callback, we 
-			// can wrap 
-			if (!is_callable($lambda = $mixed) && $mixed instanceof Model\Callback) {
-				
-				// cache the process of checking for appropriate callback method on
-				// callback instance and wrapping within closure; this can be done
-				// at class level, as there should exist only one instance of callback
-				// type
-				$self   = $this;
-				$lambda = static::cache($mixed, function() use ($mixed, $event, $self) {
+			// @TODO 'around' should not be specified inline
+			$point  = 'around';
+			$lambda = $mixed;
+		}
+			
+		// check if mixed is an object of type Callback; if callable,
+		// it will be set on is_callable check, if not, and instsance of Callback, we 
+		// can wrap 
+		if (($object = $lambda) instanceof Model\Callback) {
+			
+			
+			// cache the process of checking for appropriate callback method on
+			// callback instance and wrapping within closure; this can be done
+			// at class level, as there should exist only one instance of callback
+			// type
+			$self   = $this;
+			$lambda = static::cache($object, function() use ($object, $event, $self, $point) {
 
-					// check if callback class has like/appropriately named method;
-					// if so, return as closure
-					 
-					if (\method_exists($mixed, $method = $event)                    ||
-					    \method_exists($mixed, $method = $point . ucfirst($event))) {
-					    	
-						$reflection = new ReflectionMethod(
-							$mixed, $method = "{$point}_$event"
+				// check if callback class has like/appropriately named method;
+				// if so, return as closure
+				 
+				if (\method_exists($object, $method = $event)                    ||
+				    \method_exists($object, $method = $point . ucfirst($event))) {
+				  
+					return function($model) use ($object, $method) {
+						call_user_func_array(
+							array($object, $method), 
+							array( $model )
 						);
-						
-						return $reflection->getClosure();
-						
-					}
-										
+					};
+					 
+				}
+							
+				else {
 					throw new \Exception(
 						"Failed to define callback '$event/$point' because callback instance ".
 						"'{$mixed->ident()}' does not define method '$method'"
 					);
-				});
-			}
-			
-			// @TODO 'around' should not be specified inline
-			$point  = 'around';
+				}
+				
+			});
 		}
-		
-		
+
+	
 	
 		if (is_callable($lambda)) {
 			$this->callbacks[$event][$point][] = $lambda;
 		}
 	
 		else {
+			var_export($lambda); exit;
 			throw new \Exception(
 				"A block/lambda/closure must be provided when defining a callback on receiver {$this->ident()}"
 			);
@@ -1653,17 +1660,14 @@ abstract class Model extends Delegator
 		foreach($points as $point) {
 			if (isset($this->callbacks[$event][$point])) {
 				foreach($this->callbacks[$event][$point] as $callback) {
-					if (($inject = $callback($inject)) === false) {
+					if (($callback($this)) === false) {
 						return ;
 					}
 				}
 			}		
 		}
 
-		
-		// @TODO retrieving a value from a callback seems 
-		// like it is not the best idea, make but
-		return $inject;
+
 	
 	}
 
@@ -1944,12 +1948,12 @@ abstract class Model extends Delegator
 		// __call chain, determine if 
 		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
-		if (preg_match('/^(before|after|around)_(.+?)$/i', $subject, $match)) {
+		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
 			$block = $this->defineMethod($name, function($mixed) use ($self, $match) {
 				$self->send('defineCallback', $event = $match[2], $match[1], $mixed)	;			
 			});
 			
-			call_user_func_array($block, $arguments);
+			return call_user_func_array($block, $arguments);
 		}		
 		
 		throw $deferred; 

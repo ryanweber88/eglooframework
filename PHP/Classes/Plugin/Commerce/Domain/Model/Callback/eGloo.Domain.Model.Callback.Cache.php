@@ -1,5 +1,5 @@
 <?php
-namespace \eGloo\Domain\Model\Callback;
+namespace eGloo\Domain\Model\Callback;
 
 use \eGloo\Domain,
     \eGloo\Performance\Caching;

@@ -1,6 +1,7 @@
 <?php
 namespace eGloo\Domain\Model\Callback;
 
+use \eGloo\Domain;
 use \eGloo\Domain\Model;
 use \eGloo\Dialect\ObjectSafe as Object;
 
@@ -10,7 +11,7 @@ use \eGloo\Dialect\ObjectSafe as Object;
  */
 class CRUD extends Model\Callback {
 	
-	public function update($model) {
+	public function update(Domain\Model $model) {
 
 						
 		// check that a create callback has not already been created - this is to ensure
@@ -40,7 +41,9 @@ class CRUD extends Model\Callback {
 		
 	}
 	
-	public function create($model) {
+	public function create(Domain\Model $model) {
+
+
 		// check that a create callback has not already been created - this is to ensure
 		// we don't face double inserts
 		// @TODO since this was added late in the lifecycle of model design, there already
@@ -77,7 +80,7 @@ class CRUD extends Model\Callback {
 		}			
 	}
 	
-	public function delete($model) {
+	public function delete(Domain\Model $model) {
 		// check that a create callback has not already been created - this is to ensure
 		// we don't face double inserts
 		// @TODO since this was added late in the lifecycle of model design, there already
@@ -111,5 +114,5 @@ class CRUD extends Model\Callback {
 		}		
 	}
 	
-	public function afterFind($model) { }
+	public function afterFind(Domain\Model $model) { }
 }

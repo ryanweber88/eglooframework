@@ -9,20 +9,19 @@ namespace eGloo\Dialect;
 abstract class ObjectSafe {
 	
 	function __construct() {
-		
-		// ClassSafe is a class metaclass instance; here we statically cache it
-		// and key it fully qualified class name
 		$self = $this;
-		
-		$this->class = static::cache(get_called_class(), function() use ($self) {
-			return new _ClassSafe($self);
-		});
 		
 		// fire our alias properties and methods
 		//$this->aliasMethods();
 		//$this->aliasProperties();
 		$this->__methods();
 		$this->__properties();
+		
+		// ClassSafe is a class metaclass instance; here we statically cache it
+		// and key it fully qualified class name
+		$this->class = static::cache(get_called_class(), function() use ($self) {
+			return new _ClassSafe($self);
+		});		
 		
 		// provide some generic attr_reader properties
 		$this->attr_reader('ident');
@@ -578,10 +577,9 @@ abstract class ObjectSafe {
 	 * @TODO replace in php 5.4
 	 */
 	public static function singleton($arguments = null) {
-		return static::cache(get_called_class(), function() use ($arguments) {
-			$reflection = new \ReflectionClass(
-				get_called_class()
-			);
+	
+		return static::cache($class = get_called_class(), function() use ($arguments, $class) {
+			$reflection = new \ReflectionClass($class);
 			
 			try {
 				return $reflection->newInstance($arguments);
@@ -830,7 +828,7 @@ abstract class ObjectSafe {
 	 * Returns fully qualified class name with instance hash
 	 */
 	public function identifyInstance() {
-		$class = $this->classNameFull();
+		$class = get_class($this);
 		$hash  = spl_object_hash($this);
 		
 		return "$class<$hash>";
