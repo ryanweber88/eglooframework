@@ -5,6 +5,7 @@ use \eGloo\Configuration as Configuration;
 use \eGloo\Utility\Logger as Logger;
 use \Exception as Exception;
 use \Memcache as Memcache;
+use \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * eGloo\Performance\Caching\Gateway Class File
@@ -44,28 +45,32 @@ use \Memcache as Memcache;
  * @subpackage Caching
  * @TODO implement tiered storage; currently only supports memcache
  */
-class Gateway {
+class Gateway extends Object {
 
 	private $_active = false;
 	private $_memcache = null;
 	private $_filecache = null;
 	private $_cache_file_path = '';
 	private $_cache_tiers = 0x0;
-
+	private $_memcache_servers = array();
 	private $_piping_hot_cache = array();
 
 	const USE_APCCACHE		= 0x1;		// 0000 0001
 	const USE_FILECACHE		= 0x2;		// 0000 0010
 	const USE_MEMCACHE		= 0x4;		// 0000 0100
+	
+	const DFLT_NAMESPACE  = 'Other';
+	const MEMCACHED_HOST  = '127.0.0.1';
+	const MEMCACHED_PORT  = 11211;
 
-	private static $_singleton;
-
-	private $_memcache_servers = array();
-
-	const MEMCACHED_HOST = '127.0.0.1';
-	const MEMCACHED_PORT = 11211;
-
-	private function __construct() {}
+	function __construct() {
+		parent::__construct();
+		
+		// @TODO constructor is meant to be private so as to
+		// force singleton (not yet implemented)
+		//$this->privateClassMethod();
+		
+	}
 
 	private function loadMemcache() {
 		if ($this->_active) {
@@ -221,7 +226,7 @@ class Gateway {
 
 				$this->_memcache_servers['Templating'] = $newMemcacheServer;
 
-				// Other
+				// Model
 				$newMemcacheServer = new Memcache();
 				
 				for ($i = $i; $i <= 9; $i++) {
@@ -234,7 +239,41 @@ class Gateway {
 													$status,
 													$failure_callback );
 				}
+				
+				$this->_memcache_servers['Model'] = $newMemcacheServer;
+				
+				
+				// Query
+				$newMemcacheServer = new Memcache();
+				
+				for ($i = $i; $i <= 10; $i++) {
+					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
+													self::MEMCACHED_PORT + $i,
+													$persist_connection,
+													$weight,
+													$timeout,
+													$retry_interval,
+													$status,
+													$failure_callback );
+				}
 
+				$this->_memcache_servers['Query'] = $newMemcacheServer;
+				
+				
+				// Other
+				$newMemcacheServer = new Memcache();
+				
+				for ($i = $i; $i <= 11; $i++) {
+					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
+													self::MEMCACHED_PORT + $i,
+													$persist_connection,
+													$weight,
+													$timeout,
+													$retry_interval,
+													$status,
+													$failure_callback );
+				}
+				
 				$this->_memcache_servers['Other'] = $newMemcacheServer;
 
 			} catch ( Exception $exception ) {
@@ -245,6 +284,11 @@ class Gateway {
 			
 		}
 	}
+
+	protected static function instance($arguments = null) {
+		return static::getCacheGateway();
+	}
+	
 
 	private function loadFileCache() {
 		if ($this->_active) {
@@ -395,10 +439,49 @@ class Gateway {
 
 		return $retVal;
 	}
+	
+	/**
+	 * Retrieves list of memcache keys
+	 */
+	public function keys($namespace = null) {
+		
+		//var_export($this->_memcache_servers['Model']);
+		
+		if (is_null($namespace)) {
+			$namespace = 'Other';
+		}
+    $list     = array();
+		$memcache = $this->_memcache_servers[$namespace]; 
+    $allSlabs = $memcache->getExtendedStats('slabs');
+    $items = $memcache->getExtendedStats('items');
+		
+    foreach($allSlabs as $server => $slabs) {
+    				
+			if ($slabs === false) {
+				var_export($allSlabs); exit;
+			}
+	
+        foreach($slabs as $slabId => $slabMeta) {
+           $cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
+            foreach($cdump as $keys => $arrVal) {
+                if (!is_array($arrVal)) continue;
+                foreach($arrVal as $k => $v) {                   
+                   $list[] = $k; 
+                }
+           }
+        }
+    }
+		
+		return $list;
+	}
 
 	public function storeObject( $id, $obj, $namespace = null, $ttl = 0, $keep_hot = false ) {
 		// TODO extensive error checking and input validation
 		$retVal = null;
+		
+		//if (is_object($obj) && $obj instanceof CacheKeyInterface) {
+		//	$id = $obj->cacheKey();
+		//}
 
 		if ($this->_active) {
 			if ( !$namespace ) {

@@ -613,7 +613,13 @@ abstract class ObjectSafe {
 		return new \eGloo\Utilities\Caller(debug_backtrace());
 	}	
 	
-	
+	protected function privateClassMethod($__mixed = null) {
+		// changes method visibility	
+		$arguments = Collection::flatten(func_get_args());
+		
+		
+		
+	}
 
 	
 	/**

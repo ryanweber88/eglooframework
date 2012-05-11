@@ -5,13 +5,14 @@ use \eGloo\Utilities\Delegator;
 use \eGloo\Utilities\InflectionsSafe;
 use \eGloo\Utilities\Collection;
 use \eGloo\Domain\Model\Callback;
+use \eGloo\Performance\Caching;
 
 /**
  * Superclass for all domain models; provides generic functionality
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable {
+	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, Caching\CacheKeyInterface {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -180,7 +181,7 @@ abstract class Model extends Delegator
 																
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
-				$arguments = \eGloo\Utilities\Collection::flatten(func_get_args());
+				$arguments = Collection::flatten(func_get_args());
 				$table     = $class::sendStatic('signature');
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
@@ -200,6 +201,11 @@ abstract class Model extends Delegator
 							// check if model has already been persisted
 							// @TODO this needs to be converted to single statement ASAP  
 							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
+								
+								// check model cache to determine if 
+								// TODO explicitly create model cache?
+								$cache = Caching\Gateway::instance();
+															
 								$result = $class::sendStatic('process', $class::where(array(
 									$field => $key
 								)));
@@ -414,8 +420,9 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return isset($this->id)   && 
-					 !empty($this->id);					 
+		return isset($this->id)     && 
+					 (!empty($this->id)   ||
+					  !is_null($this->id));					 
 	}
 	
 	/**
@@ -614,8 +621,8 @@ abstract class Model extends Delegator
 		// @TODO this has to be determined dynamically, but for the time being
 		// will ensure that proper model is instantiated if attempting an alias
 		// call on \Model will return \Common\Domain\Model\*
-		$ns               = '\\Common\\Domain\\Model';
-		$self             = $this;
+		$ns   = '\\Common\\Domain\\Model';
+		$self = $this;
 		
 		// determine relationship type based on either $singular parameter, 
 		// which takes prescedence, or looks at plurality using inflections
@@ -949,6 +956,19 @@ abstract class Model extends Delegator
 		return $values;
 	}
 
+	/** CacheKeyInterface Interface ********************************************/
+	// Provides method to ensure the return of valid/reliable cache key
+	
+	public function cacheKey() {
+		if ($this->exists()) {
+			$tokens = array_reverse(explode('\\', get_class($this)));
+			return "<{$this->id}>" . implode ('\\', $tokens);
+		}
+
+		throw new \Exception(
+			"Failed to generate cache key because instance {$this->ident()} does not exist"
+		);
+	}
 
 	/** Serializable Interface *************************************************/
 	// Provides method to allow model to be serialized; this is mostly used for
@@ -1123,6 +1143,7 @@ abstract class Model extends Delegator
 		}		
 		
 		$this->after_find( Callback\CRUD::instance() );
+		$this->after_find( Callback\Cache::instance() );
 		
 		// finally lets add cache callback
 		$this->after_save( Callback\Cache::instance() );
@@ -1682,6 +1703,8 @@ abstract class Model extends Delegator
 	protected static function shape($result) {
 		
 		if ($result instanceof Model\Relation) {
+			// cache based on query
+			
 			$result = $result->build();
 		}
 		
@@ -1695,10 +1718,11 @@ abstract class Model extends Delegator
 			$class     = static::classNameFull();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				return $manager->find($class, $key, function($class) use ($result) {
+				$result = $manager->find($class, $key, function($class) use ($result) {
 					return new $class($result);
 				});					
-
+				
+				$result->send('runCallbacks', 'find', 'after');
 			}
 					
 			// otherwise, we manually build set with model instances
@@ -1733,12 +1757,15 @@ abstract class Model extends Delegator
 				// run after find callback
 				// @TODO centralize this behavior - at the moment its interspersed 
 				// throughout Model
-				
+
 				foreach($set as $model) {
 					$model->send(
 						'runCallbacks', 'find', 'after'
 					);
 				}
+				
+				//$gateway = \eGloo\Performance\Caching\Gateway::getCacheGateway();
+				//var_export($gateway->keys('Model')); exit;
 				
 				// replace result with temporary
 				$result = new Model\Set($set);

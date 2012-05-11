@@ -1,7 +1,9 @@
 <?php
 namespace eGloo\Domain\Model;
 
-use eGloo\Domain;
+use \eGloo\Domain;
+use \eGloo\Utilities;
+use \eGloo\Performance\Caching;
 
 /**
  * Represents a returned set of data - can be accessed as array and is iterable over
@@ -9,7 +11,7 @@ use eGloo\Domain;
  * @author Christian Calloway
  */
 class Set extends \eGloo\Dialect\ObjectSafe
-	implements \ArrayAccess, \IteratorAggregate, \Countable, \eGloo\Utilities\ToArrayInterface {
+	implements \ArrayAccess, \IteratorAggregate, \Countable, Utilities\ToArrayInterface, \Serializable, Caching\CacheKeyInterface {
 	
 	
 	/**
@@ -944,6 +946,49 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$this->clear();
 		}
 	}
+
+	public function keys() {
+		$keys = array();
+		
+		foreach($this as $model) {
+			$keys[] = $model->id;
+		}
+		
+		return $keys;
+	}
+
+	/** Serializable Interface *************************************************/
+	
+	/**
+	 * Iterates through set and builds serialized form of set
+	 */
+	public function serialize() {
+		
+	}
+	
+	/**
+	 * Unserializes model[] data and rebuilds set
+	 */
+	public function unserialize($unserialized) {
+		
+	}
+	
+	
+
+
+	/** CacheKeyInterface Interface ********************************************/
+
+	/**
+	 * Provides a unique cache key
+	 */
+	public function cacheKey() {
+		// first reverse our set and model fully qualified class name	
+		$set   = implode('\\', array_reverse(explode('\\', get_class($this))));
+		$model = implode('\\', array_reverse(explode('\\', get_class($this)))); 
+		$keys  = implode(',',  $this->keys());
+		
+		return "<$keys><$model>$set";
+	}	
 	
 	protected $model;
 	protected $key;

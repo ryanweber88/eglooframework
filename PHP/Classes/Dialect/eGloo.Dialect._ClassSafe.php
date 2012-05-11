@@ -28,8 +28,8 @@ class _ClassSafe {
 		// get class name and namespace
 		if (class_exists($this->class)) {
 			
-			$parts           = explode('\\', $this->class);
-			$this->name      = $parts[count($parts)-1];
+			$parts      = explode('\\', $this->class);
+			$this->name = $parts[count($parts)-1];
 			
 			// make sure we are namepace exists
 			if (count($parts) > 1) {  

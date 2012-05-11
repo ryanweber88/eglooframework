@@ -95,6 +95,14 @@ class Caller extends Object {
 	public function __toString() {
 		return $this->trace[self::CALLER_INDEX]['function'];
 	}
+	
+	public function method() {
+		var_export($this->trace[self::CALLER_INDEX]); exit;
+	}
+	
+	public function object() {
+		
+	}
 
 	protected      $trace;
 	private static $cache = array();
