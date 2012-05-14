@@ -8,10 +8,10 @@ namespace eGloo\Performance\Caching;
  */
 interface StoreInterface {
 
-	abstract public function read($__mixed);
-	abstract public function write($__mixed);
-	abstract public function fetch($key, $lamda);
-	abstract public function delete($key, $__mixed = null);
-	abstract public function exists($key, $__mixed = null);
+	abstract public function read  ($name, array $options = null);
+	abstract public function write ($name, array $options = null);
+	abstract public function find  ($name, array $options = null, $lambda = null);
+	abstract public function delete($name, array $options = null);
+	abstract public function exists($name, array $options = null);
 	
 }

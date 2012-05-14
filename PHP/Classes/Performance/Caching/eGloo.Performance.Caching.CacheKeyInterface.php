@@ -5,5 +5,5 @@ interface CacheKeyInterface {
 	/*
 	 * Returns an appropriate cache key for a given model instance
 	 */
-	public function cacheKey();
+	public static function cacheKey();
 }

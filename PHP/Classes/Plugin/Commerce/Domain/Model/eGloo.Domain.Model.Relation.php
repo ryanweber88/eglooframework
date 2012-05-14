@@ -2,6 +2,7 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain,
+    \eGloo\Domain\Cache,
     \eGloo\Utilities\Collection;
 		
 		
@@ -224,7 +225,9 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		$model  = $this->model;
 		$result = null;
 				
+		
 		try {
+		
 			$result = $model::sendStatic('process', $model::statement(
 				$sql = $this->chain->to_sql(), $this->arguments
 			));

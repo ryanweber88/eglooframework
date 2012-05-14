@@ -5,7 +5,7 @@ use \eGloo\Utilities\Delegator;
 use \eGloo\Utilities\InflectionsSafe;
 use \eGloo\Utilities\Collection;
 use \eGloo\Domain\Model\Callback;
-use \eGloo\Performance\Caching;
+use \eGloo\Domain\Model\Cache;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -202,15 +202,15 @@ abstract class Model extends Delegator
 							// @TODO this needs to be converted to single statement ASAP  
 							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
 								
-								// check model cache to determine if 
+								// check model cache to determine if exists in cache already
 								// TODO explicitly create model cache?
-								$cache = Caching\Gateway::instance();
-															
-								$result = $class::sendStatic('process', $class::where(array(
-									$field => $key
-								)));
-								
-								
+								$cache  = Cache\Model::instance();
+								$result = $cache->fetch($class::createCacheKey($key), function() use ($class, $field, $key) {
+									return $class::sendStatic('process', $class::where(array(
+										$field => $key
+									)));
+								}); 
+				
 								// we know that if result is not absolute false, it will be returned
 								// as a set from our process method
 								if ($result) {
@@ -959,6 +959,9 @@ abstract class Model extends Delegator
 	/** CacheKeyInterface Interface ********************************************/
 	// Provides method to ensure the return of valid/reliable cache key
 	
+	/**
+	 * Returns a unique cache key for this instance
+	 */
 	public function cacheKey() {
 		if ($this->exists()) {
 			$tokens = array_reverse(explode('\\', get_class($this)));
@@ -968,6 +971,13 @@ abstract class Model extends Delegator
 		throw new \Exception(
 			"Failed to generate cache key because instance {$this->ident()} does not exist"
 		);
+	}
+	
+	protected static function createCacheKey($id) {
+		// not part of the CacheKeyInterface, but allows for static call
+		// when creating a cache key
+		$tokens = array_reverse(explode('\\', static::classnamefull()));
+		return "<$id>" . implode ('\\', $tokens);		
 	}
 
 	/** Serializable Interface *************************************************/
@@ -1702,8 +1712,12 @@ abstract class Model extends Delegator
 	 */
 	protected static function shape($result) {
 		
-		if ($result instanceof Model\Relation) {
+		if (($relation = $result) instanceof Model\Relation) {
 			// cache based on query
+			$class = static::classnamefull();
+			$cache = new Cache\Query;
+			
+			$result = $cache->find($result)
 			
 			$result = $result->build();
 		}

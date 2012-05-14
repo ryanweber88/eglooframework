@@ -47,7 +47,7 @@ class Collection extends \ArrayObject {
 	 * @param  mixed[](n)
 	 * @return mixed[]
 	 */
-	public static function flatten($collection) {
+	public static function flatten(array $collection) {
 		$return = array();
 		
 		array_walk_recursive($collection, function($element, $key) use (&$return) {
