@@ -258,12 +258,27 @@ class Gateway extends Object {
 				}
 
 				$this->_memcache_servers['Query'] = $newMemcacheServer;
+
+				// Query
+				$newMemcacheServer = new Memcache();
 				
+				for ($i = $i; $i <= 11; $i++) {
+					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
+													self::MEMCACHED_PORT + $i,
+													$persist_connection,
+													$weight,
+													$timeout,
+													$retry_interval,
+													$status,
+													$failure_callback );
+				}
+
+				$this->_memcache_servers['Relation'] = $newMemcacheServer;				
 				
 				// Other
 				$newMemcacheServer = new Memcache();
 				
-				for ($i = $i; $i <= 11; $i++) {
+				for ($i = $i; $i <= 12; $i++) {
 					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
 													self::MEMCACHED_PORT + $i,
 													$persist_connection,

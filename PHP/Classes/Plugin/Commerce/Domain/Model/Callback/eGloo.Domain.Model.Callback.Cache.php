@@ -3,6 +3,7 @@ namespace eGloo\Domain\Model\Callback;
 
 use \eGloo\Domain,
 		\eGloo\Domain\Model,
+		\eGloo\Domain\Cache,
     \eGloo\Performance\Caching;
     
 /**
@@ -13,15 +14,13 @@ class Cache extends Model\Callback {
 	const GATEWAY_NAMESPACE = 'Model';
 	
 	public function afterSave(Domain\Model $model) {
-		$gateway = Caching\Gateway::getCacheGateway();
+		$cache = new Cache\Model;
 
 		// invalidate cache object
-		$this->invalidate($model);
+		$this->invalidates($model);
 		
 		// save to cache
-		$gateway->storeObject(
-			$this->key($model), $model, self::GATEWAY_NAMESPACE
-		);
+		$cache->write($model);
 		
 	}
 	
@@ -29,38 +28,27 @@ class Cache extends Model\Callback {
 	 * Invalidate cache after deletion from backend
 	 */
 	public function afterDelete(Domain\Model $model) {
-		$this->invalidate($model);
+		$this->invalidates($model);
 	}
 	
 	/**
 	 * Store to cache after find
 	 */
 	public function afterFind(Domain\Model $model) {
-		$gateway = Caching\Gateway::getCacheGateway();
-		$gateway->storeObject($this->key($model), $model, self::GATEWAY_NAMESPACE);
+		$cache = new Cache\Model;
+		$cache->write($model);
 	}
 	
-	public function beforeFind(Domain\Model $model) {
-		//$gateway = Caching\Gateway::getCacheGateway();
+
+	protected function invalidates(Domain\Model $model) {
 		
-		//if (is_array($gateway->getObject($model->id))){ }
+		// iterate through model/query cache and delete any
+		// saved references
+		foreach(array(new Cache\Model, new Cache\Query) as $cache) {
+			$cache->delete($model);
+		}
+		
 	}
 	
 
-	protected function invalidate(Domain\Model $model) {
-		// responsible for invalidating all memcache records attached to
-		$gateway = Caching\Gateway::getCacheGateway();
-		$manager = Caching\Manager::instance();
-
-		// invalidate/clear cache
-		// @TODO fit indexed values into cache callback
-		// @TODO use \eGloo cache
-		//$gateway->deleteObject($model->id);			
-	}
-	
-	protected static function key(Domain\Model $model) {
-		return $model->cacheKey();
-	}
-	
-	
 }

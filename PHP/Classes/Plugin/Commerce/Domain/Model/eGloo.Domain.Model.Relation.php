@@ -2,8 +2,8 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain,
-    \eGloo\Domain\Cache,
-    \eGloo\Utilities\Collection;
+    \eGloo\Utilities\Collection,
+    \eGloo\Performance\Caching;
 		
 		
 /**
@@ -15,13 +15,15 @@ use \eGloo\Domain,
  * 
  */		
 class Relation extends \eGloo\Dialect\ObjectSafe 
-	implements \eGloo\Utilities\ToArrayInterface {
+	implements \eGloo\Utilities\ToArrayInterface, Caching\CacheKeyInterface  {
 	
 	function __construct($model) {
+		parent::__construct();
+		
+		// set instance properties and create sql AREL/Bella builder
 		$this->builder = new \Bella\Table($model::sendStatic('entityName'));
 		$this->model   = $model; 
-		
-		$this->chain = $this->builder;
+		$this->chain   = $this->builder;
 	}
 	
 	public function from($tables) {
@@ -51,6 +53,10 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		return $this->where(
 			implode(' OR ', $conditions), array_values($arguments)
 		);
+	}
+	
+	public function sql($sql) {
+		$this->sql = $sql;
 	}
 	
 	/**
@@ -210,7 +216,10 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	public function to_sql() {
-		return $this->chain->to_sql();
+		
+		return is_null($this->sql)
+			? $this->chain->to_sql() 
+			: $this->sql;
 	}
 	
 	public function limit($number) { }
@@ -224,10 +233,11 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function build() {
 		$model  = $this->model;
 		$result = null;
+		$sql    = is_null($this->sql)
+			? $this->chain->to_sql()
+			: $this->sql;
 				
-		
 		try {
-		
 			$result = $model::sendStatic('process', $model::statement(
 				$sql = $this->chain->to_sql(), $this->arguments
 			));
@@ -259,9 +269,24 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function __toArray() {
 		return $this->build()->__toArray();
 	}
+	
+	/** CacheKeyInterface ******************************************************/
+	
+	/**
+	 * Uses query + fully qualified model class name to provide
+	 * a unique cache key
+	 */
+	public function cacheKey() {
+		$tokens         = array_reverse(explode('\\', $this->model));
+		$encryptedQuery = md5($this->to_sql()); 
+		
+		
+		return "<$encryptedQuery>" . implode ('\\', $tokens);		
+	}
 
 	protected $builder;	
 	protected $chain;
 	protected $model;
+	protected $sql;
 	protected $arguments = array();
 }

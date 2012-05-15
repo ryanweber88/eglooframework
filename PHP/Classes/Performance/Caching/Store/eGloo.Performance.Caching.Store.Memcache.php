@@ -20,34 +20,39 @@ class Memcache extends Caching\Store {
 			->storeObject($name, $value, $this->server($options));		
 	}
 	
-	public function find($name, $__mixed = null) {
-		$arguments = \eGloo\Utilities\Collection::flatten(array_slice(
-			func_get_args(), 1
-		));
-		
+	public function find($name, array $options = null, $lambda) {
+
 		// check if cached item exists, in which case return
 		// to caller as is
-		if ($this->exists($name, $this->server($arguments))) {
-			return $this->read($name, $arguments);
+		if ($this->exists($name, $this->server($options))) {
+			return $this->read($name, $options);
 		}
 		
 		// otherwise, determine if block/lambda has been passed
 		// 
-		else if ($lambda = is_callable($arguments[count($arguments) - 1])) {
+		else if (is_callable($lambda)) {
 			$this
 				->cache()
-				->write($name, $value = $lambda($key, $arguments), $arguments);
+				->write($name, $value = $lambda($name, $arguments), $arguments);
 				
 			return $value;
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed to find cache with key '$name' because it does not exist and " .
+				"a callable lambda was not provided"
+			);
 		}		
 	}
 	
-	public function delete($key, array $options = null) {
-		$this->cache()
-		     ->delete($key, $this->server($options));
+	public function delete($name, array $options = null) {
+		$this
+			->cache()
+			->delete($name, $this->server($options));
 	}
 	
-	public function exists($key, array $options = null) {
+	public function exists($name, array $options = null) {
 		$value = $this
 			->cache()
 			->read($name, $this->server($options));
@@ -59,6 +64,12 @@ class Memcache extends Caching\Store {
 	
 	private function cache() {
 		return Caching\Gateway::instance();
+	}
+	
+	private function server(array $options = null) {
+		return !is_null($options) && isset($options['server'])
+			? $options['server']
+			: null; 
 	}
 	
 

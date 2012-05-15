@@ -2,7 +2,13 @@
 namespace eGloo\Performance\Caching;
 
 use \eGloo\Utilities;
+use \eGloo\Performance\Caching;
 
+/**
+ * Provides the idea of an "interface" or "bridge" to a delegated Cache\Store
+ * instance, which provides functionality in terms of storage
+ * @author Christian Calloway callowaylc@gmail.com
+ */
 class Cache extends Utilities\Delegator {
 	
 	function __construct($delegated) {
@@ -19,4 +25,5 @@ class Cache extends Utilities\Delegator {
 		}
 		
 	}
+	
 }

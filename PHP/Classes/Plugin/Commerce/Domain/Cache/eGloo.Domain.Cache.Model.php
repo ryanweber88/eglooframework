@@ -8,7 +8,7 @@ use \eGloo\Domain;
  * @author Christian Calloway callowaylc@yahoo.com
  */
 class Model extends Domain\Cache {
-	
+
 	
 	protected function server($__mixed = null) {
 		return 'Model';	

@@ -5,7 +5,8 @@ use \eGloo\Utilities\Delegator;
 use \eGloo\Utilities\InflectionsSafe;
 use \eGloo\Utilities\Collection;
 use \eGloo\Domain\Model\Callback;
-use \eGloo\Domain\Model\Cache;
+use \eGloo\Domain\Cache;
+use \eGloo\Performance\Caching;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -204,7 +205,7 @@ abstract class Model extends Delegator
 								
 								// check model cache to determine if exists in cache already
 								// TODO explicitly create model cache?
-								$cache  = Cache\Model::instance();
+								$cache  = new Cache\Model;
 								$result = $cache->fetch($class::createCacheKey($key), function() use ($class, $field, $key) {
 									return $class::sendStatic('process', $class::where(array(
 										$field => $key
@@ -261,9 +262,7 @@ abstract class Model extends Delegator
 				// does not pan out; so callers will be explicitly aware
 				try {
 					
-					$result = $class::sendStatic('process', $class::statement("
-						SELECT * FROM $table	
-					"));
+					$result = $class::sendStatic('process', $class::selects('*'));
 					
 					// our 'all' method should return an empty set if failed to return
 					// result
@@ -295,7 +294,7 @@ abstract class Model extends Delegator
 			
 			static::delegates(array(
 				'methods' => array('selects', 'search', 'like', 'where', 'from', 'join', 'limit', 'order', 'group'),
-				'to'      => new Model\Relation(static::classNameFull())
+				'to'      => new Model\Relation(static::classnamefull())
 			));
 		}
 	}
@@ -621,7 +620,9 @@ abstract class Model extends Delegator
 		// @TODO this has to be determined dynamically, but for the time being
 		// will ensure that proper model is instantiated if attempting an alias
 		// call on \Model will return \Common\Domain\Model\*
-		$ns   = '\\Common\\Domain\\Model';
+		//$ns   = '\\Common\\Domain\\Model';
+		preg_match('/^.+?Model/', $this->class->namespace, $match);
+		$ns   = $match[0];
 		$self = $this;
 		
 		// determine relationship type based on either $singular parameter, 
@@ -671,15 +672,24 @@ abstract class Model extends Delegator
 			
 		
 			if ($self->exists()) {
+					
+				// create relation instance - for time being this is used for caching
+				$relation = new Model\Relation($model);
+				
+				// check cache to determine if model exists, either as a singular
+				// or as a collection/set
+				$cache = new Cache\Relation($self);
+				
+				$result = $cache->find($relation, function() use ($model, $lambda) {
+					try {
+						return $lambda($model);
+					}
+					
+					catch(\Exception $pass) {
+						throw $pass;
+					}
+				});
 
-				
-				try {
-					$result = $lambda($model);
-				}
-				catch(\Exception $pass) {
-					throw $pass;
-				} 
-				
 			
 				
 				// if returned result is an instance of relationship, which is a query build tool
@@ -972,6 +982,61 @@ abstract class Model extends Delegator
 			"Failed to generate cache key because instance {$this->ident()} does not exist"
 		);
 	}
+	
+	/**
+	 * Convenience method to pass sql to underlying layer;
+	 * @TODO this may be removed 
+	 */
+	public static function find_by_sql($sql) {
+		$relation = new Model\Relation(
+			static::classnamefull()
+		);
+		$relation->sql($sql);
+	
+		// @TODO eventually we need to return relation as lazy load
+		// device
+		return static::process($relation);		
+	}
+	
+	public function findBySql($sql) {
+		return $this->find_by_sql($sql);
+	}
+
+	/**
+	 * This method is a temporary measure to provide a place to cache
+	 * queries; eventually this should be moved into Model\Relation
+	 * 
+	 */	
+	public static function statement($statement, $__mixed = null) {
+		
+		// create a callback/lambda to pass arguments to 
+		// Domain\Data handler method 'statement
+		$class     = static::classnamefull();
+		$arguments = func_get_args();
+		$handler   = function($mixed) use ($arguments, $class) {
+			$data = $class::data();
+			return call_user_func_array(
+				array($data, 'statement'), $arguments
+			);
+		};
+		
+		// check that statement is a select statement	
+		if (preg_match('/^\s*?select/is', $statement, $match)) {
+			
+			// we're going to use Model\Relation as query cache, since 
+			// functionality will be moved there and it encapsulates cacheKey
+			// generation
+			$relation = new Model\Relation(static::classnamefull());
+			$cache    = new Cache\Relation;
+			
+			// attempt to find the cache, or set if it has not yet been
+			// established
+			return $cache->find($relation, $handler);
+					
+		}
+		
+		return $handler();
+	}	
 	
 	protected static function createCacheKey($id) {
 		// not part of the CacheKeyInterface, but allows for static call
@@ -1700,10 +1765,10 @@ abstract class Model extends Delegator
 			}		
 		}
 
+	}
+	
 
 	
-	}
-
 	/**
 	 * "Shapes" a result set into either a model or
 	 * set of models; I don't know if I like the name of this
@@ -1714,12 +1779,7 @@ abstract class Model extends Delegator
 		
 		if (($relation = $result) instanceof Model\Relation) {
 			// cache based on query
-			$class = static::classnamefull();
-			$cache = new Cache\Query;
-			
-			$result = $cache->find($result)
-			
-			$result = $result->build();
+			$result = $relation->build();	
 		}
 		
 		else if (is_array($result) && count($result)) {
