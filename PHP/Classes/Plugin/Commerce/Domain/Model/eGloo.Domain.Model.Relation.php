@@ -233,13 +233,11 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function build() {
 		$model  = $this->model;
 		$result = null;
-		$sql    = is_null($this->sql)
-			? $this->chain->to_sql()
-			: $this->sql;
+
 				
 		try {
 			$result = $model::sendStatic('process', $model::statement(
-				$sql = $this->chain->to_sql(), $this->arguments
+				$this->to_sql(), $this->arguments
 			));
 		}
 		
@@ -279,7 +277,6 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function cacheKey() {
 		$tokens         = array_reverse(explode('\\', $this->model));
 		$encryptedQuery = md5($this->to_sql()); 
-		
 		
 		return "<$encryptedQuery>" . implode ('\\', $tokens);		
 	}

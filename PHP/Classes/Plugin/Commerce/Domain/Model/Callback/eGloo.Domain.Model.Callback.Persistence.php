@@ -1,14 +1,16 @@
 <?php
 namespace eGloo\Domain\Model\Callback;
 
-use \eGloo\Dialect\ObjectSafe as Object;
-use \eGloo\Domain\Model;
+use \eGloo\Domain,
+		\eGloo\Domain\Model,
+		\eGloo\Domain\Cache,
+    \eGloo\Performance\Caching;
 
 /**
  * Provides generic crud operations, wrapped with model callback
  * handlers
  */
-class Persistence extends Object {
+class Persistence extends Model\Callback {
 	
 	public function afterCreate($model) {
 		$manager = Model\Manager::instance();

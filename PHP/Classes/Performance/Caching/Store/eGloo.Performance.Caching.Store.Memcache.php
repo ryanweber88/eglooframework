@@ -24,17 +24,24 @@ class Memcache extends Caching\Store {
 
 		// check if cached item exists, in which case return
 		// to caller as is
-		if ($this->exists($name, $this->server($options))) {
+		if ($this->exists($name, $options)) {
+			echo "$name exists!<br />";
 			return $this->read($name, $options);
 		}
 		
 		// otherwise, determine if block/lambda has been passed
 		// 
 		else if (is_callable($lambda)) {
-			$this
-				->cache()
-				->write($name, $value = $lambda($name, $arguments), $arguments);
-				
+			echo "writing $name with lambda<br />";
+			
+			$this->write(
+				$name, $value = $lambda($name), $options 
+			);
+
+			if (strpos($name, 'Generic') !== false) {
+				var_export($this->cache()->keys('Model'));
+				exit('asdf');
+			}	
 			return $value;
 		}
 		
@@ -49,13 +56,13 @@ class Memcache extends Caching\Store {
 	public function delete($name, array $options = null) {
 		$this
 			->cache()
-			->delete($name, $this->server($options));
+			->deleteObject($name, $this->server($options));
 	}
 	
 	public function exists($name, array $options = null) {
 		$value = $this
 			->cache()
-			->read($name, $this->server($options));
+			->getObject($name, $this->server($options));
 			
 	
 		// @TODO determine what memcache returns 

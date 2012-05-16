@@ -631,19 +631,22 @@ abstract class Model extends Delegator
 			? $singular
 			: InflectionsSafe::isSingular($relationshipName);
 			
+
+			
 		// if class does not exist, then replace with generic	handler
+
 		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
 			$model = "$ns\\Generic";
-			
+
 			if (!$model::tangible($relationshipName)) {
+				var_export($model); exit;
 				throw new \Exception(
 					"Failed to create generic relation '$relationshipName' using the Generic model, because " .
 					"it cannot be determined on underlying data layer"
 				);
 			}
 		}
-		
-	
+
 		
 		// @TODO replace with Model.Relation
 		$this->relationships[$relationshipName] = $model;
@@ -674,21 +677,21 @@ abstract class Model extends Delegator
 			if ($self->exists()) {
 					
 				// create relation instance - for time being this is used for caching
-				$relation = new Model\Relation($model);
+				// $relation = new Model\Relation($model);
 				
 				// check cache to determine if model exists, either as a singular
 				// or as a collection/set
-				$cache = new Cache\Relation($self);
+				//$cache = new Cache\Relation($self);
 				
-				$result = $cache->find($relation, function() use ($model, $lambda) {
-					try {
-						return $lambda($model);
-					}
-					
-					catch(\Exception $pass) {
-						throw $pass;
-					}
-				});
+				//$result = $cache->find($relation, function() use ($model, $lambda) {
+				try {
+					$result = $lambda($model);
+				}
+				
+				catch(\Exception $pass) {
+					throw $pass;
+				}
+				//});
 
 			
 				
@@ -1011,23 +1014,27 @@ abstract class Model extends Delegator
 		
 		// create a callback/lambda to pass arguments to 
 		// Domain\Data handler method 'statement
-		$class     = static::classnamefull();
+		$class     = get_called_class();
 		$arguments = func_get_args();
 		$handler   = function($mixed) use ($arguments, $class) {
-			$data = $class::data();
+			$data = $class::sendStatic('data');
 			return call_user_func_array(
 				array($data, 'statement'), $arguments
 			);
 		};
 		
+
+		
 		// check that statement is a select statement	
 		if (preg_match('/^\s*?select/is', $statement, $match)) {
-			
+				
 			// we're going to use Model\Relation as query cache, since 
 			// functionality will be moved there and it encapsulates cacheKey
 			// generation
-			$relation = new Model\Relation(static::classnamefull());
 			$cache    = new Cache\Relation;
+			$relation = new Model\Relation($class);
+			$relation->sql($statement);
+			
 			
 			// attempt to find the cache, or set if it has not yet been
 			// established
@@ -1599,7 +1606,6 @@ abstract class Model extends Delegator
 	}
 	
 	public static function delete($__mixed) {
-		
 		$arguments = Collection::flatten(
 			func_get_args()
 		);

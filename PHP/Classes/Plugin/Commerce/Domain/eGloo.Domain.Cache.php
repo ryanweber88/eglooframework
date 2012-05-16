@@ -5,10 +5,13 @@ use \eGloo\Performance\Caching,
     \eGloo\Performance\Caching\Store;
 
 /**
- * Provides "override" methods
+ * Provides "override" methods (really the presence of them causes bridged methods
+ * found within delegated instance to NOT be called) so that classes implementing
+ * Caching\CacheKeyInterface can be passed as keys; this allows for the use of our
+ * "domain" object to be used as both keys and values 
  * @author Christian Calloway callowaylc@gmail.com
  */
-class Cache extends Caching\Cache {
+abstract class Cache extends Caching\Cache {
 	
 	function __construct($delegated = null) {
 		
@@ -28,7 +31,7 @@ class Cache extends Caching\Cache {
 	
 	
 	public function write(Caching\CacheKeyInterface $obj) {
-		return $this->delegated->write($obj->cacheKey(), $obj, $options);		
+		return $this->delegated->write($obj->cacheKey(), $obj, $this->options());		
 	}	
 	
 	public function find(Caching\CacheKeyInterface $obj, $lambda) {

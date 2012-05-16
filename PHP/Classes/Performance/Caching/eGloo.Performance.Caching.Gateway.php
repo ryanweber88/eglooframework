@@ -241,9 +241,8 @@ class Gateway extends Object {
 				}
 				
 				$this->_memcache_servers['Model'] = $newMemcacheServer;
-				
-				
-				// Query
+
+				// Relation
 				$newMemcacheServer = new Memcache();
 				
 				for ($i = $i; $i <= 10; $i++) {
@@ -257,8 +256,9 @@ class Gateway extends Object {
 													$failure_callback );
 				}
 
-				$this->_memcache_servers['Query'] = $newMemcacheServer;
-
+				$this->_memcache_servers['Relation'] = $newMemcacheServer;	
+								
+				
 				// Query
 				$newMemcacheServer = new Memcache();
 				
@@ -273,7 +273,9 @@ class Gateway extends Object {
 													$failure_callback );
 				}
 
-				$this->_memcache_servers['Relation'] = $newMemcacheServer;				
+				$this->_memcache_servers['Query'] = $newMemcacheServer;
+
+			
 				
 				// Other
 				$newMemcacheServer = new Memcache();
@@ -300,7 +302,7 @@ class Gateway extends Object {
 		}
 	}
 
-	protected static function instance($arguments = null) {
+	public static function instance($arguments = null) {
 		return static::getCacheGateway();
 	}
 	
@@ -471,11 +473,7 @@ class Gateway extends Object {
     $items = $memcache->getExtendedStats('items');
 		
     foreach($allSlabs as $server => $slabs) {
-    				
-			if ($slabs === false) {
-				var_export($allSlabs); exit;
-			}
-	
+    					
         foreach($slabs as $slabId => $slabMeta) {
            $cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
             foreach($cdump as $keys => $arrVal) {
