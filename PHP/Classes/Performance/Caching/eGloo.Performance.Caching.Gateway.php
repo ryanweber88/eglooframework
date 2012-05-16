@@ -245,16 +245,16 @@ class Gateway extends Object {
 				// Relation
 				$newMemcacheServer = new Memcache();
 				
-				for ($i = $i; $i <= 10; $i++) {
-					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
-													self::MEMCACHED_PORT + $i,
+				//for ($i = $i; $i <= 10; $i++) {
+				$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
+													self::MEMCACHED_PORT + $i++,
 													$persist_connection,
 													$weight,
 													$timeout,
 													$retry_interval,
 													$status,
 													$failure_callback );
-				}
+				//}
 
 				$this->_memcache_servers['Relation'] = $newMemcacheServer;	
 								
@@ -262,16 +262,16 @@ class Gateway extends Object {
 				// Query
 				$newMemcacheServer = new Memcache();
 				
-				for ($i = $i; $i <= 11; $i++) {
+				//for ($i = $i; $i <= 11; $i++) {
 					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
-													self::MEMCACHED_PORT + $i,
+													self::MEMCACHED_PORT + $i++,
 													$persist_connection,
 													$weight,
 													$timeout,
 													$retry_interval,
 													$status,
 													$failure_callback );
-				}
+				//}
 
 				$this->_memcache_servers['Query'] = $newMemcacheServer;
 
@@ -280,16 +280,16 @@ class Gateway extends Object {
 				// Other
 				$newMemcacheServer = new Memcache();
 				
-				for ($i = $i; $i <= 12; $i++) {
+				//for ($i = $i; $i <= 12; $i++) {
 					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
-													self::MEMCACHED_PORT + $i,
+													self::MEMCACHED_PORT + $i++,
 													$persist_connection,
 													$weight,
 													$timeout,
 													$retry_interval,
 													$status,
 													$failure_callback );
-				}
+				//}
 				
 				$this->_memcache_servers['Other'] = $newMemcacheServer;
 
@@ -524,7 +524,8 @@ class Gateway extends Object {
 						$memcacheServer = $this->_memcache_servers['Other'];
 					}
 
-					$retVal = $memcacheServer->set( $id, $obj, false, $ttl ); 
+					$retVal = $memcacheServer->set( $id, $obj, false, $ttl );
+				 
 				} catch ( Exception $exception ) {
 					Logger::writeLog( Logger::ERROR, 
 							'Memcache Cache Write for id \'' . $id . '\': ' . $exception->getMessage(), 'Memcache' );

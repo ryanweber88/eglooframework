@@ -25,7 +25,7 @@ class Memcache extends Caching\Store {
 		// check if cached item exists, in which case return
 		// to caller as is
 		if ($this->exists($name, $options)) {
-			echo "$name exists!<br />";
+			echo "$name exists<br />";
 			return $this->read($name, $options);
 		}
 		
@@ -38,9 +38,12 @@ class Memcache extends Caching\Store {
 				$name, $value = $lambda($name), $options 
 			);
 
-			if (strpos($name, 'Generic') !== false) {
-				var_export($this->cache()->keys('Model'));
-				exit('asdf');
+			if (strpos($name, 'Organization') !== false) {
+				//var_export($this->read($name, $options)); exit;
+				//var_export($this->cache()->keys('Relation'));
+				//exit('asdf');
+				//var_export($this->cache()->keys('Relation'));
+				//exit;
 			}	
 			return $value;
 		}

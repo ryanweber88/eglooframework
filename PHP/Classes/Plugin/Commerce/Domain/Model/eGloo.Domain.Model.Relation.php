@@ -275,10 +275,11 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 * a unique cache key
 	 */
 	public function cacheKey() {
-		$tokens         = array_reverse(explode('\\', $this->model));
-		$encryptedQuery = md5($this->to_sql()); 
+		$tokens             = array_reverse(explode('\\', $this->model));
+		$encryptedQuery     = md5($this->to_sql());
+		$encryptedArguments = md5(implode('/', $this->arguments));  
 		
-		return "<$encryptedQuery>" . implode ('\\', $tokens);		
+		return "<$encryptedQuery::$encryptedArguments>" . implode ('\\', $tokens);		
 	}
 
 	protected $builder;	

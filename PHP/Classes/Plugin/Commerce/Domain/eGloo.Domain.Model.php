@@ -639,7 +639,7 @@ abstract class Model extends Delegator
 			$model = "$ns\\Generic";
 
 			if (!$model::tangible($relationshipName)) {
-				var_export($model); exit;
+				echo $relationshipName; exit;
 				throw new \Exception(
 					"Failed to create generic relation '$relationshipName' using the Generic model, because " .
 					"it cannot be determined on underlying data layer"
