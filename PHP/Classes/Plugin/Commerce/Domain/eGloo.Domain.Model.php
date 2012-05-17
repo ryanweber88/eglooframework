@@ -214,16 +214,21 @@ abstract class Model extends Delegator
 								$model->id = $key;
 								
 								$result = $cache->find($model, function() use ($class, $field, $key) {
-									return $class::sendStatic('process', $class::where(array(
+									$result = $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
-								}); 
+									
 	
-								// we know that if result is not absolute false, it will be returned
-								// as a set from our process method
-								if ($result) {
-									$result = $result[0];
-								}
+									// we know that if result is not absolute false, it will be returned
+									// as a set from our process method									
+									if ($result) {
+										$result = $result[0];
+									}
+									
+									return $result;
+								}); 
+								
+								exit;
 								
 								return $result;
 							});
@@ -232,13 +237,12 @@ abstract class Model extends Delegator
 
 					}
 					
-					// @TODO perform an afterFind callback
 					// @TODO place our afterFind in background task
-					if ($result !== false) {
+					//if ($result !== false) {
 						foreach($set as $model) {
 							$model->send('runCallbacks', 'find', 'after');
 						}
-					}
+					//}
 					
 					// if a set consisting of a single element; return element, as the likely
 					// intended purpose was to retrieve a single record; otherwise return set
@@ -998,15 +1002,8 @@ abstract class Model extends Delegator
 	 * Convenience method to pass sql to underlying layer;
 	 * @TODO this may be removed 
 	 */
-	public static function find_by_sql($sql) {
-		$relation = new Model\Relation(
-			static::classnamefull()
-		);
-		$relation->sql($sql);
-	
-		// @TODO eventually we need to return relation as lazy load
-		// device
-		return static::process($relation);		
+	public static function find_by_sql($statement, $__mixed = null) {
+		return forward_static_call_array('statement', array_slice(func_get_args(), 1));
 	}
 	
 	public function findBySql($sql) {
@@ -1083,8 +1080,9 @@ abstract class Model extends Delegator
 			// return of attributes method, so we are doing so explictly
 			// here	
 			// @TODO 
+			
 			if (!$this->isAliasedProperty($attribute)) {
-				$attributes[] = $attribute;		
+				$attributes[$key] = $attribute;		
 			}
 		}	
 		
@@ -1094,9 +1092,13 @@ abstract class Model extends Delegator
 	/**
 	 * Unserializes model
 	 * @TODO currently we are only caching attribute values; this should be expanded
-	 * to cover the many areas of Model, including callbacks 
+	 * to cover the many areas of Model, including callbacks (not currently possible in 5.3,
+	 * dont know in 5.4)
 	 */
 	public function unserialize($serialized) {
+		if ($this instanceof \Common\Domain\Model\Brand) {
+			var_export(unserialize($serialized));
+		}		
 		return new static(unserialize(
 			$serialized
 		));

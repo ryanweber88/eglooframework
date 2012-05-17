@@ -328,12 +328,19 @@ abstract class ObjectSafe {
 			// set for the given key and class 
 			$cache = &$class::referenceStatic('_scache');
 			
-			if (!isset($cache[$class][$key])) {
-				$cache[$class][$key] = $lambda();
+			if (!isset($cache[$class][$key]) &&
+			    !is_null($value = $lambda())) {
+			    	
+				$cache[$class][$key] = $value;
+			}		
+			
+			
+			
+			// invalidate cachhe
+			if (isset($cache[$class][$key])) {
+				return $cache[$class][$key];
 			}
-			
-			
-			return $cache[$class][$key];		
+					
 		});
 		
 		static::defineMethod('clear_cache', function($key, $class = null) {

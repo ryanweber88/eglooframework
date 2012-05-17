@@ -21,7 +21,6 @@ class Memcache extends Caching\Store {
 	}
 	
 	public function find($name, array $options = null, $lambda) {
-		//echo "finding $name<br />\n";
 
 		// check if cached item exists, in which case return
 		// to caller as is
@@ -68,8 +67,8 @@ class Memcache extends Caching\Store {
 	public function exists($name, array $options = null) {
 		$value = $this
 			->cache()
-			->getObject($name, $this->server($options));
-			
+			->exists($name, $this->server($options));
+						
 	
 		// @TODO determine what memcache returns 
 		return !is_null($value) && $value !== false;	

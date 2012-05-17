@@ -47,13 +47,13 @@ use \eGloo\Dialect\ObjectSafe as Object;
  */
 class Gateway extends Object {
 
-	private $_active = false;
-	private $_memcache = null;
-	private $_filecache = null;
-	private $_cache_file_path = '';
-	private $_cache_tiers = 0x0;
-	private $_memcache_servers = array();
-	private $_piping_hot_cache = array();
+	private   $_active = false;
+	private   $_memcache = null;
+	private   $_filecache = null;
+	private   $_cache_file_path = '';
+	private   $_cache_tiers = 0x0;
+	protected $_memcache_servers = array();
+	private   $_piping_hot_cache = array();
 
 	const USE_APCCACHE		= 0x1;		// 0000 0001
 	const USE_FILECACHE		= 0x2;		// 0000 0010
@@ -465,33 +465,54 @@ class Gateway extends Object {
 	 * Retrieves list of memcache keys
 	 */
 	public function keys($namespace = null) {
-		
-		//var_export($this->_memcache_servers['Model']);
-		
+
+		// @TODO remove hardcode for default namespace
 		if (is_null($namespace)) {
 			$namespace = 'Other';
 		}
-    $list     = array();
-		$memcache = $this->_memcache_servers[$namespace]; 
-    $allSlabs = $memcache->getExtendedStats('slabs');
-    $items = $memcache->getExtendedStats('items');
 		
-    foreach($allSlabs as $server => $slabs) {
-    			
-				if (is_array($slabs)) {		
-        foreach($slabs as $slabId => $slabMeta) {
-           $cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
-            foreach($cdump as $keys => $arrVal) {
-                if (!is_array($arrVal)) continue;
-                foreach($arrVal as $k => $v) {                   
-                   $list[] = $k; 
-                }
-           }
-        }
-			}
-    }
+		// here we are going to statically cache memcache keys,
+		// based on namespace; this is mostly done for performance
+		// reasons and works in conjunction with Gateway::exists method
+		$key  = __FUNCTION__ . "/$namespace";
+		$self = $this;
+
+		return static::cache($key, function() use ($self, $namespace) {
+	    $list     = array();
+			$servers  = &$self->reference('_memcache_servers');
+			$memcache = $servers[$namespace];
+	    $allSlabs = $memcache->getExtendedStats('slabs');
+	    $items    = $memcache->getExtendedStats('items');
+
+	    foreach($allSlabs as $server => $slabs) {
+	    			
+					if (is_array($slabs)) {		
+	        foreach($slabs as $slabId => $slabMeta) {
+	        	 try {
+	           	$cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
+						 }
+						 catch(\Exception $throw) {
+						 	return null;
+						 }
+	            foreach($cdump as $keys => $arrVal) {
+	                if (!is_array($arrVal)) continue;
+	                foreach($arrVal as $k => $v) {                   
+	                   $list[] = $k; 
+	                }
+	           }
+	        }
+				}
+	    }
+			
+			return $list;
+		});
+	}
+
+	public function exists ($id, $namespace = null) {
+		$keys = $this->keys($namespace);
 		
-		return $list;
+		return is_array($keys) && 
+		       isset($keys[$id]);
 	}
 
 	public function storeObject( $id, $obj, $namespace = null, $ttl = 0, $keep_hot = false ) {
@@ -559,6 +580,9 @@ class Gateway extends Object {
 				$this->_filecache[$id] = $cache_pack;
 			}
 		}
+
+		// reset cache that holds keys
+		static::clear_cache("keys/$namespace");
 
 		return $retVal; 
 	}
