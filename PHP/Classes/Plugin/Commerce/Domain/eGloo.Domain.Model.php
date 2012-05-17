@@ -233,6 +233,7 @@ abstract class Model extends Delegator
 					}
 					
 					// @TODO perform an afterFind callback
+					// @TODO place our afterFind in background task
 					if ($result !== false) {
 						foreach($set as $model) {
 							$model->send('runCallbacks', 'find', 'after');
@@ -2676,6 +2677,9 @@ abstract class Model extends Delegator
 		);
 	}
 		
+	public function cached() {
+		return $this->cached === true;
+	}
 	
 	
 	private function guessPrimaryKey() {
@@ -2710,7 +2714,9 @@ abstract class Model extends Delegator
 	protected $changes        = array();
 	protected $relationships  = array();
 	protected $indicies       = array();
+	protected $cached         = false;
 	protected $primaryKeyName; 
 	protected $association;
+	
 }
 

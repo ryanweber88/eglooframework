@@ -26,7 +26,12 @@ abstract class Cache extends Caching\Cache {
 	}
 	
 	public function read(Caching\CacheKeyInterface $obj) {
-		return $this->delegated->read($obj->cacheKey(), $this->options());
+		try {
+			return $this->delegated->read($obj->cacheKey(), $this->options());
+		}
+		catch (\Exception $pass) {
+			return false;
+		} 
 	}
 	
 	
