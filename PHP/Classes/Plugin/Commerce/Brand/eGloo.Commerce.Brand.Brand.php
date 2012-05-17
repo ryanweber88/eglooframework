@@ -110,12 +110,15 @@ class Brand extends Domain\Model {
 	public static function loadBrandList() {
 		$result = array();
 		$rows = BrandDataAccess::fetch()->loadBrandList();
-		
+
 		foreach ($rows as $row) {
-			$result[] = new static($row);
+			if ( intval($row['brand_id']) > 0 ) {
+				$brand = static::loadByID(intval($row['brand_id']));
+				$brand->friendly_url	= 'brand/'. BrandDataAccess::fetch()->loadBrandSlugDestination((int)$brand->brand_id);
+				$result[] = $brand;
+			}
 		}
-				
-		
+
 		return $result;
 	}
 	
