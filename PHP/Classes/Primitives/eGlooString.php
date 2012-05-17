@@ -25,13 +25,15 @@
  * @version 1.0
  */
 
+ use \eGloo\Dialect\ObjectSafe as Object;
+
 /**
  * eGlooString Class
  * 
  * @package Core
  * @subpackage Utilities
  */
-class eGlooString {
+class eGlooString extends Object {
 
 	protected $safe_html_tokens = array(
 		array('search' => '&lt;p&gt;', 'replace' => '<p>'),
@@ -47,6 +49,7 @@ class eGlooString {
 	private $string_as_UTF8 = '';
 
 	public function __construct($string) {
+		parent::__construct();
 		$this->setString($string);
 	}
 
@@ -56,6 +59,12 @@ class eGlooString {
 
 	public function getString() {
 		return $this->string_as_UTF8;
+	}
+	
+	public static function reverseTokens($delimiter, $string) {
+		return implode($delimiter, array_reverse(
+			explode($delimiter, $string)
+		));
 	}
 
 	public static function UTF8Encode($string) {

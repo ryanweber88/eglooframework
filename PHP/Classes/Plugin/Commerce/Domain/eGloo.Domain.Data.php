@@ -252,7 +252,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * @param variable-length $__mixed
 	 */
 	public static function statement($statement, $__mixed = null) {
-		
+			
+		//echo "calling statement:$statement<br /><br />";
 
 		
 		// make sence of our params - we are providing variable length argument

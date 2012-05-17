@@ -41,9 +41,10 @@ class Cache extends Model\Callback {
 	public function afterFind(Domain\Model $model) {
 		$cache = new _Cache\Model;
 		
-		if (!$cache->exists($model)) {
+		// @TODO removed exists here as its a slight hit on performance
+		//if (!$cache->exists($model)) {
 			$cache->write($model);
-		}
+		//}
 	}
 	
 

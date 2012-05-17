@@ -253,7 +253,11 @@ class Gateway extends Object {
 													$timeout,
 													$retry_interval,
 													$status,
-													function($__mixed) { throw new \Exception(var_export(func_get_args())); } );
+													function($__mixed) {
+														throw new \Exception(var_export(func_get_args())); 
+													} 
+													
+				);
 				//}
 
 				$this->_memcache_servers['Relation'] = $newMemcacheServer;	

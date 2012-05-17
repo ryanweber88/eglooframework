@@ -1041,6 +1041,8 @@ abstract class Model extends Delegator
 			// @TODO this really hacky (using relation in this manner) 
 			// this needs to be addressed as Relation is moved away from
 			// Model (when creating )
+			// @TODO change this to query/cache as opposed to jammin
+			// into relation
 			$cache    = new Cache\Relation;
 			$relation = new Model\Relation($class);
 			$relation->sql($statement);
@@ -1807,7 +1809,7 @@ abstract class Model extends Delegator
 			// guess key for manager, and get class
 			$signature = static::signature();
 			$key       = "{$signature}_id";
-			$class     = static::classNameFull();
+			$class     = static::classnamefull();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				$result = $manager->find($class, $key, function($class) use ($result) {
@@ -1849,15 +1851,15 @@ abstract class Model extends Delegator
 				// run after find callback
 				// @TODO centralize this behavior - at the moment its interspersed 
 				// throughout Model
+				// @TODO removing afterFind callback improves performance significantly - 
+				// id prefer to have afterFind, but need a way to make performant
 
-				foreach($set as $model) {
-					$model->send(
-						'runCallbacks', 'find', 'after'
-					);
-				}
+				//foreach($set as $model) {
+					//$model->send(
+					//	'runCallbacks', 'find', 'after'
+					//);
+				//}
 				
-				//$gateway = \eGloo\Performance\Caching\Gateway::getCacheGateway();
-				//var_export($gateway->keys('Model')); exit;
 				
 				// replace result with temporary
 				$result = new Model\Set($set);
