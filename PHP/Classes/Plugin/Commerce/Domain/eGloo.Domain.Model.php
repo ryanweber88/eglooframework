@@ -1049,7 +1049,7 @@ abstract class Model extends Delegator
 			
 			// attempt to find the cache, or set if it has not yet been
 			// established
-			//return $cache->find($relation, $handler);
+			return $cache->find($relation, $handler);
 					
 		}
 		
