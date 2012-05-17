@@ -203,15 +203,22 @@ abstract class Model extends Delegator
 							// @TODO this needs to be converted to single statement ASAP  
 							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
 								
-								// check model cache to determine if exists in cache already
-								// TODO explicitly create model cache?
+								// check model cache to determine if exists in cache already; we use our
+								// static instance so we DON'T have to reinstantiate everytime we call find
+								// as it is an expensive operation and the model in this instance only serves
+								// as template of sorts (see todo)
+								// @TODO since model is really only a template, this should be replaced with
+								// Virtual Proxy concept
 								$cache  = new Cache\Model;
-								$result = $cache->fetch($class::createCacheKey($key), function() use ($class, $field, $key) {
+								$model  = $class::instance();
+								$model->id = $key;
+								
+								$result = $cache->find($model, function() use ($class, $field, $key) {
 									return $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
 								}); 
-				
+	
 								// we know that if result is not absolute false, it will be returned
 								// as a set from our process method
 								if ($result) {
@@ -1016,7 +1023,7 @@ abstract class Model extends Delegator
 		// Domain\Data handler method 'statement
 		$class     = get_called_class();
 		$arguments = func_get_args();
-		$handler   = function($mixed) use ($arguments, $class) {
+		$handler   = function() use ($arguments, $class) {
 			$data = $class::sendStatic('data');
 			return call_user_func_array(
 				array($data, 'statement'), $arguments
@@ -1031,14 +1038,18 @@ abstract class Model extends Delegator
 			// we're going to use Model\Relation as query cache, since 
 			// functionality will be moved there and it encapsulates cacheKey
 			// generation
+			// @TODO this really hacky (using relation in this manner) 
+			// this needs to be addressed as Relation is moved away from
+			// Model (when creating )
 			$cache    = new Cache\Relation;
 			$relation = new Model\Relation($class);
 			$relation->sql($statement);
+			$relation->arguments(Collection::flatten($arguments));
 			
 			
 			// attempt to find the cache, or set if it has not yet been
 			// established
-			return $cache->find($relation, $handler);
+			//return $cache->find($relation, $handler);
 					
 		}
 		
@@ -1064,10 +1075,11 @@ abstract class Model extends Delegator
 	public function serialize() {
 		$attributes = array();
 			
-		foreach($this->attributes() as $attribute) {
+		foreach($this->attributes() as $key => $attribute) {
 			// @TODO currently aliased properties are NOT removed from
 			// return of attributes method, so we are doing so explictly
 			// here	
+			// @TODO 
 			if (!$this->isAliasedProperty($attribute)) {
 				$attributes[] = $attribute;		
 			}
@@ -1510,7 +1522,7 @@ abstract class Model extends Delegator
 			
 			// reset our changed, since model is now (theoretically) in 
 			// parrallel to database
-			$model->changed = array();
+			$model->changes = array();
 			
 			// finally call after callback
 			$this->runCallbacks(__FUNCTION__, 'after');

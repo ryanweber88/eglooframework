@@ -253,7 +253,7 @@ class Gateway extends Object {
 													$timeout,
 													$retry_interval,
 													$status,
-													$failure_callback );
+													function($__mixed) { throw new \Exception(var_export(func_get_args())); } );
 				//}
 
 				$this->_memcache_servers['Relation'] = $newMemcacheServer;	
@@ -473,7 +473,8 @@ class Gateway extends Object {
     $items = $memcache->getExtendedStats('items');
 		
     foreach($allSlabs as $server => $slabs) {
-    					
+    			
+				if (is_array($slabs)) {		
         foreach($slabs as $slabId => $slabMeta) {
            $cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
             foreach($cdump as $keys => $arrVal) {
@@ -483,6 +484,7 @@ class Gateway extends Object {
                 }
            }
         }
+			}
     }
 		
 		return $list;
@@ -525,7 +527,7 @@ class Gateway extends Object {
 					}
 
 					$retVal = $memcacheServer->set( $id, $obj, false, $ttl );
-				 
+
 				} catch ( Exception $exception ) {
 					Logger::writeLog( Logger::ERROR, 
 							'Memcache Cache Write for id \'' . $id . '\': ' . $exception->getMessage(), 'Memcache' );

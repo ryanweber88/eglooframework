@@ -15,36 +15,39 @@ class Memcache extends Caching\Store {
 	}
 	
 	public function write($name, $value, array $options = null) {
-		$this
+		return $this
 			->cache()
 			->storeObject($name, $value, $this->server($options));		
 	}
 	
 	public function find($name, array $options = null, $lambda) {
+		//echo "finding $name<br />\n";
 
 		// check if cached item exists, in which case return
 		// to caller as is
 		if ($this->exists($name, $options)) {
-			echo "$name exists<br />";
 			return $this->read($name, $options);
 		}
 		
 		// otherwise, determine if block/lambda has been passed
 		// 
 		else if (is_callable($lambda)) {
-			echo "writing $name with lambda<br />";
 			
-			$this->write(
+			$result = $this->write(
 				$name, $value = $lambda($name), $options 
 			);
 
-			if (strpos($name, 'Organization') !== false) {
+			//echo "writing $name with result $result<br />\n";
+
+
+			//if (strpos($name, 'Organization') !== false) {
 				//var_export($this->read($name, $options)); exit;
 				//var_export($this->cache()->keys('Relation'));
 				//exit('asdf');
-				//var_export($this->cache()->keys('Relation'));
-				//exit;
-			}	
+				//var_export($result);
+			//	var_export($this->cache()->keys('Relation'));
+			//	exit;
+			//}	
 			return $value;
 		}
 		

@@ -40,7 +40,10 @@ class Cache extends Model\Callback {
 	 */
 	public function afterFind(Domain\Model $model) {
 		$cache = new _Cache\Model;
-		$cache->write($model);
+		
+		if (!$cache->exists($model)) {
+			$cache->write($model);
+		}
 	}
 	
 

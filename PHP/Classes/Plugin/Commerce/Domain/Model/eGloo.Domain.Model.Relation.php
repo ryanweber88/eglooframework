@@ -264,6 +264,14 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		return $result;
 	}
 	
+	/**
+	 * @TODO temporary - arguments should NOT be explicitly
+	 * set like this
+	 */
+	public function arguments($arguments) {
+		$this->arguments = $arguments;
+	}
+	
 	public function __toArray() {
 		return $this->build()->__toArray();
 	}
@@ -276,10 +284,19 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 */
 	public function cacheKey() {
 		$tokens             = array_reverse(explode('\\', $this->model));
-		$encryptedQuery     = md5($this->to_sql());
-		$encryptedArguments = md5(implode('/', $this->arguments));  
 		
-		return "<$encryptedQuery::$encryptedArguments>" . implode ('\\', $tokens);		
+		// ensure that we have sql so as to create unique key
+		if (strlen($sql = $this->to_sql()) > 0) {
+			$encryptedQuery     = md5($this->to_sql());
+			$encryptedArguments = md5(serialize($this->arguments));  
+			
+			return "<$encryptedQuery::$encryptedArguments>" . implode ('\\', $tokens);	
+		}
+		
+		// otherwise throw an exception, because we cannot create a unique key
+		throw new \Exception(
+			"Failed to create unique key for receiver '{$this->ident()}' because query is invalid"
+		);	
 	}
 
 	protected $builder;	
