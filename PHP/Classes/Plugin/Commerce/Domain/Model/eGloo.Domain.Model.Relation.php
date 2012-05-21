@@ -110,8 +110,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function where($mixed, $__arguments = null) {
 
 		$conditions = array();
-		
-				
+
 		// it is assumed that if hash, we have passed key:value pairs, and
 		// not key:? placeholders.. we push our values into arguments
 		if (is_array($mixed) && Collection::isHash($arguments = $mixed)) {
@@ -123,7 +122,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 				// that job rest with extrinsic callers?
 				$operator = 'AND';
 
-				if (!empty($value)) {
+				if (!is_null($value)) {
 					
 					if (!is_array($values = $value)) {
 						$values = array($value);
@@ -133,16 +132,15 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 						$operator = 'OR';
 					}
 					
-					
+						
 					foreach($values as $value) {
 						$groups[] = strpos($value, '%') !== false 
 							? "$field like ?"
 							: "$field = ?";
-							
+														
 						$this->arguments[] = $value;	
 					}
 										
-					//array_merge($);
 					$conditions[] = "(" . implode (" $operator ", $groups) . ")";
 					
 				} 
@@ -179,7 +177,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 				$mixed		
 			));
 		}
-
+		
 							
 		
 		// pass our conditions to where method and return instance

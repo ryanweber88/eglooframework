@@ -28,22 +28,20 @@ class Memcache extends Caching\Store {
 
 		// check if cached item exists, in which case return
 		// to caller as is
-		if ($this->exists($name, $options)) {	
-			return $this->read($name, $options);
+		if ($this->exists($name, $options)) {
+			$result = $this->read($name, $options);
 		}
-		
+	
 		// otherwise, determine if block/lambda has been passed
 		// - it is assumed that the value returned from block
 		// is now our new cache data, which will be written
 		// and returned (write-through)
 		else if (is_callable($lambda)) {
-			//if (strpos($name, 'Session') !== false) { echo "not exists<br />"; }	
-			$result = $this->write(
-				$name, $value = $lambda($name), $options 
+			$success = $this->write(
+				$name, $result = $lambda($name), $options 
 			);
 
-
-			return $value;
+			
 		}
 		
 		else {
@@ -52,6 +50,9 @@ class Memcache extends Caching\Store {
 				"a callable lambda was not provided"
 			);
 		}		
+		
+		
+		return $result;
 	}
 	
 	public function delete($name, array $options = null) {

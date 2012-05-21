@@ -420,7 +420,11 @@ class Gateway extends Object {
 							$memcacheServer = $this->_memcache_servers['Other'];
 						}
 
+
+						
 						$retVal = $memcacheServer->get( $id );
+						
+						
 
 						$this->_piping_hot_cache[$id] = $retVal;
 					} catch ( Exception $exception ) {
@@ -554,7 +558,7 @@ class Gateway extends Object {
 	 * @return boolean
 	 */
 	public function exists ($id, $namespace = 'Other') {
-	
+			
 		// retrieve cached keys for namespace
 		$keys = $this->keys($namespace);
 			

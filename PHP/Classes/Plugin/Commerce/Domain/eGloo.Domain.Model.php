@@ -213,12 +213,12 @@ abstract class Model extends Delegator
 								$model  = $class::instance();
 								$model->id = $key;
 								
+								
 								$result = $cache->find($model, function() use ($class, $field, $key) {
-									echo "in lambda";
 									$result = $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
-									
+																		
 	
 									// we know that if result is not absolute false, it will be returned
 									// as a set from our process method									
@@ -227,10 +227,12 @@ abstract class Model extends Delegator
 									}
 									
 									return $result;
-								}); 
+								});
+																
 																
 								return $result;
 							});
+							
 							
 						}
 
@@ -650,7 +652,7 @@ abstract class Model extends Delegator
 			$model = "$ns\\Generic";
 
 			if (!$model::tangible($relationshipName)) {
-				echo $relationshipName; exit;
+				echo $relationshipName; exit('asdf');
 				throw new \Exception(
 					"Failed to create generic relation '$relationshipName' using the Generic model, because " .
 					"it cannot be determined on underlying data layer"
@@ -1095,12 +1097,7 @@ abstract class Model extends Delegator
 	 * dont know in 5.4)
 	 */
 	public function unserialize($serialized) {
-		if ($this instanceof \Common\Domain\Model\Brand) {
-			var_export(unserialize($serialized));
-		}		
-		return new static(unserialize(
-			$serialized
-		));
+		$this->__construct(unserialize($serialized));
 	}
 	
 	/** Model Constructors *****************************************************/
