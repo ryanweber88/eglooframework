@@ -214,6 +214,7 @@ abstract class Model extends Delegator
 								$model->id = $key;
 								
 								$result = $cache->find($model, function() use ($class, $field, $key) {
+									echo "in lambda";
 									$result = $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
@@ -227,9 +228,7 @@ abstract class Model extends Delegator
 									
 									return $result;
 								}); 
-								
-								exit;
-								
+																
 								return $result;
 							});
 							
@@ -2155,7 +2154,7 @@ abstract class Model extends Delegator
 			$findOne = !empty($match[1]); 
 	
 			// now lets define out dynamic finder function
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+			return call_user_func_array(static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
 				
 				
 				// build string representation of query coinditionals
@@ -2175,8 +2174,7 @@ abstract class Model extends Delegator
 					unset($arguments[$count-1]);
 				} 
 				
-				try {
-
+				try {	
 					$result = $class::sendStatic('process', $class::where(
 						$conditions, $arguments
 					));
@@ -2193,17 +2191,13 @@ abstract class Model extends Delegator
 					$result = $result[0];
 				}
 				
-				
 				return $result;
 				
 				
-			});
+			}), $arguments);
 			
+	
 			
-			// now call our little pretty dynamic finder method
-			return call_user_func_array(
-		  	$block, $arguments 
-			);
 		}
 
 		// dynamic range finders

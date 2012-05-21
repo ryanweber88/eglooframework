@@ -330,7 +330,11 @@ abstract class ObjectSafe {
 			
 			if (!isset($cache[$class][$key]) &&
 			    !is_null($value = $lambda())) {
-			    	
+			    
+				if ($key == 'keys/Relation') {
+					$show = implode(',', $value);
+					//echo "setting $class/$key with $show\n";			    	
+				}
 				$cache[$class][$key] = $value;
 			}		
 			

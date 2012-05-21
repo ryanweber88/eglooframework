@@ -22,31 +22,27 @@ class Memcache extends Caching\Store {
 	
 	public function find($name, array $options = null, $lambda) {
 
+
+		//echo "finding $name <br />\n";
+
+
 		// check if cached item exists, in which case return
 		// to caller as is
-		if ($this->exists($name, $options)) {
+		if ($this->exists($name, $options)) {	
 			return $this->read($name, $options);
 		}
 		
 		// otherwise, determine if block/lambda has been passed
-		// 
+		// - it is assumed that the value returned from block
+		// is now our new cache data, which will be written
+		// and returned (write-through)
 		else if (is_callable($lambda)) {
-			
+			//if (strpos($name, 'Session') !== false) { echo "not exists<br />"; }	
 			$result = $this->write(
 				$name, $value = $lambda($name), $options 
 			);
 
-			//echo "writing $name with result $result<br />\n";
 
-
-			//if (strpos($name, 'Organization') !== false) {
-				//var_export($this->read($name, $options)); exit;
-				//var_export($this->cache()->keys('Relation'));
-				//exit('asdf');
-				//var_export($result);
-			//	var_export($this->cache()->keys('Relation'));
-			//	exit;
-			//}	
 			return $value;
 		}
 		
@@ -68,10 +64,10 @@ class Memcache extends Caching\Store {
 		$value = $this
 			->cache()
 			->exists($name, $this->server($options));
-						
-	
+			
+
 		// @TODO determine what memcache returns 
-		return !is_null($value) && $value !== false;	
+		return $value !== false;	
 	}
 	
 	private function cache() {

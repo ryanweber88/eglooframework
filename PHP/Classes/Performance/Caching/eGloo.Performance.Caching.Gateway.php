@@ -52,6 +52,7 @@ class Gateway extends Object {
 	private   $_filecache = null;
 	private   $_cache_file_path = '';
 	private   $_cache_tiers = 0x0;
+	protected $keys              = array();
 	protected $_memcache_servers = array();
 	private   $_piping_hot_cache = array();
 
@@ -228,7 +229,7 @@ class Gateway extends Object {
 
 				// Model
 				$newMemcacheServer = new Memcache();
-				
+
 				for ($i = $i; $i <= 9; $i++) {
 					$newMemcacheServer->addServer(	self::MEMCACHED_HOST,
 													self::MEMCACHED_PORT + $i,
@@ -254,13 +255,14 @@ class Gateway extends Object {
 													$retry_interval,
 													$status,
 													function($__mixed) {
-														throw new \Exception(var_export(func_get_args())); 
+														echo (var_export(func_get_args(), true)); 
 													} 
 													
 				);
 				//}
 
 				$this->_memcache_servers['Relation'] = $newMemcacheServer;	
+				
 								
 				
 				// Query
@@ -296,6 +298,7 @@ class Gateway extends Object {
 				//}
 				
 				$this->_memcache_servers['Other'] = $newMemcacheServer;
+				
 
 			} catch ( Exception $exception ) {
 				Logger::writeLog( Logger::ERROR, 
@@ -377,6 +380,9 @@ class Gateway extends Object {
 				unset($this->_filecache[$id]);
 			}
 		}
+		
+		// remove from in-memory lookup
+		unset($this->keys[$namespace][$id]);
 		
 		return $retVal;
 	}
@@ -476,43 +482,88 @@ class Gateway extends Object {
 		// reasons and works in conjunction with Gateway::exists method
 		$key  = __FUNCTION__ . "/$namespace";
 		$self = $this;
+		
 
-		return static::cache($key, function() use ($self, $namespace) {
-	    $list     = array();
-			$servers  = &$self->reference('_memcache_servers');
-			$memcache = $servers[$namespace];
-	    $allSlabs = $memcache->getExtendedStats('slabs');
-	    $items    = $memcache->getExtendedStats('items');
-
-	    foreach($allSlabs as $server => $slabs) {
-	    			
-					if (is_array($slabs)) {		
-	        foreach($slabs as $slabId => $slabMeta) {
-	        	 try {
-	           	$cdump = $memcache->getExtendedStats('cachedump',(int)$slabId);
-						 }
-						 catch(\Exception $throw) {
-						 	return null;
-						 }
-	            foreach($cdump as $keys => $arrVal) {
-	                if (!is_array($arrVal)) continue;
-	                foreach($arrVal as $k => $v) {                   
-	                   $list[] = $k; 
-	                }
-	           }
-	        }
-				}
-	    }
+		// @TODO Query for keys fails intermittently, so we have wrapped with a do/while
+		// loop - this is inherently dangerous, so this will serve only as a temporary
+		// measure
+		
+		do {
 			
-			return $list;
-		});
+			// @TODO querying memcache keys seems to be broken, or it only works once,
+			// so we will need to set as instance property
+			$keys = static::cache($key, function() use ($self, $namespace) {
+		    $list     = array();
+				$servers  = &$self->reference('_memcache_servers');
+				$memcache = $servers[$namespace];
+		    $allSlabs = $memcache->getExtendedStats('slabs');
+		    $items    = $memcache->getExtendedStats('items');
+	
+		    foreach($allSlabs as $server => $slabs) {
+		    			
+						if (is_array($slabs)) {
+								
+		        	foreach($slabs as $slabId => $slabMeta) {
+		        		
+							 	
+								if (is_numeric($slabId)) {
+				        	 try {
+				           	$cdump = $memcache->getExtendedStats('cachedump',(int)$slabId, 1000);								
+									 }
+									 catch(\Exception $ignore) {
+									 	
+									 }
+									 
+									 
+				            foreach($cdump as $keys => $arrVal) {
+											
+				                if (!is_array($arrVal)) continue;
+				                foreach($arrVal as $k => $v) {                   
+				                   $list[] = $k; 
+				                }
+				            }
+								}
+		        }			
+					}
+					
+		    }
+
+				return $list;
+			});
+		} while (is_null($keys));
+		
+		
+					
+		// set our namespace ids on instance property keys
+		// @TODO this will be replaced entirely
+		if (!isset($this->keys[$namespace])) {
+			$this->keys[$namespace] = array();
+		}
+		
+		foreach($keys as $key) {
+			$this->keys[$namespace][$key] = true;
+		}
+		
+		return $this->keys[$namespace];
+
 	}
 
-	public function exists ($id, $namespace = null) {
+	/**
+	 * Determines if object exists without the hit of retrieving
+	 * object from memcache stores (checks for existence of object id/key)
+	 * @return boolean
+	 */
+	public function exists ($id, $namespace = 'Other') {
+	
+		// retrieve cached keys for namespace
 		$keys = $this->keys($namespace);
+			
+		// reset id to use namespace as leading part of key
+		$id = "$namespace::$id";		
 		
-		return is_array($keys) && 
-		       isset($keys[$id]);
+		// ask if id is part of namespace domain
+		return isset($keys[$id]); 
+		       
 	}
 
 	public function storeObject( $id, $obj, $namespace = null, $ttl = 0, $keep_hot = false ) {
@@ -551,9 +602,12 @@ class Gateway extends Object {
 						$memcacheServer = $this->_memcache_servers['Other'];
 					}
 
+					
 					$retVal = $memcacheServer->set( $id, $obj, false, $ttl );
+					
 
 				} catch ( Exception $exception ) {
+					echo $exception;
 					Logger::writeLog( Logger::ERROR, 
 							'Memcache Cache Write for id \'' . $id . '\': ' . $exception->getMessage(), 'Memcache' );
 				}
@@ -582,7 +636,17 @@ class Gateway extends Object {
 		}
 
 		// reset cache that holds keys
-		static::clear_cache("keys/$namespace");
+		//echo "saving/resetting $id\n";
+		//echo "keys/$namespace\n";
+		//static::clear_cache("keys/$namespace");
+		//if (!in_array($id, $this->keys[$namespace])) {
+		//	$this->keys[$namespace][] = ;
+		//}
+		
+		// flag that id has been made available to cache
+		if ($retVal !== false) {
+			$this->keys[$namespace][$id] = true;
+		}
 
 		return $retVal; 
 	}
@@ -761,6 +825,7 @@ class Gateway extends Object {
 			}
 
 		}
+
 
 		return self::$_singleton; 
 	}
