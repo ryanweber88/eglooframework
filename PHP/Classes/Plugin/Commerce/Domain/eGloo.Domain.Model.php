@@ -13,7 +13,7 @@ use \eGloo\Performance\Caching;
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, Caching\CacheKeyInterface {
+	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, Caching\CacheKeyInterface, Caching\CacheableInterface {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -259,6 +259,7 @@ abstract class Model extends Delegator
 					// @TODO place our afterFind in background task
 					//if ($result !== false) {
 						foreach($set as $model) {
+							
 							$model->send('runCallbacks', 'find', 'after');
 						}
 					//}
@@ -1019,7 +1020,17 @@ abstract class Model extends Delegator
 			"Failed to generate cache key because instance {$this->ident()} does not exist"
 		);
 	}
+
+	/** CacheKeyInterface Interface ********************************************/
+	// Provides method to ensure the return of valid/reliable cache key
 	
+	/**
+	 * Returns a unique cache key for this instance
+	 */
+	public function cacheable() {
+		return true;
+	}
+		
 	/**
 	 * Convenience method to pass sql to underlying layer;
 	 * @TODO this may be removed 
@@ -1159,6 +1170,7 @@ abstract class Model extends Delegator
 		$this->defineCallback('transaction', 'before', function() use ($self) {
 			$self::transaction(function($t) {
 				$t->begin();
+				
 			});
 		});
 		

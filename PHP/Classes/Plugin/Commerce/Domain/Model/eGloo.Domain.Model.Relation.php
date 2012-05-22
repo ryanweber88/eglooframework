@@ -280,10 +280,20 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 * a unique cache key
 	 */
 	public function cacheKey() {
-		$tokens             = array_reverse(explode('\\', $this->model));
+		$tokens = array_reverse(explode('\\', $this->model));
 			
 		// ensure that we have sql so as to create unique key
 		if (strlen($sql = $this->to_sql()) > 0) {
+			
+			// @TODO hack for the moment - a closure is being passed
+			// at the end of argument lists and cannot track how this
+			// is happeneing; for the time being, removing manually
+			foreach($this->arguments as $key => $argument) {
+				if (is_callable($argument)) {
+					unset($this->arguments[$key]);
+				}
+			}
+			
 			$encryptedQuery     = md5($this->to_sql());
 			$encryptedArguments = md5(serialize($this->arguments));  
 			

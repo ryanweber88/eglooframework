@@ -18,14 +18,17 @@ class Transaction extends Object {
 	}
 	
 	public function begin() {
+		$data = $this->data;
 		return $data::statement('BEGIN');
 	}
 	
 	public function commit() {
+		$data = $this->data;
 		return $data::statement('COMMIT');
 	}
 	
 	public function rollback() {
+		$data = $this->data;
 		return $data::statement('ROLLBACK');
 	}
 	

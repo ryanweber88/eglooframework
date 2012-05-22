@@ -18,10 +18,10 @@ class Cache extends Model\Callback {
 	
 	
 	public function afterSave(Domain\Model $model) {
-		$cache = new _Cache\Model;
+		$cache = _Cache\Model::instance();
 
 		// invalidate cache object
-		$this->invalidates($model);
+		$cache->delete($model);
 		
 		// save to cache
 		$cache->write($model);
@@ -32,31 +32,21 @@ class Cache extends Model\Callback {
 	 * Invalidate cache after deletion from backend
 	 */
 	public function afterDelete(Domain\Model $model) {
-		$this->invalidates($model);
+		$cache = _Cache\Model::instance();
+		$cache->delete($model);
 	}
 	
 	/**
 	 * Store to cache after find
 	 */
 	public function afterFind(Domain\Model $model) {
-		$cache = new _Cache\Model;
+		$cache = _Cache\Model::instance();
 		
 		// @TODO removed exists here as its a slight hit on performance
-		//if (!$cache->exists($model)) {
+		if (!$cache->exists($model)) {
 			$cache->write($model);
-		//}
-	}
-	
-
-	protected function invalidates(Domain\Model $model) {
-		
-		// iterate through model/query cache and delete any
-		// saved references
-		foreach(array(new _Cache\Model, new _Cache\Relation) as $cache) {
-			$cache->delete($model);
 		}
-		
 	}
-	
+
 
 }
