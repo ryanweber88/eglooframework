@@ -319,6 +319,7 @@ abstract class ObjectSafe {
 			// If we have passed an object, or a lambda, a signature can be generated
 			// that uniquely identifies the instance, thus creating a key for cached
 			// value
+		
 			if (is_object($mixed) || is_callable($mixed)) {
 				//$reflection = new \ReflectionFunction($mixed);
 				//$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
@@ -328,10 +329,12 @@ abstract class ObjectSafe {
 				// we set lambda to mixed
 				if (is_callable($mixed)) {
 					$lambda = $mixed;
-					$class  = $lambda;
+					//$class  = $lambda;
 				}
 				
 			}
+			
+
 						
 			
 			// now determine if static cache has been previously
