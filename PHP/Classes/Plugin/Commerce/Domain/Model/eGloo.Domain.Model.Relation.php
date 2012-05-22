@@ -231,8 +231,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	public function build() {
 		$model  = $this->model;
 		$result = null;
-
-				
+							
 		try {
 			$result = $model::sendStatic('process', $model::statement(
 				$this->to_sql(), $this->arguments
@@ -282,7 +281,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 */
 	public function cacheKey() {
 		$tokens             = array_reverse(explode('\\', $this->model));
-		
+			
 		// ensure that we have sql so as to create unique key
 		if (strlen($sql = $this->to_sql()) > 0) {
 			$encryptedQuery     = md5($this->to_sql());

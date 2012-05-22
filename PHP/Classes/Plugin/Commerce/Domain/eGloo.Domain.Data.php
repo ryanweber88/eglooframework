@@ -254,7 +254,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	public static function statement($statement, $__mixed = null) {
 			
 		//echo "calling statement:$statement<br /><br />";
-
+	
 		
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
@@ -552,8 +552,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
-
-
+		
 		$result = $dataAccess->$method($statement, $arguments);
 
 		// set result to false if we don't have a match

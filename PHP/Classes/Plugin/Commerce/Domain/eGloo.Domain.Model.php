@@ -59,7 +59,19 @@ abstract class Model extends Delegator
 		}
 
 		
-		
+
+		// assign left-over columns to model
+		// @TODO delegate this to overrideable method, or place into
+		// 'after' initialize
+		if (!in_array($signature = static::signature(), array('user'))            && 
+		    is_array($columns = Data::columns($signature))) {
+		    	
+			foreach($columns as $attribute) {
+				if (!\property_exists($this, $attribute)) {
+					$this->$attribute = null;
+				}
+			}
+		}			
 					
 		
 	}
@@ -1042,6 +1054,7 @@ abstract class Model extends Delegator
 		
 		// check that statement is a select statement	
 		if (preg_match('/^\s*?select/is', $statement, $match)) {
+		
 				
 			// we're going to use Model\Relation as query cache, since 
 			// functionality will be moved there and it encapsulates cacheKey
@@ -1163,7 +1176,6 @@ abstract class Model extends Delegator
 			});
 			
 
-
 			foreach($attributes as $name) {
 				
 				
@@ -1224,19 +1236,7 @@ abstract class Model extends Delegator
 					return $self->Status->$field;
 				});
 			}
-
-			// assign left-over columns to model
-			// @TODO delegate this to overrideable method, or place into
-			// 'after' initialize
-			if (!in_array($signature, array('user'))            && 
-			    is_array($columns = Data::columns($signature))) {
-			    	
-				foreach($columns as $attribute) {
-					if (!\property_exists($self, $attribute)) {
-						$self->$attribute = null;
-					}
-				}
-			}							
+						
 					
 		});
 		
