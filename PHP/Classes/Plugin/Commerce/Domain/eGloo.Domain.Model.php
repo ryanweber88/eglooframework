@@ -213,8 +213,10 @@ abstract class Model extends Delegator
 								$model  = $class::instance();
 								$model->id = $key;
 								
-								
-								$result = $cache->find($model, function() use ($class, $field, $key) {
+								// @TODO model caching is breaking references on callbacks and following
+								// trace is nearly impossible - for the time being, we are removing this
+								// functionality								
+								//$result = $cache->find($model, function() use ($class, $field, $key) {
 									$result = $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
@@ -226,13 +228,17 @@ abstract class Model extends Delegator
 										$result = $result[0];
 									}
 									
-									return $result;
-								});
+									//return $result;
+								//});
 																
-																
+					
+																							
 								return $result;
 							});
 							
+
+							
+							//var_export($result); exit;
 							
 						}
 
@@ -638,6 +644,7 @@ abstract class Model extends Delegator
 		$ns   = $match[0];
 		$self = $this;
 		
+
 		// determine relationship type based on either $singular parameter, 
 		// which takes prescedence, or looks at plurality using inflections
 		$singular = $singular === true
@@ -663,11 +670,11 @@ abstract class Model extends Delegator
 		
 		// @TODO replace with Model.Relation
 		$this->relationships[$relationshipName] = $model;
-				
 
+		
 		//@TODO using ternary below may be hard to read
 		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join) {
-		 
+							 
 			$association = new Model\Association(array(
 				'owner'       => $self,
 				'target'      => $model,
@@ -688,6 +695,8 @@ abstract class Model extends Delegator
 			
 		
 			if ($self->exists()) {
+					
+
 					
 				// create relation instance - for time being this is used for caching
 				// $relation = new Model\Relation($model);

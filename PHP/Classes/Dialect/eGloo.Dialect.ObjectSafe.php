@@ -60,11 +60,21 @@ abstract class ObjectSafe {
 	protected function  aliasMethods() {
 		
 
-		$self = $this;
+		$self   = $this;
+		$caller = $this->caller();
 
 		// we need to immediately call define method, this will be the basis for
 		// all runtime defined methods
-		$this->_methods['defineMethod'] = function($name, $lambda) use ($self) {
+		$this->_methods['defineMethod'] = function($name, $lambda) use ($self, $caller) {
+			
+			// @TODO this is a major bug; for some esoteric fuck-me-reason, $self becomes
+			// invalidated
+			if (!is_object($self)) {
+				echo 'self no longer defined in defineMethod';
+				var_export($caller);
+				exit('asdf');
+			}
+			//echo get_class($self) . "\n";
 				
 			// create a reference to methods, since they cannot be directly referenced
 			// by self given class access modifer protected
