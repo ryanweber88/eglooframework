@@ -75,6 +75,17 @@ class Generic extends Domain\Model {
 		return static::$pseudonym;
 	}
 	
+	public static function __callstatic($name, $arguments) {
+		if (in_array($name, $methods = array('selects', 'where', 'join', 'limit', 'order', 'group'))) {
+			static::delegates(array(
+				'methods' => $methods,
+				'to'      => new Relation(get_called_class())
+			));					
+		}
+		
+		return parent::__callstatic($name, $arguments);
+	}
+	
 	
 	private static function fakeIt() {
 		// fakes 
@@ -86,7 +97,7 @@ class Generic extends Domain\Model {
 		// assign static delegation
 		 
 		Delegator::delegate(get_called_class(), get_class(static::data()));
-		
+				
 				
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
@@ -119,7 +130,7 @@ class Generic extends Domain\Model {
 			
 			
 		});
-		
+				
 				
 		// explicitly define all, if not aliased and not explicitly defined
 		
@@ -150,7 +161,7 @@ class Generic extends Domain\Model {
 			
 			
 		});
-	
+			
 				
 		// delegate our query building methods to Relation
 		// @TODO we should delegate to scoped which should handle
@@ -160,10 +171,9 @@ class Generic extends Domain\Model {
 		// receiving an initializing hash; so i am taking the bitch out
 		// for the moment
 			
-		static::delegates(array(
-			'methods' => array('selects', 'where', 'join', 'limit', 'order', 'group'),
-			'to'      => new Relation(get_called_class())
-		));		
+
+		
+		return ;
 	}
 	
 	

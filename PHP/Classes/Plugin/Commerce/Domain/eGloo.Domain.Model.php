@@ -25,22 +25,27 @@ abstract class Model extends Delegator
 	 */
 	function __construct($__mixed = null) {
 
+
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
 		
+		
 		// calls our index method, in which we are responsible for defining
 		// attributes which will servce as cache indicies
 		$this->__indexes();
-
+		
+			
 		// call our validates method, which provides validation definitions
 		// for Model attributes
 		$this->__validates();
+		
 		
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
 		$this->__relationships();
 		
+	
 		// call __callbacks method, which defines behaviors during life cycle
 		// of instance
 		$this->__callbacks();
@@ -73,7 +78,6 @@ abstract class Model extends Delegator
 			}
 		}			
 					
-		
 	}
 
 	/** @Polymorphic */ 
@@ -1012,8 +1016,11 @@ abstract class Model extends Delegator
 	 */
 	public function cacheKey() {
 		if ($this->exists()) {
-			$tokens = array_reverse(explode('\\', get_class($this)));
-			return "<{$this->id}>" . implode ('\\', $tokens);
+			$encrypted = static::cache($this->class->reversed(), function($key) {
+				return md5($key);
+			});
+			
+			return "$encrypted/0";
 		}
 
 		throw new \Exception(
@@ -1056,6 +1063,7 @@ abstract class Model extends Delegator
 		$model     = $class::instance();
 		$arguments = func_get_args();
 		$handler   = function() use ($arguments, $class) {
+			//echo "in handler for $class<br />";
 			$data = $class::sendStatic('data');
 			return call_user_func_array(
 				array($data, 'statement'), $arguments
@@ -1266,7 +1274,7 @@ abstract class Model extends Delegator
 		// instance is cacheable before adding callback
 		// instance
 		if ($this->cacheable()) {
-			$this->after_find( Callback\Cache::instance() );
+			//$this->after_find( Callback\Cache::instance() );
 			$this->after_save( Callback\Cache::instance() );
 			$this->after_delete( Callback\Cache::instance() );
 		}

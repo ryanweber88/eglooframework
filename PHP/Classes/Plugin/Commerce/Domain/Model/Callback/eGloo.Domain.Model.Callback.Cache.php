@@ -24,7 +24,7 @@ class Cache extends Model\Callback {
 		$cache->delete($model);
 		
 		// save to cache
-		$cache->write($model);
+		//$cache->write($model);
 		
 	}
 	
@@ -40,12 +40,12 @@ class Cache extends Model\Callback {
 	 * Store to cache after find
 	 */
 	public function afterFind(Domain\Model $model) {
-		$cache = _Cache\Model::instance();
+		//$cache = _Cache\Model::instance();
 		
 		// @TODO removed exists here as its a slight hit on performance
-		if (!$cache->exists($model)) {
-			$cache->write($model);
-		}
+		//if (!$cache->exists($model)) {
+		//	$cache->write($model);
+		//}
 	}
 
 

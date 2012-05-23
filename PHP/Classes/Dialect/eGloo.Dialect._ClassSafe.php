@@ -67,6 +67,19 @@ class _ClassSafe {
 	}
 	
 	/**
+	 * Returns reversed (tokenized) class name as
+	 * means for quick hash look up and to prevent
+	 * collisions
+	 * @return string
+	 * @TODO cache result?
+	 */
+	public function reversed() {
+		return \eGlooString::reverseTokens(
+			'\\', $this->qualified_name 
+		);
+	}
+	
+	/**
 	 * 
 	 * Only getter is provided for instance
 	 */
@@ -96,7 +109,8 @@ class _ClassSafe {
 		
 	}	
 	
-
+	// @TODO add to attr_accessor and change to
+	// protected
 	public $name;
 	public $qualified_name;
 	public $class;

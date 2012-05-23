@@ -161,7 +161,9 @@ abstract class Delegator extends Object {
 			$methods  = array_slice($arguments, 0, count($arguments) - 2);
 			
 			
-			if (is_object($receiver)) {
+			if (is_object($receiver) && 
+			    !isset(static::$delegatedToStatic[static::classnamefull()][get_class($receiver)])) {
+			    	
 				static::$delegatedToStatic[static::classNameFull()][get_class($receiver)] = array(
 					'receiver' => $receiver,
 					'methods'  => $methods

@@ -155,7 +155,7 @@ abstract class ObjectSafe {
 			$cache = &$self->reference('_cache'); 
 			
 			if (!isset($cache[$key])) {
-				$cache[$key] = $lambda();
+				$cache[$key] = $lambda($key);
 			}
 						
 			return $cache[$key];
@@ -342,12 +342,8 @@ abstract class ObjectSafe {
 			$cache = &$class::referenceStatic('_scache');
 			
 			if (!isset($cache[$class][$key]) &&
-			    !is_null($value = $lambda())) {
-			    
-				if ($key == 'keys/Relation') {
-					$show = implode(',', $value);
-					//echo "setting $class/$key with $show\n";			    	
-				}
+			    !is_null($value = $lambda($key))) {
+
 				$cache[$class][$key] = $value;
 			}		
 			

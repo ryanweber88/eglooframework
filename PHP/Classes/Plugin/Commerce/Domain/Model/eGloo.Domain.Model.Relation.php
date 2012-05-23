@@ -20,10 +20,33 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	function __construct($model) {
 		parent::__construct();
 		
+		// @TODO model should be passed as instance as opposed to
+		// string; for the time being, to ensure compatibility, we
+		// change to instance
+		if (is_string($model)) {
+			if (\class_exists($model)) {
+				try { 
+					//$model = $model::instance();
+				}
+				
+				catch(\Exception $ignore) { }
+			}
+			
+			else {
+				throw new \Exception (
+					"Failed to create instance 'Relation' because model '{$model->ident()}' does not exist"
+				);
+			}
+		}
+		
+		
 		// set instance properties and create sql AREL/Bella builder
 		$this->builder = new \Bella\Table($model::sendStatic('entityName'));
 		$this->model   = $model; 
 		$this->chain   = $this->builder;
+		
+		
+		
 	}
 	
 	public function from($tables) {
@@ -280,24 +303,36 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 	 * a unique cache key
 	 */
 	public function cacheKey() {
-		$tokens = array_reverse(explode('\\', $this->model));
 			
 		// ensure that we have sql so as to create unique key
 		if (strlen($sql = $this->to_sql()) > 0) {
+			// reverse model tokens/namespace (for quick lookup)
+			// and then retrieve md5'd hash from static cache
+			$model = $this->model;
+			$key   = \eGlooString::reverseTokens(
+				'\\', $model
+			);
+			
+			$encryptedModel = static::cache($key, function($key) {
+				return md5($key);
+			});		
+			
+			
+			// now retrieve arguments to be used as cache identifier
+			$arguments = array();
 			
 			// @TODO hack for the moment - a closure is being passed
 			// at the end of argument lists and cannot track how this
 			// is happeneing; for the time being, removing manually
 			foreach($this->arguments as $key => $argument) {
-				if (is_callable($argument)) {
-					unset($this->arguments[$key]);
+				if (!is_callable($argument)) {
+					$arguments[] = $argument;
 				}
 			}
 			
-			$encryptedQuery     = md5($this->to_sql());
-			$encryptedArguments = md5(serialize($this->arguments));  
+			return $encryptedModel . '/' . 
+			       md5($this->to_sql() . serialize($arguments));
 			
-			return "<$encryptedQuery::$encryptedArguments>" . implode ('\\', $tokens);	
 		}
 		
 		// otherwise throw an exception, because we cannot create a unique key
