@@ -1053,6 +1053,7 @@ abstract class Model extends Delegator
 		// create a callback/lambda to pass arguments to 
 		// Domain\Data handler method 'statement
 		$class     = get_called_class();
+		$model     = $class::instance();
 		$arguments = func_get_args();
 		$handler   = function() use ($arguments, $class) {
 			$data = $class::sendStatic('data');
@@ -1064,7 +1065,8 @@ abstract class Model extends Delegator
 
 		
 		// check that statement is a select statement	
-		if (preg_match('/^\s*?select/is', $statement, $match)) {
+		if ($model->cacheable() && 
+		    preg_match('/^\s*?select/is', $statement, $match)) {
 		
 				
 			// we're going to use Model\Relation as query cache, since 
@@ -1259,12 +1261,15 @@ abstract class Model extends Delegator
 		}		
 		
 		$this->after_find( Callback\CRUD::instance() );
-		$this->after_find( Callback\Cache::instance() );
 		
-		// finally lets add cache callback
-		$this->after_save( Callback\Cache::instance() );
-		$this->after_delete( Callback\Cache::instance() );
-		
+		// finally lets add cache callback; test that
+		// instance is cacheable before adding callback
+		// instance
+		if ($this->cacheable()) {
+			$this->after_find( Callback\Cache::instance() );
+			$this->after_save( Callback\Cache::instance() );
+			$this->after_delete( Callback\Cache::instance() );
+		}
 		
 
 				
