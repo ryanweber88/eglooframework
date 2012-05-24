@@ -33,6 +33,12 @@ class Generic extends Domain\Model {
 			
 	}
 	
+	public function ident() {
+		return get_called_class() . '/' . 
+		       static::classNameFull()  .
+		       '<' . spl_object_hash($this) . '>';
+	}
+	
 	public static function factory($pseudonym, $__mixed = null) {
 		return new static($pseudonym, $__mixed);
 	}

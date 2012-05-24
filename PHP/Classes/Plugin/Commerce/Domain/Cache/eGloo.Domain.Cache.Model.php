@@ -33,13 +33,16 @@ class Model extends Domain\Cache {
 		// that match
 		// @TODO I don't like deleting items on Relation
 		// server from Cache\Model 
-		$partialKey = \eGlooString::reverseTokens(
-			'\\', $obj->class->qualified_name
+		// @TODO we need one module responsible cache key
+		// conventions; note that i changed how cache key
+		// was generated for model and now have to clean 
+		// up in multiple places as a result
+		$partialKey = preg_replace(
+			'/\/[0-9]+$/i', null, $obj->cacheKey()
 		);
-		
+				
 		foreach($cache->keys('Relation') as $key => $ignore) {
 			if (strpos($key, $partialKey) !== false) {
-				
 				// @TODO this is messy at the moment - we need to remove 
 				// 'Relation::' from $key as it will be added back when
 				// passed to deleteObject method 

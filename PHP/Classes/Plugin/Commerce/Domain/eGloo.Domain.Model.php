@@ -1020,7 +1020,7 @@ abstract class Model extends Delegator
 				return md5($key);
 			});
 			
-			return "$encrypted/0";
+			return "$encrypted/{$this->id}";
 		}
 
 		throw new \Exception(
