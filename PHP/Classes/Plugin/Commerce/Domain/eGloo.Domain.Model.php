@@ -1519,7 +1519,7 @@ abstract class Model extends Delegator
 	 */
 	
 	public function save($cascade = true) {
-		
+				
 		// we ask the question again, if valid, after performing
 		// our validation routines
 		if ($this->valid()) { 
@@ -1811,8 +1811,17 @@ abstract class Model extends Delegator
 		foreach($points as $point) {
 			if (isset($this->callbacks[$event][$point])) {
 				foreach($this->callbacks[$event][$point] as $callback) {
-					if (($callback($this)) === false) {
-						return ;
+					try { 
+						if (($callback($this)) === false) {
+							return ;
+						}
+					}
+					
+					// @TODO this exception is not bubbling up, for now, exit 
+					// and 
+					catch(\Exception $e) {
+						echo $e;
+						exit;
 					}
 				}
 			}		

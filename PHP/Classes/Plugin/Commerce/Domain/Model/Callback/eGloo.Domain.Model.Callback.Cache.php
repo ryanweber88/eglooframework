@@ -20,6 +20,7 @@ class Cache extends Model\Callback {
 	public function afterSave(Domain\Model $model) {
 		$cache = _Cache\Model::instance();
 
+
 		// invalidate cache object
 		$cache->delete($model);
 		
