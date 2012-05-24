@@ -217,7 +217,7 @@ abstract class Model extends Delegator
 							
 							// check if model has already been persisted
 							// @TODO this needs to be converted to single statement ASAP  
-							$set[] = $manager->find($class, $key, function($class, $key) use ($field) {
+							$result = $manager->find($class, $key, function($class, $key) use ($field) {
 								
 								// check model cache to determine if exists in cache already; we use our
 								// static instance so we DON'T have to reinstantiate everytime we call find
@@ -252,21 +252,19 @@ abstract class Model extends Delegator
 								return $result;
 							});
 							
-
-							
-							//var_export($result); exit;
+							if ($result !== false) {
+								$set[] = $result;
+							}
 							
 						}
 
 					}
 					
 					// @TODO place our afterFind in background task
-					//if ($result !== false) {
-						foreach($set as $model) {
-							
-							$model->send('runCallbacks', 'find', 'after');
-						}
-					//}
+					foreach($set as $model) {
+						$model->send('runCallbacks', 'find', 'after');
+					}
+
 					
 					// if a set consisting of a single element; return element, as the likely
 					// intended purpose was to retrieve a single record; otherwise return set

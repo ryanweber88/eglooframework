@@ -52,7 +52,7 @@ fi
 
 killall memcached
 
-instances=10
+instances=15
 
 MEMCACHE_DAEMON=`locate */bin/memcached | head -n 1`
 
