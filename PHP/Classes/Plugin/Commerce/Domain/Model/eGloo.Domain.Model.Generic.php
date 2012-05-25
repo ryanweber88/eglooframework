@@ -14,11 +14,25 @@ class Generic extends Domain\Model {
 	
 	function __construct($pseudonym, $__mixed = null) {
 		
-		parent::__construct($__mixed);
+		// @TODO this is temporoary until i can figure out a 
+		// a more elegant way doing this; until that point
+		// if an array is being passed as first argument
+		// we assume that we are using prior pseudonym (note
+		// this may cause very unhappy shit)
+		if (is_array($arguments = $pseudonym)) {
+			$tokens    = explode('\\', static::$pseudonym);
+			$pseudonym = $tokens[count($tokens)-1]; 
+		} 
 		
+		else {
+			$arguments = $__mixed;
+		}
+			
+		parent::__construct($arguments);
+
+			
 		// now lets create our fake namespaced pseudonym
-		$namespace         = $this->namespace();
-		static::$pseudonym = "$namespace\\$pseudonym";
+		static::$pseudonym = "{$this->namespace()}\\$pseudonym";
 		
 		// fakes like the class it's pretending to be! unfortunately this
 		// has to be a static call in order to create a static method; an

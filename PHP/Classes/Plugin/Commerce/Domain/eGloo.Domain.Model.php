@@ -673,10 +673,9 @@ abstract class Model extends Delegator
 		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
 			$model = "$ns\\Generic";
 
-			if (!$model::tangible($relationshipName)) {
-				echo $relationshipName; exit('asdf');
+			if (!$model::tangible($name)) {
 				throw new \Exception(
-					"Failed to create generic relation '$relationshipName' using the Generic model, because " .
+					"Failed to create generic relation '$name' using the Generic model, because " .
 					"it cannot be determined on underlying data layer"
 				);
 			}
@@ -730,6 +729,7 @@ abstract class Model extends Delegator
 				}
 				//});
 
+
 			
 				
 				// if returned result is an instance of relationship, which is a query build tool
@@ -781,9 +781,13 @@ abstract class Model extends Delegator
 					// otherwise, we manually build set with model instances
 					else {
 						
+			
+						
 						foreach($result as $record) {
 							$temporary[] = new $model($record);	
 						}
+												
+
 						
 						// replace result with temporary
 						$result = new Model\Set($temporary);

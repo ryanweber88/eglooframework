@@ -318,11 +318,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 		
 		
-		$method = ($classification = strtolower($match[1])) == 'select'
-			? 'getList'
-			: 'execute' . ucfirst($classification);
-			
-
+		//$method = ($classification = strtolower($match[1])) == 'select'
+		//	? 'executeSelect'
+		//	: 'execute' . ucfirst($classification);
+		$method = 'execute' . ucfirst(
+			$classification = strtolower($match[1])
+		);
+		
 			
 		$fields = array();
 		
@@ -551,10 +553,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
-		
-
-		
+				
 		$result = $dataAccess->$method($statement, $arguments);
+
 
 		// set result to false if we don't have a match
 		// @TODO this should be fixed at connection level,

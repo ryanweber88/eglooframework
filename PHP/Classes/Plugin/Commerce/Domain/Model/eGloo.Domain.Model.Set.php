@@ -102,6 +102,34 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	/**
+	 * Return the first element in a set
+	 * @return Model
+	 */
+	public function first() {
+		if (count($this)) {
+			return $this[0];
+		}
+		
+		throw new \Exception(
+			"Failed to return first element of set '$this' because its empty"
+		);
+	}
+	
+	/**
+	 * Return the last element in a set
+	 * @return Model
+	 */
+	public function last() {
+		if (count($this)) {
+			return $this[0];
+		}
+		
+		throw new \Exception(
+			"Failed to return first element of set '$this' because its empty"
+		);			
+	}
+	
+	/**
 	 * Adds reduce/inject functionality to set; please note that lambda takes two parameters
 	 * lambda (result, model)
 	 * @returns mixed
