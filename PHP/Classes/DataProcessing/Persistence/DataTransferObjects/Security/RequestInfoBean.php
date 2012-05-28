@@ -36,7 +36,7 @@
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-class RequestInfoBean {
+class RequestInfoBean implements \ArrayAccess {
 
 	private $arguments = null;
 	private $requestProcessorID = null;
@@ -126,6 +126,119 @@ class RequestInfoBean {
 
 		$this->invalidForms = array();
 	}
+	
+	/**
+	 * 
+	 * Provides method missing functionality to requestinfobean in order
+	 * access (php GLOBALS) properties 
+	 * @param string  $name
+	 * @param mixed[] $arguments
+	 */
+	public function __call($name, $arguments) {
+		// @TODO test and implement this
+				
+		// match against xxx(Xxx) method name patterns, where it is assumed
+		// that our submatch is the name of property - in reality we are
+		// matching against GET/POST/DELETE/PUT 
+		if (preg_match('/([a-z]+)([A-Z].+)/', $name, $match)) {
+			$action = $match[1];
+			
+			// ensure that property exists on self
+			if (property_exists($this, $match[2])) {
+				$property = &$this->{$match[2]};
+				
+				// an isset action asks if value(s) are set within
+				// array property - if all items match, then absolute
+				// true will be returned, if only some are set, then
+				// number of matched items will be returned; otherwise,
+				// absolute false is returned if no items are matched
+				if ($action == 'isset' && is_array($property)) {
+					
+					$matched = 0;
+					
+					// itereate through arguments 
+					foreach ($arguments as $argument) {	
+						if (in_array($argument, $property)) {
+							$matched += 1;
+						}
+					}
+					
+					// if number matched is equal to count of array property
+					// then we have matched all items
+					if ($matched == count($property)) {
+						return true;
+					}
+					
+					return ($matched > 0) 
+						 ? $matched 
+						 : false;
+					
+				}
+			}
+		}
+	}
+	
+	// ArrayAccess Interface //////////////////////////////////////////////////
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetExists()
+	 */
+	public function offsetExists($offset) {
+		
+
+
+
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			// have to assign into holder prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetGet()
+	 */
+	public function offsetGet($offset) {
+		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
+			// have to do this prior to 5.4
+			$property = &$this->$method;
+
+			if (property_exists($this, $method) && isset($property[$offset])) {
+				return $property[$offset];
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetSet()
+	 */
+	public function offsetSet($offset, $value) {
+		throw new \Exception(
+			'Do not set bean values via array notation'
+		);
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see ArrayAccess::offsetUnset()
+	 */
+	public function offsetUnset($offset) {
+		throw new \Exception(
+			'Do not unset bean values via array notation'
+		);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
 
 	public function issetCOOKIE( $key ) {
 		$retVal = false;
@@ -273,6 +386,7 @@ class RequestInfoBean {
 
 		return $retVal;
 	}
+	
 
 	public function issetInvalidPOST( $key ) {
 		$retVal = false;
@@ -448,6 +562,10 @@ class RequestInfoBean {
 	
 	public function getWildCardRequestID() {
 		return $this->_wildCardRequestID;
+	}
+
+	public function hasWildCardRequestID() {
+		return !is_null($this->_wildCardRequestID);
 	}	
 
 	public function setRequestProcessorID( $requestProcessorID ) {
@@ -491,8 +609,8 @@ class RequestInfoBean {
 	public function getSlug() {
 		$retVal = null;
 
-		if ( $this->requestInfoBean->issetGET('eg_slug') ) {
-			$retVal = $this->requestInfoBean->getGET('eg_slug');
+		if ( $this->issetGET('eg_slug') ) {
+			$retVal = $this->getGET('eg_slug');
 		}
 
 		return $retVal;

@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # Runs locate command and returns numbered list from which to launch gedit on
 # located files
+# Feature Wish List:
+# Need to cache results for N seconds since remote connection can take some time
+# or keep connection alive in background
 
 # REQUIRE
 
@@ -11,8 +14,10 @@ require 'net/ssh'
 
 Space    = ' '
 Newline  = "\n"
-Remote   = '192.168.93.131'
-User     = 'christian'
+Remote   = '192.168.10.7' 
+#Remote  = '192.168.93.131'
+#User    = 'christian'
+User     = 'petflowdeveloper'
 Password = 'fe5180zz'
 Editor   = 'zend' 
 Mount    = '/Volumes/' + Remote

@@ -40,10 +40,14 @@ abstract class RequestProcessor {
 	/* Protected Data Members */
 	protected $requestInfoBean = null;
 	protected $decoratorInfoBean = null;
+	protected $bean = null;
 
 	public function __construct() {
 		$this->requestInfoBean = RequestInfoBean::getInstance();
 		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
+
+		// serves simply as an alias
+		$this->bean = $this->requestInfoBean;
 	}
 
 	public static function getClass() {

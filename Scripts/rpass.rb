@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
-# Runs locate command and returns numbered list from which to launch gedit on
-# located files
+# The point of this script is to run a rlocate, but pass the resulting path
+# to another command - so in essence it works as a pipe; the only difference 
+# here is that we add the pipe through at the end, and make sure to account
+# for command at beginning
 
 # REQUIRE
 
@@ -11,8 +13,10 @@ require 'net/ssh'
 
 Space    = ' '
 Newline  = "\n"
-Remote   = '192.168.93.131'
-User     = 'christian'
+Remote   = '192.168.10.7' 
+#Remote  = '192.168.93.131'
+#User    = 'christian'
+User     = 'petflowdeveloper'
 Password = 'fe5180zz'
 Editor   = 'zend' 
 Mount    = '/Volumes/' + Remote
@@ -59,6 +63,7 @@ end
 
 options = {
   remote:   false,
+  command:  false,
   user:     User,
   password: Password,
   editor:   Editor,
@@ -68,12 +73,15 @@ options = {
 OptionParser.new do |opts|
   opts.banner = 'Usage: example.rb [options]'
     
-  %w(remote user password mount).each do | word |
+  %w(remote user password mount command).each do | word |
     opts.on "-#{word[0]} [VALUE]", "--#{word}"   do | value |
       options[:"#{word}"] = value || true
     end    
   end  
 end.parse!
+
+
+raise 'You must specify a command via --command or -c flag' unless options[:command]
 
 
 # set options remote to default if remote has been specified,
@@ -121,9 +129,7 @@ unless @results.empty?
   if @results.length == 1
     result = @results.pop
     result = "#{options[:mount]}/#{result}" unless options[:remote] == false
-    
-    `#{options[:editor]} #{result} &`
-    
+        
   else
 
     # iterate through result set and display as choosable options
@@ -140,7 +146,10 @@ unless @results.empty?
       answer = answer.to_i
       @results[answer] = options[:mount] + "/#{@results[answer]}" unless options[:remote] == false
       
-      `#{options[:editor]} #{@results[answer]} &` if @results.in_bounds?(answer)
+      result = @results[answer] if @results.in_bounds?(answer)
     end 
   end
+  
+  # now push result to command
+  puts `#{options[:command]} #{result}`
 end

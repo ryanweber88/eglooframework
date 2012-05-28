@@ -187,6 +187,7 @@ function eglooAutoload( $class_name ) {
 	if ($sanityCheckClassLoading) {
 		$instances = array();
 	}
+
 	
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {

@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
-# Runs locate command and returns numbered list from which to launch gedit on
-# located files
+# This is just a port of rlocate - runs remote commands on server
 
 # REQUIRE
 
@@ -11,8 +10,10 @@ require 'net/ssh'
 
 Space    = ' '
 Newline  = "\n"
-Remote   = '192.168.93.131'
-User     = 'christian'
+Remote   = '192.168.10.7' 
+#Remote  = '192.168.93.131'
+#User    = 'christian'
+User     = 'petflowdeveloper'
 Password = 'fe5180zz'
 Editor   = 'zend' 
 Mount    = '/Volumes/' + Remote
@@ -58,7 +59,7 @@ end
 # through that shit
 
 options = {
-  remote:   false,
+  remote:   true,
   user:     User,
   password: Password,
   editor:   Editor,
@@ -68,7 +69,7 @@ options = {
 OptionParser.new do |opts|
   opts.banner = 'Usage: example.rb [options]'
     
-  %w(remote user password mount).each do | word |
+  %w(remote user password mount sudo).each do | word |
     opts.on "-#{word[0]} [VALUE]", "--#{word}"   do | value |
       options[:"#{word}"] = value || true
     end    
@@ -87,6 +88,9 @@ options.each_with_index do | (key, value), index |
   end
 end
 
+# check for sudo flag, in which case, we want to set user to root
+options[:user] = 'root' if options[:sudo]
+
 # make sure something.. anything has been passed as our main
 # argument to locate
 raise 'You forgot to pass a value cunt' if ARGV.empty?
@@ -97,50 +101,15 @@ parameters = ARGV.join(Space)
 # if doing a remote check, we will to ssh into our remote
 # and perform a locate there
 
-if options[:remote]
-  
-  # raise an exception if 
-  begin
-    Net::SSH.start(options[:remote], options[:user], :password => options[:password]) do | ssh |
-      @results = (ssh.exec! "locate #{parameters}").split Newline
-    end
-  
-  rescue => error
-    raise "Problem with connection to #{options[:remote]} with error : #{error}"  
-      
+# raise an exception if 
+begin
+  Net::SSH.start(options[:remote], options[:user], :password => options[:password]) do | ssh |
+    @results = (ssh.exec! "#{parameters}").split Newline
   end
-  
-# otherwise we simply call a  
-else
-  @results = `locate #{parameters}`.split Newline   
+
+rescue => error
+  raise "Problem with connection to #{options[:remote]} with error : #{error}"  
+    
 end
 
-
-unless @results.empty?
-
-  if @results.length == 1
-    result = @results.pop
-    result = "#{options[:mount]}/#{result}" unless options[:remote] == false
-    
-    `#{options[:editor]} #{result} &`
-    
-  else
-
-    # iterate through result set and display as choosable options
-    # user
-    @results.each_with_index do | result, index |
-      puts "#{index} ==> #{result}"
-    end
-  
-    print "\nchoose from above index: "
-  
-    # recieve user input from command line and launch gedit
-    # with filepath
-    if (answer = $stdin.gets.chomp).length > 0
-      answer = answer.to_i
-      @results[answer] = options[:mount] + "/#{@results[answer]}" unless options[:remote] == false
-      
-      `#{options[:editor]} #{@results[answer]} &` if @results.in_bounds?(answer)
-    end 
-  end
-end
+puts @results

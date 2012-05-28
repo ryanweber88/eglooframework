@@ -14,6 +14,7 @@ namespace eGloo\Dialect;
 abstract class Object implements MetaInterface { 
 	
 	use \eGloo\Utilities\MagicMethodTrait;
+	
 
 
 	function __construct() { 
@@ -80,9 +81,13 @@ abstract class Object implements MetaInterface {
 		// defines a method for this instance only
 		$this->_methods[$name] = $lambda;
 		
+		// get lambda definition from backtrace and 
+		
+			
+		
 		return $lambda;
 	}
-	
+		
 	/**
 	 * 
 	 * Determines if $name is callable on object - also
