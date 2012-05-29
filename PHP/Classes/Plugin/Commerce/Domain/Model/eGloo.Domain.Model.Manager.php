@@ -49,10 +49,11 @@ class Manager extends Object {
 		
 		// our mixed parameter may be of either type Model or a string
 		// representing a valid, fully qualified class name
-		$class = (is_object($mixed) && $mixed instanceof Object)  
+		$class = (is_object($instance = $mixed) && $mixed instanceof Object)  
 			? $mixed->class->qualified_name
 			: $mixed;
-						
+
+					
 		if (class_exists($class)) { 
 			if (isset($this->pool[$class][$key])) {
 				return $this->pool[$class][$key];

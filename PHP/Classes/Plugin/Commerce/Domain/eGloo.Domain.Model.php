@@ -1854,9 +1854,12 @@ abstract class Model extends Delegator
 			$signature = static::signature();
 			$key       = "{$signature}_id";
 			$class     = static::classnamefull();
+			
+			$tmp       = get_called_class();
+			$instance  = $tmp::instance();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($class, $key, function($class) use ($result) {
+				$result = $manager->find($instance, $key, function($class) use ($result) {
 					return new $class($result);
 				});					
 				
@@ -1886,7 +1889,7 @@ abstract class Model extends Delegator
 						}
 						// attempt to retrieve instance from pool, if it is not available, return
 						// "fallback" result from pool; 
-						$set[] = $manager->find($class, $key, function($class) use ($record) {
+						$set[] = $manager->find($instance, $key, function($class) use ($record) {
 							return new $class($record);
 						});					
 					}
@@ -2189,6 +2192,57 @@ abstract class Model extends Delegator
 			);
 			
 		}		
+
+		if (preg_match('/^find_like_(.+)$/', $name, $match)) {
+			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
+			$fields  = explode('_and_', $match[2]);
+			$findOne = !empty($match[1]); 
+	
+			// now lets define out dynamic finder function
+			return call_user_func_array(static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+				
+				
+				// build string representation of query coinditionals
+				$conditions = array();
+				
+				foreach($fields as $field) {
+					$conditions[] = "$field = ?";
+				}
+				
+				$conditions = implode(' and ', $conditions); 
+				$arguments  = func_get_args();
+				
+				// @TODO this is a temporary measure because ObjectSafe will pass in
+				// class context as last parameter, which causes our result below
+				// to break; for now, remove last argument if it matches $class
+				if (($count = count($arguments)) > 1 && $arguments[$count-1] == $class) {
+					unset($arguments[$count-1]);
+				} 
+				
+				try {	
+					$result = $class::sendStatic('process', $class::where(
+						$conditions, $arguments
+					));
+				}
+				catch(\Exception $pass) {
+					throw $pass;
+				} 
+				
+				
+				// if we have specified find_one_by then we return the first
+				// instance - in most cases, this will be used when we know
+				// there is only one corresponding record
+				if ($findOne && $result instanceof Model\Set) {
+					$result = $result[0];
+				}
+				
+				return $result;
+				
+				
+			}), $arguments);		
+
+		}
+		
 		
 		if (preg_match('/^find_(one_)?by_(.+)$/', $name, $match)) {
 			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
@@ -2320,7 +2374,7 @@ abstract class Model extends Delegator
 				
 		throw $deferred;
 	}
-	
+
 
 	/**
 	 * Set/create properties on instance; this will

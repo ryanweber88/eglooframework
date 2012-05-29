@@ -58,6 +58,14 @@ class Generic extends Domain\Model {
 	}
 	
 	/**
+	 * @TODO for the time being, this must be set to return false, but we can check
+	 * exists by looking at pseudoname pattern
+	 */
+	public function exists() {
+		return false;
+	}
+	
+	/**
 	 * Uses convention to determine if underlying layer has data representation
 	 * as identified by $name
 	 * 
