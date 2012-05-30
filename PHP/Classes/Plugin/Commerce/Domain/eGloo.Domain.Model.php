@@ -922,6 +922,14 @@ abstract class Model extends Delegator
 			);
 		}	
 	}
+	
+	/**
+	 * Will idiomatic synononym to call Model#__construct
+	 * 
+	 */
+	public function build($mixed) {
+		$this->__construct($mixed);
+	}
 
 	/**
 	 * The point of trapping the defineMethod event is to determine

@@ -12,7 +12,15 @@ class Caller extends Object {
 
 	const CALLER_INDEX = 2;
 
-	function __construct(array $hash) {
+	function __construct(array $hash = null) {
+		
+		// if hash is null, then debug backtrace is being called from
+		// caller context; in which case we must remove first backtrace
+		// index (because it points to Caller as self)
+		if (is_null($hash)) {
+			$hash = array_slice(debug_backtrace(), 1);	
+		}
+		
 		if (count($hash) >= self::CALLER_INDEX) {
 			$this->trace = $hash;
 
@@ -97,7 +105,11 @@ class Caller extends Object {
 	}
 	
 	public function method() {
-		var_export($this->trace[self::CALLER_INDEX]); exit;
+		return $this->trace[self::CALLER_INDEX]['function'];
+	}
+	
+	public function arguments() {
+		return $this->trace[self::CALLER_INDEX]['args'];
 	}
 	
 	public function object() {
