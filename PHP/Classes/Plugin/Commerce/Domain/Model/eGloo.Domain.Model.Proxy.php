@@ -2,7 +2,8 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain,
-    \eGloo\Dialect;
+    \eGloo\Dialect,
+    \eGloo\Utilities;
 
 /**
  * Acts as primary interface to model instance, or as lightweight 
@@ -17,7 +18,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 		// call constructor directly because variable argument list isn't 
 		// directly supported #wtfphp
 		call_user_func_array(
-			array(parent, '__constructor', func_get_args())
+			array('parent', '__constructor'), func_get_args()
 		);
 		
 		// now check to ensure that delegated is instanceof Model
@@ -33,7 +34,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 	 */
 	protected function evaluate($lambda) {
 		// first we get a singleton instance of model
-		$model = $this->instance();
+		$model = $this->delegated;
 			
 		// first we use our caller utility to determine
 		// calling method - not as performant as explicitly
@@ -41,6 +42,8 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 		$caller    = new Utilities\Caller;
 		$arguments = $caller->arguments();
 		$name      = $arguments[0];
+		
+		echo $caller; exit;
 		 
 		
 		// check if dynamic property methods have been called
@@ -92,7 +95,8 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 	
 	private function instance() {
 		// returns singleton instance of delegated class
-		$class = $this->class->qualified_name;
+		$class = get_class($this->delegated);
+		exit;
 		return $class::instance();
 	}
 	

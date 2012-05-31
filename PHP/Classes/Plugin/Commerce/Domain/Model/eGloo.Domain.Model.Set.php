@@ -58,7 +58,8 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			$this->model = $mixed;
 		}
 		
-		else { 
+		else {
+						 
 			throw new \Exception(
 				"Failed constructing set because argument '$mixed' is invalid"
 			);

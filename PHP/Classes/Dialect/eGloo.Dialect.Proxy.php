@@ -5,8 +5,8 @@ use \eGloo\Dialect\_ClassSafe as _Class;
 
 
 /**
- * Acts as a proxy, or pass through, to underlying delegated member property
- * (which itself, must be an object)
+ * Acts as a proxy, or pass through, to underlying delegated member property 'delegated';
+ * essentially provides a no-thrills bridge pattern
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Proxy {
@@ -33,8 +33,14 @@ abstract class Proxy {
 			}
 		}
 		
-		else if (is_object($mixed)) {
-			$this->delegated = $mixed;
+		else if (is_object($object = $mixed) ) {
+			$this->delegated = is_callable($lambda = $mixed)
+				? $lambda()
+				: $object;
+				
+			is_object($this->delegated) or throws(
+				"Failed to construct {$this->ident()} because lambda argument must return an(y) instance"
+			);
 		}
 		
 		else if ($mixed instanceof _Class) {
@@ -43,17 +49,6 @@ abstract class Proxy {
 			);
 		}
 		
-		else if (is_callable($lambda = $mixed)) {
-			if (is_object($o = $lambda())) {
-				$this->delegated = $o;
-			}
-			
-			else {
-				throw new \Exception(
-					"Failed to construct {$this->ident()} because lambda argument must return an(y) instance"
-				);
-			}
-		}
 		
 		else {
 			throw new \Exception(
@@ -65,7 +60,7 @@ abstract class Proxy {
 		
 	}
 	
-	protected function evaluate($method, $lambda) {
+	protected function evaluate($lambda) {
 		// calls lambda with delegated member property as 
 		// argument
 		return $lambda($this->delegated);

@@ -254,6 +254,7 @@ abstract class Model extends Delegator
 								return $result;
 							});
 							
+							
 							if ($result !== false) {
 								$set[] = $result;
 							}
@@ -263,17 +264,21 @@ abstract class Model extends Delegator
 					}
 					
 					// @TODO place our afterFind in background task
-					foreach($set as $model) {
-						$model->send('runCallbacks', 'find', 'after');
+					if (count($set)) {
+						foreach($set as $model) {
+							$model->send('runCallbacks', 'find', 'after');
+						}
+	
+						
+						// if a set consisting of a single element; return element, as the likely
+						// intended purpose was to retrieve a single record; otherwise return set
+						// instance
+						return count($set) == 1
+							? $set[0]
+							: new Model\Set($set);
 					}
-
 					
-					// if a set consisting of a single element; return element, as the likely
-					// intended purpose was to retrieve a single record; otherwise return set
-					// instance
-					return count($set) == 1
-						? $set[0]
-						: new Model\Set($set);
+					return false;
 				}	
 					
 				catch(\Exception $passthrough) {
