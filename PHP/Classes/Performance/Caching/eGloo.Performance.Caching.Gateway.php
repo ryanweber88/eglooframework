@@ -255,7 +255,7 @@ class Gateway extends Object {
 													$retry_interval,
 													$status,
 													function($__mixed) {
-														echo (var_export(func_get_args(), true)); 
+														//echo (var_export(func_get_args(), true)); 
 													} 
 													
 				);
