@@ -718,6 +718,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 				
 				$target = $this->association->through;	
 				$owner  = $this->association->owner;
+				
+				// @TODO check for hasRelationship on through
+				//if ($owner->hasRelationship($target))
 
 				$joinModel = \class_exists($class = "$ns\\$target")
 					? new $class

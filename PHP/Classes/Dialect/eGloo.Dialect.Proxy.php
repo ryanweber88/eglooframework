@@ -33,6 +33,10 @@ abstract class Proxy {
 			}
 		}
 		
+		else if (is_object($mixed)) {
+			$this->delegated = $mixed;
+		}
+		
 		else if ($mixed instanceof _Class) {
 			$this->delegated = $mixed->instantiate(
 				$arguments
@@ -61,7 +65,7 @@ abstract class Proxy {
 		
 	}
 	
-	protected function evaluate($lambda) {
+	protected function evaluate($method, $lambda) {
 		// calls lambda with delegated member property as 
 		// argument
 		return $lambda($this->delegated);

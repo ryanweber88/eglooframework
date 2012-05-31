@@ -7,13 +7,15 @@ use \eGloo\Utilities\Collection;
 use \eGloo\Domain\Model\Callback;
 use \eGloo\Domain\Cache;
 use \eGloo\Performance\Caching;
+use \eGloo\Domain\Model;
 
 /**
  * Superclass for all domain models; provides generic functionality
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, Caching\CacheKeyInterface, Caching\CacheableInterface {
+	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, 
+	           Caching\CacheKeyInterface, Caching\CacheableInterface, ModelInterface {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -617,7 +619,7 @@ abstract class Model extends Delegator
 		);
 	}
 	
-	protected function hasRelationship($name) {
+	public function hasRelationship($name) {
 		return isset($this->relationships[$name]);
 	}
 	
