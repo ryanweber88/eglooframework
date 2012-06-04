@@ -1494,7 +1494,10 @@ abstract class Model extends Delegator
 			
 			// saves model to underlying data layer and sets
 			// initialized to true
-			$model->save();
+			// @TODO change this back to $model->save onces
+			// composite keys are defined
+			//$model->save();
+			$model->create($model);
 			$model->initialized = true;
 			
 		}
