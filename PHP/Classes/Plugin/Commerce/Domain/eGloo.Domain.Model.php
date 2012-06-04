@@ -2167,7 +2167,7 @@ abstract class Model extends Delegator
 				//$disguisedClass = $class::classFullName();
 				$conditions = array();
 				$arguments  = Collection::flatten(func_get_args());
-
+				
 				foreach($fields as $field) {
 					$conditions[] = "$field = ?"; 	
 				}
@@ -2177,8 +2177,7 @@ abstract class Model extends Delegator
 				
 				// @TODO arguments is appended with classname, sometimes??; for now,
 				// removing appended value
-				$arguments = array_slice($arguments, 0, count($conditions));
-
+				$arguments = array_slice($arguments, 0, count($fields));
 				
 				try {			 
 					Data::statement("

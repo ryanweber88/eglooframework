@@ -18,7 +18,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 		// call constructor directly because variable argument list isn't 
 		// directly supported #wtfphp
 		call_user_func_array(
-			array('parent', '__constructor'), func_get_args()
+			array(get_parent_class($this), '__construct'), func_get_args()
 		);
 		
 		// now check to ensure that delegated is instanceof Model
@@ -27,6 +27,13 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 			"Failed to construct instance '{$this->ident()}' because delegated '$delegated' ".
 			"must be instance of Model"
 		);
+		
+		// finally lets get attributes, should they exist
+		if (count($attributes = array_slice(func_get_args(), 1)) && 
+		    Utilities\Collection::isHash($attributes))           {
+		    	
+				
+		}
 	}
 	/**
 	 * Evaluates results of given pass through method (__get, __set, __call, __callstatic)
@@ -35,6 +42,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 	protected function evaluate($lambda) {
 		// first we get a singleton instance of model
 		$model = $this->delegated;
+		var_export($this->delegated);
 			
 		// first we use our caller utility to determine
 		// calling method - not as performant as explicitly
@@ -42,9 +50,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 		$caller    = new Utilities\Caller;
 		$arguments = $caller->arguments();
 		$name      = $arguments[0];
-		
-		echo $caller; exit;
-		 
+				 
 		
 		// check if dynamic property methods have been called
 		// in which case we need to perform passthrough
@@ -66,7 +72,7 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 			// note of current id; we do this avoid build on model
 			// as much as possible
 			if (static::$current != ($id = spl_object_hash($this))) {
-				$model->build($this->store);
+				$model->build($this->attributes);
 				static::$current = $id;
 			}			
 			
@@ -88,18 +94,11 @@ class Proxy extends Dialect\Proxy implements Domain\ModelInterface {
 				array($model, $method), $arguments
 			);
 		}
-						
 
-		
 	}
 	
-	private function instance() {
-		// returns singleton instance of delegated class
-		$class = get_class($this->delegated);
-		exit;
-		return $class::instance();
-	}
-	
+
+	protected      $store;
 	protected      $attributes = array();
 	private static $current;
 	
