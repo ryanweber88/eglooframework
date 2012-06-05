@@ -74,6 +74,26 @@ class Cart extends Domain\Model {
 		static::setActiveCartID();
 	}
 
+	public static function temporaryCreateCart($userId) {
+		$session = Session::find_one_by_user_id( $userId );
+		
+		$cart = new static(
+			array
+				(
+				'session_id' => $session->id,
+				'user_id' => $userId,
+				'cart_progress_id' => self::CART_PROGRESS_ADD,
+				'last_action' => 'I',
+				'last_action_taken' => date('Y-m-d H:i:s', time()),
+				'action_by' => \User::getActiveUserID(),
+				)
+		);
+
+		$cart->save();
+
+		static::$cart_id = $_SESSION['cart_id'] = $cart->id;		
+	}
+	
 	public static function setActiveCartID( $cart_id = null, $cart_session_id = null, $cart_user_id = null, $create_cart = true ) {
 		if ( !is_null($cart_id) && is_numeric($cart_id) && $cart_id > 0 ) {
 			// Look up via cart_id

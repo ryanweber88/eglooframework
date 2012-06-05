@@ -153,6 +153,12 @@ class Generic extends Domain\Model {
 			}
 			
 			catch(\Exception $passthrough) {
+				// @TODO passthrough isn't getting pushed
+				// to caller scope/context	
+				echo $passthrough;
+				exit;
+				
+				//throw $passthrough;				
 				throw $passthrough;
 			}
 			
@@ -175,16 +181,21 @@ class Generic extends Domain\Model {
 			// does not pan out; so callers will be explicitly aware
 			try {
 				
-				$set = $class::statement("
-					SELECT * FROM $table
-						
-				");
 				
+				$set = $class::statement("
+					SELECT * FROM $table		
+				");
+
 				return $class::sendStatic('process', $set);
 			}
 			
 			catch(\Exception $passthrough) {
-				throw $passthrough;
+				// @TODO passthrough isn't getting pushed
+				// to caller scope/context	
+				echo $passthrough;
+				exit;
+				
+				//throw $passthrough;
 			}
 			
 			

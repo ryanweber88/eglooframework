@@ -101,7 +101,7 @@ abstract class Model extends Delegator
 			'/^load([A-Z][a-z]+?)By([a-zA-Z]+)$/' => 'find_by_$1_$2',
 			'/^get([A-Z][a-z]+?)By([a-zA-Z]+)$/'  => 'find_by_$1_$2',
 			"/^load{$classname}List$/"            => 'all',
-			"/^create{$classname}$/"              => 'create'
+			//"/^create{$classname}$/"              => 'create'
 		);
 
 		// retrieve list of methods from class
@@ -1167,8 +1167,8 @@ abstract class Model extends Delegator
 	 */
 	protected function __relationships() {
 		
-		$class     = $this->classname();
-		$namespace = $this->namespace();
+		$class     = $this->class->name;
+		$namespace = $this->class->namespace;
 		
 		// check for status relationship and draw if exists, we could
 		// explicitly do this in a try/catch, but would present a serious
@@ -1176,6 +1176,7 @@ abstract class Model extends Delegator
 		// class; so here, our convention is "if there is a Status class
 		// in Comon.Domain.Model.$ClassName namespace, then define status
 		// relationship"
+
 		if (class_exists($model = "$namespace\\$class\\Status")) {
 			$self = $this;
 
@@ -1964,6 +1965,24 @@ abstract class Model extends Delegator
 		
 
 		$this->primaryKeyName = $from;
+	}
+	
+	/**
+	 * If a composite model, specify model primary keys
+	 * @return boolean
+	 */
+	protected function primaryKeys($__mixed) {
+		$this->primaryKeys = Collection::flatten(func_get_args());
+	}
+	
+	/**
+	 * Check to determine if model has been specified as having
+	 * composite primary keys
+	 * @return boolean
+	 */
+	protected function hasCompositeKeys() {
+		return is_array($this->primaryKeys) && 
+		       count($this->primaryKeys);
 	}
 	
 	/**
@@ -2816,6 +2835,7 @@ abstract class Model extends Delegator
 		);
 	}	
 
+	protected $primaryKeys    = null;
 	protected $attributes     = array();
 	protected $validates      = array();
 	protected $callbacks      = array();
