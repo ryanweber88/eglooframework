@@ -9,6 +9,8 @@ require 'optparse'
 # First lets find our Requests.xml file
 request_file = Dir['**/Requests.xml'].pop
 
+puts "Looking @ #{file}"
+
 # Raise exceptions based on found file
 unless request_file.nil?
   
