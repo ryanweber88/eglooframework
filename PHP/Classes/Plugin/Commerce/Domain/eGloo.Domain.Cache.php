@@ -66,5 +66,3 @@ abstract class Cache extends Caching\Cache {
 	abstract protected function server();
 	
 }
-
-

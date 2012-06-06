@@ -555,10 +555,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// point in return a multi-result set if performing an insert
 		// for example
 		
-		if ($classification == 'update' && strpos($statement, 'purchase_order_good') !== false) {
-			echo $statement; exit;
-		}
-				
 		$result = $dataAccess->$method($statement, $arguments);
 
 

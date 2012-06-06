@@ -8,9 +8,13 @@ use \eGloo\Dialect\ObjectSafe as Object;
 /**
  * Provides generic crud operations, wrapped with model callback
  * handlers
+ * @author Christian Calloway callowaylc@gmail.com
  */
 class CRUD extends Model\Callback {
 	
+	/**
+	 * Provides generic handler on 'update' event (fired from model instance)
+	 */
 	public function update(Domain\Model $model) {
 
 		
@@ -21,7 +25,8 @@ class CRUD extends Model\Callback {
 		// check for the existence of create
 		$callbacks = &$model->reference('callbacks');
 		
-		if ($model->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
+		if ($model->send('hasCallbacks', 'update', 'around') && 
+		    count($callbacks['update']['around']) == 1)      {
 			
 			$conditions = array();
 							
@@ -54,6 +59,9 @@ class CRUD extends Model\Callback {
 		
 	}
 	
+	/**
+	 * Provides generic event handler on 'create' event (fired from model instance)
+	 */
 	public function create(Domain\Model $model) {
 		
 
@@ -65,7 +73,8 @@ class CRUD extends Model\Callback {
 		// check for the existence of create
 		$callbacks = &$model->reference('callbacks');
 		
-		if ($model->send('hasCallbacks', 'create', 'around') && count($callbacks['create']['around']) == 1) {
+		if ($model->send('hasCallbacks', 'create', 'around') && 
+		    count($callbacks['create']['around']) == 1)      {
 											
 			try {
 				// set primary key with result of insert - if it has been succesfully aliased,
@@ -95,6 +104,9 @@ class CRUD extends Model\Callback {
 		
 	}
 	
+	/**
+	 * Provides generic event handler on 'delete' event (fired from model instance)
+	 */	
 	public function delete(Domain\Model $model) {
 		// check that a create callback has not already been created - this is to ensure
 		// we don't face double inserts
@@ -103,7 +115,8 @@ class CRUD extends Model\Callback {
 		// check for the existence of create
 		$callbacks = &$model->reference('callbacks');
 		
-		if ($model->send('hasCallbacks', 'delete', 'around') && count($callbacks['delete']['around']) == 1) {
+		if ($model->send('hasCallbacks', 'delete', 'around') && 
+		    count($callbacks['delete']['around']) == 1)      {
 			
 			// @TODO replace with a flexible mechanism for deleting records; especially consider composite
 			// keys
@@ -129,5 +142,6 @@ class CRUD extends Model\Callback {
 		}		
 	}
 	
+	/** @TODO stuff - determine performance impact for firing afterFind on multple instances */
 	public function afterFind(Domain\Model $model) { }
 }
