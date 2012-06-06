@@ -62,7 +62,14 @@ class Generic extends Domain\Model {
 	 * exists by looking at pseudoname pattern
 	 */
 	public function exists() {
-		return false;
+		$primaryKey = $this->primaryKeyName();
+		
+		return isset($this->$primaryKey)     && 
+					 !is_null($this->$primaryKey);	
+	}
+	
+	public function primaryKeyName() {
+		return static::signature() . '_id';
 	}
 	
 	/**
@@ -189,10 +196,13 @@ class Generic extends Domain\Model {
 				// @TODO clean this up later - I shouldn't have to keep asking whether
 				// item is set or model
 				$result = $class::sendStatic('process', $set);
-				
+				var_export($result->exists()); exit;
+							
 				if ($result instanceof Domain\Model) {
-					$result = Set($result);
+					$result = new Set($result);
 				}
+				
+				
 				
 				return $result;
 			}
