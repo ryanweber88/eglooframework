@@ -189,7 +189,8 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				}
 							
 							
-				$conditions = implode("AND\n ", $conditions);			
+				$conditions = implode(" AND\n ", $conditions);		
+				
 				
 				
 				// build query 
@@ -553,6 +554,10 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		// @TODO we have to determine nature of query, as there is no
 		// point in return a multi-result set if performing an insert
 		// for example
+		
+		if ($classification == 'update' && strpos($statement, 'purchase_order_good') !== false) {
+			echo $statement; exit;
+		}
 				
 		$result = $dataAccess->$method($statement, $arguments);
 

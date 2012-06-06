@@ -15,14 +15,14 @@ unless request_file.nil?
   # lets parse our options for which request 
   # class we are looking for
   options = {
-    request_class:    false,
+    request_class: false,
   }
   
   OptionParser.new do |opts|
     opts.banner = 'Usage: example.rb [options]'
       
     %w(remote user password mount).each do | word |
-      opts.on "-#{word[0]} [VALUE]", "--#{word}"   do | value |
+      opts.on "-#{word[0]} [VALUE]", "--#{word}" do | value |
         options[:"#{word}"] = value || true
       end    
     end  
@@ -30,12 +30,11 @@ unless request_file.nil?
   
   # now lets open our xml document and use
   # xpath to find the correct request class 
-  
-  doc = Nokogiri::XML(request_file)
-  #doc.remove_namespaces!
-  
-  p doc.xpath "//tns:Requests"
-  puts 'here'
+  File.open request_file do |file|
+    doc = Nokogiri::XML(file)
+    p doc.xpath("/Requests/RequestClass[@id='#{options[:request_class]}']")    
+  end
+
   
   
 
