@@ -22,12 +22,25 @@ class CRUD extends Model\Callback {
 		$callbacks = &$model->reference('callbacks');
 		
 		if ($model->send('hasCallbacks', 'update', 'around') && count($callbacks['update']['around']) == 1) {
+			
+			$conditions = array();
 							
-							
+			if ($model->send('hasCompositeKeys')) {
+				foreach($model->reference('primaryKeys') as $key) {
+					$conditions[] = "$key = ?";		
+				}
+			}
+			
+			else {
+				$conditions[] = "{$model->primaryKeyName()} = ?";
+			}	
+			
+						
 			try { 
 				$model::updates(array(
 					'against'      => $model->send('signature'),
-					'using'        => $model
+					'using'        => $model,
+					'where'        => $conditions
 				));	
 				
 			}

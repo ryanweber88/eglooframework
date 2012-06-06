@@ -1971,8 +1971,14 @@ abstract class Model extends Delegator
 	 * If a composite model, specify model primary keys
 	 * @return boolean
 	 */
-	protected function primaryKeys($__mixed) {
-		$this->primaryKeys = Collection::flatten(func_get_args());
+	protected function primaryKeys($__mixed = null) {		
+		if (count($arguments = func_get_args())) {
+			$this->primaryKeys = Collection::flatten($arguments);
+		}
+		
+		else {
+			return $this->primaryKeys;
+		}
 	}
 	
 	/**
