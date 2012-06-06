@@ -191,7 +191,7 @@ class Generic extends Domain\Model {
 				$result = $class::sendStatic('process', $set);
 				
 				if ($result instanceof Domain\Model) {
-					$result = Model\Set($result);
+					$result = Set($result);
 				}
 				
 				return $result;
