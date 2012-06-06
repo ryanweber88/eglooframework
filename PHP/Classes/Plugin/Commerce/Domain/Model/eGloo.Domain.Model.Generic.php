@@ -186,7 +186,15 @@ class Generic extends Domain\Model {
 					SELECT * FROM $table		
 				");
 
-				return $class::sendStatic('process', $set);
+				// @TODO clean this up later - I shouldn't have to keep asking whether
+				// item is set or model
+				$result = $class::sendStatic('process', $set);
+				
+				if ($result instanceof Domain\Model) {
+					$result = Model\Set($result);
+				}
+				
+				return $result;
 			}
 			
 			catch(\Exception $passthrough) {
