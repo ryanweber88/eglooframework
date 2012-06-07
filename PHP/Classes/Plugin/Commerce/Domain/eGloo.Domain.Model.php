@@ -460,9 +460,21 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		return isset($this->id)     && 
-					 (!empty($this->id)   ||
-					  !is_null($this->id));					 
+		if ($this->hasCompositeKeys()) {
+			foreach($this->primaryKeys as $key) {
+				if (!isset($this->$key) || is_null($this->$key)) {
+					return false;
+				}
+			}
+			
+			return true;
+		}
+		
+		else {
+			return isset($this->id)     && 
+						 (!empty($this->id)   ||
+						  !is_null($this->id));
+		}					 
 	}
 	
 	/**

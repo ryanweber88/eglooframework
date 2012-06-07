@@ -10,7 +10,7 @@ class eGloo extends Object
 	implements \ArrayAccess {
 		
 	static function __static() {
-		static::$cache = new Caching\Cache;
+		//static::$cache = new Caching\Cache;
 	}
 	
 	/** ArrayAccess interface methods *****************/
@@ -21,7 +21,7 @@ class eGloo extends Object
 	// notation
 	
 	public function offsetGet($offset) {
-		
+		return $offset;
 	}
 	
 	public function offsetSet($offset, $value) {
