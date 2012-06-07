@@ -29,6 +29,13 @@ unless file.nil?
     end  
   end.parse!  
   
+  unless ARGV[0].nil? 
+    if ARGV[0] =~ /[a-z]\:[a-z]/i
+      options[:class], options[:id] = ARGV[0].split ':'
+    end  
+  end
+    
+  
   unless options[:class].nil?
     
     xpath =  "//Requests/RequestClass[@id='" + options[:class]  + "']"

@@ -9,11 +9,13 @@ require 'optparse'
 # First lets find our Requests.xml file
 request_file = Dir['**/Requests.xml'].pop
 
-puts "Looking @ #{file}"
+puts "Looking @ #{request_file}"
 
 # Raise exceptions based on found file
 unless request_file.nil?
   
+
+      
   # lets parse our options for which request 
   # class we are looking for
   options = {
@@ -31,6 +33,13 @@ unless request_file.nil?
     end  
   end.parse!  
   
+  unless ARGV[0].nil? 
+    if ARGV[0] =~ /[a-z]\:[a-z]/i
+      options[:class], options[:id] = ARGV[0].split ':'
+    end  
+  end
+  
+
   unless options[:class].nil?
     
     xpath =  "//Requests/RequestClass[@id='" + options[:class]  + "']"
