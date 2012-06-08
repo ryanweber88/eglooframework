@@ -49,9 +49,16 @@ class Collection extends \ArrayObject {
 	 */
 	public static function flatten(array $collection) {
 		$return = array();
-		
-		array_walk_recursive($collection, function($element, $key) use (&$return) {
-			$return[$key] = $element;
+		array_walk_recursive($collection, function($element, $key) use (&$return, $collection) {
+			// @TODO there should be a cleaner way of doing this - on numerical indicies
+			// we are seeing overwrites when flattening mutlidimensional arrays 
+			if (is_numeric($key) && isset($return[$key])) {
+				$return[] = $element;
+			}
+			
+			else { 
+				$return[$key] = $element;
+			}
 		});
 		
 		return $return;

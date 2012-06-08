@@ -2003,6 +2003,13 @@ abstract class Model extends Delegator
 		       count($this->primaryKeys);
 	}
 	
+	protected function hasPrimaryKey() {
+		$field = $this->primaryKeyName();
+		
+		return isset($this->$field) &&
+		       !is_null($this->$field);
+	}
+	
 	/**
 	 * This is an alias of ObjectSafe#aliasProperty - since dynamically bound
 	 * properties on a model are termed "attributes", "aliasAttribute" is
