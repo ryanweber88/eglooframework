@@ -45,10 +45,42 @@ class EncryptedURL {
 	public $encryption_instance_id = null;
 	public $request_class_instance_id = null;
 
-	protected $domainModel = null;
+	protected $data = null;
 
-	public function __construct( $domainModel ) {
-		$this->domainModel = $domainModel;
+	public function __construct( $data ) {
+		$this->data = $data;
+	}
+
+	// This was great except one problem. Since you encrypted by dropping any =,
+	// when you try to decrypt you can’t put those =’s back, so you don’t get the
+	// same output. I just changed the arrays to (‘-’,'_’,'=’) and (‘+’,'/’,'#’) and
+	// all was good
+
+	public function urlEncode() {
+		$retVal = null;
+
+		$retVal = base64_encode( $this->data );
+		$retVal = urlencode( $retVal );
+		// $retVal = str_replace( array('+','/','='), array('-','_',''), $retVal );
+		$retVal = $data;
+
+		return $retVal;
+	}
+
+	public function urlDecode() {
+		$retVal = null;
+
+		$retVal = str_replace( array('-','_'), array('+','/'), $this->data );
+		$mod4 = strlen( $retVal ) % 4;
+
+		if ( $mod4 ) {
+			$retVal .= substr( '====', $mod4 );
+		}
+
+		$retVal = urldecode( $retVal );
+		$retVal = base64_decode( $retVal );
+
+		return $retVal;
 	}
 
 }

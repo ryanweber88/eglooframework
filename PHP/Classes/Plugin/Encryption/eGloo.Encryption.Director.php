@@ -1,8 +1,10 @@
 <?php
+namespace eGloo\Encryption;
+
 /**
- * eGloo.Encryption.Director Class File
+ * \eGloo\Encryption\Director Class File
  *
- * Contains the class definition for the eGloo.Encryption.Director
+ * Contains the class definition for the \eGloo\Encryption\Director
  * 
  * Copyright 2012 eGloo LLC
  * 
@@ -28,7 +30,7 @@
  */
 
 /**
- * eGloo.Encryption.Director
+ * \eGloo\Encryption\Director
  *
  * $short_description
  *
@@ -38,7 +40,15 @@
  * @package $package
  * @subpackage $subpackage
  */
-class eGloo.Encryption.Director {
+class Director {
+
+	public static function encrypt( $_mixed ) {
+		
+	}
+
+	public static function decrypt( $_mixed ) {
+		
+	}
 
 }
 

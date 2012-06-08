@@ -2,9 +2,9 @@
 namespace eGloo\Encryption;
 
 /**
- * eGloo\Encryption\EncryptionInstance Class File
+ * \eGloo\Encryption\EncryptionInstance Class File
  *
- * Contains the class definition for the eGloo\Encryption\EncryptionInstance
+ * Contains the class definition for the \eGloo\Encryption\EncryptionInstance
  * 
  * Copyright 2012 eGloo LLC
  * 
@@ -30,7 +30,7 @@ namespace eGloo\Encryption;
  */
 
 /**
- * eGloo\Encryption\EncryptionInstance
+ * \eGloo\Encryption\EncryptionInstance
  *
  * $short_description
  *
