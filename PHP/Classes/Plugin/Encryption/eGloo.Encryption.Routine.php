@@ -54,24 +54,35 @@ class Routine {
 
 		if ( $data !== null ) {
 			$text = $data;
-			$iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB );
+
+			$iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CFB );
 			$iv = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
-			$crypttext = mcrypt_encrypt( MCRYPT_RIJNDAEL_256, $this->skey, $text, MCRYPT_MODE_ECB, $iv );
-			$retVal = trim( $this->safe_b64encode($crypttext) ); 
+
+			$data->setInitializationVector( $iv );
+			$crypttext = mcrypt_encrypt( MCRYPT_RIJNDAEL_256, $this->_token, $text, MCRYPT_MODE_CFB, $iv );
+
+			$data->setValue( $crypttext );
+			$data->setIsEncrypted();
+
+			$retVal = $crypttext;
 		}
 
 		return $retVal;
 	}
 
-	public function decrypt( $data ){
+	public function decrypt( $data ) {
 		$retVal = false;
 
 		if ( $data !== null ) {
-			$crypttext = $this->safe_b64decode( $data ); 
-			$iv_size = mcrypt_get_iv_size( MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB );
-			$iv = mcrypt_create_iv( $iv_size, MCRYPT_RAND );
-			$decrypttext = mcrypt_decrypt( MCRYPT_RIJNDAEL_256, $this->skey, $crypttext, MCRYPT_MODE_ECB, $iv );
-			$retVal = trim( $decrypttext );
+			$crypttext = $data;
+
+			$decrypttext = mcrypt_decrypt( MCRYPT_RIJNDAEL_256, $this->_token, $crypttext, MCRYPT_MODE_CFB, $data->getInitializationVector() );
+			$decrypttext = trim( $decrypttext );
+
+			$data->setValue( $decrypttext );
+			$data->setIsEncrypted( false );
+
+			$retVal = $decrypttext;
 		}
 
 		return $retVal;
@@ -94,12 +105,6 @@ class Routine {
 	public function setToken( $token ) {
 		$this->_token = $token;
 	}
-
-	/*
-	$this->encrypt->encode('Your data');
-	$this->encrypt->decode('Your encrypted data');
-
-	*/
 
 }
 
