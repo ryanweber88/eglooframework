@@ -12,9 +12,12 @@ look_for = Pathname.new(__FILE__).basename.to_s.sub(/^(\w)/) do |s|
   s.capitalize
 end 
 
+path = '**/'
+path += 'XHTML/' if look_for =~ /dispatch/i
+
 
 # First lets find our Requests.xml file
-file = Dir['**/XHTML/' + look_for + '.xml'].pop
+file = Dir[path + look_for + '.xml'].pop
 
 # Raise exceptions based on found file
 unless file.nil?

@@ -70,7 +70,7 @@ abstract class Model extends Delegator
 		// assign left-over columns to model
 		// @TODO delegate this to overrideable method, or place into
 		// 'after' initialize
-		if (!in_array($signature = static::signature(), array('user'))            && 
+		if (!in_array($signature = static::entityName(), array('user'))            && 
 		    is_array($columns = Data::columns($signature))) {
 		    	
 			foreach($columns as $attribute) {
@@ -348,38 +348,12 @@ abstract class Model extends Delegator
 
 		$this->defineMethod('transaction', function($lambda) use ($self) {
 
-			// @TODO trigger begin transaction
 			$self->send('runCallbacks', 'transaction', 'before');
 			
-			try {
-				$result = $lambda();
-			} 
-			
-			catch(\Exception $pass) {
-				
-				// rollback our transaction
-				$self::transaction(function($t) {
-					$t->rollback();
-				});
-				
-				// now throw exception
-				throw $pass;
-			}
-			
-			// an absolute false value also indicates that transaction
-			// should be rolled back 
-			if ($result === false) {
-				$self::transaction(function($t) {
-					$t->rollback();
-				});	
-			}
+			$self::transaction($lambda);
 			
 			$self->send('runCallbacks', 'transaction', 'after');
-			
-			return $result;
 		
-		// @TODO trigger end transaction
-	
 		});
 		
 	}
@@ -1208,16 +1182,11 @@ abstract class Model extends Delegator
 		$signature = static::signature(); 
 		
 		$this->defineCallback('transaction', 'before', function() use ($self) {
-			$self::transaction(function($t) {
-				$t->begin();
-				
-			});
+			
 		});
 		
 		$this->defineCallback('transaction', 'after', function() use ($self) {
-			$self::transaction(function($t) {
-				$t->end();
-			});
+
 		});	
 		
 		
@@ -1504,14 +1473,17 @@ abstract class Model extends Delegator
 			$model     = new static($arguments);
 			$model->id = null;
 						
-			
+
 			// saves model to underlying data layer and sets
 			// initialized to true
 			// @TODO change this back to $model->save onces
 			// composite keys are defined
 			//$model->save();
-			$model->create($model);
-			$model->initialized = true;
+			if ($model->valid()) {
+				$model->runCallbacks('save', 'before');
+				$model->create($model);
+				$model->initialized = true;
+			}
 			
 		}
 		

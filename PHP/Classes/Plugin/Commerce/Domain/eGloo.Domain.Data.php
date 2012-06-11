@@ -115,21 +115,45 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	/**
 	 * Retrieve transaction instance for this data object 
 	 */
-	public static function transaction($lambda = null) {
-		$class = static::classnamefull();
-		
+	public static function transaction($lambda) {
+		$class       = static::classnamefull();		
 		$transaction = static::cache(function() use ($class) {
 			return new Data\Transaction(
 				new $class
 			);
 		});
 		
-		if (!is_null($lambda) && is_callable($lambda)) {
-			$lambda($transaction);
+		
+		
+		// lets start our motherfucking transaction
+		$transaction->begin();
+		
+		// run lambda - if it resturns absolute false
+		// or throws an exception, this will signal that
+		// something went wrong and to roll back transaction
+		try { 
+			$result = $lambda($transaction);	
 		}
 		
-		return $transaction;
+		catch(\Exception $defer) {
+			$result = false;
+		}
+		
+		// absolute false indicates transaction should be rolled back
+		if ($result === false) {
+			$transaction->rollback();
+			
+			// pass exception upstack to handled by caller
+			throw $defer;
+		
+		// otherwise end transaction
+		} else {
+			$transaction->commit();
+		}
+
 	}
+	
+
 
 	public static function updates(array $idioms) {
 		// check that idiom 'into' exists
@@ -318,13 +342,15 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 		
 		
+		// determine execute method to call based upon
+		// query type; make sure to avoid transaction based
+		$method = 'execute';
 		
-		//$method = ($classification = strtolower($match[1])) == 'select'
-		//	? 'executeSelect'
-		//	: 'execute' . ucfirst($classification);
-		$method = 'execute' . ucfirst(
-			$classification = strtolower($match[1])
-		);
+		if (in_array(strtolower($match[1]), array('select', 'insert', 'update', 'delete'))) {
+			$method = 'execute' . ucfirst(
+				$classification = strtolower($match[1])
+			);
+		}
 		
 			
 		$fields = array();

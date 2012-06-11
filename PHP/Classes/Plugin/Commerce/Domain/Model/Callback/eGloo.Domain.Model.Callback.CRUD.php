@@ -77,11 +77,12 @@ class CRUD extends Model\Callback {
 		    count($callbacks['create']['around']) == 1)      {
 											
 			try {
+				
 				// set primary key with result of insert - if it has been succesfully aliased,
 				// then value will be updated on true primary key
 				// @TODO composite keys? 
 				$model->id = $model::inserts(array(
-					'into'         => $model->send('signature'),
+					'into'         => $model->send('entityName'),
 					'using'        => $model
 				));	
 									
