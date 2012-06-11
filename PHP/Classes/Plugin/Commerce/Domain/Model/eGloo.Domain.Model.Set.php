@@ -563,7 +563,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		// otherwise we create an instance of templated model and push
 		// onto queue
 		if (!isset($model)) {
-			$model  = new $this->model;
+			$model = $this->model;
+			$model = $model::instantiate();
+						
 			$this[] = $model;
 		}
 		

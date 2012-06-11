@@ -1862,9 +1862,11 @@ abstract class Model extends Delegator
 			$instance  = $tmp::instance();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($instance, $key, function($class) use ($result) {
+			
+				$result = $manager->find($instance, $key, function($class) use ($result) {				
 					return new $class($result);
-				});					
+				});				
+				
 				
 				$result->send('runCallbacks', 'find', 'after');
 			}

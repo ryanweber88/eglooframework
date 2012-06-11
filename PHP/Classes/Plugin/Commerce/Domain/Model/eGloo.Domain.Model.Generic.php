@@ -41,6 +41,36 @@ class Generic extends Domain\Model {
 	}
 	
 	/**
+	 * Overrides ObjectSafe.instantiate to reuse preexisting class
+	 * variable pseudonym is not arguments are passed
+	 * @throws Exception
+	 */
+	public static function instantiate($__mixed = null) {
+		$returns    = null;	
+		$arguments  = func_get_args();
+		$reflection = new \ReflectionClass(get_called_class()); 
+
+		// if arguments have been passed we create an instance as usual
+		if (count($arguments)) {
+			$returns = $reflection->newInstanceArgs($arguments);
+		
+		// otherwise, if no arguments have been passed, we attempt to create
+		// a new generic with pre-existing pseudonym
+		} else if (static::$pseudonym !== null)  {
+			$returns = new static(static::$pseudonym);
+			
+		// otherwise we throw an exception
+		} else {
+			throw new \Exception(
+				"Failed to instantiate generic model without arguments"
+			);
+		}
+				
+		return $returns;
+	}
+	
+	
+	/**
 	 * 
 	 */
 	static function __static() {
@@ -61,11 +91,17 @@ class Generic extends Domain\Model {
 	 * @TODO for the time being, this must be set to return false, but we can check
 	 * exists by looking at pseudoname pattern
 	 */
-	public function exists() {
+	public function exists() {	
 		$primaryKey = $this->primaryKeyName();
 		
-		return isset($this->$primaryKey)     && 
-					 !is_null($this->$primaryKey);	
+				
+		if (isset($this->$primaryKey)) { 
+			return !is_null($this->$primaryKey);
+		}
+		
+		// @TODO can't determine if generics that fall outside of naming
+		// conventions actually exist (esp in case of junction tables)
+		return true;	
 	}
 	
 	public function primaryKeyName() {
@@ -234,5 +270,5 @@ class Generic extends Domain\Model {
 	
 	
 	
-	protected static $pseudonym;
+	public static $pseudonym;
 }
