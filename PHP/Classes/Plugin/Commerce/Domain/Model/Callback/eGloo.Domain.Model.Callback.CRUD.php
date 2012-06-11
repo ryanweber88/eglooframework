@@ -39,11 +39,10 @@ class CRUD extends Model\Callback {
 			else {
 				$conditions[] = "{$model->primaryKeyName()} = ?";
 			}	
-			
-						
+									
 			try { 
 				$model::updates(array(
-					'against'      => $model->send('signature'),
+					'against'      => $model->send('entity'),
 					'using'        => $model,
 					'where'        => $conditions
 				));	
@@ -82,7 +81,7 @@ class CRUD extends Model\Callback {
 				// then value will be updated on true primary key
 				// @TODO composite keys? 
 				$model->id = $model::inserts(array(
-					'into'         => $model->send('entityName'),
+					'into'         => $model->send('entity'),
 					'using'        => $model
 				));	
 									
@@ -118,10 +117,24 @@ class CRUD extends Model\Callback {
 		
 		if ($model->send('hasCallbacks', 'delete', 'around') && 
 		    count($callbacks['delete']['around']) == 1)      {
-			
+		    	
 			// @TODO replace with a flexible mechanism for deleting records; especially consider composite
 			// keys
-			$table = $model->send('signature');
+			$table = $model->send('entity');
+			$pk    = $model->primaryKeyName();
+								
+			if ($model->send('hasCompositeKeys')) {
+				foreach($model->reference('primaryKeys') as $key) {
+					$conditions[] = "$key = ?";		
+				}
+			}
+			
+			else {
+				$conditions[] = "$pk = ?";  
+			}	
+			
+			$conditions = implode (' AND ', $conditions);				
+			
 			
 			try { 
 				$model::statement("
@@ -131,9 +144,9 @@ class CRUD extends Model\Callback {
 						$table
 						
 					WHERE
-						{$table}_id = ? 
+						($conditions)
 						
-				", $model->id);
+				", $model);
 			}
 			
 			catch (\Exception $pass) {

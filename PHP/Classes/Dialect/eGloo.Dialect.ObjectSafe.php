@@ -596,7 +596,7 @@ abstract class ObjectSafe {
 	 * Instantiates a new object
 	 */
 	public static function instantiate($__mixed = null) {
-		$reflection = new ReflectionClass(get_called_class());
+		$reflection = new \ReflectionClass(get_called_class());
 		return $reflection->newInstanceArgs(func_get_args());
 	}
 	
