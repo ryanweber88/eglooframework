@@ -91,8 +91,8 @@ class EncryptedURL {
 		$this->_value = $value;
 	}
 
-	public function __construct( $data ) {
-		if ( !$data->isEncrypted() ) {
+	public function __construct( $data = null ) {
+		if ( $data !== null && !$data->isEncrypted() ) {
 			throw new \Exception( 'Cannot create an encrypted URL from unencrypted data object' );
 		}
 
@@ -100,24 +100,36 @@ class EncryptedURL {
 		$this->_value = (string) $data;
 	}
 
-	public function urlEncode() {
+	public function base64Encode() {
 		$data = base64_encode( $this->_value );
-		$data = urlencode( $data );
+		$this->_value = $data;
+	}
+
+	public function base64Decode() {
+		$data = base64_decode( $this->_value );
+		$this->_value = $data;
+
+		if ( $this->_data !== null && $this->_data->getValue() === null ) {
+			$this->_data->setValue( $this->_value );
+		}
+	}
+
+	public function urlEncode() {
+		$data = urlencode( $this->_value );
 		$this->_value = $data;
 	}
 
 	public function urlDecode() {
 		$data = urldecode( $this->_value );
-		$data = base64_decode( $data );
 		$this->_value = $data;
 
-		if ( $this->_data->getValue() === null ) {
+		if ( $this->_data !== null && $this->_data->getValue() === null ) {
 			$this->_data->setValue( $this->_value );
 		}
 	}
 
 	public function __toString() {
-		
+		return $this->_value;
 	}
 
 }

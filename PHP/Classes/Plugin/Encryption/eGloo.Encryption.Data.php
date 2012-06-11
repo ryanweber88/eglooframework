@@ -66,6 +66,29 @@ class Data {
 	}
 
 	/**
+	 * @var string Cipher mode used for encryption
+	 */
+	protected $_cipher_mode = null;
+
+	/**
+	 * Returns protected class member $_cipher_mode
+	 *
+	 * @return string Cipher mode used for encryption
+	 */
+	public function getCipherMode() {
+		return $this->_cipher_mode;
+	}
+
+	/**
+	 * Sets protected class member $_cipher_mode
+	 *
+	 * @param cipher_mode string Cipher mode used for encryption
+	 */
+	public function setCipherMode( $cipher_mode ) {
+		$this->_cipher_mode = $cipher_mode;
+	}
+
+	/**
 	 * @var string Encryption method used
 	 */
 	protected $_encryption_method = null;
