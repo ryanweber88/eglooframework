@@ -45,42 +45,91 @@ class EncryptedURL {
 	public $encryption_instance_id = null;
 	public $request_class_instance_id = null;
 
-	protected $data = null;
+	/**
+	 * @var eGloo\Encryption\Data Encrypted data object
+	 */
+	protected $_data = null;
 
-	public function __construct( $data ) {
-		$this->data = $data;
+	/**
+	 * Returns protected class member $_data
+	 *
+	 * @return eGloo\Encryption\Data Encrypted data object
+	 */
+	public function getData() {
+		return $this->_data;
 	}
 
-	// This was great except one problem. Since you encrypted by dropping any =,
-	// when you try to decrypt you can’t put those =’s back, so you don’t get the
-	// same output. I just changed the arrays to (‘-’,'_’,'=’) and (‘+’,'/’,'#’) and
-	// all was good
+	/**
+	 * Sets protected class member $_data
+	 *
+	 * @param data eGloo\Encryption\Data Encrypted data object
+	 */
+	public function setData( $data ) {
+		$this->_data = $data;
+	}
+
+	/**
+	 * @var string Value of this encrypted URL
+	 */
+	protected $_value = null;
+
+	/**
+	 * Returns protected class member $_value
+	 *
+	 * @return string Value of this encrypted URL
+	 */
+	public function getValue() {
+		return $this->_value;
+	}
+
+	/**
+	 * Sets protected class member $_value
+	 *
+	 * @param value string Value of this encrypted URL
+	 */
+	public function setValue( $value ) {
+		$this->_value = $value;
+	}
+
+	public function __construct( $data = null ) {
+		if ( $data !== null && !$data->isEncrypted() ) {
+			throw new \Exception( 'Cannot create an encrypted URL from unencrypted data object' );
+		}
+
+		$this->_data = $data;
+		$this->_value = (string) $data;
+	}
+
+	public function base64Encode() {
+		$data = base64_encode( $this->_value );
+		$this->_value = $data;
+	}
+
+	public function base64Decode() {
+		$data = base64_decode( $this->_value );
+		$this->_value = $data;
+
+		if ( $this->_data !== null && $this->_data->getValue() === null ) {
+			$this->_data->setValue( $this->_value );
+		}
+	}
 
 	public function urlEncode() {
-		$retVal = null;
-
-		$retVal = base64_encode( $this->data );
-		$retVal = urlencode( $retVal );
-		// $retVal = str_replace( array('+','/','='), array('-','_',''), $retVal );
-		$retVal = $data;
-
-		return $retVal;
+		$data = urlencode( $this->_value );
+		$this->_value = $data;
 	}
 
 	public function urlDecode() {
-		$retVal = null;
+		$data = urldecode( $this->_value );
+		$this->_value = $data;
 
-		$retVal = str_replace( array('-','_'), array('+','/'), $this->data );
-		$mod4 = strlen( $retVal ) % 4;
-
-		if ( $mod4 ) {
-			$retVal .= substr( '====', $mod4 );
+		if ( $this->_data !== null && $this->_data->getValue() === null ) {
+			$this->_data->setValue( $this->_value );
 		}
+	}
 
-		$retVal = urldecode( $retVal );
-		$retVal = base64_decode( $retVal );
-
-		return $retVal;
+	public function __toString() {
+		return $this->_value;
 	}
 
 }

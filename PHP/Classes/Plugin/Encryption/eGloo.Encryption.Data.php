@@ -43,6 +43,52 @@ namespace eGloo\Encryption;
 class Data {
 
 	/**
+	 * @var bool Whether this data is encrypted or not
+	 */
+	protected $_is_encrypted = false;
+
+	/**
+	 * Returns protected class member $_is_encrypted
+	 *
+	 * @return bool Whether this data is encrypted or not
+	 */
+	public function isEncrypted() {
+		return $this->_is_encrypted;
+	}
+
+	/**
+	 * Sets protected class member $_is_encrypted
+	 *
+	 * @param is_encrypted bool Whether this data is encrypted or not
+	 */
+	public function setIsEncrypted( $is_encrypted = true ) {
+		$this->_is_encrypted = $is_encrypted;
+	}
+
+	/**
+	 * @var string Cipher mode used for encryption
+	 */
+	protected $_cipher_mode = null;
+
+	/**
+	 * Returns protected class member $_cipher_mode
+	 *
+	 * @return string Cipher mode used for encryption
+	 */
+	public function getCipherMode() {
+		return $this->_cipher_mode;
+	}
+
+	/**
+	 * Sets protected class member $_cipher_mode
+	 *
+	 * @param cipher_mode string Cipher mode used for encryption
+	 */
+	public function setCipherMode( $cipher_mode ) {
+		$this->_cipher_mode = $cipher_mode;
+	}
+
+	/**
 	 * @var string Encryption method used
 	 */
 	protected $_encryption_method = null;
@@ -132,6 +178,29 @@ class Data {
 	 */
 	public function setIterationsRun( $iterations_run ) {
 		$this->_iterations_run = $iterations_run;
+	}
+
+	/**
+	 * @var string Initialization vector for cypher
+	 */
+	protected $_initialization_vector = null;
+
+	/**
+	 * Returns protected class member $_initialization_vector
+	 *
+	 * @return string Initialization vector for cypher
+	 */
+	public function getInitializationVector() {
+		return $this->_initialization_vector;
+	}
+
+	/**
+	 * Sets protected class member $_initialization_vector
+	 *
+	 * @param initialization_vector string Initialization vector for cypher
+	 */
+	public function setInitializationVector( $initialization_vector ) {
+		$this->_initialization_vector = $initialization_vector;
 	}
 
 	/**
