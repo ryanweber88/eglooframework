@@ -583,10 +583,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 	//	echo "$statement<br/><br/>";
 
-		
+
 		$result = $dataAccess->$method($statement, $arguments);
 
 
+		if ($classification == 'update' && strpos($statement, 'session') !== false) {
+			//echo $statement;exit;
+		}
+		
 		// set result to false if we don't have a match
 		// @TODO this should be fixed at connection level,
 		// but that can be managed later - need to make sure

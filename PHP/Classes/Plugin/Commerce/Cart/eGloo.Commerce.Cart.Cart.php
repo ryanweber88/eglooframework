@@ -6,6 +6,7 @@ use \eGloo\Commerce,
     \eGloo\Domain; 
 
 use \Common\Domain\Model\Session;
+use \Common\Domain\Model;
 
 /**
  * Address Class File
@@ -148,21 +149,34 @@ class Cart extends Domain\Model {
 		
 		} else if ( isset($_SESSION['cart_id']) ) {
 			$retVal = static::$cart_id = $_SESSION['cart_id'];
+			
 		} else if ( $create_cart ) {
 			\SessionHandler::startSession();
-
+			
+			
 			// Generate one
-			$session = Session::find_one_by_php_session_id( session_id() );
-
+			// Hack for time being since this is all fucked
+			$active = Model\User::active();
+			$userId = isset($_SESSION['browse_as']) 
+				? $_SESSION['browse_as']
+				: $active->id;
+			
+			
+			//$session = Session::find_one_by_php_session_id( session_id() );
+			//echo "user_id = $cart_user_id";
+			$session = Session::find_one_by_user_id (
+				$userId
+			);
+			
 			$cart = new static(
 				array
 					(
 					'session_id' => $session->id,
-					'user_id' => \User::getActiveUserID(),
+					'user_id' => $userId,
 					'cart_progress_id' => self::CART_PROGRESS_ADD,
 					'last_action' => 'I',
 					'last_action_taken' => date('Y-m-d H:i:s', time()),
-					'action_by' => \User::getActiveUserID(),
+					'action_by' => $active->id
 					)
 			);
 

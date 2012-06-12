@@ -1237,6 +1237,7 @@ abstract class Model extends Delegator
 						
 						try { 
 							$self->send('aliasProperty', 'name', $name);
+							$self->send('aliasProperty', 'value', $name);
 						}
 						
 						// the only reason an exception would be thrown, is if 
