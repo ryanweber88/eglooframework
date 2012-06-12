@@ -1495,7 +1495,7 @@ abstract class Model extends Delegator
 				
 		else if ( \eGloo\Utilities\Collection::isHash($arguments = $arguments[0]) ) {
 			$model     = new static($arguments);
-			$model->id = null;
+			//$model->id = null;
 						
 
 			// saves model to underlying data layer and sets
