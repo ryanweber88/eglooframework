@@ -422,6 +422,16 @@ class RequestInfoBean implements \ArrayAccess {
 		$this->UNSET_GET[$key] = $key;
 	}
 
+	public function isPOST() {
+		$retVal = false;
+
+		if ( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
+			$retVal = true;
+		}
+
+		return $retVal;
+	}
+
 	public function issetPOST( $key ) {
 		$retVal = false;
 
