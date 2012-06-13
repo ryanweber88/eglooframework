@@ -41,7 +41,7 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 		
 		
 		// set instance properties and create sql AREL/Bella builder
-		$this->builder = new \Bella\Table($model::sendStatic('entityName'));
+		$this->builder = new \Bella\Table($model::sendStatic('entity'));
 		$this->model   = $model; 
 		$this->chain   = $this->builder;
 		

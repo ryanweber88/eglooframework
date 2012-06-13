@@ -468,6 +468,10 @@ abstract class Model extends Delegator
 	public static function entityName() {
 		return static::signature();
 	}
+	
+	protected static function entity() {
+		return static::entityName();
+	}
 
 
 	/**
@@ -485,6 +489,10 @@ abstract class Model extends Delegator
 	 * must still follow plurality conventions
 	 */
 	protected function hasOne($name, $lambda) {
+		
+		$name = preg_replace(
+			'/\s+and\s+is\s+dependent/i', null, $name
+		);
 		
 		// look for join table definition
 		// @TODO replace search for "through" with method
@@ -588,6 +596,10 @@ abstract class Model extends Delegator
 	
 	protected function hasMany($name, $lambda) {
 		
+		$name = preg_replace(
+			'/\s+and\s+is\s+dependent/i', null, $name
+		);
+				
 		// look for join table definition
 		$join = null;
 		
@@ -640,8 +652,10 @@ abstract class Model extends Delegator
 		}
 		
 		$relationshipName = $name;
-		$name             = ucfirst(\eGloo\Utilities\InflectionsSafe::instance()
-						          ->singularize($name));
+		$name             = ucfirst(
+													\eGloo\Utilities\InflectionsSafe::instance()
+						          		                                ->singularize($name)
+												);
 		//$ns               = $this->namespace();
 
 		// @TODO this has to be determined dynamically, but for the time being
@@ -680,7 +694,9 @@ abstract class Model extends Delegator
 
 		
 		//@TODO using ternary below may be hard to read
-		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join) {
+		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join, $name) {
+			
+			$self->send('runCallbacks', 'relationship', 'before');
 							 
 			$association = new Model\Association(array(
 				'owner'       => $self,
@@ -703,7 +719,14 @@ abstract class Model extends Delegator
 		
 			if ($self->exists()) {
 					
-
+				// check if model is generic - in which case we have to set
+				// pseudonym before feeding to our lambda
+				// @TODO this is cumbersome and inefficient - lets figure out
+				// more elegant solution
+				if ($model::instance() instanceof Model\Generic) {
+					$model::instantiate($name);
+				}
+				
 					
 				// create relation instance - for time being this is used for caching
 				// $relation = new Model\Relation($model);
@@ -876,7 +899,7 @@ abstract class Model extends Delegator
 			}
 
 			
-
+			$self->send('runCallbacks', 'relationship', 'after');
 			
 			// otherwise we return result as is, which can be any value outside
 			// of null
@@ -1096,7 +1119,7 @@ abstract class Model extends Delegator
 			
 			// attempt to find the cache, or set if it has not yet been
 			// established
-			return $cache->find($relation, $handler);
+			//return $cache->find($relation, $handler);
 					
 		}
 		
@@ -1523,7 +1546,7 @@ abstract class Model extends Delegator
 	 * 
 	 */
 	
-	public function save($cascade = true) {
+	public function save($cascade = false) {
 				
 		// we ask the question again, if valid, after performing
 		// our validation routines
@@ -1583,16 +1606,16 @@ abstract class Model extends Delegator
 		// @TODO this should be pushed into a callback, not has a "hard-code"
 		// here
 		
-		if (false) {
+		if ($cascade) {
 			foreach($model->relations() as $relation) {
 				
 				// determine if a hasOne relationship and if initialized - 
 				// which case save
 				// @TODO this needs to be abstracted to Model.Relation
 				if ($relation instanceof Model && 
-				    $relation->initialized()   &&
+				    $relation->initialized())  {
 						//$relation->changed()) {
-						!$relation->exists())      {
+						//!$relation->exists())      {
 														
 					try {
 						$relation->save();
@@ -1613,9 +1636,9 @@ abstract class Model extends Delegator
 				
 					foreach($relation as $relation) {
 						
-						if ($relation->initialized() && 
+						if ($relation->initialized()) { 
 						    //$relation->changed())    {
-						    !$relation->exists())     {	
+						    //!$relation->exists())     {	
 							try {
 								$relation->save();
 							}
@@ -1719,10 +1742,17 @@ abstract class Model extends Delegator
 				    \method_exists($object, $method = $point . ucfirst($event))) {
 					
 					$lambda = function($model) use ($object, $method) {
-						call_user_func_array(
-							array($object, $method), 
-							array( $model )
-						);
+						try {
+							call_user_func_array(
+								array($object, $method), 
+								array( $model )
+							);
+						}
+						
+						catch(\Exception $pass) {
+							throw $pass;
+						}
+						
 					};
 					 
 				}
@@ -1824,9 +1854,9 @@ abstract class Model extends Delegator
 					
 					// @TODO this exception is not bubbling up, for now, exit 
 					// and 
-					catch(\Exception $e) {
-						echo $e;
-						exit;
+					catch(\Exception $pass) {
+						throw $pass;
+						
 					}
 				}
 			}		
@@ -1862,9 +1892,11 @@ abstract class Model extends Delegator
 			$instance  = $tmp::instance();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($instance, $key, function($class) use ($result) {
+			
+				$result = $manager->find($instance, $key, function($class) use ($result) {				
 					return new $class($result);
-				});					
+				});				
+				
 				
 				$result->send('runCallbacks', 'find', 'after');
 			}
