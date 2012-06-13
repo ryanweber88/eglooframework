@@ -1,6 +1,15 @@
 <?php
 namespace eGloo\Combine;
 
+use \eGloo;
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
+use \eGloo\Performance\Caching\Gateway as CacheGateway;
+use \eGloo\Security\RequestValidator\ExtendedRequestValidator as ExtendedRequestValidator;
+
+use \Exception as Exception;
+
 /**
  * eGloo\Combine\Help Class File
  *
@@ -77,7 +86,7 @@ class Help extends Combine {
 		if ( isset( $this->_command_arguments[0]) ) {
 			$info_subject = $this->_command_arguments[0];
 
-			$combine_class = eGlooConfiguration::getCLICombineMapping( $info_subject );
+			$combine_class = Configuration::getCLICombineMapping( $info_subject );
 
 			if ( class_exists($combine_class) ) {
 				echo $combine_class::getHelpString() . "\n";
@@ -99,7 +108,7 @@ class Help extends Combine {
 	protected function _list() {
 		$retVal = false;
 
-		$combine_list = eGlooConfiguration::getCLICombineList();
+		$combine_list = Configuration::getCLICombineList();
 
 		$longest = 0;
 
@@ -110,7 +119,8 @@ class Help extends Combine {
 		}
 
 		foreach( $combine_list as $combine_id => $combine_class ) {
-			if ( class_exists($combine_class) && $combine_class !== get_class($this) && $combine_class !== 'eGlooZalgo' ) {
+			if ( class_exists($combine_class) && $combine_class !== get_class($this) && $combine_class !== '\eGloo\Combine\Zalgo'
+			 	 && $combine_class !== '\eGloo\Combine\Help' ) {
 				$tab_string = '';
 
 				$name_length = $longest - strlen($combine_id);
