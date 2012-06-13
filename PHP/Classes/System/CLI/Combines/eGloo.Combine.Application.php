@@ -3,6 +3,8 @@ namespace eGloo\Combine;
 
 use \eGloo\Application as ApplicationObject;
 use \eGloo\Framework as FrameworkObject;
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
 
 /**
  * eGloo\Combine\Application Class File

@@ -1,6 +1,15 @@
 <?php
 namespace eGloo;
 
+use \eGloo;
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
+use \eGloo\Performance\Caching\Gateway as CacheGateway;
+use \eGloo\Security\RequestValidator\ExtendedRequestValidator as ExtendedRequestValidator;
+
+use \Exception as Exception;
+
 /**
  * eGloo\Framework Class File
  *
@@ -101,17 +110,17 @@ class Framework {
 	 * Constructor for this object
 	 */
 	public function __construct() {
-		$this->_applications_path = \eGlooConfiguration::getApplicationsPath();
-		$this->_cache_path = \eGlooConfiguration::getCachePath();
-		$this->_configuration_path = \eGlooConfiguration::getConfigurationPath();
-		$this->_cubes_path = \eGlooConfiguration::getCubesPath();
-		$this->_data_store_path = \eGlooConfiguration::getDataStorePath();
-		$this->_doctrine_path = \eGlooConfiguration::getDoctrineIncludePath();
-		$this->_documentation_path = \eGlooConfiguration::getDocumentationPath();
-		$this->_document_root_path = \eGlooConfiguration::getDocumentRoot();
-		$this->_framework_root_path = \eGlooConfiguration::getFrameworkRootPath();
-		$this->_logging_path = \eGlooConfiguration::getLoggingPath();
-		$this->_smarty_path = \eGlooConfiguration::getSmartyIncludePath();
+		$this->_applications_path = Configuration::getApplicationsPath();
+		$this->_cache_path = Configuration::getCachePath();
+		$this->_configuration_path = Configuration::getConfigurationPath();
+		$this->_cubes_path = Configuration::getCubesPath();
+		$this->_data_store_path = Configuration::getDataStorePath();
+		$this->_doctrine_path = Configuration::getDoctrineIncludePath();
+		$this->_documentation_path = Configuration::getDocumentationPath();
+		$this->_document_root_path = Configuration::getDocumentRoot();
+		$this->_framework_root_path = Configuration::getFrameworkRootPath();
+		$this->_logging_path = Configuration::getLoggingPath();
+		$this->_smarty_path = Configuration::getSmartyIncludePath();
 	}
 
 	/**
