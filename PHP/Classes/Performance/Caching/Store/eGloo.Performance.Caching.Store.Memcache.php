@@ -72,7 +72,7 @@ class Memcache extends Caching\Store {
 	}
 	
 	private function cache() {
-		return Caching\Gateway::instance();
+		return Caching\Gateway::getCacheGateway();
 	}
 	
 	private function server(array $options = null) {
