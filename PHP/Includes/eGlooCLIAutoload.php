@@ -61,15 +61,13 @@ if ( in_array('-v', $egloo_script_arguments) ) {
 // Initialize the Logger
 Logger::initialize( $logging_level, Configuration::getLogFormat( false ) );
 
-// Register eGloo Autoloader
-spl_autoload_register('eGloo\autoload');
-
 // Bring up the caching system (needed for the autoloader)
 if ( !class_exists( '\eGloo\Performance\Caching\Gateway', false ) ) {
 	include( 'PHP/Classes/Performance/Caching/eGloo.Performance.Caching.Gateway.php' );
 }
 
-
+// Register eGloo Autoloader
+spl_autoload_register('eGloo\autoload');
 
 /**
  * These conditional includes are ordered for speed; do not reorganize without benchmarking and serious testing
@@ -128,9 +126,6 @@ function autoload( $class_name ) {
 	if ( strpos($class_name, '\\') === 0 ) {
 		$class_name = substr( $class_name, 1 );
 	}
-
-	exit;
-	echo "$class_name\n";
 	
 	$cacheGateway = CacheGateway::getCacheGateway();
 	
