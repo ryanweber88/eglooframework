@@ -17,7 +17,6 @@ class CRUD extends Model\Callback {
 	 */
 	public function update(Domain\Model $model) {
 
-		
 		// check that a create callback has not already been created - this is to ensure
 		// we don't face double inserts
 		// @TODO since this was added late in the lifecycle of model design, there already
@@ -63,8 +62,6 @@ class CRUD extends Model\Callback {
 	 */
 	public function create(Domain\Model $model) {
 		
-
-
 		// check that a create callback has not already been created - this is to ensure
 		// we don't face double inserts
 		// @TODO since this was added late in the lifecycle of model design, there already

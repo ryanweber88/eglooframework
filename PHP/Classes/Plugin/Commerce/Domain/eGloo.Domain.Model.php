@@ -1237,6 +1237,7 @@ abstract class Model extends Delegator
 						
 						try { 
 							$self->send('aliasProperty', 'name', $name);
+							$self->send('aliasProperty', 'value', $name);
 						}
 						
 						// the only reason an exception would be thrown, is if 
@@ -1494,7 +1495,7 @@ abstract class Model extends Delegator
 				
 		else if ( \eGloo\Utilities\Collection::isHash($arguments = $arguments[0]) ) {
 			$model     = new static($arguments);
-			$model->id = null;
+			//$model->id = null;
 						
 
 			// saves model to underlying data layer and sets
