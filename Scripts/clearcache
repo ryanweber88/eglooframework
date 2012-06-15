@@ -1,0 +1,23 @@
+#!/bin/bash
+rm -rf /var/tmp/com.egloo.cache
+restartmemcache
+rm -rf /var/cache/egloo/*
+rm -rf /var/www/egloo/css/*
+rm -rf /var/www/egloo/js/*
+rm -rf /var/www/egloo/xcss/*
+rm -rf /var/www/egloo/xjs/*
+rm -rf /var/www/admin/css/*
+rm -rf /var/www/admin/js/*
+
+/etc/init.d/apache2 graceful
+
+#kick_apache
+#rm -rf /var/tmp/com.egloo.cache
+#restartmemcache
+#rm -rf /var/cache/egloo/*
+#rm -rf /var/www/egloo/css/*
+#rm -rf /var/www/egloo/js/*
+#rm -rf /var/www/egloo/xcss/*
+#rm -rf /var/www/egloo/xjs/*
+#rm -rf /var/www/admin/css/*
+#rm -rf /var/www/admin/js/*

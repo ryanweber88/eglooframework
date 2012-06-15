@@ -1,0 +1,17 @@
+#!/bin/bash
+rm -rf /var/tmp/com.egloo.cache
+restartmemcache
+rm -rf /var/cache/egloo/*
+
+# Example
+# rm -rf /var/cache/egloo/*
+# rm -rf /var/www/egloo/css/*
+# rm -rf /var/www/egloo/js/*
+# rm -rf /var/www/egloo/xcss/*
+# rm -rf /var/www/egloo/xjs/*
+
+if [ -f "/etc/egloo/clearcache" ]; then
+	source "/etc/egloo/clearcache"
+fi
+
+/etc/init.d/apache2 graceful
