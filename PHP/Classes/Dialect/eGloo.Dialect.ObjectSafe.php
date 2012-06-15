@@ -999,7 +999,7 @@ abstract class ObjectSafe {
 			if ($this->respondTo($method = "set_$name")) {
 				$attr[$name]['writer'] = function($value) use ($method, $name, $self, &$attr) {
 					
-					if (!is_null($result = $self->send($method, $value, &$attr[$name]['value']))) {
+					if (!is_null($result = $self->send($method, $value, $attr[$name]['value']))) {
 						$attr[$name]['value'] = $result;
 					}	
 										
@@ -1015,7 +1015,7 @@ abstract class ObjectSafe {
 				// @TODO replace with ReflectionMethod#getClosure on switch
 				// to php 5.4
 				$attr[$name]['accessor'] = function($value = null) use ($name, $self, &$attr) {
-					if (!is_null($result = $self->send($name, $value, &$attr[$name]['value']))) {
+					if (!is_null($result = $self->send($name, $value, $attr[$name]['value']))) {
 						$attr[$name]['value'] = $result;
 					};	
 				};

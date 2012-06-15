@@ -45,7 +45,7 @@ use \eGloo\Dialect\ObjectSafe as Object;
  * @subpackage Caching
  * @TODO implement tiered storage; currently only supports memcache
  */
-class Gateway extends Object {
+class Gateway {
 
 	private   $_active = false;
 	private   $_memcache = null;
@@ -55,6 +55,8 @@ class Gateway extends Object {
 	protected $keys              = array();
 	protected $_memcache_servers = array();
 	private   $_piping_hot_cache = array();
+	protected static $_singleton;
+	protected static $namespaceKeys = array();
 
 	const USE_APCCACHE		= 0x1;		// 0000 0001
 	const USE_FILECACHE		= 0x2;		// 0000 0010
@@ -64,14 +66,7 @@ class Gateway extends Object {
 	const MEMCACHED_HOST  = '127.0.0.1';
 	const MEMCACHED_PORT  = 11211;
 
-	function __construct() {
-		parent::__construct();
-		
-		// @TODO constructor is meant to be private so as to
-		// force singleton (not yet implemented)
-		//$this->privateClassMethod();
-		
-	}
+	
 
 	private function loadMemcache() {
 		if ($this->_active) {
@@ -496,9 +491,14 @@ class Gateway extends Object {
 			
 			// @TODO querying memcache keys seems to be broken, or it only works once,
 			// so we will need to set as instance property
-			$keys = static::cache($key, function() use ($self, $namespace) {
+			
+			//$keys = static::cache($key, function() use ($self, $namespace) {
+			$keys = null;
+			
+			if (!isset(static::$namespaceKeys[$namespace])) {
 		    $list     = array();
-				$servers  = &$self->reference('_memcache_servers');
+				//$servers  = &$self->reference('_memcache_servers');
+				$servers  = $this->_memcache_servers;
 				$memcache = $servers[$namespace];
 		    $allSlabs = $memcache->getExtendedStats('slabs');
 		    $items    = $memcache->getExtendedStats('items');
@@ -530,10 +530,11 @@ class Gateway extends Object {
 		        }			
 					}
 					
-		    }
-
-				return $list;
-			});
+		    } 
+				
+				$keys = $list;
+			}
+			//});
 		} while (is_null($keys));
 		
 		

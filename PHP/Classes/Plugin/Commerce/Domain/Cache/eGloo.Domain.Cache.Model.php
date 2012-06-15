@@ -27,7 +27,7 @@ class Model extends Domain\Cache {
 		// that use model type
 		// @TODO right now, an entire collection/set is dumped; we
 		// need to do this at granular level
-		$cache = Caching\Gateway::instance();
+		$cache = Caching\Gateway::getCacheGateway();
 		
 		// get cache keys for relation and remove all
 		// that match
