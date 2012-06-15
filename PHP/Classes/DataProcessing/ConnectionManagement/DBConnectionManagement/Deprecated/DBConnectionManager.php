@@ -50,10 +50,9 @@ final class DBConnectionManager extends ConnectionManager {
 
 	public static function getConnection( $connection_name = 'egPrimary', $engine_mode = null ) {
 		$retVal          = null;
-		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo(
-			$connection_name
-		);
-		
+
+		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo( $connection_name );
+
 		if ($connection_info['password']) {
 	
 			if ($engine_mode !== null) {
@@ -347,7 +346,7 @@ final class DBConnectionManager extends ConnectionManager {
 		if (isset(self::$connections['MySQLiOOP'][$connection_name])) {
 			$retVal = self::$connections['MySQLiOOP'][$connection_name];
 		} else {
-			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo( $connection_name );
 
 			$host 			= $connection_info['host'];
 			$port 			= $connection_info['port'];

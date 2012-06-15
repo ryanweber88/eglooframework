@@ -16,4 +16,7 @@ fi
 
 # Apache Management (MacPorts)
 launchctl unload /Library/LaunchDaemons/org.macports.apache2.plist
+
+sleep 3
+
 launchctl load /Library/LaunchDaemons/org.macports.apache2.plist
