@@ -1,0 +1,22 @@
+#!/bin/bash
+rm -rf /var/tmp/com.egloo.cache
+restartmemcache
+sudo rm -rf /Library/Caches/com.egloo.templates/*
+
+# Example
+# rm -rf /Library/WebServer/eGloo/css/
+# rm -rf /Library/WebServer/eGloo/js/
+# rm -rf /Library/WebServer/eGloo/xcss/
+# rm -rf /Library/WebServer/eGloo/xjs/
+# rm -rf /Library/WebServer/eGloo/images/
+
+if [ -f "/Library/Application Support/eGloo/Framework/Configuration/clearcache" ]; then
+	source "/Library/Application Support/eGloo/Framework/Configuration/clearcache"
+fi
+
+# Apache Management (MacPorts)
+launchctl unload /Library/LaunchDaemons/org.macports.apache2.plist
+
+sleep 3
+
+launchctl load /Library/LaunchDaemons/org.macports.apache2.plist
