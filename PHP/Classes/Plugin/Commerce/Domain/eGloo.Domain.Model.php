@@ -1213,7 +1213,7 @@ abstract class Model extends Delegator
 		});	
 		
 		
-		$this->defineCallback('initialize', 'after', function() use ($self, $class, $signature) {
+		$this->after_initialize(function() use ($self, $class, $signature) {
 
 			$attributes = $class::cache($signature, function() use ($self) {
 				return $self->reference('attributes');
@@ -1236,7 +1236,7 @@ abstract class Model extends Delegator
 					if ($name == $signature) {
 						
 						try { 
-							$self->send('aliasProperty', 'name', $name);
+							//$self->send('aliasProperty', 'name', $name);
 							$self->send('aliasProperty', 'value', $name);
 						}
 						
