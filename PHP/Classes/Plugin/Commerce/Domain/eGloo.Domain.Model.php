@@ -70,7 +70,7 @@ abstract class Model extends Delegator
 		// assign left-over columns to model
 		// @TODO delegate this to overrideable method, or place into
 		// 'after' initialize
-		if (!in_array($signature = static::entityName(), array('user'))            && 
+		if (!in_array($signature = static::entityName(), array('user')) && 
 		    is_array($columns = Data::columns($signature))) {
 		    	
 			foreach($columns as $attribute) {

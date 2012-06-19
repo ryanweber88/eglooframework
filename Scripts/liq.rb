@@ -50,6 +50,7 @@ end.parse!
 
 container = nil 
 filter    = 'owner_id = me'
+list      = nil
 
 options.each do | key, value |
   # check if workspace respond to key value, in which case
@@ -66,27 +67,33 @@ options.each do | key, value |
       filter    = ActiveSupport::Inflector.singularize(key) +
                   '_id=' + 
                   container.id.to_s
-                        
+      next                   
+    end
     
     # otherwise lets list current 
-    else      
-      if list.length == 1
-        p item  
-      else
-        list.each_with_index do | item, index |
-          print "##{index } ==> " 
+    if list.length > 1
+      list.each_with_index do | item, index |
+        print "##{index } ==> " 
+        
+        print "* " if item.is_done
+        print "  " unless item.is_done 
+        
+        puts  " #{item.name}"   
           
-          print "* " if item.is_done
-          print "  " unless item.is_done 
-          
-          puts  " #{item.name}"   
-            
-        end   
-      end           
+      end   
     end
    
   # otherwise we have an "action oriented" event
   else
     
+  end
+end
+
+if list.length == 1
+  resource = list.pop
+  puts "#{resource.type} : #{resource.name}"
+  
+  resource.known_attributes.each do | attribute |
+    puts "#{attribute} ==> #{resource.send attribute}"  
   end
 end
