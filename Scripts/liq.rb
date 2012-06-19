@@ -6,6 +6,8 @@ require 'nokogiri'
 require 'optparse'
 require 'pathname'
 require 'liquidplanner'
+require 'active_support'
+ 
 
 # constants
 Email     = 'christian@petflow.com'
@@ -23,6 +25,7 @@ workspace   = lp.workspaces(WorkSpace)
 
 # now lets grab our options
 options = %w(
+  current
   projects
   packages
   tasks
@@ -45,32 +48,41 @@ OptionParser.new do |opts|
 end.parse!
 
 
-filter = [
-  'owner_id = me'
-]
+container = nil 
+filter    = 'owner_id = me'
 
 options.each do | key, value |
   # check if workspace respond to key value, in which case
   # we have a list oriented event
   if workspace.respond_to? key
-    list = workspace.send key, :all, :filter => 'owner_id = me'
+    
+    # @TODO how the fuck do you pass multiple filters
+    list = workspace.send key, :all, :filter => filter
        
     # if value is not null, we filter by grabbing the current
     # representation
     unless value.nil?
-      p list[value.to_i]
-      exit
-      id = list[value.to_i].id
-      puts key
-      exit  
+      container = list[value.to_i]
+      filter    = ActiveSupport::Inflector.singularize(key) +
+                  '_id=' + 
+                  container.id.to_s
+                        
     
     # otherwise lets list current 
-    else
-      puts key
-      
-      list.each_with_index do | item, index |
-        puts "##{index } ==> #{item.name}"  
-      end            
+    else      
+      if list.length == 1
+        p item  
+      else
+        list.each_with_index do | item, index |
+          print "##{index } ==> " 
+          
+          print "* " if item.is_done
+          print "  " unless item.is_done 
+          
+          puts  " #{item.name}"   
+            
+        end   
+      end           
     end
    
   # otherwise we have an "action oriented" event
