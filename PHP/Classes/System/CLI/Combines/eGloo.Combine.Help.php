@@ -71,7 +71,7 @@ class Help extends Combine {
 				$retVal = $this->printHelpInfo();
 				break;
 			case 'all' :
-				$retVal = $this->_list();
+				$retVal = $this->_list_lazily();
 				break;
 			default :
 				break;
@@ -119,8 +119,11 @@ class Help extends Combine {
 		}
 
 		foreach( $combine_list as $combine_id => $combine_class ) {
-			if ( class_exists($combine_class) && $combine_class !== get_class($this) && $combine_class !== '\eGloo\Combine\Zalgo'
-			 	 && $combine_class !== '\eGloo\Combine\Help' ) {
+			if ( class_exists($combine_class)
+					&& $combine_class !== get_class($this)
+					&& $combine_class !== '\eGloo\Combine\Zalgo'
+					&& $combine_class !== '\eGloo\Combine\Help' ) {
+
 				$tab_string = '';
 
 				$name_length = $longest - strlen($combine_id);
@@ -139,6 +142,34 @@ class Help extends Combine {
 
 				echo $combine_id . ':' . $tab_string . $combine_class::getHelpString() . "\n";
 			}
+		}
+
+		$retVal = true;
+
+		return $retVal;
+	}
+	
+	// PHP is dumb - 'list' should be a valid method name
+	protected function _list_lazily() {
+		$retVal = false;
+
+		$combine_list = Configuration::getCLICombineList();
+		
+		$helpStrings = array();
+
+		foreach ( $combine_list as $combine_id => $combine_class ) {
+			if ( class_exists($combine_class)
+					&& $combine_class !== get_class($this)
+					&& $combine_class !== '\eGloo\Combine\Zalgo'
+					&& $combine_class !== '\eGloo\Combine\Help' ) {
+
+				$values[] = $combine_id;
+				$values[] = $combine_class::getHelpString();
+				
+				echo vsprintf("%-20s %s",$values)."\n";
+				
+				$values='';
+			}	
 		}
 
 		$retVal = true;
@@ -171,8 +202,12 @@ class Help extends Combine {
 	 * @author George Cooper
 	 **/
 	public static function getHelpString() {
-		$retVal = 'eGloo Help: Work in Progress' ."\n\n";
-		$retVal .= 'Common Commands:' . "\n\n";
+		
+		// not 100% sure why this method is static...
+		$helpClass = new Help();
+		$helpClass->_list();
+		
+		$retVal = "\n\n".'eGloo Help: Work in Progress'."\n";
 		$retVal .= 'See "egloo help <command>" for more information on a specific command';
 
 		return $retVal;
