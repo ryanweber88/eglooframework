@@ -138,7 +138,6 @@ class ArrayAccess extends \eGloo\Utilities\ArrayAccess {
 				
 		return is_null($result) 
 			? new static(new Nil)
-			
 			: $result;
 			
 	}

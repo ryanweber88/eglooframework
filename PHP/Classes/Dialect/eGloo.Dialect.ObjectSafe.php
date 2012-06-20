@@ -667,7 +667,7 @@ abstract class ObjectSafe {
 			unset($this->$name);
 			
 			// fire deferrable and unset from deferrable collection
-			$value = $this->_defers[$name]();
+			$value = $this->_defers[$name]($this);
 			unset($this->_defers[$name]);
 			
 			// if a value has been returned, then call __set

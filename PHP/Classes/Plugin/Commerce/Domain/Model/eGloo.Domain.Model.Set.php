@@ -159,6 +159,14 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	/**
+	 * An alias method; its intended usage is within templates, where underscores
+	 * are used as convention
+	 */
+	public function is_empty() {
+		return $this->isEmpty();
+	}
+	
+	/**
 	 * Simply empties out our collection
 	 */
 	public function clear() {
@@ -204,7 +212,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	}
 	
 	/**
-	 * Returns filtered set - not that this returns a new instance of
+	 * Returns filtered set - note that this returns a new instance of
 	 * set and not a modified version of the old set
 	 * @TODO move this to Collection and override
 	 */
