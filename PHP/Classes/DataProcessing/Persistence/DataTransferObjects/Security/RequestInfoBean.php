@@ -30,7 +30,7 @@
 /**
  * RequestInfoBean
  * 
- * This class is simply a data holder for current validated request info.
+ * This class is simply a data holder for current request info.
  *
  * @category DataProcessing
  * @package Persistence
