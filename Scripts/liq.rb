@@ -17,7 +17,6 @@ WorkSpace = 68456
 # patches
 
 class String
-  
   # add a singularize method to our string class (this is for convenience
   # sake alone)
   def singularize
@@ -28,6 +27,13 @@ class String
     ActiveSupport::Inflector.pluralize(self)
   end
   
+end
+
+%w(:Project :Package :Task).each_with_index do | resource, index |
+  Object.const_get(resource).classEval do 
+    
+  end
+
 end
 
 # first lets instantiate our client and grab
