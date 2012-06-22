@@ -12,16 +12,24 @@ use \eGloo\Utilities\Delegator;
  */
 class Generic extends Domain\Model {
 	
-	function __construct($pseudonym, $__mixed = null) {
+	function __construct($pseudonym = null, $__mixed = null) {
 		
 		// @TODO this is temporoary until i can figure out a 
 		// a more elegant way doing this; until that point
 		// if an array is being passed as first argument
 		// we assume that we are using prior pseudonym (note
 		// this may cause very unhappy shit)
-		if (is_array($arguments = $pseudonym)) {
-			$tokens    = explode('\\', static::$pseudonym);
-			$pseudonym = $tokens[count($tokens)-1]; 
+		if (is_array($arguments = $pseudonym) || is_null($pseudonym)) {
+			if (static::$pseudonym !== null) {
+				$tokens    = explode('\\', static::$pseudonym);
+				$pseudonym = $tokens[count($tokens)-1];
+			} 
+			
+			else {
+				throw new \Exception(
+					'Failed to instantiate generic model because a pseudonym has not been defined'
+				);
+			}
 		} 
 		
 		else {

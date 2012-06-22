@@ -679,6 +679,7 @@ abstract class Model extends Delegator
 
 		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
 			$model = "$ns\\Generic";
+			$model::factory($name);
 
 			if (!$model::tangible($name)) {
 				throw new \Exception(
@@ -693,7 +694,6 @@ abstract class Model extends Delegator
 		$this->relationships[$relationshipName] = $model;
 
 		
-		//@TODO using ternary below may be hard to read
 		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join, $name) {
 			
 			$self->send('runCallbacks', 'relationship', 'before');
