@@ -13,7 +13,7 @@ require 'active_support'
 Email     = 'christian@petflow.com'
 Password  = 'fe5180zz'
 WorkSpace = 68456 
-
+Resources = 
 # patches
 
 class String
@@ -29,12 +29,16 @@ class String
   
 end
 
-%w(:Project :Package :Task).each_with_index do | resource, index |
-  Object.const_get(resource).classEval do 
-    
-  end
+#[:singularize, :pluralize].each do | method |
+#  String.classEval do
+#    define_method method do
+#      ActiveSupport::Inflector.send(method, self)
+#    end
+#  end
+#end
 
-end
+
+
 
 # first lets instantiate our client and grab
 # our account and workspace resources
@@ -44,6 +48,31 @@ lp = LiquidPlanner::Base.new(
 )
 account     = lp.account
 workspace   = lp.workspaces(WorkSpace) 
+
+# here we are going to patch Project, Package, Task classes
+(resources = %w(:Project :Package :Task)).each_with_index do | resource, index |
+  Object.const_get(resource).classEval do 
+    resource.reverse.each do | compare |
+      
+      # check to ensure that resource is not equal to compare, 
+      # we don't want to do Project#projects for example
+      unless resource.eql? compare
+       
+        # define our method name and add to to to current
+        # resource class
+        method = compare.to_s.downcase.pluralize
+        
+        define_method method do
+          #set filter and send request to workspace instance 
+          filter = "#{resource.to_s.downcase}_id=#{self.id}"   
+          workspace.send method.to_s.pluralize, filter 
+        end 
+
+      end
+    end
+  end
+
+end
 
 # now lets grab our options
 options = %w(

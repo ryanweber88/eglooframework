@@ -525,6 +525,16 @@ abstract class ObjectSafe {
 	//public function respondTo($name) {
 		//return method_exists($this, $name) || isset($this->_methods[$name]);
 	//}
+
+	//public function kindOf()
+	
+	/**
+	 * Provides a looser interpretation of instanceof 
+	 * operator
+	 */
+	public function isA($constant) {
+		return true;
+	}
 	
 	/**
 	 * Aliases identify instance
