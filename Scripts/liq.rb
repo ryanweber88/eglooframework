@@ -27,6 +27,12 @@ class String
     ActiveSupport::Inflector.pluralize(self)
   end
   
+  def to_class
+    self.split('::').inject(Object) do |mod, class_name|
+      mod.const_get(class_name)
+    end
+  end  
+  
 end
 
 #[:singularize, :pluralize].each do | method |
@@ -50,8 +56,18 @@ account     = lp.account
 workspace   = lp.workspaces(WorkSpace) 
 
 # here we are going to patch Project, Package, Task classes
-(resources = %w(:Project :Package :Task)).each_with_index do | resource, index |
-  Object.const_get(resource).classEval do 
+(resources = [:Project, :Package, :Task]).each_with_index do | resource, index |
+  
+  const = "LiquidPlanner::Resources::#{resource}".to_class
+  class << const
+    define_method 'name' do
+      puts 'hello'
+    end
+  end
+  const.name
+  exit
+
+  "LiquidPlanner::Resources::#{resource}".to_class.classEval do 
     resource.reverse.each do | compare |
       
       # check to ensure that resource is not equal to compare, 
@@ -73,6 +89,8 @@ workspace   = lp.workspaces(WorkSpace)
   end
 
 end
+
+exit
 
 # now lets grab our options
 options = %w(
