@@ -28,7 +28,7 @@ class CRUD extends Model\Callback {
 		    count($callbacks['update']['around']) == 1)      {
 			
 			$conditions = array();
-							
+										
 			if ($model->send('hasCompositeKeys')) {
 				foreach($model->reference('primaryKeys') as $key) {
 					$conditions[] = "$key = ?";		

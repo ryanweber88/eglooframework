@@ -35,9 +35,9 @@ class Generic extends Domain\Model {
 		else {
 			$arguments = $__mixed;
 		}
+		
 			
 		parent::__construct($arguments);
-
 			
 		// now lets create our fake namespaced pseudonym
 		static::$pseudonym = "{$this->namespace()}\\$pseudonym";
@@ -101,9 +101,8 @@ class Generic extends Domain\Model {
 	 */
 	public function exists() {	
 		$primaryKey = $this->primaryKeyName();
-		
-				
-		if (isset($this->$primaryKey)) { 
+	
+		if (isset($this->$primaryKey)) {			 
 			return !is_null($this->$primaryKey);
 		}
 		

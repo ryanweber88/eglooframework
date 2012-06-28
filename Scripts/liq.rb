@@ -58,25 +58,28 @@ workspace   = lp.workspaces(WorkSpace)
 # here we are going to patch Project, Package, Task classes
 (resources = [:Project, :Package, :Task]).each_with_index do | resource, index |
   
+  # retrieve reference to class instance identified by resource
   const = "LiquidPlanner::Resources::#{resource}".to_class
-  class << const
-    define_method 'name' do
-      puts 'hello'
-    end
-  end
-  const.name
-  exit
-
-  "LiquidPlanner::Resources::#{resource}".to_class.classEval do 
-    resource.reverse.each do | compare |
+  
+  # now lets dynamically add methods to that class instance; 
+  # we'll be adding children and parent methods based upon
+  # resources placement (ie project will have packages and tasks)
+  # methods and task will have project and parent method
+  const.class_eval do 
+    resources.reverse.each do | compare |
       
       # check to ensure that resource is not equal to compare, 
       # we don't want to do Project#projects for example
       unless resource.eql? compare
+        
+        # get index of compare in resources array to determine whether
+        # compare is upstream or downstream of current
+        resources.index compare
        
         # define our method name and add to to to current
         # resource class
-        method = compare.to_s.downcase.pluralize
+        method = compare.to_s.downcase
+        method = method.pluralize if resources.index(compare) > index
         
         define_method method do
           #set filter and send request to workspace instance 
@@ -90,7 +93,6 @@ workspace   = lp.workspaces(WorkSpace)
 
 end
 
-exit
 
 # now lets grab our options
 options = %w(

@@ -26,8 +26,7 @@ abstract class Model extends Delegator
 	 * @param variable-length $__mixed
 	 */
 	function __construct($__mixed = null) {
-
-
+		
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
@@ -56,6 +55,8 @@ abstract class Model extends Delegator
 		// instance		
 		$this->__attributes();
 		
+
+		
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
@@ -64,7 +65,6 @@ abstract class Model extends Delegator
 			$this->initialize($__mixed);
 					
 		}
-
 		
 
 		// assign left-over columns to model
@@ -78,7 +78,9 @@ abstract class Model extends Delegator
 					$this->$attribute = null;
 				}
 			}
-		}			
+		}		
+				
+						
 					
 	}
 
@@ -2079,7 +2081,7 @@ abstract class Model extends Delegator
 						//	$currentValue = $self->alias;
 						//}
 						
-						$self->$alias = &$lambda();
+						$self->$alias = &$lambda($self);
 										
 						if (!is_null($initialValue)) {
 							$self->$alias = $initialValue;

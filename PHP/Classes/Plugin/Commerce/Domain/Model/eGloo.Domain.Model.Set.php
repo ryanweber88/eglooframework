@@ -211,6 +211,18 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		return true;
 	}
 	
+	// @TODO this is temporary until Set#collect is fixed
+	// to propery implement map pattern
+	public function map($lambda) {
+		$collected = array();
+		
+		foreach($this as $element) {
+			$collected[] = $lambda($element);
+		}
+		
+		return $collected;
+	}
+	
 	/**
 	 * Returns filtered set - note that this returns a new instance of
 	 * set and not a modified version of the old set
@@ -230,10 +242,22 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			// against collection; an a return of absolute TRUE
 			// will result in instance being added to new set
 			if (is_callable($lambda = $arguments[0])) {
+				$collected = array();
+				
 				foreach($this as $model) {
-					if ($lambda($model) === true) {
+					if (($value = $lambda($model)) === true) {
 						$set[] = $model;
 					}
+					
+					// @TODO this is very messy and a problem with the nature of
+					// collect as it has been written/defined; we probably
+					// need another method for iterating over a set and collecting
+					//
+					//else if ($value !== null   &&
+					//         $value !== false) {
+						 	
+					//	$set[] = $value;     
+					//}
 				}
 			}
 			
