@@ -43,6 +43,23 @@ class Symbol
     self.to_s.downcase
   end
 end
+
+class Class
+  # get the class name without module names attached
+  def class_name
+    self.name.split('::').last
+  end
+end
+
+class Array
+  def contains?(*a)
+    return (self & a).length == a.length
+  end
+end
+
+
+
+
 #[:singularize, :pluralize].each do | method |
 #  String.classEval do
 #    define_method method do
@@ -51,10 +68,24 @@ end
 #  end
 #end
 
+
+# convenience method for retrieving liquid planner 
+# constant from within module
 def liq_constant(name)
   "LiquidPlanner::Resources::#{name}".to_class
 end
 
+module LiquidPlanner
+  module Resources
+    class Workspace
+      # this is a bit of a hack at the moment; we need workspace
+      # instance to respond_to activites in order to list them
+      # @TODO find another method to do this; we shouldn't be
+      # patching with placeholder methods
+      def activities(a,b); end
+    end
+  end
+end
 # first lets instantiate our client and grab
 # our account and workspace resources
 lp = LiquidPlanner::Base.new(
@@ -80,7 +111,6 @@ workspace   = lp.workspaces(WorkSpace)
   const.class_eval do
     
 
-        
     # for some reason, instance_eval does not allow define_method
     # to add method to class scope (or have class as as receiver);
     # so instead we have to call method through singleton class self
@@ -126,7 +156,11 @@ options = %w(
   projects
   packages
   tasks
+  activities
   start
+  task
+  activity
+  work
   stop
 )
 
@@ -145,60 +179,79 @@ OptionParser.new do |opts|
 end.parse!
 
 
-
-# iterate through our options; the options can be a "list" or 
-# "action" oriented events; list events give us information 
-# in regards to packages, projects and tasks; action events
-# allow for the update tasks
-list, resource = nil
-
-options.each do | key, value |
-    
-  # check if workspace respond to key value, in which case
-  # we have a list oriented event; we filter out our list
-  # or item through each progressive 
-  if workspace.respond_to? key
-
-    # retrieve our workspace/rest resource
-    const = liq_constant(key.to_s.singularize.ucfirst)
-    
-    # if a numeric value has been specified then 
-    unless value.nil?
-      resource = const.get value.to_i
-      
-    # otherwise retrieve a list of resource (a list of tasks for example)
-    else
-      list = resource.nil? && const.list || resource.send(key)
+# if our options contain
+if options.keys.contains? :start, :task, :activity
+  
+  liq_constant(:Task).list.each do | task |
+    if task.id == options[:task]
+      puts "found it"
     end
-   
-   
- 
-  # otherwise we have an "action oriented" event
-  else
+  end
+
+else 
+  
+  # iterate through our options; the options can be a "list" or 
+  # "action" oriented events; list events give us information 
+  # in regards to packages, projects and tasks; action events
+  # allow for the update tasks
+  
+  list, resource, const = nil
+  
+  options.each do | key, value |
+      
+    # check if workspace respond to key value, in which case
+    # we have a list oriented event; we filter out our list
+    # or item through each progressive 
+    if workspace.respond_to? key
+  
+      # retrieve our workspace/rest resource
+      const = liq_constant(key.to_s.singularize.ucfirst)
+              
+      # if a numeric value has been specified then 
+      unless value.nil?
+        resource = const.get value.to_i
+        
+      # otherwise retrieve a list of resource (a list of tasks for example)
+      else
+        list = resource.nil? && const.list || resource.send(key)
+      end
+    end
     
   end
+  
+  # if list is nil, then we set list to a list
+  # attributes that comprise the resource; we
+  # are essentially viewing the makeup of a 
+  # single resource as opposed to listing of 
+  # resources that would would fall under parent:
+  # ie, a series of tasks that belong to a package
+  if list.nil?
+    list = resource.known_attributes
+    puts "ATTRIBUTES FOR #{resource.type} ##{resource.id} : \"#{resource.name}\""
+   
+  # otherwise we have returned a list of items; check if
+  # list is not empty or display message to that effect  
+  else
+    puts "LIST OF #{const.class_name.pluralize} FOR #{resource.type} : \"#{resource.name}\""
+  
+      
+  end
+  
+  # now iterate through list
+  list.each_with_index do | item, index |
+    print "##{index } ==> " 
+      
+    if item.kind_of? LiquidPlanner::LiquidPlannerResource
+      if item.respond_to? :is_done
+        print "* " if     item.is_done
+        print "  " unless item.is_done 
+      end
+      
+      puts  "##{item.id} #{item.name}"   
+      
+    else
+      puts "#{item}=#{resource.send(item)}" unless resource.send(item).nil?
+    end
+      
+  end 
 end
-
-# if list is nil, then we set list to a list
-# attributes that comprise the resource; we
-# are essentially viewing the makeup of a 
-# single resource as opposed to listing of 
-# resources that would would fall under parent:
-# ie, a series of tasks that belong to a package
-list = resource.known_attributes if list.nil?
-
-# now iterate through list
-list.each_with_index do | item, index |
-  print "##{index } ==> " 
-  
-  if item.respond_to? :is_done
-    print "* " if     item.is_done
-    print "  " unless item.is_done 
-    puts  " #{item.name}"   
-    
-  else
-    puts "#{item}=#{resource.send(item)}" unless resource.send(item).nil?
-  end
-    
-end 
-  
