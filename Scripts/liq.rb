@@ -33,8 +33,16 @@ class String
     end
   end  
   
+  def ucfirst
+    self.sub(/^(\w)/) {|s| s.capitalize }
+  end
 end
 
+class Symbol
+  def to_method_name
+    self.to_s.downcase
+  end
+end
 #[:singularize, :pluralize].each do | method |
 #  String.classEval do
 #    define_method method do
@@ -43,8 +51,9 @@ end
 #  end
 #end
 
-
-
+def liq_constant(name)
+  "LiquidPlanner::Resources::#{name}".to_class
+end
 
 # first lets instantiate our client and grab
 # our account and workspace resources
@@ -55,36 +64,54 @@ lp = LiquidPlanner::Base.new(
 account     = lp.account
 workspace   = lp.workspaces(WorkSpace) 
 
+
 # here we are going to patch Project, Package, Task classes
 (resources = [:Project, :Package, :Task]).each_with_index do | resource, index |
   
   # retrieve reference to class instance identified by resource
-  const = "LiquidPlanner::Resources::#{resource}".to_class
+  const = liq_constant(resource)
   
-  # now lets dynamically add methods to that class instance; 
+  # now lets dynamically add methods to instance and class instance; 
   # we'll be adding children and parent methods based upon
   # resources placement (ie project will have packages and tasks)
-  # methods and task will have project and parent method
-  const.class_eval do 
+  # methods and task will have project and parent method; as well
+  # as utility methods list and get
+  
+  const.class_eval do
+    
+
+        
+    # for some reason, instance_eval does not allow define_method
+    # to add method to class scope (or have class as as receiver);
+    # so instead we have to call method through singleton class self
+    s = class << self; self; end   
+    
+    s.send :define_method, :list do
+      filter = 'owner_id = me'
+      workspace.send(resource.to_method_name.pluralize, :all, :filter => filter)
+    end
+        
+    s.send :define_method, :get do | index |
+      self.list[index]
+    end
+       
     resources.reverse.each do | compare |
+      
+      method = resource.eql? compare && compare
       
       # check to ensure that resource is not equal to compare, 
       # we don't want to do Project#projects for example
       unless resource.eql? compare
         
-        # get index of compare in resources array to determine whether
-        # compare is upstream or downstream of current
-        resources.index compare
-       
         # define our method name and add to to to current
         # resource class
-        method = compare.to_s.downcase
+        method = compare.to_method_name
         method = method.pluralize if resources.index(compare) > index
-        
+
         define_method method do
           #set filter and send request to workspace instance 
           filter = "#{resource.to_s.downcase}_id=#{self.id}"   
-          workspace.send method.to_s.pluralize, filter 
+          workspace.send method, :all, :filter => filter 
         end 
 
       end
@@ -92,7 +119,6 @@ workspace   = lp.workspaces(WorkSpace)
   end
 
 end
-
 
 # now lets grab our options
 options = %w(
@@ -119,14 +145,12 @@ OptionParser.new do |opts|
 end.parse!
 
 
-container, list = nil
-filter    = 'owner_id = me'
-
 
 # iterate through our options; the options can be a "list" or 
 # "action" oriented events; list events give us information 
 # in regards to packages, projects and tasks; action events
 # allow for the update tasks
+list, resource = nil
 
 options.each do | key, value |
     
@@ -134,15 +158,17 @@ options.each do | key, value |
   # we have a list oriented event; we filter out our list
   # or item through each progressive 
   if workspace.respond_to? key
+
+    # retrieve our workspace/rest resource
+    const = liq_constant(key.to_s.singularize.ucfirst)
     
-    # @TODO how the fuck do you pass multiple filters
-    list = workspace.send key, :all, :filter => filter
-    
-    # if value is not null, we filter by grabbing the current
-    # representation
+    # if a numeric value has been specified then 
     unless value.nil?
-      container = list[value.to_i]
-      filter    = key.to_s.singularize + '_id=' + container.id.to_s
+      resource = const.get value.to_i
+      
+    # otherwise retrieve a list of resource (a list of tasks for example)
+    else
+      list = resource.nil? && const.list || resource.send(key)
     end
    
    
@@ -153,41 +179,26 @@ options.each do | key, value |
   end
 end
 
+# if list is nil, then we set list to a list
+# attributes that comprise the resource; we
+# are essentially viewing the makeup of a 
+# single resource as opposed to listing of 
+# resources that would would fall under parent:
+# ie, a series of tasks that belong to a package
+list = resource.known_attributes if list.nil?
 
-
-
-# otherwise lets output current list of items/resources
-# @TODO pretty print output
-if list.length > 1
-  list.each_with_index do | item, index |
-    print "##{index } ==> " 
-    
+# now iterate through list
+list.each_with_index do | item, index |
+  print "##{index } ==> " 
+  
+  if item.respond_to? :is_done
     print "* " if     item.is_done
     print "  " unless item.is_done 
-    
     puts  " #{item.name}"   
-      
-  end 
-
-# if list length is one, then we want to print out the attributes for
-# for a given resource
-elsif list.length == 1
-
-  # if our filter is valid, we "re-list" from workspace
-  unless container.nil?
-    method = container.type.downcase.pluralize
-    filter = "id=#{container.id}"
-    list = workspace.send method, :all, :filter => filter
-  end  
+    
+  else
+    puts "#{item}=#{resource.send(item)}" unless resource.send(item).nil?
+  end
+    
+end 
   
-  resource = list.pop
-  puts "#{resource.type} : #{resource.name}"
-  
-  resource.known_attributes.each do | attribute |
-    puts "#{attribute} ==> #{resource.send attribute}"  
-  end    
-end
-
-if list.length == 1
-
-end

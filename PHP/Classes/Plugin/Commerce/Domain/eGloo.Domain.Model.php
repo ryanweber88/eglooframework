@@ -14,8 +14,9 @@ use \eGloo\Domain\Model;
  * @author Christian Calloway callowaylc@gmail.com
  */
 abstract class Model extends Delegator 
-	implements \eGloo\Utilities\ToArrayInterface, \ArrayAccess, \Serializable, 
-	           Caching\CacheKeyInterface, Caching\CacheableInterface, ModelInterface {
+	implements \eGloo\Utilities\ToArrayInterface, \eGloo\TemplateProcessing\ToTemplateInterface, 
+	           \ArrayAccess, \Serializable, Caching\CacheKeyInterface, Caching\CacheableInterface, 
+	           ModelInterface {
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -490,11 +491,28 @@ abstract class Model extends Delegator
 	 * Convenience method to specify 1 - 1 relationships; note that you
 	 * must still follow plurality conventions
 	 */
-	protected function hasOne($name, $lambda) {
+	protected function hasOne($name, $lambda = null) {
+	
+	
+ 		// if lambda has not been defined, we provide a by-convention
+		// handler which will assume that foreign key is the same as
+		// primary key name
+		if (is_null($lambda)) {
+			$self = $this;
+						
+			$lambda = function($model) use ($self) {
+				$key    = $self->send('primaryKeyName');
+				$method = "find_one_by_{$key}";	
+				
+				return $model::$method($self->id);
+			};
+		}
 		
+			
 		$name = preg_replace(
 			'/\s+and\s+is\s+dependent/i', null, $name
 		);
+			
 		
 		// look for join table definition
 		// @TODO replace search for "through" with method
@@ -596,8 +614,25 @@ abstract class Model extends Delegator
 
 	}
 	
-	protected function hasMany($name, $lambda) {
+	protected function hasMany($name, $lambda = null) {
 		
+		
+		// if lambda has not been defined, we provide a by-convention
+		// handler which will assume that foreign key is the same as
+		// primary key name
+		if (is_null($lambda)) {
+			$self = $this;
+						
+			$lambda = function($model) use ($self) {
+				$key    = $self->send('primaryKeyName');
+				$method = "find_by_{$key}";	
+				
+				return $model::$method($self->id);
+			};
+		}
+		
+		// remove 'dependency' marker
+		// @TODO implement depedencies
 		$name = preg_replace(
 			'/\s+and\s+is\s+dependent/i', null, $name
 		);
@@ -1391,6 +1426,14 @@ abstract class Model extends Delegator
 		);
 		
 	}	
+	
+	/**
+	 * @TODO currently aliasing __toArray; need to change once references
+	 * are removed
+	 */
+	public function toTemplate() {
+		return $this->__toArray();
+	}
 	
 	/**
 	 * Alias to __toArray; this is meant to be called explicitly
