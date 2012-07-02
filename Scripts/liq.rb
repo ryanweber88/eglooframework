@@ -183,7 +183,7 @@ end.parse!
 if options.keys.contains? :start, :task, :activity
   
   liq_constant(:Task).list.each do | task |
-    if task.id == options[:task]
+    if task.id == options[:task].to_i
       puts "found it"
     end
   end

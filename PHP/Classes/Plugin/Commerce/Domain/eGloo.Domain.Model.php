@@ -714,7 +714,8 @@ abstract class Model extends Delegator
 			
 		// if class does not exist, then replace with generic	handler
 
-		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && !class_exists($model = "$ns\\$name"))	{
+		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && 
+		    !class_exists($model = "$ns\\$name"))	{
 			$model = "$ns\\Generic";
 			$model::factory($name);
 
@@ -727,7 +728,29 @@ abstract class Model extends Delegator
 		}
 
 		
+		// if relationship name aready exists, attempt to use a provided alias; if no alias is 
+		// provided, then throw exception as otherwise we will be overwriting an already
+		// existing relationship
 		// @TODO replace with Model.Relation
+		// @TODO we shouldn't have to check on callable status on relationship; there is a 
+		// currently a bug somewhere that is setting a relationship name without attaching
+		// lambda?
+		if ($this->hasRelationship($relationshipName)             && 
+		    is_callable($this->relationships[$relationshipName])) {
+		    	
+			if (count($aliases)) {
+				$relationshipName = array_shift($aliases);
+			}
+			
+			else {
+				//var_export($this->relationships); exit;
+				throw new \Exception(
+					"Failed to define relationship '$relationshipName' on model '{$this->ident()}' because it already exists. " .
+					"You must provide an alias if you wish to define additional relationship of the same type"
+				);
+			}
+		}
+		
 		$this->relationships[$relationshipName] = $model;
 
 		
