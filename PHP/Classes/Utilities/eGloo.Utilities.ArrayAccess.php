@@ -78,13 +78,12 @@ class ArrayAccess extends Object implements \ArrayAccess {
 			// where parameters are needed; if that were to be the case,
 			// the argument would be that there is a fatal design flaw
 			else if (\method_exists($delegated, $member)) {
+								// check if class/instance member 
+
 				
-				// check if class/instance member 
-				$reflection = new \ReflectionMethod($delegated, $member);
-				$result     = $reflection->isStatic()
-					? $delegated::$$member()
-					: $delegated->$member();
-				
+				$result = call_user_func(array(
+					$delegated, $member
+				));
 				
 			}
 			
