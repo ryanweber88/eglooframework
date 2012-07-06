@@ -71,7 +71,9 @@ abstract class Model extends Delegator
 		// assign left-over columns to model
 		// @TODO delegate this to overrideable method, or place into
 		// 'after' initialize
-		if (!in_array($signature = static::entityName(), array('user')) && 
+		// @TODO I don't remember why user entity was removed
+		// from column assignment
+		if (!in_array($signature = static::entity(), array('user')) && 
 		    is_array($columns = Data::columns($signature))) {
 		    	
 			foreach($columns as $attribute) {
@@ -80,7 +82,9 @@ abstract class Model extends Delegator
 				}
 			}
 		}		
-				
+		
+		// @TODO temporary until all instances of relationships is removed		
+		$this->associations = &$this->relationships;
 						
 					
 	}
@@ -472,6 +476,11 @@ abstract class Model extends Delegator
 		return static::signature();
 	}
 	
+	/**
+	 * Alias to entityName - I think entityName is bit redundant, and I like this
+	 * signature better
+	 * @return string
+	 */
 	protected static function entity() {
 		return static::entityName();
 	}
@@ -560,12 +569,27 @@ abstract class Model extends Delegator
 			$lambda = function($model) use ($self) {
 		  	// belongs to convention dictates that a foreign key with name
 		  	// signature_id exists on calling model	
-		  	$field = $model::sendStatic('signature') . '_id';
+		  	$fk = $model->send('primaryKeyName');
+		  	
 				
-		  	if (isset($self->$field)) {
-					// find, using belonged_to primary key
-			  	$result = $model::find($self->$field);
+		  	if (property_exists($model, $fk)) {
+		  		// get primary key name, which SHOULD exist as 
+		  		// as a fk on self; if it does not, throw an exception
+		  		// to fact
+		  		$fk = $model->send('primaryKeyName');	
+		  		
+					// check 
+					if (isset($self->$fk)) {
+						// find, using belonged_to primary key
+				  	$result = $model::find($self->$fk);
+					}
 					
+					else {
+						throw new \Exception(
+							"Failed to create 'belongsTo' relationship with '{$model->class->qualified_name}' " .
+							"because '{$self->ident()}' does not have foreign key attribute '$fk'"
+						);	
+					}
 					
 					// finally aliasAttribute between foreign/primary key
 					//$self->send('aliasAttribute', $field, function & () use ($result) {
@@ -578,7 +602,9 @@ abstract class Model extends Delegator
 				
 				else {
 					throw new \Exception(
-						"Failed to create 'belongsTo' relationship with '$name' because foreign key '$field' does not exist in receiver '{$self->ident()}'"
+						"Failed to create 'belongsTo' relationship with '{$model->class->qualified_name}' " .
+						"from '{$self->class->qualified_name}' because model '{$model->class->name}' does " . 
+						"not have a primary key"
 					);
 				}
 		  };			
@@ -713,17 +739,26 @@ abstract class Model extends Delegator
 
 			
 		// if class does not exist, then replace with generic	handler
-
 		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && 
 		    !class_exists($model = "$ns\\$name"))	{
+		  
+			// use callers namespace; this makes the assumption that generic
+			// exists in current namespace - this may have to be changed
+			// later  	
 			$model = "$ns\\Generic";
-			$model::factory($name);
-
-			if (!$model::tangible($name)) {
+			
+			// make a determination if name points to a "tangible" entity, and
+			// if the cace, we create an instance
+			// @TODO remove this when Model.Generic static issue is corrected
+			if ($model::tangible($name)) {
+				$model::factory($name);
+			}
+			
+			else {
 				throw new \Exception(
 					"Failed to create generic relation '$name' using the Generic model, because " .
 					"it cannot be determined on underlying data layer"
-				);
+				);				
 			}
 		}
 
@@ -782,10 +817,12 @@ abstract class Model extends Delegator
 				// check if model is generic - in which case we have to set
 				// pseudonym before feeding to our lambda
 				// @TODO this is cumbersome and inefficient - lets figure out
-				// more elegant solution
-				if ($model::instance() instanceof Model\Generic) {
-					$model::instantiate($name);
+				// more elegant solution or at least clear up exactly what
+				// is happening here
+				if (($model = $model::instance()) instanceof Model\Generic) {
+					$model = $model::instantiate($name);
 				}
+				
 				
 					
 				// create relation instance - for time being this is used for caching
@@ -917,7 +954,7 @@ abstract class Model extends Delegator
 				// that result has a foreign key with the same signature
 				// as this model, then aliasAttribute on result to top this
 				// model primary key 
-				$foreignKey = $self->sendStatic('signature') . '_id';
+				$foreignKey = $self->send('primaryKeyName');
 				
 				if(\property_exists($result, $foreignKey)) {
 					
@@ -1256,6 +1293,13 @@ abstract class Model extends Delegator
 						
 		}
 		
+	}
+	
+	/**
+	 * Alias to relationships; want to replace with association terminology
+	 */
+	protected function __associations() {
+		$this->__relationships();
 	}
 
 	protected function __callbacks() {
@@ -1676,18 +1720,21 @@ abstract class Model extends Delegator
 		// here
 		
 		if ($cascade) {
-			foreach($model->relations() as $relation) {
+			foreach($model->associations(true) as $relation) {
 				
 				// determine if a hasOne relationship and if initialized - 
 				// which case save
 				// @TODO this needs to be abstracted to Model.Relation
-				if ($relation instanceof Model && 
-				    $relation->initialized())  {
+				// @TODO we need to be able to make a determination of changed..
+				// php provides no hooks for property changed, which makes
+				// this tuff to implement (thats right, i said 'tuff')
+				if ($relation instanceof Model) { 
+				    //$relation->initialized())  {
 						//$relation->changed()) {
 						//!$relation->exists())      {
 														
 					try {
-						$relation->save();
+						$relation->save(true);
 					}
 					
 					// a not changed exception we ignore, as this will be the case
@@ -1705,11 +1752,11 @@ abstract class Model extends Delegator
 				
 					foreach($relation as $relation) {
 						
-						if ($relation->initialized()) { 
+						//if ($relation->initialized()) { 
 						    //$relation->changed())    {
 						    //!$relation->exists())     {	
 							try {
-								$relation->save();
+								$relation->save(true);
 							}
 							
 							catch(Model\Exception\Update\NotChanged $ignore) { }
@@ -1718,7 +1765,7 @@ abstract class Model extends Delegator
 								throw $pass;
 							}
 						}
-					}
+					//}
 				}
 			}
 		}
@@ -1732,15 +1779,33 @@ abstract class Model extends Delegator
 
 	/**
 	 * Returns a list of relation instances of this model instance
+	 * @deprecated changed to Model#associations
 	 */
 	public function relations() {
 		$relations = array();
 		
 		foreach($this->relationships as $key => $ignore) {
-			$relations[$key] = $this->$key;
+			 $relations[$key] = $this->$key;
 		}
 		
 		return $relations;
+	}
+	
+	/**
+	 * Returns a listing of associations to this model
+	 */
+	public function associations($onlyLoaded = false) {
+		$associations = array();
+				
+		foreach($this->associations as $association => $ignore) {
+			if (!$onlyLoaded ||
+			   ($onlyLoaded  && isset($this->$association))) {
+				
+				$associations[] = $this->$association;
+			}
+		}
+		
+		return $associations;
 	}
 
 	
@@ -2071,12 +2136,12 @@ abstract class Model extends Delegator
 	 * composite primary keys
 	 * @return boolean
 	 */
-	protected function hasCompositeKeys() {
+	public function hasCompositeKeys() {
 		return is_array($this->primaryKeys) && 
 		       count($this->primaryKeys);
 	}
 	
-	protected function hasPrimaryKey() {
+	public function hasPrimaryKey() {
 		$field = $this->primaryKeyName();
 		
 		return isset($this->$field) &&
@@ -2647,7 +2712,7 @@ abstract class Model extends Delegator
 			return $this->primaryKeyName;
 		}
 		
-		return static::signature() . '_id';
+		return static::entity() . '_id';
 		
 		throw new \Exception(
 			"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"
@@ -2753,13 +2818,13 @@ abstract class Model extends Delegator
 						
 				// lets add an automatic bind of foreign key to relationship, if
 				// it belongsTo current model instance
-				if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
+				//if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
 					//$field = $this->primaryKeyName;
 
 					//if (!is_null($this->$name)) {
 					//	$this->$name->$field = $this->$field;
 					//}
-				}
+				//}
 				
 				return $this->$name;
 			}
@@ -2940,6 +3005,7 @@ abstract class Model extends Delegator
 	private   $initialized    = false;
 	protected $changes        = array();
 	protected $relationships  = array();
+	protected $associations   = null;
 	protected $indicies       = array();
 	protected $cached         = false;
 	protected $primaryKeyName; 
