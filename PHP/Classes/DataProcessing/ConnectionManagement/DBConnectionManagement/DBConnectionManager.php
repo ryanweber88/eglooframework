@@ -199,8 +199,25 @@ final class DBConnectionManager extends ConnectionManager {
 			$dbname 		= $connection_options['database'];
 			$user 			= $connection_options['user'];
 			$password	 	= $connection_options['password'];
+			
+			// if 'interactive_timeout' option has been specified, then
+			// set option with php const
+			$timeout = isset($connection_options['interactive_timeout']) && 
+			           $connection_options['interactive_timeout'] === true
+				? MYSQLI_CLIENT_INTERACTIVE
+				: null;
 
-			$mysqli_conn = mysqli_connect($host, $user, $password, $dbname, $port);
+			//$mysqli_conn = mysqli_connect($host, $user, $password, $dbname, $port);
+			$mysqli_conn = \mysqli_init();
+			
+			// attempt a "real" connection - wow
+			$connected = $mysqli_conn->real_connect(
+				$host, $user, $password, $dbname, $port, null, $timeout
+			);
+			
+			if (!$connected) {
+				throw new \Exception($mysqli_conn->connect_error);
+			}
 
 			if (!$mysqli_conn) {
 				$exception_message = 'DBConnectionManager: Cannot connect to MySQL server via getMySQLiConnection.  Error: '
@@ -356,11 +373,33 @@ final class DBConnectionManager extends ConnectionManager {
 			$dbname 		= $connection_info['database'];
 			$user 			= $connection_info['user'];
 			$password	 	= $connection_info['password'];
-
+			
+			// if 'interactive_timeout' option has been specified, then
+			// set option with php const
+			$timeout = isset($connection_info['interactive_timeout']) && 
+			           $connection_info['interactive_timeout'] === true
+				? MYSQLI_CLIENT_INTERACTIVE
+				: null;
 
 			try { 
-				$mysqli = new mysqli($host, $user, $password, $dbname, $port);
-			} 
+				//$mysqli = new mysqli($host, $user, $password, $dbname, $port);
+
+				
+
+				//$mysqli_conn = mysqli_connect($host, $user, $password, $dbname, $port);
+				$mysqli = \mysqli_init();
+			
+				// attempt a "real" connection - wow
+				$connected = $mysqli->real_connect(
+					$host, $user, $password, $dbname, $port, null, $timeout
+				);
+				
+				if (!$connected) {
+					throw new \Exception($mysqli->connect_error);
+				}
+			}
+			
+			// I don't think an exception is still needed for real_connect method 
 			catch (Exception $e) { 
 				echo $e->getMessage();
 			}
