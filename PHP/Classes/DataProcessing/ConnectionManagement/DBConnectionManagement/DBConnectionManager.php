@@ -359,8 +359,20 @@ final class DBConnectionManager extends ConnectionManager {
 
 
 			try { 
-				$mysqli = new mysqli($host, $user, $password, $dbname, $port);
-			} 
+				//$mysqli = new mysqli($host, $user, $password, $dbname, $port);
+				$mysqli = \mysqli::init();
+				
+				// attempt a "real" connection - wow
+				$connected = $mysqli->real_connect(
+					$host, $user, $password, $dbname, $port, null, MYSQLI_CLIENT_INTERACTIVE
+				);
+				
+				if (!$connected) {
+					throw new \Exception($mysqli->connect_error);
+				}
+			}
+			
+			// I don't think an exception is still needed for real_connect method 
 			catch (Exception $e) { 
 				echo $e->getMessage();
 			}
