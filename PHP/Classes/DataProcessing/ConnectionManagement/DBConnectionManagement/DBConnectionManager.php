@@ -360,7 +360,7 @@ final class DBConnectionManager extends ConnectionManager {
 
 			try { 
 				//$mysqli = new mysqli($host, $user, $password, $dbname, $port);
-				$mysqli = \mysqli::init();
+				$mysqli = \mysqli_init();
 				
 				// attempt a "real" connection - wow
 				$connected = $mysqli->real_connect(
