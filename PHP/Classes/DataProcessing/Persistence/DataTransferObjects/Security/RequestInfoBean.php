@@ -30,7 +30,7 @@
 /**
  * RequestInfoBean
  *
- * This class is simply a data holder for current validated request info.
+ * This class is simply a data holder for current request info.
  *
  * @category DataProcessing
  * @package Persistence
@@ -141,9 +141,9 @@ class RequestInfoBean implements \ArrayAccess {
 
 
 		if (preg_match('/^request_?is_?(.+)$/i', $name, $match)) {
-			return strtolower($match[1]) == strtolower($_SERVER['REQUEST_METHOD']);	
+			return strtolower($match[1]) == strtolower($_SERVER['REQUEST_METHOD']);
 		}
-		
+
 		// match against xxx(Xxx) method name patterns, where it is assumed
 		// that our submatch is the name of property - in reality we are
 		// matching against GET/POST/DELETE/PUT
@@ -187,20 +187,20 @@ class RequestInfoBean implements \ArrayAccess {
 
 	/**
 	 * Flattens array parameters into single hash; keeps keys intact, but
-	 * last key will override any previous to it. 
+	 * last key will override any previous to it.
 	 * @return Hash
 	 */
 	public function flatten($__mixed) {
 		$arguments = \eGloo\Utilities\Collection::flatten(
 			func_get_args()
 		);
-		
+
 		$hold = array();
-		
+
 		foreach($arguments as $argument) {
 			$hold[] = $this[$argument];
 		}
-		
+
 		return \eGloo\Utilities\Collection::flatten($hold);
 	}
 
@@ -218,14 +218,14 @@ class RequestInfoBean implements \ArrayAccess {
 			if (property_exists($this, $method) && isset($property[$offset])) {
 				return true;
 			}
-			
+
 			else {
 				foreach(array('post', 'get') as $method) {
 					if (property_exists($this, $method) && isset($property["{$offset}_$method"])) {
 						return true;
 					}
 				}
-			}			
+			}
 		}
 
 		return false;
@@ -241,9 +241,9 @@ class RequestInfoBean implements \ArrayAccess {
      * @see ArrayAccess::offsetGet()
      */
 	public function offsetGet($offset) {
-		
+
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
-			
+
 			// have to do this prior to 5.4
 			$property = &$this->$method;
 
@@ -251,7 +251,7 @@ class RequestInfoBean implements \ArrayAccess {
 				return $property[$offset];
 			}
 			// lets check for $name_get|post pattern and apply into offset
-			else { 
+			else {
 				foreach(array('post', 'get') as $method) {
 					if (isset($this["{$offset}_$method"])) {
 						return $property["{$offset}_$method"];

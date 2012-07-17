@@ -14,6 +14,7 @@
   <delete dir="${basedir}/Build/doxworking"/>
   <delete dir="${basedir}/Build/logs"/>
   <delete dir="${basedir}/Build/pdepend"/>
+  <delete file="${basedir}/cache.properties"/>
 
   <mkdir dir="${basedir}/Build/api"/>
   <mkdir dir="${basedir}/Build/code-browser"/>
@@ -22,6 +23,19 @@
   <mkdir dir="${basedir}/Build/doxworking"/>
   <mkdir dir="${basedir}/Build/logs"/>
   <mkdir dir="${basedir}/Build/pdepend"/>
+ </target>
+
+ <target name="lint" depends="clean"
+        description="Perform syntax check of sourcecode files">
+  <apply executable="php" failonerror="true">
+   <arg value="-l" />
+
+   <fileset dir="${source}">
+    <include name="**/*.php" />
+    <modified />
+   </fileset>
+
+  </apply>
  </target>
 
  <target name="doxygen"
@@ -46,6 +60,7 @@
 	<antcall target="pdepend"/>
 	<antcall target="phpmd"/>
    </sequential>
+   <antcall target="lint"/>
    <antcall target="doxygen"/>
    <antcall target="phpcpd"/>
    <antcall target="phpcs"/>

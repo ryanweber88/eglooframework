@@ -731,13 +731,8 @@ class XML2ArrayRequestDefinitionParser extends RequestDefinitionParser {
 		$requestLookup = $requestClass . $requestID;
 
 		// If we're in DEVELOPMENT mode, log what request we're getting so we can trace runtime flow
-<<<<<<< HEAD:PHP/Classes/Security/XML2ArrayRequestDefinitionParser.php
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Incoming Request Class and Request ID lookup is: "' . $requestLookup . '"', 'Security' );
-		
-=======
 		Logger::writeLog( Logger::DEBUG, 'Incoming Request Class and Request ID lookup is: "' . $requestLookup . '"', 'Security' );
 
->>>>>>> origin/develop:PHP/Classes/Security/eGloo.Security.RequestDefinitionParser.XML2ArrayRequestDefinitionParser.php
 		// Grab the cache handler specifically for this cache region.  We do this so that when we write to the cache for RequestProcessing
 		// we can also write some information to the caching system to better keep track of what is cached for the RequestProcessing system
 		// and do more granulated inspection and cache clearing
@@ -754,16 +749,9 @@ class XML2ArrayRequestDefinitionParser extends RequestDefinitionParser {
 			$requestLookup, 'RequestValidation', true );
 
 		if ( !$requestNode && $allNodesCached ) {
-<<<<<<< HEAD:PHP/Classes/Security/XML2ArrayRequestDefinitionParser.php
-						
-			eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in cache, checking wildcards: ' . $requestLookup, 'Security' );
-			$useRequestIDDefaultHandler = eGlooConfiguration::getUseDefaultRequestIDHandler();
-			$useRequestClassDefaultHandler = eGlooConfiguration::getUseDefaultRequestClassHandler();
-=======
 			Logger::writeLog( Logger::DEBUG, 'Request node not found in cache, checking wildcards: ' . $requestLookup, 'Security' );
 			$useRequestIDDefaultHandler = Configuration::getUseDefaultRequestIDHandler();
 			$useRequestClassDefaultHandler = Configuration::getUseDefaultRequestClassHandler();
->>>>>>> origin/develop:PHP/Classes/Security/eGloo.Security.RequestDefinitionParser.XML2ArrayRequestDefinitionParser.php
 
 			// We have already parsed the XML once, so let's check down our wildcard options.  I want to refactor this later.  Maybe.
 			if ( $allNodesCached && ($useRequestIDDefaultHandler || $useRequestClassDefaultHandler) ) {

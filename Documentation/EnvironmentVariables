@@ -1,0 +1,10 @@
+# Ubuntu env vars
+export EG_CONFIG=/etc/egloo
+export EG_CACHE=/var/cache/egloo
+export EG_DOC=/usr/share/doc/egloo
+export EG_LOG=/var/log/egloo
+export EG_HOME=/usr/lib/eglooframework
+export EG_WWW=/var/www/egloo
+export EG_APPS=/usr/lib/egloo/applications
+export EG_DATA=/var/egloo
+export EG_CUBES=/usr/lib/egloo/cubes
