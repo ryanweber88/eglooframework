@@ -1,6 +1,15 @@
 <?php
 namespace eGloo\Combine;
 
+use \eGloo;
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
+use \eGloo\Performance\Caching\Gateway as CacheGateway;
+use \eGloo\Security\RequestValidator\ExtendedRequestValidator as ExtendedRequestValidator;
+
+use \Exception as Exception;
+
 /**
  * eGloo\Combine\Help Class File
  *
@@ -51,6 +60,9 @@ class Help extends Combine {
 		'all' => array(),
 	);
 
+	/**
+	 * Delegates which method to execute, depending on command passed
+	 */
 	public function execute() {
 		$retVal = null;
 
@@ -62,7 +74,7 @@ class Help extends Combine {
 				$retVal = $this->printHelpInfo();
 				break;
 			case 'all' :
-				$retVal = $this->_list();
+				echo $this->listPrettily();
 				break;
 			default :
 				break;
@@ -71,13 +83,16 @@ class Help extends Combine {
 		return $retVal;
 	}
 
+	/**
+	 * Print help for the command specified.
+	 */
 	protected function printCommandInfo() {
 		$retVal = false;
 
 		if ( isset( $this->_command_arguments[0]) ) {
 			$info_subject = $this->_command_arguments[0];
 
-			$combine_class = eGlooConfiguration::getCLICombineMapping( $info_subject );
+			$combine_class = Configuration::getCLICombineMapping( $info_subject );
 
 			if ( class_exists($combine_class) ) {
 				echo $combine_class::getHelpString() . "\n";
@@ -94,45 +109,68 @@ class Help extends Combine {
 	protected function printHelpInfo() {
 		echo self::getHelpString() . "\n";
 	}
+	
+	/**
+	 * This method will return out a list of available commands and their
+	 * corresponding classes.
+	 * 
+	 * @return String A list of available commands.
+	 * @author Ben Roberson
+	 */
+	protected function listPrettily() {
+		$retVal = "";
+		
+		// get a list of the commands + classes
+		$combine_list = Configuration::getCLICombineList();
+		
+		$tabLength = 4;
+		$longestKey = $this->getLongestKey( $combine_list );
+		$spacing = $longestKey + $tabLength;
+		$format = "%-" . $spacing . "s %s";
+		
+		// we are explicitly ignoring the "Zalgo" class and this class
+		foreach ( $combine_list as $combine_id => $combine_class ) {
+			
+			if ( class_exists( $combine_class )
+					&& $combine_class !== '\eGloo\Combine\Zalgo'
+					&& $combine_class !== '\eGloo\Combine\Help' ) {
 
-	// PHP is dumb - 'list' should be a valid method name
-	protected function _list() {
-		$retVal = false;
-
-		$combine_list = eGlooConfiguration::getCLICombineList();
-
-		$longest = 0;
-
-		foreach( $combine_list as $combine_id => $combine_class ) {
-			if (strlen($combine_id) > $longest) {
-				$longest = strlen($combine_id);
-			}
+				$values[] = $combine_id;
+				$values[] = $combine_class::getHelpString();
+				
+				// add one formatted line to the string
+				$retVal .= vsprintf( $format , $values ) ."\n";
+				
+				$values = '';
+			}	
 		}
 
-		foreach( $combine_list as $combine_id => $combine_class ) {
-			if ( class_exists($combine_class) && $combine_class !== get_class($this) && $combine_class !== 'eGlooZalgo' ) {
-				$tab_string = '';
-
-				$name_length = $longest - strlen($combine_id);
-
-				if ( ($name_length / 8) < 1 ) {
-					$tab_count = 0;
-				} else if ( ($name_length / 8) === 1 ) {
-					$tab_count = 1;
-				} else {
-					$tab_count = ceil($name_length / 8);
-				}
-
-				for( $i = 0; $i <= $tab_count; $i++ ) {
-					$tab_string .= "\t";
-				}
-
-				echo $combine_id . ':' . $tab_string . $combine_class::getHelpString() . "\n";
+		return $retVal;
+	}
+	
+	/**
+	 * Return the strlen of the longest string key in the assoc array. Will
+	 * blow up if passed is not an assoc array, or keys are not strings.
+	 * 
+	 * @return int strlen of the longest key
+	 * @author Ben Roberson
+	 */
+	public function getLongestKey($assocArray) {
+		
+		$retVal = -1;
+			
+		// fail early
+		assert( is_array( $assocArray ));
+		
+		foreach ( $assocArray as $key => $val ) {
+			
+			assert( is_string( $key ));
+			
+			if ( strlen( $key ) > $retVal ) {
+				$retVal = strlen( $key );
 			}
 		}
-
-		$retVal = true;
-
+		
 		return $retVal;
 	}
 
@@ -161,12 +199,16 @@ class Help extends Combine {
 	 * @author George Cooper
 	 **/
 	public static function getHelpString() {
-		$retVal = 'eGloo Help: Work in Progress' ."\n\n";
-		$retVal .= 'Common Commands:' . "\n\n";
-		$retVal .= 'See "egloo help <command>" for more information on a specific command';
+
+		$retVal = 'eGloo Help: Work in Progress'."\n";
+		$retVal .= 'See "egloo help <command>" for more information on a ';
+		$retVal .= 'specific command'."\n\n";
+
+		// not 100% sure why this method is static...
+		$helpClass = new Help();
+		$retVal .= $helpClass->listPrettily();
 
 		return $retVal;
 	}
 
 }
-

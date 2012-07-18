@@ -9,6 +9,6 @@ eGloo exists because of the contributions from the following people
  - Kai Prenger
  - Christian Calloway
  - Keith Buel
- - Ben Roberson
+ - Ben Roberson 
  - Yoona Chung
  - William Cook
