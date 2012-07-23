@@ -6,21 +6,21 @@ use \eGloo\Dialect\ObjectSafe as Object;
  * Class and Interface Autoloader
  *
  * This file contains the function definition for the __autoload runtime handler.
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *		  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *	
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -51,7 +51,7 @@ eGlooLogger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfigurati
 // if ( !class_exists( '\eGloo\Utility\Logger', false ) ) {
 // 	include( 'PHP/Classes/System/Utilities/eGloo.Utility.Logger.php' );
 // }
-// 
+//
 // // Initialize the eGlooLogger: 1% Hit
 // Logger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfiguration::getLogFormat() );
 
@@ -67,15 +67,15 @@ spl_autoload_register('eglooAutoload');
  * These conditional includes are ordered for speed; do not reorganize without benchmarking and serious testing
  */
 
- 
+
 // Load Bella
 // @Temporary
 //if ( eGlooConfiguration::getUseBella() ) {
-if ( true ) { 
+if ( true ) {
 	include( eGlooConfiguration::getBellaIncludePath() );
 }
- 
- 
+
+
 // Load Haanga
 if ( eGlooConfiguration::getUseHaanga() ) {
 	include( eGlooConfiguration::getHaangaIncludePath() );
@@ -110,7 +110,7 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 
 // Load Pimple DIC
 // TODO place into configuration
-require_once eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php';
+include( eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
 
 // Let's override some built-in functions in profiling mode
 if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDProfile() ) {
@@ -131,13 +131,13 @@ if ( extension_loaded('xdebug') && eGlooConfiguration::getUseXdebugTrace() ) {
 
 /**
  * Defines the class and interface autoload runtime handler.
- * 
- * When PHP encounters a class or interface that has not yet been loaded or defined, __autoload 
+ *
+ * When PHP encounters a class or interface that has not yet been loaded or defined, __autoload
  * is invoked with the class or interface name as its only parameter.  __autoload searches
  * the defined classpaths for possible matches.	 If a match is found, the file containing the
  * requested definition is included.  If __autoload exits without successfully matching and
  * loading the requested class or interface, the runtime will abort with an error.
- * 
+ *
  * The only permitted class or interface filename format is {CLASS_OR_INTERFACE_NAME}.php and is
  * case sensitive.	The only classpath checked is "../PHP/Classes", relative to the project root
  * and inclusive of all subdirectories.
@@ -149,8 +149,6 @@ function eglooAutoload( $class_name ) {
 	if ( strpos($class_name, '\\') === 0 ) {
 		$class_name = substr( $class_name, 1 );
 	}
-	
-
 
 	$cacheGateway = CacheGateway::getCacheGateway();
 
@@ -158,14 +156,14 @@ function eglooAutoload( $class_name ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include_once( $autoload_hash[$class_name] );
+				include( $autoload_hash[$class_name] );
 
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
 				// hierarchy
 				try {
 					__constructStatic($class_name);
-					
+
 				} catch ( \Exception $e ) {
 					var_export($e);
 					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
@@ -188,7 +186,7 @@ function eglooAutoload( $class_name ) {
 	static $possible_path = null;
 
 	// List here whatever formats you use for your file names. Note that, if you autoload
-	// a class that implements a non-loaded interface, you will also need to autoload that 
+	// a class that implements a non-loaded interface, you will also need to autoload that
 	// interface. Put the &CLASS wherever the $class_name might appear
 	static $permitted_formats = array( '&CLASS.php' );
 
@@ -198,10 +196,10 @@ function eglooAutoload( $class_name ) {
 	if ( null === $possible_path ) {
 		// These are the default paths for this application
 		$framework_classes = eGlooConfiguration::getFrameworkRootPath() . '/PHP';
-		$application_classes = eGlooConfiguration::getApplicationsPath() . '/' . 
+		$application_classes = eGlooConfiguration::getApplicationsPath() . '/' .
 			eGlooConfiguration::getApplicationPath() . '/PHP';
 
-		$extra_class_path = eGlooConfiguration::getApplicationsPath() . '/' . 
+		$extra_class_path = eGlooConfiguration::getApplicationsPath() . '/' .
 			eGlooConfiguration::getApplicationPath() . '/' . eGlooConfiguration::getExtraClassPath();
 
 		// Customize this yourself, but leave the array_flip alone. We will use this to
@@ -211,7 +209,7 @@ function eglooAutoload( $class_name ) {
 		$possible_path = array_flip( array( $application_classes, $extra_class_path, $framework_classes ) );
 
 		// Merge the flipped arrays to get rid of duplicate "keys" (which are really the
-		// valid include paths) then strip out the keys leaving only uniques. This is 
+		// valid include paths) then strip out the keys leaving only uniques. This is
 		// marginally faster than using array_combine and array_unique and much more elegant.
 		$possible_path = array_keys( array_merge( $possible_path,
 			array_flip( explode( ini_get( 'include_path' ), ';' ) ) ) );
@@ -286,11 +284,11 @@ function eglooAutoload( $class_name ) {
 				if ($sanityCheckClassLoading) {
 					foreach( $instances as $directory => $instancePathSet) {
 						$noConflicts = true;
-				
+
 						if (count($instancePathSet) > 1) {
 							$noConflicts = false;
 							$errorMessage = 'Duplicate class "' . $class_name . '" found.';
-				
+
 							foreach($instances as $classPath => $classPathInstances) {
 								foreach($classPathInstances as $instance) {
 									$errorMessage .= "\n\tClass Path: " . $classPath . "\n\tInstance: " . $instance . "\n";
@@ -308,8 +306,8 @@ function eglooAutoload( $class_name ) {
 					}
 				}
 
-				include_once( $realPath );
-				
+				include( $realPath );
+
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
 				// hierarchy
@@ -346,7 +344,8 @@ function eglooAutoload( $class_name ) {
 		$namespace_regex = '~\n\s*namespace\s+' . $namespace_regex . ';~';
 
 		$base_class = preg_replace( '~([a-zA-Z0-9]+\\\)~', '', $class_name );
-		$class_declaration_regex = '~\n\s*class\s+' . $base_class . '\s*([a-zA-Z0-9,]*\s*)*\s*{~';
+		$class_declaration_regex = '~\n\s*(abstract)?\s*class\s+' . $base_class . '\s*([a-zA-Z0-9,]*\s*)*\s*{~';
+		$bad_fuzzy_matches_found = array();
 
 		// Go through each class path like normal
 		foreach ( $possible_path as $directory ) {
@@ -377,6 +376,14 @@ function eglooAutoload( $class_name ) {
 								// Bingo, let's mark this and bail
 								$realPath = $file_path;
 								break;
+							} else {
+								$bad_fuzzy_matches_found[] = array(
+									'file_path' => $file_path,
+									'namespace_regex' => $namespace_regex,
+									'namespace_regex_result' => preg_match( $namespace_regex, $file_contents ),
+									'class_declaration_regex' => $class_declaration_regex,
+									'class_declaration_regex_result' => preg_match( $class_declaration_regex, $file_contents ),
+								);
 							}
 						}
 					}
@@ -395,6 +402,21 @@ function eglooAutoload( $class_name ) {
 					$autoload_hash[$class_name] = realpath( $realPath );
 					$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 					break;
+				} else if ( !empty($bad_fuzzy_matches_found) ) {
+					$errorMessage = 'Invalid fuzzy matches for namespaced class "' . $class_name . '" found.' . "\n";
+
+					foreach( $bad_fuzzy_matches_found as $bad_fuzzy_match ) {
+						$errorMessage .= "\nInvalid fuzzy match: " . $bad_fuzzy_match['file_path'] .
+							"\n\n" . var_export($bad_fuzzy_match, true);
+					}
+
+					// In case you want to know why we do this, it's because exceptions in a PHP autoloader
+					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
+					// to the global exception handler, just as if it was thrown.  Voila!
+					$errorException = new ErrorException($errorMessage);
+
+					eGlooLogger::global_exception_handler($errorException);
+					exit;
 				}
 			}
 		}
@@ -410,7 +432,7 @@ function eglooAutoload( $class_name ) {
 		}
 
 		if ( $realPath !== null ) {
-			include_once ( $realPath );
+			include ( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 
@@ -487,7 +509,7 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 
 		// TODO build bridge between dynamic object definition and class builder; remove
 		// build process entirely from autoload
-		
+
 		$eglooDPDirector = eGlooDPDirector::getInstance();
 		$dynamic_object_definition = $eglooDPDirector->getDPDynamicObjectDefinition( $base_class_name );
 
@@ -495,47 +517,47 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 			->name($base_class_name)
 			->extends('DynamicObject') // fix to constant determined in config
 			->namespace('eGloo\DP');   // same
-		
+
 		foreach( $dynamic_object_definition['constants'] as $constantID => $constant ) {
 			// TODO handle more cases than this, obviously
-			
+
 			$rclass
 				->constant($constantID)
 				->value($constant['defaultValue']);
 		}
-		
+
 		foreach( $dynamic_object_definition['staticMembers'] as $staticMemberID => $staticMember ) {
 			// TODO handle more cases than this, obviously
-			
+
 			$rclass
 				->property($staticMemberID)
 				->value($staticMember['defaultValue'])
 				->visibility($staticMember['scope'])
 				->static(true);
 		}
-		
+
 		foreach( $dynamic_object_definition['members'] as $memberID => $member ) {
 			// TODO handle more cases than this, obviously
 			$defaultValue = $member['defaultValue'];
 			$scope = $member['scope'];
 			$managed = $member['managed'];
-			
-			
+
+
 			$rclass
 				->property($memberID)
 				->visibility($scope)
-				->value($defaultValue)	
-				->managed($managed);				
+				->value($defaultValue)
+				->managed($managed);
 		}
 
-				
+
 
 		foreach( $dynamic_object_definition['staticMethods'] as $staticMethodID => $staticMethod ) {
 			$rmethod = $rclass
 				->method($staticMethodID)
 				->static(true);
-				
-								
+
+
 			foreach( $staticMethod['arguments'] as $argumentID => $argument ) {
 				$rmethod->argument($argumentID);
 			}
@@ -545,7 +567,7 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 
 				if ( isset($statement['dpStatements']) ) {
 					foreach( $statement['dpStatements'] as $dpStatement ) {
-						
+
 						// why is this here?
 						$statement_definition = $eglooDPDirector->getDPStatementDefinition( $dpStatement['class'], $dpStatement['statementID'] );
 
@@ -558,8 +580,8 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 								'$statement->bind( \'' . $argumentMap['to'] . '\', $' . $argumentMap['from'] . ' )'
 							);
 						}
-						
-							
+
+
 
 						// Caching?  In the future
 						// if ( $result = $statement->execute( 'getByProductID', $id ) ) {
@@ -594,33 +616,33 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 						}
 
 
-			
+
 					}
 				}
 			}
 
-	
+
 			$rmethod->statement('return $retVal');
 		}
-		
+
 
 		foreach( $dynamic_object_definition['methods'] as $methodID => $method ) {
 			$rmethod = $rclass
 				->method($methodID)
 				->visibility($rclass::V_PUBLIC);
-				
+
 
 			foreach( $method['arguments'] as $argumentID => $argument ) {
 				$rmethod->argument($argumentID);
-				
+
 
 			}
 
-		
+
 		}
 
 		// write class definition to path specified in parameter
-		$rclass->write($dpClassFilePath);	
+		$rclass->write($dpClassFilePath);
 
 		// Do stuff
 		$retVal = $dpClassFilePath;
@@ -667,19 +689,19 @@ function getArrayDefinitionString( $array_to_define ) {
  * expression; in php: condition or throws()
  */
 function throws( $mixed ) {
-	
+
 	// determine our exception; this can be passed explicitly, or
 	// will default to global namespaced exception
-	$exception = $mixed instanceof \Exception 
-		// if mixed is already an instance of exception, we 
+	$exception = $mixed instanceof \Exception
+		// if mixed is already an instance of exception, we
 		// assign to exception
 		? $mixed
-		
+
 		// it is assumed that mixed is our message and we instantiate
 		// base exception with message
-		: new \Exception($mixed);	
-		
-	// now throw our exception	
+		: new \Exception($mixed);
+
+	// now throw our exception
 	throw $exception;
 }
 
@@ -915,13 +937,13 @@ function almost_empty($in, $trim = false) {
  *  to provide static constructor functionality on class load
  */
 function __constructStatic($name) {
-		
-	// make sure object is instanceof of global Object 
+
+	// make sure object is instanceof of global Object
 	// - if the case, then we are assured that we have
 	// a __statuc method, whether a stubb or
 	// actualy definition - since we are checking
 	// on a string, we need to call methodExists
-	// over 
+	// over
 	if ( method_exists($name, '__static') ) {
 		// because method exists will return true for inherited methods that
 		// are NOT explicitly defined in class - we need to determine that
@@ -933,14 +955,14 @@ function __constructStatic($name) {
 
 		// since our static constructors do share the same concept of inheritence
 		// as do regular constructors, we use the 'Polymorphic' annotation to
-		// describe any static constructor that should be called in the 
-		// children of 
-		if (strpos($reflection->getDocComment(), '@Polymorphic') !== false || 
+		// describe any static constructor that should be called in the
+		// children of
+		if (strpos($reflection->getDocComment(), '@Polymorphic') !== false ||
 
 				// check if __static is in declaring class, as opposed to simply available
 				// through inheritence
 				$reflection->getDeclaringClass()->getName() == $name) {
-					 
+
 			$name::__static();
 		}
 	}
