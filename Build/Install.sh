@@ -124,8 +124,14 @@ then
 		echo "sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist"
 		echo
 
-		echo -n "Continue? [y/N]: "
-		read -e CONFIRM_CONTINUE
+		if [ $DEFAULT_EVERYTHING -eq 0 ]
+		then
+			echo -n "Continue? [y/N]: "
+			read -e CONFIRM_CONTINUE
+		else
+			echo "Default behavior here is NOT to continue..."
+			exit 1
+		fi
 
 		# Make sure the user is prepared to answer some setup questions
 		case "$CONFIRM_CONTINUE" in
