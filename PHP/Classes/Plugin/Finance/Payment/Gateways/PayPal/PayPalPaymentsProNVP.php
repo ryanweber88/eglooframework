@@ -1,7 +1,8 @@
 <?php
 namespace eGloo\Plugin\Finance\Payment\Gateways\PayPal;
 
-use \eGloo\Configuration as Configuration;
+// use \eGloo\Configuration as Configuration;
+use \eGlooConfiguration as Configuration;
 
 use \eGloo\Utility\Exceptions\LoggerException as LoggerException;
 use \eGloo\Utility\Logger as Logger;
@@ -50,1515 +51,630 @@ use \ErrorException as ErrorException;
  */
 class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 
+	/**
+	 * Create a recurring payments profile
+	 *
+	 *
+	 */
 	public function createRecurringPaymentsProfile() {
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$token = urlencode("token_from_setExpressCheckout");
+		$paymentAmount = urlencode("payment_amount");
+		$currencyID = urlencode("USD");						// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$startDate = urlencode("2009-9-6T0:0:0");
+		$billingPeriod = urlencode("Month");				// or "Day", "Week", "SemiMonth", "Year"
+		$billingFreq = urlencode("4");						// combination of this and billingPeriod must be at most a year
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		$nvpStr="&TOKEN=$token&AMT=$paymentAmount&CURRENCYCODE=$currencyID&PROFILESTARTDATE=$startDate";
+		$nvpStr .= "&BILLINGPERIOD=$billingPeriod&BILLINGFREQUENCY=$billingFreq";
 
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		$httpParsedResponseAr = $this->postHTTPRequest('CreateRecurringPaymentsProfile', $nvpStr);
 
-		// 	// setting the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// turning off the server and peer verification(TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// NVPRequest for submitting to server
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// setting the nvpreq as POST FIELD to curl
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// getting response from server
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the RefundTransaction response details
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// $token = urlencode("token_from_setExpressCheckout");
-		// $paymentAmount = urlencode("payment_amount");
-		// $currencyID = urlencode("USD");						// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		// $startDate = urlencode("2009-9-6T0:0:0");
-		// $billingPeriod = urlencode("Month");				// or "Day", "Week", "SemiMonth", "Year"
-		// $billingFreq = urlencode("4");						// combination of this and billingPeriod must be at most a year
-
-		// $nvpStr="&TOKEN=$token&AMT=$paymentAmount&CURRENCYCODE=$currencyID&PROFILESTARTDATE=$startDate";
-		// $nvpStr .= "&BILLINGPERIOD=$billingPeriod&BILLINGFREQUENCY=$billingFreq";
-
-		// $httpParsedResponseAr = PPHttpPost('CreateRecurringPaymentsProfile', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('CreateRecurringPaymentsProfile Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('CreateRecurringPaymentsProfile failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('CreateRecurringPaymentsProfile Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('CreateRecurringPaymentsProfile failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Authorize a payment
+	 *
+	 *
+	 */
 	public function doAuthorization() {
-		// /** DoAuthorization NVP example; last modified 08MAY23.
-		//  *
-		//  *  Authorize a payment.
-		// */
+		// Set request-specific fields.
+		$transactionID = urlencode('1371');
+		$amount = urlencode('40.00');
+		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$trxType = urlencode('V');
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr="&TRANSACTIONID=$transactionID&AMT=$amount&CURRENCYCODE=$currency&TRXTYPE=$trxType";
+// die_r($nvpStr);
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DoAuthorization', $nvpStr);
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
-
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $transactionID = urlencode('example_transaction_id');
-		// $amount = urlencode('example_amount');
-		// $currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		// $trxType = urlencode('V');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr="&TRANSACTIONID=$transactionID&AMT=$amount&CURRENCYCODE=$currency&TRXTYPE=$trxType";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DoAuthorization', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('DoAuthorization Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoAuthorization failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('DoAuthorization Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoAuthorization failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Capture a payment
+	 *
+	 *
+	 */
 	public function doCapture() {
-		// /** DoCapture NVP example; last modified 08MAY23.
-		//  *
-		//  *  Capture a payment.
-		// */
+		// Set request-specific fields.
+		$authorizationID = urlencode('example_authorization_id');
+		$amount = urlencode('example_amount');
+		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$completeCodeType = urlencode('Complete');				// or 'NotComplete'
+		$invoiceID = urlencode('example_invoice_id');
+		$note = urlencode('example_note');
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&NOTE=$note";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DoCapture', $nvpStr);
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $authorizationID = urlencode('example_authorization_id');
-		// $amount = urlencode('example_amount');
-		// $currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		// $completeCodeType = urlencode('Complete');				// or 'NotComplete'
-		// $invoiceID = urlencode('example_invoice_id');
-		// $note = urlencode('example_note');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&NOTE=$note";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DoCapture', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Process a credit card payment
+	 *
+	 *
+	 */
 	public function doDirectPayment() {
-		// /** DoDirectPayment NVP example; last modified 08MAY23.
-		//  *
-		//  *  Process a credit card payment.
-		// */
+		// Set request-specific fields.
+		$paymentType = urlencode('Authorization');				// or 'Sale'
+		$firstName = urlencode('George');
+		$lastName = urlencode('Cooper');
+		$creditCardType = urlencode('visa');
+		$creditCardNumber = urlencode('4470966005764985');
+		$expDateMonth = '5';
+		// Month must be padded with leading zero
+		$padDateMonth = urlencode(str_pad($expDateMonth, 2, '0', STR_PAD_LEFT));
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$expDateYear = urlencode('2017');
+		$cvv2Number = urlencode('cc_cvv2_number');
+		$address1 = urlencode('90 West Street APT 19P');
+		$address2 = urlencode('');
+		$city = urlencode('New York');
+		$state = urlencode('New York');
+		$zip = urlencode('10006');
+		$country = urlencode('US');				// US or other valid country code
+		$amount = urlencode('10');
+		$currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Add back &CVV2=$cvv2Number
+		// Add request-specific fields to the request string.
+		$nvpStr =	"&PAYMENTACTION=$paymentType&AMT=$amount&CREDITCARDTYPE=$creditCardType&ACCT=$creditCardNumber".
+					"&EXPDATE=$padDateMonth$expDateYear&FIRSTNAME=$firstName&LASTNAME=$lastName".
+					"&STREET=$address1&CITY=$city&STATE=$state&ZIP=$zip&COUNTRYCODE=$country&CURRENCYCODE=$currencyID";
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DoDirectPayment', $nvpStr);
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $paymentType = urlencode('Authorization');				// or 'Sale'
-		// $firstName = urlencode('customer_first_name');
-		// $lastName = urlencode('customer_last_name');
-		// $creditCardType = urlencode('customer_credit_card_type');
-		// $creditCardNumber = urlencode('customer_credit_card_number');
-		// $expDateMonth = 'cc_expiration_month';
-		// // Month must be padded with leading zero
-		// $padDateMonth = urlencode(str_pad($expDateMonth, 2, '0', STR_PAD_LEFT));
-
-		// $expDateYear = urlencode('cc_expiration_year');
-		// $cvv2Number = urlencode('cc_cvv2_number');
-		// $address1 = urlencode('customer_address1');
-		// $address2 = urlencode('customer_address2');
-		// $city = urlencode('customer_city');
-		// $state = urlencode('customer_state');
-		// $zip = urlencode('customer_zip');
-		// $country = urlencode('customer_country');				// US or other valid country code
-		// $amount = urlencode('example_payment_amuont');
-		// $currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr =	"&PAYMENTACTION=$paymentType&AMT=$amount&CREDITCARDTYPE=$creditCardType&ACCT=$creditCardNumber".
-		// 			"&EXPDATE=$padDateMonth$expDateYear&CVV2=$cvv2Number&FIRSTNAME=$firstName&LASTNAME=$lastName".
-		// 			"&STREET=$address1&CITY=$city&STATE=$state&ZIP=$zip&COUNTRYCODE=$country&CURRENCYCODE=$currencyID";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DoDirectPayment', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Complete an Express Checkout transaction
+	 *
+	 *
+	 */
 	public function doExpressCheckoutPayment() {
-		// /** DoExpressCheckoutPayment NVP example; last modified 08MAY23.
-		//  *
-		//  *  Complete an Express Checkout transaction.
-		// */
+		/**
+		 * This example assumes that a token was obtained from the SetExpressCheckout API call.
+		 * This example also assumes that a payerID was obtained from the SetExpressCheckout API call
+		 * or from the GetExpressCheckoutDetails API call.
+		 */
+		// Set request-specific fields.
+		$payerID = urlencode("payer_id");
+		$token = urlencode("token");
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$paymentType = urlencode("Authorization");			// or 'Sale' or 'Order'
+		$paymentAmount = urlencode("payment_amount");
+		$currencyID = urlencode("USD");						// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Add request-specific fields to the request string.
+		$nvpStr = "&TOKEN=$token&PAYERID=$payerID&PAYMENTACTION=$paymentType&AMT=$paymentAmount&CURRENCYCODE=$currencyID";
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DoExpressCheckoutPayment', $nvpStr);
 
-		// 	// setting the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Set the curl parameters.
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit('$methodName_ failed: '.curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// /**
-		//  * This example assumes that a token was obtained from the SetExpressCheckout API call.
-		//  * This example also assumes that a payerID was obtained from the SetExpressCheckout API call
-		//  * or from the GetExpressCheckoutDetails API call.
-		//  */
-		// // Set request-specific fields.
-		// $payerID = urlencode("payer_id");
-		// $token = urlencode("token");
-
-		// $paymentType = urlencode("Authorization");			// or 'Sale' or 'Order'
-		// $paymentAmount = urlencode("payment_amount");
-		// $currencyID = urlencode("USD");						// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&TOKEN=$token&PAYERID=$payerID&PAYMENTACTION=$paymentType&AMT=$paymentAmount&CURRENCYCODE=$currencyID";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DoExpressCheckoutPayment', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('Express Checkout Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoExpressCheckoutPayment failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('Express Checkout Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoExpressCheckoutPayment failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Reauthorize a previously authorized payment
+	 *
+	 *
+	 */
 	public function doReauthorization() {
-		// /** DoReauthorization NVP example; last modified 08MAY23.
-		//  *
-		//  *  Reauthorize a previously authorized payment.
-		// */
+		// Set request-specific fields.
+		$authorizationID = urlencode('example_authorization_id');
+		$amount = urlencode('example_amount');
+		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&CURRENCYCODE=$currency";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DoReauthorization', $nvpStr);
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $authorizationID = urlencode('example_authorization_id');
-		// $amount = urlencode('example_amount');
-		// $currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&CURRENCYCODE=$currency";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DoReauthorization', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('DoReauthorization Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoReauthorization failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('DoReauthorization Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoReauthorization failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Cancel a previously authorized payment
+	 *
+	 *
+	 */
 	public function doVoid() {
-		// /** DoVoid NVP example; last modified 08MAY23.
-		//  *
-		//  *  Cancel a previously authorized payment.
-		// */
+		// Set request-specific fields.
+		$authorizationID = urlencode('example_authorization_id');
+		$note = urlencode('example_note');
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr="&AUTHORIZATIONID=$authorizationID&NOTE=$note";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('DOVoid', $nvpStr);
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $authorizationID = urlencode('example_authorization_id');
-		// $note = urlencode('example_note');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr="&AUTHORIZATIONID=$authorizationID&NOTE=$note";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('DOVoid', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('Void Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('DoVoid failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('Void Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('DoVoid failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Process a credit card payment
+	 *
+	 *
+	 */
 	public function getBalance() {
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$nvpStr="";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		$httpParsedResponseAr = $this->postHTTPRequest('GetBalance', $nvpStr);
 
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// setting the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// turning off the server and peer verification(TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// NVPRequest for submitting to server
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// setting the nvpreq as POST FIELD to curl
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// getting response from server
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the RefundTransaction response details
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// $nvpStr="";
-
-		// $httpParsedResponseAr = PPHttpPost('GetBalance', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('GetBalance Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('GetBalance failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('GetBalance Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('GetBalance failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Get information about an Express Checkout transaction
+	 *
+	 *
+	 */
 	public function getExpressCheckoutDetails() {
-		// /** GetExpressCheckoutDetails NVP example; last modified 08MAY23.
-		//  *
-		//  *  Get information about an Express Checkout transaction.
-		// */
+		/**
+		 * This example assumes that this is the return URL in the SetExpressCheckout API call.
+		 * The PayPal website redirects the user to this page with a token.
+		 */
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Obtain the token from PayPal.
+		if(!array_key_exists('token', $_REQUEST)) {
+			exit('Token is not received.');
+		}
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Set request-specific fields.
+		$token = urlencode(htmlspecialchars($_REQUEST['token']));
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		// Add request-specific fields to the request string.
+		$nvpStr = "&TOKEN=$token";
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('GetExpressCheckoutDetails', $nvpStr);
 
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			// Extract the response details.
+			$payerID = $httpParsedResponseAr['PAYERID'];
+			$street1 = $httpParsedResponseAr["SHIPTOSTREET"];
+			if(array_key_exists("SHIPTOSTREET2", $httpParsedResponseAr)) {
+				$street2 = $httpParsedResponseAr["SHIPTOSTREET2"];
+			}
+			$city_name = $httpParsedResponseAr["SHIPTOCITY"];
+			$state_province = $httpParsedResponseAr["SHIPTOSTATE"];
+			$postal_code = $httpParsedResponseAr["SHIPTOZIP"];
+			$country_code = $httpParsedResponseAr["SHIPTOCOUNTRYCODE"];
 
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit('$methodName_ failed: '.curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// /**
-		//  * This example assumes that this is the return URL in the SetExpressCheckout API call.
-		//  * The PayPal website redirects the user to this page with a token.
-		//  */
-
-		// // Obtain the token from PayPal.
-		// if(!array_key_exists('token', $_REQUEST)) {
-		// 	exit('Token is not received.');
-		// }
-
-		// // Set request-specific fields.
-		// $token = urlencode(htmlspecialchars($_REQUEST['token']));
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&TOKEN=$token";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('GetExpressCheckoutDetails', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	// Extract the response details.
-		// 	$payerID = $httpParsedResponseAr['PAYERID'];
-		// 	$street1 = $httpParsedResponseAr["SHIPTOSTREET"];
-		// 	if(array_key_exists("SHIPTOSTREET2", $httpParsedResponseAr)) {
-		// 		$street2 = $httpParsedResponseAr["SHIPTOSTREET2"];
-		// 	}
-		// 	$city_name = $httpParsedResponseAr["SHIPTOCITY"];
-		// 	$state_province = $httpParsedResponseAr["SHIPTOSTATE"];
-		// 	$postal_code = $httpParsedResponseAr["SHIPTOZIP"];
-		// 	$country_code = $httpParsedResponseAr["SHIPTOCOUNTRYCODE"];
-
-		// 	exit('Get Express Checkout Details Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('GetExpressCheckoutDetails failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+			exit('Get Express Checkout Details Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('GetExpressCheckoutDetails failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Get detailed information about a single transaction
+	 *
+	 *
+	 */
 	public function getTransactionDetails() {
-		// /** GetTransactionDetails NVP example; last modified 08MAY23.
-		//  *
-		//  *  Get detailed information about a single transaction.
-		// */
+		// Set request-specific fields.
+		$transactionID = urlencode('example_transaction_id');
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr = "&TRANSACTIONID=$transactionID";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('GetTransactionDetails', $nvpStr);
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
-
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $transactionID = urlencode('example_transaction_id');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&TRANSACTIONID=$transactionID";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('GetTransactionDetails', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('GetTransactionDetails Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('GetTransactionDetails failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('GetTransactionDetails Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('GetTransactionDetails failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Pay one or more recipients
+	 *
+	 *
+	 */
 	public function massPay() {
-		// /** MassPay NVP example; last modified 08MAY23.
-		//  *
-		//  *  Pay one or more recipients.
-		// */
+		// Set request-specific fields.
+		$emailSubject =urlencode('example_email_subject');
+		$receiverType = urlencode('EmailAddress');
+		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr="&EMAILSUBJECT=$emailSubject&RECEIVERTYPE=$receiverType&CURRENCYCODE=$currency";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		$receiversArray = array();
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		for($i = 0; $i < 3; $i++) {
+			$receiverData = array(	'receiverEmail' => "user$i@paypal.com",
+									'amount' => "example_amount",
+									'uniqueID' => "example_unique_id",
+									'note' => "example_note");
+			$receiversArray[$i] = $receiverData;
+		}
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		foreach($receiversArray as $i => $receiverData) {
+			$receiverEmail = urlencode($receiverData['receiverEmail']);
+			$amount = urlencode($receiverData['amount']);
+			$uniqueID = urlencode($receiverData['uniqueID']);
+			$note = urlencode($receiverData['note']);
+			$nvpStr .= "&L_EMAIL$i=$receiverEmail&L_Amt$i=$amount&L_UNIQUEID$i=$uniqueID&L_NOTE$i=$note";
+		}
 
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('MassPay', $nvpStr);
 
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $emailSubject =urlencode('example_email_subject');
-		// $receiverType = urlencode('EmailAddress');
-		// $currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr="&EMAILSUBJECT=$emailSubject&RECEIVERTYPE=$receiverType&CURRENCYCODE=$currency";
-
-		// $receiversArray = array();
-
-		// for($i = 0; $i < 3; $i++) {
-		// 	$receiverData = array(	'receiverEmail' => "user$i@paypal.com",
-		// 							'amount' => "example_amount",
-		// 							'uniqueID' => "example_unique_id",
-		// 							'note' => "example_note");
-		// 	$receiversArray[$i] = $receiverData;
-		// }
-
-		// foreach($receiversArray as $i => $receiverData) {
-		// 	$receiverEmail = urlencode($receiverData['receiverEmail']);
-		// 	$amount = urlencode($receiverData['amount']);
-		// 	$uniqueID = urlencode($receiverData['uniqueID']);
-		// 	$note = urlencode($receiverData['note']);
-		// 	$nvpStr .= "&L_EMAIL$i=$receiverEmail&L_Amt$i=$amount&L_UNIQUEID$i=$uniqueID&L_NOTE$i=$note";
-		// }
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('MassPay', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('MassPay Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('MassPay failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('MassPay Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('MassPay failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Issue a refund for a prior transaction
+	 *
+	 *
+	 */
 	public function refundTransaction() {
-		// /** RefundTransaction NVP example; last modified 08MAY23.
-		//  *
-		//  *  Issue a refund for a prior transaction.
-		// */
+		// Set request-specific fields.
+		$transactionID = urlencode('example_transaction_id');
+		$refundType = urlencode('Full');						// or 'Partial'
+		$amount;												// required if Partial.
+		$memo;													// required if Partial.
+		$currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr = "&TRANSACTIONID=$transactionID&REFUNDTYPE=$refundType&CURRENCYCODE=$currencyID";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		if(isset($memo)) {
+			$nvpStr .= "&NOTE=$memo";
+		}
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		if(strcasecmp($refundType, 'Partial') == 0) {
+			if(!isset($amount)) {
+				exit('Partial Refund Amount is not specified.');
+			} else {
+		 		$nvpStr = $nvpStr."&AMT=$amount";
+			}
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+			if(!isset($memo)) {
+				exit('Partial Refund Memo is not specified.');
+			}
+		}
 
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('RefundTransaction', $nvpStr);
 
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $transactionID = urlencode('example_transaction_id');
-		// $refundType = urlencode('Full');						// or 'Partial'
-		// $amount;												// required if Partial.
-		// $memo;													// required if Partial.
-		// $currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&TRANSACTIONID=$transactionID&REFUNDTYPE=$refundType&CURRENCYCODE=$currencyID";
-
-		// if(isset($memo)) {
-		// 	$nvpStr .= "&NOTE=$memo";
-		// }
-
-		// if(strcasecmp($refundType, 'Partial') == 0) {
-		// 	if(!isset($amount)) {
-		// 		exit('Partial Refund Amount is not specified.');
-		// 	} else {
-		//  		$nvpStr = $nvpStr."&AMT=$amount";
-		// 	}
-
-		// 	if(!isset($memo)) {
-		// 		exit('Partial Refund Memo is not specified.');
-		// 	}
-		// }
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('RefundTransaction', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('Refund Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('RefundTransaction failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('Refund Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('RefundTransaction failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Set custom billing agreement
+	 *
+	 *
+	 */
 	public function setCustomBillingAgreement() {
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$returnURL = urlencode("my_return_url");
+		$cancelURL = urlencode("my_cancel_url");
+		$billingType = urlencode("RecurringPayments");	// or "MerchantInitiatedBilling"
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		$nvpStr="&BILLINGTYPE=$billingType&RETURNURL=$returnURL&CANCELURL=$cancelURL";
 
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		$httpParsedResponseAr = $this->postHTTPRequest('SetCustomerBillingAgreement', $nvpStr);
 
-		// 	// setting the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// turning off the server and peer verification(TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// NVPRequest for submitting to server
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// setting the nvpreq as POST FIELD to curl
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// getting response from server
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the RefundTransaction response details
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// $returnURL = urlencode("my_return_url");
-		// $cancelURL = urlencode("my_cancel_url");
-		// $billingType = urlencode("RecurringPayments");	// or "MerchantInitiatedBilling"
-
-		// $nvpStr="&BILLINGTYPE=$billingType&RETURNURL=$returnURL&CANCELURL=$cancelURL";
-
-		// $httpParsedResponseAr = PPHttpPost('SetCustomerBillingAgreement', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('SetCustomerBillingAgreement Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('SetCustomerBillingAgreement failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('SetCustomerBillingAgreement Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('SetCustomerBillingAgreement failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Initiate an Express Checkout transaction
+	 *
+	 *
+	 */
 	public function setExpressCheckout() {
-		// /** SetExpressCheckout NVP example; last modified 08MAY23.
-		//  *
-		//  *  Initiate an Express Checkout transaction.
-		// */
+		// Set request-specific fields.
+		$paymentAmount = urlencode('example_payment_amuont');
+		$currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$paymentType = urlencode('Authorization');				// or 'Sale' or 'Order'
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$returnURL = urlencode("my_return_url");
+		$cancelURL = urlencode('my_cancel_url');
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Add request-specific fields to the request string.
+		$nvpStr = "&Amt=$paymentAmount&ReturnUrl=$returnURL&CANCELURL=$cancelURL&PAYMENTACTION=$paymentType&CURRENCYCODE=$currencyID";
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('SetExpressCheckout', $nvpStr);
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
-
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $paymentAmount = urlencode('example_payment_amuont');
-		// $currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		// $paymentType = urlencode('Authorization');				// or 'Sale' or 'Order'
-
-		// $returnURL = urlencode("my_return_url");
-		// $cancelURL = urlencode('my_cancel_url');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&Amt=$paymentAmount&ReturnUrl=$returnURL&CANCELURL=$cancelURL&PAYMENTACTION=$paymentType&CURRENCYCODE=$currencyID";
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('SetExpressCheckout', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	// Redirect to paypal.com.
-		// 	$token = urldecode($httpParsedResponseAr["TOKEN"]);
-		// 	$payPalURL = "https://www.paypal.com/webscr&cmd=_express-checkout&token=$token";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$payPalURL = "https://www.$environment.paypal.com/webscr&cmd=_express-checkout&token=$token";
-		// 	}
-		// 	header("Location: $payPalURL");
-		// 	exit;
-		// } else  {
-		// 	exit('SetExpressCheckout failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			// Redirect to paypal.com.
+			$token = urldecode($httpParsedResponseAr["TOKEN"]);
+			$payPalURL = "https://www.paypal.com/webscr&cmd=_express-checkout&token=$token";
+			if("sandbox" === $environment || "beta-sandbox" === $environment) {
+				$payPalURL = "https://www.$environment.paypal.com/webscr&cmd=_express-checkout&token=$token";
+			}
+			header("Location: $payPalURL");
+			exit;
+		} else  {
+			exit('SetExpressCheckout failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Initiate an Express Checkout PayLater transaction
+	 *
+	 *
+	 */
 	public function setExpressCheckoutPayLater() {
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		$paymentAmount = urlencode('example_payment_amuont');
+		$currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$paymentType = urlencode('Authorization');				// or 'Sale' or 'Order'
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		$returnURL = urlencode("my_return_url");
+		$cancelURL = urlencode("my_cancel_url");
 
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		// Pay Later
+		$promoCode = urlencode('101');
 
-		// 	// setting the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		$nvpStr = "&Amt=$paymentAmount&ReturnUrl=$returnURL&CANCELURL=$cancelURL&PAYMENTACTION=$paymentType&CURRENCYCODE=$currencyID";
+		$nvpStr .= "&L_PROMOCODE0=$promoCode";
 
-		// 	// turning off the server and peer verification(TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		$httpParsedResponseAr = $this->postHTTPRequest('SetExpressCheckout', $nvpStr);
 
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// NVPRequest for submitting to server
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// setting the nvpreq as POST FIELD to curl
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// getting response from server
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the RefundTransaction response details
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// $paymentAmount = urlencode('example_payment_amuont');
-		// $currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		// $paymentType = urlencode('Authorization');				// or 'Sale' or 'Order'
-
-		// $returnURL = urlencode("my_return_url");
-		// $cancelURL = urlencode("my_cancel_url");
-
-		// // Pay Later
-		// $promoCode = urlencode('101');
-
-		// $nvpStr = "&Amt=$paymentAmount&ReturnUrl=$returnURL&CANCELURL=$cancelURL&PAYMENTACTION=$paymentType&CURRENCYCODE=$currencyID";
-		// $nvpStr .= "&L_PROMOCODE0=$promoCode";
-
-		// $httpParsedResponseAr = PPHttpPost('SetExpressCheckout', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	// Redirect to paypal.com here
-		// 	$token = urldecode($httpParsedResponseAr["TOKEN"]);
-		// 	$payPalURL = "https://www.paypal.com/webscr&cmd=_express-checkout&token=$token";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$payPalURL = "https://www.$environment.paypal.com/webscr&cmd=_express-checkout&token=$token";
-		// 	}
-		// 	header("Location: $payPalURL");
-		// 	exit;
-		// } else  {
-		// 	exit('SetExpressCheckout failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			// Redirect to paypal.com here
+			$token = urldecode($httpParsedResponseAr["TOKEN"]);
+			$payPalURL = "https://www.paypal.com/webscr&cmd=_express-checkout&token=$token";
+			if("sandbox" === $environment || "beta-sandbox" === $environment) {
+				$payPalURL = "https://www.$environment.paypal.com/webscr&cmd=_express-checkout&token=$token";
+			}
+			header("Location: $payPalURL");
+			exit;
+		} else  {
+			exit('SetExpressCheckout failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Search your account history for transactions that meet the criteria you specify
+	 *
+	 *
+	 */
 	public function transactionSearch() {
-		// /** TransactionSearch NVP example; last modified 08MAY23.
-		//  *
-		//  *  Search your account history for transactions that meet the criteria you specify.
-		// */
+		// Set request-specific fields.
+		$transactionID = urlencode('example_transaction_id');
 
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
+		// Add request-specific fields to the request string.
+		$nvpStr = "&TRANSACTIONID=$transactionID";
 
-		// /**
-		//  * Send HTTP POST Request
-		//  *
-		//  * @param	string	The API method name
-		//  * @param	string	The POST Message fields in &name=value pair format
-		//  * @return	array	Parsed HTTP Response body
-		//  */
-		// function PPHttpPost($methodName_, $nvpStr_) {
-		// 	global $environment;
+		// Set additional request-specific fields and add them to the request string.
+		$startDateStr;			// in 'mm/dd/ccyy' format
+		$endDateStr;			// in 'mm/dd/ccyy' format
+		if(isset($startDateStr)) {
+		   $start_time = strtotime($startDateStr);
+		   $iso_start = date('Y-m-d\T00:00:00\Z',  $start_time);
+		   $nvpStr .= "&STARTDATE=$iso_start";
+		  }
 
-		// 	// Set up your API credentials, PayPal end point, and API version.
-		// 	$API_UserName = urlencode('my_api_username');
-		// 	$API_Password = urlencode('my_api_password');
-		// 	$API_Signature = urlencode('my_api_signature');
-		// 	$API_Endpoint = "https://api-3t.paypal.com/nvp";
-		// 	if("sandbox" === $environment || "beta-sandbox" === $environment) {
-		// 		$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-		// 	}
-		// 	$version = urlencode('51.0');
+		if(isset($endDateStr)&&$endDateStr!='') {
+		   $end_time = strtotime($endDateStr);
+		   $iso_end = date('Y-m-d\T24:00:00\Z', $end_time);
+		   $nvpStr .= "&ENDDATE=$iso_end";
+		}
 
-		// 	// Set the curl parameters.
-		// 	$ch = curl_init();
-		// 	curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-		// 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// Execute the API operation; see the PPHttpPost function above.
+		$httpParsedResponseAr = $this->postHTTPRequest('TransactionSearch', $nvpStr);
 
-		// 	// Turn off the server and peer verification (TrustManager Concept).
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-		// 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-
-		// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		// 	curl_setopt($ch, CURLOPT_POST, 1);
-
-		// 	// Set the API operation, version, and API signature in the request.
-		// 	$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-
-		// 	// Set the request as a POST FIELD for curl.
-		// 	curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
-
-		// 	// Get response from the server.
-		// 	$httpResponse = curl_exec($ch);
-
-		// 	if(!$httpResponse) {
-		// 		exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
-		// 	}
-
-		// 	// Extract the response details.
-		// 	$httpResponseAr = explode("&", $httpResponse);
-
-		// 	$httpParsedResponseAr = array();
-		// 	foreach ($httpResponseAr as $i => $value) {
-		// 		$tmpAr = explode("=", $value);
-		// 		if(sizeof($tmpAr) > 1) {
-		// 			$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-		// 		}
-		// 	}
-
-		// 	if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-		// 		exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-		// 	}
-
-		// 	return $httpParsedResponseAr;
-		// }
-
-		// // Set request-specific fields.
-		// $transactionID = urlencode('example_transaction_id');
-
-		// // Add request-specific fields to the request string.
-		// $nvpStr = "&TRANSACTIONID=$transactionID";
-
-		// // Set additional request-specific fields and add them to the request string.
-		// $startDateStr;			// in 'mm/dd/ccyy' format
-		// $endDateStr;			// in 'mm/dd/ccyy' format
-		// if(isset($startDateStr)) {
-		//    $start_time = strtotime($startDateStr);
-		//    $iso_start = date('Y-m-d\T00:00:00\Z',  $start_time);
-		//    $nvpStr .= "&STARTDATE=$iso_start";
-		//   }
-
-		// if(isset($endDateStr)&&$endDateStr!='') {
-		//    $end_time = strtotime($endDateStr);
-		//    $iso_end = date('Y-m-d\T24:00:00\Z', $end_time);
-		//    $nvpStr .= "&ENDDATE=$iso_end";
-		// }
-
-		// // Execute the API operation; see the PPHttpPost function above.
-		// $httpParsedResponseAr = PPHttpPost('TransactionSearch', $nvpStr);
-
-		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-		// 	exit('TransactionSearch Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		// } else  {
-		// 	exit('TransactionSearch failed: ' . print_r($httpParsedResponseAr, true));
-		// }
+		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+			exit('TransactionSearch Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		} else  {
+			exit('TransactionSearch failed: ' . print_r($httpParsedResponseAr, true));
+		}
 	}
 
+	/**
+	 * Get name of the product being accessed
+	 *
+	 *
+	 */
 	public function getProductName() {
 
+	}
+
+	/**
+	 * Send HTTP POST Request
+	 *
+	 * @param	string	The API method name
+	 * @param	string	The POST Message fields in &name=value pair format
+	 * @return	array	Parsed HTTP Response body
+	 */
+	protected function postHTTPRequest( $methodName_, $nvpStr_ ) {
+			$environment_credentials = $this->getEnvironmentCredentials();
+			echo_r($environment_credentials);
+			// Set up your API credentials, PayPal end point, and API version.
+			$API_UserName = urlencode( $environment_credentials['API_UserName'] );
+			$API_Password = urlencode( $environment_credentials['API_Password'] );
+			$API_Signature = urlencode( $environment_credentials['API_Signature'] );
+			$API_Endpoint = $environment_credentials['API_Endpoint'];
+
+			$version = urlencode( $environment_credentials['version'] );
+
+			// Set the curl parameters.
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
+			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+
+			// Turn off the server and peer verification (TrustManager Concept).
+			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+
+			// Set the API operation, version, and API signature in the request.
+			$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+
+			// Set the request as a POST FIELD for curl.
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
+
+			// Get response from the server.
+			$httpResponse = curl_exec($ch);
+
+			if(!$httpResponse) {
+				exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
+			}
+
+			// Extract the response details.
+			$httpResponseAr = explode("&", $httpResponse);
+
+			$httpParsedResponseAr = array();
+			foreach ($httpResponseAr as $i => $value) {
+				$tmpAr = explode("=", $value);
+				if(sizeof($tmpAr) > 1) {
+					$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
+				}
+			}
+
+			if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
+				exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
+			}
+
+			return $httpParsedResponseAr;
+	}
+
+	protected function getEnvironmentCredentials( $environment = null, $environment_key = null ) {
+		$retVal = array();
+
+		if ( $environment === null && Configuration::issetCustomVariable('environment') ) {
+			$config_environment = Configuration::getCustomVariable('environment');
+		} else if ( $environment === null ) {
+			$config_environment = 'development';
+		} else {
+			$config_environment = $environment;
+		}
+
+		if ( $environment_key === null && Configuration::issetCustomVariable('environment_key') ) {
+			$config_environment_key = Configuration::getCustomVariable('environment_key');
+		} else if ( $environment_key === null ) {
+			$config_environment_key = '';
+		} else {
+			$config_environment_key = $environment_key;
+		}
+
+		// Set up your API credentials, PayPal end point, and API version.
+		switch( $config_environment ) {
+			case 'development' :
+				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+			case 'staging' :
+				$API_UserName = Configuration::getCustomVariable('PayPalStagingAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalStagingAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalStagingAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+			case 'production' :
+				$API_UserName = Configuration::getCustomVariable('PayPalProductionAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalProductionAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalProductionAPISignature');
+				$API_Endpoint = 'https://api-3t.paypal.com/nvp';
+
+				break;
+			default :
+				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+		}
+
+		$version = urlencode( '51.0' );
+
+		$retVal = array(
+			'API_UserName' => $API_UserName,
+			'API_Password' => $API_Password,
+			'API_Signature' => $API_Signature,
+			'API_Endpoint' => $API_Endpoint,
+			'version' => $version,
+		);
+
+		return $retVal;
 	}
 
 }
