@@ -26,6 +26,10 @@
 # @subpackage Installation
 # @version 1.0
 
+###########################################################
+########## General Setup
+###########################################################
+
 # Exit the script if any variables specified are unset when accessed
 set -o nounset
 
@@ -52,9 +56,6 @@ DETECTED_PLATFORM=0
 # Get our parent directory
 PARENT_DIRECTORY=$(_egloo_parent_dir=$(pwd) ; echo "${_egloo_parent_dir%/*}")
 
-# Get our platform
-PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
-
 # Get our Timestamp
 TIMESTAMP=$(date +%s)
 
@@ -72,6 +73,28 @@ checkUserCanRead() {
    return 0
 }
 
+DEFAULT_EVERYTHING=0
+
+while getopts "d" opt; do
+	case $opt in
+		d)
+			DEFAULT_EVERYTHING=1
+			echo "Running in non-interactive mode with all defaults"
+		;;
+		
+		\?)
+			exit 1
+		;;
+	esac
+done
+
+###########################################################
+########## Platform Detection
+###########################################################
+
+# Get our platform
+PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
+
 # Temporarily disable errexit check because grep returns non-true on a result we need
 set +o errexit
 MACOSX_FOUND=`echo "$PLATFORM" | grep -i -c "Apple Mac OS X"`
@@ -79,6 +102,9 @@ UBUNTU_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu"`
 WINDOWS_FOUND=`echo "$PLATFORM" | grep -i -c "Windows"`
 set -o errexit
 
+###########################################################
+########## Platform: OS X specific params
+###########################################################
 if [ "$MACOSX_FOUND" -eq 1 ]
 then
 	echo "Detected Apple Mac OS X"
@@ -90,8 +116,10 @@ then
 		echo "* WARNING: The locate database (/var/db/locate.database) does not exist. *"
 		echo "**************************************************************************"
 		echo
-		echo "This installer uses locate to determine the location of supporting software during the installation process."
-		echo "You can proceed and enter supporting software paths manually, but it is recommended that you activate the locate Launch Daemon instead:"
+		echo "This installer uses locate to determine the location of supporting"
+		echo "software during the installation process. You can proceed and enter"
+		echo "supporting software paths manually, but it is recommended that you"
+		echo "activate the locate Launch Daemon instead:"
 		echo
 		echo "sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist"
 		echo
@@ -130,6 +158,9 @@ then
 	DEFAULT_WEBGROUP="admin"
 fi
 
+###########################################################
+########## Platform: Ubuntu specific params
+###########################################################
 if [ "$UBUNTU_FOUND" -eq 1 ]
 then
 	echo "Detected Ubuntu Linux"
@@ -152,6 +183,9 @@ then
 	DEFAULT_WEBGROUP="www-data"
 fi
 
+###########################################################
+########## Platform: Winblows specific params
+###########################################################
 if [ "$WINDOWS_FOUND" -eq 1 ]
 then
 	echo "Detected Windows XP (Cygwin)"
@@ -173,6 +207,9 @@ then
 	DEFAULT_WEBGROUP="mkpasswd"
 fi
 
+###########################################################
+########## Check that we have correct permissions and correct user/group
+###########################################################
 # Check for root
 if [[ "$UID" -ne "$ROOT_UID" && $DETECTED_PLATFORM -ne $OS_WINDOWS ]]
 then
@@ -199,34 +236,57 @@ else
 	WEB_GROUP=$DEFAULT_WEBGROUP
 fi
 
+
+
+################################################################################
+################################################################################
+########## START THE MAIN SCRIPT
+################################################################################
+################################################################################
+
+###########################################################
+########## Interactive Explainer
+###########################################################
 # Give the user an explanation of the build process
-echo "********************************"
-echo "* eGloo Framework Installation *"
-echo "********************************"
-echo
-echo "This installation script is interactive to give the user as much control as possible."
-echo "In the future there should be an option for full automation."
-echo
+if [ $DEFAULT_EVERYTHING -eq 0]
+then
+	echo "********************************"
+	echo "* eGloo Framework Installation *"
+	echo "********************************"
+	echo
+	echo "This installation script is interactive to give the user as much control" 
+	echo "as possible. If you would like to install non-interactively, with default"
+	echo "settings, use the '-d' flag."
+	echo
 
-echo -n "Continue? [Y/n]: "
-read -e CONFIRM_CONTINUE
+	echo -n "Continue? [Y/n]: "
+	read -e CONFIRM_CONTINUE
 
-# Make sure the user is prepared to answer some setup questions
-case "$CONFIRM_CONTINUE" in
-	"N" | "n" | "No" | "NO" | "no" )
-		echo "Installation Aborted"
-		exit
-	;;
+	# Make sure the user is prepared to answer some setup questions
+	case "$CONFIRM_CONTINUE" in
+		"N" | "n" | "No" | "NO" | "no" )
+			echo "Installation Aborted"
+			exit
+		;;
 
-	* )
-	;;
-esac
+		* )
+		;;
+	esac
+fi
 
+###########################################################
+########## Symlinks
+###########################################################
 # If we're not on Windows, allow a symlink based install
 if [ $DETECTED_PLATFORM -ne $OS_WINDOWS ]
 then
-	echo -n "Use symlinks to distribution instead of files? (Useful for eGloo Development) [Y/n]: "
-	read -e USE_SYMLINKS
+	if [ $DEFAULT_EVERYTHING -eq 0 ]
+	then
+		echo -n "Use symlinks to distribution instead of files? (Useful for eGloo Development) [Y/n]: "
+		read -e USE_SYMLINKS
+	else
+		USE_SYMLINKS=true
+	fi
 
 	# Make sure the user is prepared to answer some setup questions
 	case "$USE_SYMLINKS" in
@@ -253,6 +313,9 @@ else
 	LINKCMD="ln -s"
 fi
 
+###########################################################
+########## Configuration Files
+###########################################################
 echo
 echo "*****************************"
 echo "* eGloo Configuration Files *"
@@ -262,8 +325,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_CONFIG\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own configuration path
 case "$CONFIRM_CONTINUE" in
@@ -323,6 +391,9 @@ else
 	echo "Ignoring ownership and permissions of Configuration Path for Windows"
 fi
 
+###########################################################
+########## Cache Path
+###########################################################
 echo
 echo "********************"
 echo "* eGloo Cache Path *"
@@ -332,8 +403,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_CACHE_DIR\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own cache path
 case "$CONFIRM_CONTINUE" in
@@ -387,6 +463,9 @@ else
 	echo "Ignoring ownership and permissions of Cache Path for Windows"
 fi
 
+###########################################################
+########## Documentation
+###########################################################
 echo
 echo "****************************"
 echo "* eGloo Documentation Path *"
@@ -396,8 +475,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_DOCUMENTATION\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own documentation path
 case "$CONFIRM_CONTINUE" in
@@ -441,6 +525,9 @@ mkdir -p "$DOCUMENTATION_PATH"
 
 printf "done.\n"
 
+###########################################################
+########## Logging
+###########################################################
 echo
 echo "**********************"
 echo "* eGloo Logging Path *"
@@ -450,8 +537,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_LOGPATH\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own log path
 case "$CONFIRM_CONTINUE" in
@@ -505,6 +597,9 @@ else
 	chmod 777 "$LOGPATH"
 fi
 
+###########################################################
+########## Framework Root
+###########################################################
 echo
 echo "*****************************"
 echo "* eGloo Framework Root Path *"
@@ -514,8 +609,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_FRAMEWORKROOT\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own documentation path
 case "$CONFIRM_CONTINUE" in
@@ -633,6 +733,9 @@ else
 	echo "Ignoring ownership and permissions of Log Path for Windows"
 fi
 
+###########################################################
+########## Document Root
+###########################################################
 echo
 echo "****************************"
 echo "* Web Server Document Root *"
@@ -642,8 +745,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_DOCUMENTROOT\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own documentation path
 case "$CONFIRM_CONTINUE" in
@@ -743,6 +851,9 @@ else
 	echo "Ignoring ownership and permissions of Document Root for Windows"
 fi
 
+###########################################################
+########## Web Applications Path
+###########################################################
 echo
 echo "*******************************"
 echo "* eGloo Web Applications Path *"
@@ -752,8 +863,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_APPLICATIONS\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own documentation path
 case "$CONFIRM_CONTINUE" in
@@ -833,6 +949,9 @@ else
 	echo "Ignoring ownership and permissions of Applications Path for Windows"
 fi
 
+###########################################################
+########## Cubes
+###########################################################
 echo
 echo "********************"
 echo "* eGloo Cubes Path *"
@@ -842,8 +961,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_CUBES\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own documentation path
 case "$CONFIRM_CONTINUE" in
@@ -921,6 +1045,9 @@ else
 	echo "Ignoring ownership and permissions of Cubes Path for Windows"
 fi
 
+###########################################################
+########## Data Store
+###########################################################
 echo
 echo "*************************"
 echo "* eGloo Data Store Path *"
@@ -930,8 +1057,13 @@ echo -n "Default Location: "
 echo "\"$DEFAULT_DATA_STORE\""
 echo
 
-echo -n "Use this location? [Y/n]: "
-read -e CONFIRM_CONTINUE
+if [ $DEFAULT_EVERYTHING -eq 0 ]
+then
+	echo -n "Use this location? [Y/n]: "
+	read -e CONFIRM_CONTINUE
+else
+	CONFIRM_CONTINUE="YES"
+fi
 
 # Check if the user wants to use the default or specify their own data store path
 case "$CONFIRM_CONTINUE" in
@@ -985,6 +1117,9 @@ else
 	echo "Ignoring ownership and permissions of Data Store Path for Windows"
 fi
 
+###########################################################
+########## Supporting Software
+###########################################################
 echo
 echo "***********************"
 echo "* Supporting Software *"
@@ -1008,8 +1143,14 @@ then
 	echo "Smarty was found at the following location."
 	echo "\"$DEFAULT_SMARTY\""
 	echo 
-	echo -n "Use this Smarty package? [Y/n]: "
-	read -e CONFIRM_CONTINUE
+
+	if [ $DEFAULT_EVERYTHING -eq 0 ]
+	then
+		echo -n "Use this Smarty package? [Y/n]: "
+		read -e CONFIRM_CONTINUE
+	else
+		CONFIRM_CONTINUE="YES"
+	fi
 
 	# Check if the user wants to use the default or specify their own Smarty path
 	case "$CONFIRM_CONTINUE" in
@@ -1049,8 +1190,14 @@ then
 else
 	echo "Smarty was not found at the default location."
 	echo 
-	echo -n "Use Smarty package provided in eGloo Framework library? (If no, you will be prompted for an existing Smarty install) [Y/n]: "
-	read -e CONFIRM_CONTINUE
+
+	if [ $DEFAULT_EVERYTHING -eq 0 ]
+	then
+		echo -n "Use Smarty package provided in eGloo Framework library? (If no, you will be prompted for an existing Smarty install) [Y/n]: "
+		read -e CONFIRM_CONTINUE
+	else
+		CONFIRM_CONTINUE="YES"
+	fi
 	
 	# Check if the user wants to use the default or specify their own Smarty path
 	case "$CONFIRM_CONTINUE" in
@@ -1099,6 +1246,9 @@ else
 	echo "Ignoring ownership and permissions of Smarty Path for Windows"
 fi
 
+###########################################################
+########## Doctrine
+###########################################################
 echo
 echo "***********************"
 echo "* Doctrine ORM Engine *"
@@ -1110,8 +1260,14 @@ then
 	echo "Doctrine was found at the following location."
 	echo "\"$DEFAULT_DOCTRINE\""
 	echo 
-	echo -n "Use this Doctrine package? [Y/n]: "
-	read -e CONFIRM_CONTINUE
+	
+	if [ $DEFAULT_EVERYTHING -eq 0 ]
+	then
+		echo -n "Use this Doctrine package? [Y/n]: "
+		read -e CONFIRM_CONTINUE
+	else
+		CONFIRM_CONTINUE="YES"
+	fi
 
 	# Check if the user wants to use the default or specify their own Doctrine path
 	case "$CONFIRM_CONTINUE" in
@@ -1151,8 +1307,14 @@ then
 else
 	echo "Doctrine was not found at the default location."
 	echo 
-	echo -n "Use Doctrine package provided in eGloo Framework library? (If no, you will be prompted for an existing Doctrine install) [Y/n]: "
-	read -e CONFIRM_CONTINUE
+	
+	if [ $DEFAULT_EVERYTHING -eq 0 ]
+	then
+		echo -n "Use Doctrine package provided in eGloo Framework library? (If no, you will be prompted for an existing Doctrine install) [Y/n]: "
+		read -e CONFIRM_CONTINUE
+	else
+		CONFIRM_CONTINUE="YES"
+	fi
 	
 	# Check if the user wants to use the default or specify their own Doctrine path
 	case "$CONFIRM_CONTINUE" in
@@ -1201,6 +1363,9 @@ else
 	echo "Ignoring ownership and permissions of Doctrine Path for Windows"
 fi
 
+###########################################################
+########## Write Configuration Files
+###########################################################
 echo 
 printf "Writing configuration files... "
 
