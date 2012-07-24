@@ -248,7 +248,7 @@ fi
 ########## Interactive Explainer
 ###########################################################
 # Give the user an explanation of the build process
-if [ $DEFAULT_EVERYTHING -eq 0]
+if [ $DEFAULT_EVERYTHING -eq 0 ]
 then
 	echo "********************************"
 	echo "* eGloo Framework Installation *"
