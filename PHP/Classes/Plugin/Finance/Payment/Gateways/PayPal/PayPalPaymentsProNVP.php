@@ -1,7 +1,8 @@
 <?php
 namespace eGloo\Plugin\Finance\Payment\Gateways\PayPal;
 
-use \eGloo\Configuration as Configuration;
+// use \eGloo\Configuration as Configuration;
+use \eGlooConfiguration as Configuration;
 
 use \eGloo\Utility\Exceptions\LoggerException as LoggerException;
 use \eGloo\Utility\Logger as Logger;
@@ -56,8 +57,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function createRecurringPaymentsProfile() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		$token = urlencode("token_from_setExpressCheckout");
 		$paymentAmount = urlencode("payment_amount");
 		$currencyID = urlencode("USD");						// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
@@ -83,17 +82,15 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doAuthorization() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
-		$transactionID = urlencode('example_transaction_id');
-		$amount = urlencode('example_amount');
+		$transactionID = urlencode('1371');
+		$amount = urlencode('40.00');
 		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 		$trxType = urlencode('V');
 
 		// Add request-specific fields to the request string.
 		$nvpStr="&TRANSACTIONID=$transactionID&AMT=$amount&CURRENCYCODE=$currency&TRXTYPE=$trxType";
-
+// die_r($nvpStr);
 		// Execute the API operation; see the PPHttpPost function above.
 		$httpParsedResponseAr = $this->postHTTPRequest('DoAuthorization', $nvpStr);
 
@@ -110,8 +107,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doCapture() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$authorizationID = urlencode('example_authorization_id');
 		$amount = urlencode('example_amount');
@@ -139,32 +134,31 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doDirectPayment() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$paymentType = urlencode('Authorization');				// or 'Sale'
-		$firstName = urlencode('customer_first_name');
-		$lastName = urlencode('customer_last_name');
-		$creditCardType = urlencode('customer_credit_card_type');
-		$creditCardNumber = urlencode('customer_credit_card_number');
-		$expDateMonth = 'cc_expiration_month';
+		$firstName = urlencode('George');
+		$lastName = urlencode('Cooper');
+		$creditCardType = urlencode('visa');
+		$creditCardNumber = urlencode('4470966005764985');
+		$expDateMonth = '5';
 		// Month must be padded with leading zero
 		$padDateMonth = urlencode(str_pad($expDateMonth, 2, '0', STR_PAD_LEFT));
 
-		$expDateYear = urlencode('cc_expiration_year');
+		$expDateYear = urlencode('2017');
 		$cvv2Number = urlencode('cc_cvv2_number');
-		$address1 = urlencode('customer_address1');
-		$address2 = urlencode('customer_address2');
-		$city = urlencode('customer_city');
-		$state = urlencode('customer_state');
-		$zip = urlencode('customer_zip');
-		$country = urlencode('customer_country');				// US or other valid country code
-		$amount = urlencode('example_payment_amuont');
+		$address1 = urlencode('90 West Street APT 19P');
+		$address2 = urlencode('');
+		$city = urlencode('New York');
+		$state = urlencode('New York');
+		$zip = urlencode('10006');
+		$country = urlencode('US');				// US or other valid country code
+		$amount = urlencode('10');
 		$currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
+		// Add back &CVV2=$cvv2Number
 		// Add request-specific fields to the request string.
 		$nvpStr =	"&PAYMENTACTION=$paymentType&AMT=$amount&CREDITCARDTYPE=$creditCardType&ACCT=$creditCardNumber".
-					"&EXPDATE=$padDateMonth$expDateYear&CVV2=$cvv2Number&FIRSTNAME=$firstName&LASTNAME=$lastName".
+					"&EXPDATE=$padDateMonth$expDateYear&FIRSTNAME=$firstName&LASTNAME=$lastName".
 					"&STREET=$address1&CITY=$city&STATE=$state&ZIP=$zip&COUNTRYCODE=$country&CURRENCYCODE=$currencyID";
 
 		// Execute the API operation; see the PPHttpPost function above.
@@ -183,8 +177,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doExpressCheckoutPayment() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		/**
 		 * This example assumes that a token was obtained from the SetExpressCheckout API call.
 		 * This example also assumes that a payerID was obtained from the SetExpressCheckout API call
@@ -217,8 +209,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doReauthorization() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$authorizationID = urlencode('example_authorization_id');
 		$amount = urlencode('example_amount');
@@ -243,8 +233,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function doVoid() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$authorizationID = urlencode('example_authorization_id');
 		$note = urlencode('example_note');
@@ -268,8 +256,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function getBalance() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		$nvpStr="";
 
 		$httpParsedResponseAr = $this->postHTTPRequest('GetBalance', $nvpStr);
@@ -287,8 +273,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function getExpressCheckoutDetails() {
-		// $environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		/**
 		 * This example assumes that this is the return URL in the SetExpressCheckout API call.
 		 * The PayPal website redirects the user to this page with a token.
@@ -332,8 +316,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function getTransactionDetails() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$transactionID = urlencode('example_transaction_id');
 
@@ -356,8 +338,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function massPay() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$emailSubject =urlencode('example_email_subject');
 		$receiverType = urlencode('EmailAddress');
@@ -400,8 +380,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function refundTransaction() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$transactionID = urlencode('example_transaction_id');
 		$refundType = urlencode('Full');						// or 'Partial'
@@ -444,8 +422,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function setCustomBillingAgreement() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		$returnURL = urlencode("my_return_url");
 		$cancelURL = urlencode("my_cancel_url");
 		$billingType = urlencode("RecurringPayments");	// or "MerchantInitiatedBilling"
@@ -467,8 +443,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function setExpressCheckout() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$paymentAmount = urlencode('example_payment_amuont');
 		$currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
@@ -503,8 +477,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function setExpressCheckoutPayLater() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		$paymentAmount = urlencode('example_payment_amuont');
 		$currencyID = urlencode('USD');							// or other currency code ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 		$paymentType = urlencode('Authorization');				// or 'Sale' or 'Order'
@@ -540,8 +512,6 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 */
 	public function transactionSearch() {
-		$environment = 'sandbox';	// or 'beta-sandbox' or 'live'
-
 		// Set request-specific fields.
 		$transactionID = urlencode('example_transaction_id');
 
@@ -590,17 +560,15 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 * @return	array	Parsed HTTP Response body
 	 */
 	protected function postHTTPRequest( $methodName_, $nvpStr_ ) {
-			global $environment;
-
+			$environment_credentials = $this->getEnvironmentCredentials();
+			echo_r($environment_credentials);
 			// Set up your API credentials, PayPal end point, and API version.
-			$API_UserName = urlencode('my_api_username');
-			$API_Password = urlencode('my_api_password');
-			$API_Signature = urlencode('my_api_signature');
-			$API_Endpoint = "https://api-3t.paypal.com/nvp";
-			if("sandbox" === $environment || "beta-sandbox" === $environment) {
-				$API_Endpoint = "https://api-3t.$environment.paypal.com/nvp";
-			}
-			$version = urlencode('51.0');
+			$API_UserName = urlencode( $environment_credentials['API_UserName'] );
+			$API_Password = urlencode( $environment_credentials['API_Password'] );
+			$API_Signature = urlencode( $environment_credentials['API_Signature'] );
+			$API_Endpoint = $environment_credentials['API_Endpoint'];
+
+			$version = urlencode( $environment_credentials['version'] );
 
 			// Set the curl parameters.
 			$ch = curl_init();
@@ -643,6 +611,70 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 			}
 
 			return $httpParsedResponseAr;
+	}
+
+	protected function getEnvironmentCredentials( $environment = null, $environment_key = null ) {
+		$retVal = array();
+
+		if ( $environment === null && Configuration::issetCustomVariable('environment') ) {
+			$config_environment = Configuration::getCustomVariable('environment');
+		} else if ( $environment === null ) {
+			$config_environment = 'development';
+		} else {
+			$config_environment = $environment;
+		}
+
+		if ( $environment_key === null && Configuration::issetCustomVariable('environment_key') ) {
+			$config_environment_key = Configuration::getCustomVariable('environment_key');
+		} else if ( $environment_key === null ) {
+			$config_environment_key = '';
+		} else {
+			$config_environment_key = $environment_key;
+		}
+
+		// Set up your API credentials, PayPal end point, and API version.
+		switch( $config_environment ) {
+			case 'development' :
+				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+			case 'staging' :
+				$API_UserName = Configuration::getCustomVariable('PayPalStagingAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalStagingAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalStagingAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+			case 'production' :
+				$API_UserName = Configuration::getCustomVariable('PayPalProductionAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalProductionAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalProductionAPISignature');
+				$API_Endpoint = 'https://api-3t.paypal.com/nvp';
+
+				break;
+			default :
+				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
+
+				break;
+		}
+
+		$version = urlencode( '51.0' );
+
+		$retVal = array(
+			'API_UserName' => $API_UserName,
+			'API_Password' => $API_Password,
+			'API_Signature' => $API_Signature,
+			'API_Endpoint' => $API_Endpoint,
+			'version' => $version,
+		);
+
+		return $retVal;
 	}
 
 }
