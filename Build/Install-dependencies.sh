@@ -137,14 +137,10 @@ then
 	# Ubuntu 10.04
 	echo "Installing dependencies for" $DETECTED_OS_NAME
 
-	apt-get install python-software-properties
+	apt-get --assume-yes install python-software-properties
 	add-apt-repository ppa:l-mierzwa/lucid-php5
 
-	# install gitflow
-	wget --no-check-certificate -q -O - \
-		https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
-
-	apt-get --assume-yes install curl git-core apache2 memcached php5 php-apc \
+	apt-get --assume-yes install curl apache2 memcached php5 php-apc \
 		php5-imagick php5-mcrypt php5-memcache php5-memcached \
 		php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
 		php-soap php-openid php5-odbc php5-gd php5-xmlrpc
@@ -155,11 +151,7 @@ then
 	# Ubuntu 12.04
 	echo "Installing dependencies for" $DETECTED_OS_NAME
 
-        # install gitflow
-        wget --no-check-certificate -q -O - \
-                https://github.com/nvie/gitflow/raw/develop/contrib/gitflow-installer.sh | bash
-
-        apt-get --assume-yes install curl git apache2 memcached \
+        apt-get --assume-yes install curl apache2 memcached \
 		python-software-properties php5 php-apc \
                 php5-imagick php5-mcrypt php5-memcache php5-memcached \
                 php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
