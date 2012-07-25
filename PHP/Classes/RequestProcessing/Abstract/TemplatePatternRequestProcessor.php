@@ -59,6 +59,10 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
      */
 	public function processRequest() {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Entered processRequest()" );
+		
+		echo "hi";
+		return;
+		
 
 		// begin - 10 t/ts  @ 600 t/s
 		$this->preProcessing();
@@ -129,7 +133,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
-			$this->setOutputHeaders();
+			//$this->setOutputHeaders();
 			echo $output;
 		}
 
