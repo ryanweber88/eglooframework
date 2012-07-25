@@ -20,9 +20,16 @@ class Application
     		//$content = var_export($context, true);
     		$this->_initEgloo();
 				
-				ob_start();
-				require 'handler.php';
-				$content = ob_get_clean();
+				$handler = function() {
+					ob_start();
+					require 'handler.php';
+					$content = ob_get_clean();
+					
+					return $content;
+				};
+				$handler->bindTo($this);
+				$content = $handler();
+				
 				
 				if (!isset($context['_COOKIE']['Hello']))
             $context['_COOKIE']->setcookie('Hello', 'world!');

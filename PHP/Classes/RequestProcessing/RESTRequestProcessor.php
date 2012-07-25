@@ -1,8 +1,8 @@
 <?php
 /**
- * ExternalMainPageBaseRequestProcessor Class File
+ * RESTRequestProcessor Class File
  *
- * Contains the class definition for the ExternalMainPageBaseRequestProcessor, a
+ * Contains the class definition for the RESTRequestProcessor, a
  * subclass of the RequestProcessor abstract class.
  * 
  * Copyright 2011 eGloo, LLC
@@ -19,8 +19,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *	
- * @author Keith Buel
- * @author George Cooper
+ * @author Christian Calloway christian@petflow.com callowaylc@gmail.com
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @package RequestProcessing
@@ -28,39 +27,41 @@
  */
 
 /**
- * External Main Page Request Processor
  * 
- * Handles client requests to retrieve the external main page (the domain root;
+ * Handles HTTP $method requests
  * e.g. www.egloo.com).
  * 
  * @package RequestProcessing
  * @subpackage RequestProcessors
  */
-class ExternalMainPageBaseRequestProcessor extends RequestProcessor {
+class RESTRequestProcessor extends RequestProcessor {
 
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
 	 * 
-	 * This method handles processing of the incoming client request.  Its
-	 * primary function is to establish the deployment environment (dev, test,
-	 * production) and the current localization, and to then parse the correct
-	 * template(s) in order to construct and output the appropriate external
-	 * main page (the domain root; e.g. www.egloo.com).
+	 * This methods responsibility is to determine HTTP method type
+	 * and call appropriate method
 	 * 
 	 * @access public
 	 */
 	public function processRequest() {
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "ExternalMainPageBaseRequestProcessor: Entered processRequest()" );
+		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Entered processRequest()" );
 
 		$templateVariables = array();
 		$templateVariables['svnVersion'] = '∞';
 		$templateVariables['app'] = eGlooConfiguration::getApplicationName();
 		$templateVariables['bundle'] = eGlooConfiguration::getUIBundleName();
 
-		eGlooResponse::outputXHTML( $templateVariables );
-
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "ExternalMainPageBaseRequestProcessor: Exiting processRequest()" );
+		echo "hello";
+		//eGlooResponse::outputXHTML( $templateVariables );
+		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Exiting processRequest()" );
 	}
+	
+	protected function index()   { }
+	protected function create()  { }
+	protected function edit()    { }
+	protected function destroy() { }
+	protected function show()    { }
 
 }

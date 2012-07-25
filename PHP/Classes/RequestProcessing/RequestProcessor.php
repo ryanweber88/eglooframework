@@ -1,4 +1,6 @@
 <?php
+use \eGloo\Dialect\ObjectSafe as Object;
+
 /**
  * RequestProcessor Abstract Class File
  *
@@ -32,7 +34,7 @@
  * 
  * @package RequestProcessing
  */
-abstract class RequestProcessor {
+abstract class RequestProcessor extends Object {
 
 	/* Public Static Members */
 	public static $calledClass = null;
