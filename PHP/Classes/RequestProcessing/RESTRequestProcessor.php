@@ -48,12 +48,7 @@ class RESTRequestProcessor extends RequestProcessor {
 	public function processRequest() {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Entered processRequest()" );
 
-		$templateVariables = array();
-		$templateVariables['svnVersion'] = '∞';
-		$templateVariables['app'] = eGlooConfiguration::getApplicationName();
-		$templateVariables['bundle'] = eGlooConfiguration::getUIBundleName();
-
-		echo "hello";
+		
 		//eGlooResponse::outputXHTML( $templateVariables );
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Exiting processRequest()" );
 	}

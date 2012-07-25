@@ -17,7 +17,6 @@ class Application
 
     public function __invoke($context)
     {
-    		//$content = var_export($context, true);
     		$this->_initEgloo();
 				
 				$handler = function() {
@@ -30,13 +29,14 @@ class Application
 				$handler->bindTo($this);
 				$content = $handler();
 				
-				
+				/*
 				if (!isset($context['_COOKIE']['Hello']))
             $context['_COOKIE']->setcookie('Hello', 'world!');
 
         // replacing {data} in the "template" by our dynamic string and sending it out
         $body = str_replace('{data}', $this->prepareData($context), $this->tpl);
-
+				*/
+				
         $headers = array(
             'Content-type', 'text/html; charset=utf-8',
             'Content-Length', strlen($content)
@@ -45,10 +45,12 @@ class Application
         return array(200, $headers, $content);
     }
 
-    private function prepareData($context)
+		/**
+		 * @TODO this is being kept for the time being as an example of usage
+		 */
+		private function prepareData($context)
     {
-				
-    		/**
+
         $c = ++$this->local_storage['counter'];
         $m = memory_get_usage();
         $p = memory_get_peak_usage();
@@ -77,7 +79,7 @@ class Application
         $buffer .= '</pre>';
 
         return $buffer;
-				 **/ 
+
     }
 
 		/**
@@ -107,4 +109,5 @@ class Application
 			$_SERVER['SCRIPT_NAME'] = '/index.php';			
 			
 		}
+
 }
