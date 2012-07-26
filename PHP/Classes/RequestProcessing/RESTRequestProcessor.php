@@ -59,28 +59,35 @@ class RESTRequestProcessor extends RequestProcessor {
 		if ($this->bean->request_is_get()) {
 		
 			// @TODO determine differentiation between index/show method
-			if (true) {
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
-				$this->index();
+			if (isset($this->bean['id'])) {
+				
 			}
 			
 			else {
-				// determine
+				// determin
+				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
+				$this->index();				
 			}
+			
 			
 		} 
 		
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
-			
+			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
+			$this->create();
 		}
 		
+		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
-			
+			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
+			$this->edit();			
 		}
 		
+		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
-			
+			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
+			$this->destroy();
 		}
 
 		
