@@ -46,11 +46,48 @@ class RESTRequestProcessor extends RequestProcessor {
 	 * @access public
 	 */
 	public function processRequest() {
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Entered processRequest()" );
+		// determine http method, request parameters, and call appropriate method
+		$method = strtoupper($this->bean->requestMethod());
+		
+		$this->log(
+			"RESTRequestProcessor: Entered processRequest() on $method Request"
+		);
+		
+		
+		// a get request will invoke either index  or show, based upon
+		// request parameters 
+		if ($this->bean->request_is_get()) {
+		
+			// @TODO determine differentiation between index/show method
+			if (true) {
+				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
+				$this->index();
+			}
+			
+			else {
+				// determine
+			}
+			
+		} 
+		
+		// a post request will invoke create
+		else if ($this->bean->request_is_post()) {
+			
+		}
+		
+		else if ($this->bean->request_is_put()) {
+			
+		}
+		
+		else if ($this->bean->request_is_delete()) {
+			
+		}
 
 		
 		//eGlooResponse::outputXHTML( $templateVariables );
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "RESTRequestProcessor: Exiting processRequest()" );
+		$this->log(
+			"RESTRequestProcessor: Exiting processRequest() on $method Request"
+		);
 	}
 	
 	protected function index()   { }

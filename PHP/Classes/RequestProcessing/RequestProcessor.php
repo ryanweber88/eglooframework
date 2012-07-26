@@ -90,6 +90,17 @@ abstract class RequestProcessor extends Object {
 	public function getDecoratorInfoBean() {
 		return $this->decoratorInfoBean;
 	}
+	
+	/**
+	 * Convenience method for logging
+	 */
+	protected function log($message) {
+		
+		eGlooLogger::writeLog( 
+			eGlooLogger::DEBUG, $message
+		);		
+		
+	}
 
 
 }

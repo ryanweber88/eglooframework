@@ -17,7 +17,9 @@ class Application
 
     public function __invoke($context)
     {
-    		$this->_initEgloo();
+    		
+    		$this->_initEgloo($context);
+				
 				
 				$handler = function() {
 					ob_start();
@@ -29,6 +31,8 @@ class Application
 				$handler->bindTo($this);
 				$content = $handler();
 				
+				
+				
 				/*
 				if (!isset($context['_COOKIE']['Hello']))
             $context['_COOKIE']->setcookie('Hello', 'world!');
@@ -37,6 +41,7 @@ class Application
         $body = str_replace('{data}', $this->prepareData($context), $this->tpl);
 				*/
 				
+				//$content = var_export($_SERVER, true);
         $headers = array(
             'Content-type', 'text/html; charset=utf-8',
             'Content-Length', strlen($content)
@@ -87,7 +92,7 @@ class Application
 		 * a tradional apache request route
 		 * @TODO move to tradional bootstrap loader
 		 */
-		protected function _initEgloo() {
+		protected function _initEgloo($context) {
 				
 			// change directory to application instance; this is to allow for 
 			// relative includes in DocRoot/handler.php
@@ -95,6 +100,7 @@ class Application
 			
 			// read in .htaccess into $_SERVER
 			// match all SetEnv and place into $_SERVER global context
+			// @TODO this should be done in middleware?
 			preg_match_all (
 				'/^SetEnv.+/im', $buf = file_get_contents('.htaccess'), $matches 
 			);
@@ -103,11 +109,13 @@ class Application
 				$parts = preg_split('/\s+/', $match);
 				$_SERVER[$parts[1]] = @$parts[2];
 			}
+					
 			
+			// @TODO this should definitly be done in middleware
+			$_SERVER = array_merge($_SERVER, $context['env']);			
 			
 			// fill in default values to play nicely with config load
-			$_SERVER['SCRIPT_NAME'] = '/index.php';			
-			
+			$_SERVER['SCRIPT_NAME'] = '/index.php';				
 		}
 
 }
