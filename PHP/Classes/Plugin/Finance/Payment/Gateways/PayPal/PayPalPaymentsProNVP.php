@@ -72,13 +72,19 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 			urldecode($auth_response['AMT']),
 			urldecode($auth_response['CURRENCYCODE']),
 			'Complete',
-			1
+			$params['invoiceID']
 		);
 
 		$retVal = array(
 			'auth_request' => $params,
 			'auth_response' => $auth_response,
-			'capture_request' => '',
+			'capture_request' => array(
+				'auth_id' => urldecode($auth_response['TRANSACTIONID']),
+				'amount' => urldecode($auth_response['AMT']),
+				'currency' => urldecode($auth_response['CURRENCYCODE']),
+				'codeType' => 'Complete',
+				'invoiceID' => $params['invoiceID'],
+			),
 			'capture_response' => $capture_response,
 			'api_request_history' => $this->_api_request_history,
 		);
