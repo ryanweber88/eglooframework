@@ -736,7 +736,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			'XML2ArrayRequestDefinitionParser::NodesCached', 'RequestValidation', true );
 		$requestNode = $requestProcessingCacheRegionHandler->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'XML2ArrayRequestDefinitionParserNodes::' .
 			$requestLookup, 'RequestValidation', true );
-
+		
 		$requestType = isset($requestNode['requestType']) ? $requestNode['requestType'] : null;
 
 		if ( !$requestNode && $allNodesCached ) {
@@ -1125,7 +1125,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		$requestID = $requestInfoBean->getRequestID();
 		$retVal = true;
 
-		 foreach( $requestNode['variableArguments'] as $variableArg ) {
+		foreach( $requestNode['variableArguments'] as $variableArg ) {
+		 	
 			if( $variableArg['type'] === 'get' ){
 
 				if( !isset( $_GET[ $variableArg['id'] ] ) ){
@@ -1197,6 +1198,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						}
 					}
 				}
+
+
 			} else if ( $variableArg['type'] === 'getarray' ) {
 				if( !isset( $_GET[ $variableArg['id'] ] ) ){
 					//check if required
@@ -1388,6 +1391,28 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			}
 		} 
 
+		// look for put/delete request variables, but first we check
+		// to see if http request method is put/delete
+		if ($requestInfoBean->request_is_put()     || 
+		    $requestInfoBean->request_is_delete()) {
+		    	
+		    	
+			// #wtfphp or really #wtfmodphp, we have to explicitly
+			// retrieve put/delete request variables from input stream;
+			// we use parse_str method to explicitly feed query string
+			// into array, with which we will iterate and set on request
+			// info bean instance
+			// @TODO error checking - see above
+			parse_str(file_get_contents('php://input'), $requestVariables);
+			$method = 'set_' . $requestInfoBean->requestMethod();
+			
+			var_export($requestVariables); exit;
+						
+			foreach ($requestVariables as $key => $value) {
+				$requestInfoBean->$method($key, $value);
+			}
+		}		 
+			
 		return $retVal;
 	}
 

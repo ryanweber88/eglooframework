@@ -31,8 +31,11 @@ class Application
         return array(200, $headers, $body);
     }
 
-    private function prepareData($context)
+		private function prepareData($context)
     {
+    		$this->__initEgloo();
+				
+				/*
         $c = ++$this->local_storage['counter'];
         $m = memory_get_usage();
         $p = memory_get_peak_usage();
@@ -61,5 +64,22 @@ class Application
         $buffer .= '</pre>';
 
         return $buffer;
+				 **/
     }
+
+	/**
+	 * Boostraps egloo environment; essentially fakes the idea of traditionally running 
+	 * egloo via apache
+	 * @TODO move into real bootstrap script 
+	 */
+	protected function __initEgloo() {
+		
+		// we need to change directory to the executing application; this can
+		// be derived from configuration, but here we will do it statically
+		// for the time being
+		chdir('/var/www/api');
+		
+		require './index.php';
+		
+	}
 }
