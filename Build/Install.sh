@@ -182,6 +182,8 @@ then
 	echo "Detected Ubuntu GNU/Linux"
 	DETECTED_PLATFORM=$OS_UBUNTU
 
+	updatedb
+
 	# Default Configuration Parameters (Ubuntu)
 	DEFAULT_APPLICATIONS="/usr/lib/egloo/applications"
 	DEFAULT_CACHE_DIR="/var/cache/egloo"
