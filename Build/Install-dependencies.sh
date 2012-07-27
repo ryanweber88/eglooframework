@@ -152,8 +152,23 @@ then
         echo
 
 	add-apt-repository ppa:l-mierzwa/lucid-php5
+	echo
+	echo "* DONE: adding ppa repo for php5 *"
+	echo
 
+        echo
+        echo "**********************"
+        echo "* Updating apt-cache *"
+        echo "**********************"
+        echo
+
+	apt-get update
+
+	echo
+        echo "****************************"
 	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
+        echo "****************************"
+        echo
 
 	apt-get --assume-yes install curl apache2 memcached php5 php-apc \
 		php5-imagick php5-mcrypt php5-memcache php5-memcached \
@@ -168,7 +183,11 @@ then
 elif [ $DETECTED_PLATFORM -eq 1 ]
 then
 	# Ubuntu 12.04
+	echo
+        echo "****************************"
 	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
+        echo "****************************"
+        echo
 
         apt-get --assume-yes install curl apache2 memcached \
 		php5 php-apc \
