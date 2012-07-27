@@ -25,22 +25,30 @@
  * @version 1.0
  */
 
+
+// current self is instance of Application, so thus $this
+// is referencing that instance; this done via trick in
+// Application that binds closure to self
+
+
 // Check for the minimum PHP version to run the framework
+$this->run_once(function() {
+	if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+		echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
+			'eGloo requires PHP version 5.3.0 or higher.';
+		exit;
+	} else {
+		// Setup the OOP autoloader
+		require_once 'PHP/Includes/eGlooAutoload.php' ;
+	}
 
-if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
-		'eGloo requires PHP version 5.3.0 or higher.';
-	exit;
-} else {
-	// Setup the OOP autoloader
-	require_once 'PHP/Includes/eGlooAutoload.php' ;
-}
 
-// Check for Memcache
-if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
-	echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
-	exit;
-}
+	// Check for Memcache
+	if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
+		echo 'Memcache support not detected.  Please install Memcache or Memcached for PHP.';
+		exit;
+	}
+});
 
 // Build a request info bean
 $requestInfoBean = RequestInfoBean::getInstance();

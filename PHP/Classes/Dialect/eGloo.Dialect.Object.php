@@ -6,9 +6,9 @@ namespace eGloo\Dialect;
  * standards
  * @author Christian Calloway callowaylc@gmail.com
  */
-abstract class ObjectSafe {
+abstract class Object {
 	
-	use DelayedJobTrait;
+	use \eGloo\Utilities\DelayedJobTrait;
 	
 	function __construct() {
 		$self = $this;
@@ -36,8 +36,6 @@ abstract class ObjectSafe {
 	static function __constructStatic() { 
 		static::__methodsStatic();
 	}
-	
-	
 	
 	
 	/**
@@ -161,6 +159,13 @@ abstract class ObjectSafe {
 			}
 						
 			return $cache[$key];
+		});
+		
+		// run_once is essentially a aliasMethod to cache, but the differentiation is
+		// that run once shouldn't return a value
+		$this->defineMethod('run_once', function($lambda) {
+			$lambda->bindTo($this);
+			$this->cache($lambda);
 		});
 
 		
