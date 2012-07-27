@@ -51,9 +51,10 @@ class RequestInfoBean implements \ArrayAccess {
 
 	// Sanitized
 	private $COOKIES = null;
-	private $FILES = null;
-	private $GET = null;
-	private $POST = null;
+	private $FILES   = null;
+	private $GET     = null;
+	private $POST    = null;
+	private $PUT     = array();
 
 	private $forms = null;
 
@@ -183,6 +184,34 @@ class RequestInfoBean implements \ArrayAccess {
 				}
 			}
 		}
+		
+		// check for set_httpmethod, which will set a key value pair
+		// on instance property with corresponding name
+		else if (preg_match('/^set_?(a-z)+$/i', $name, $match)) {
+			list($key, $value) = $arguments;
+			
+			// make sure instance property exist
+			if (\property_exists($this, $httpMethod = strtoupper($match[1]))) {
+				$this->$httpMethod[$key] = $value;
+			}
+			
+			// otherwise we throw an exception to the fact
+			else {
+				throw new \Exception(
+					"Failed to set request property '$key' with value '$value' because http method '$httpMethod' does not exist"
+				);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * Returns http method of request; this is really just an abstraction of
+	 * $_SERVER.REQUEST_METHOD
+	 * @returns string
+	 */
+	public function requestMethod() {
+		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
 
 	/**
