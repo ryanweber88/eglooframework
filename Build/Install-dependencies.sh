@@ -22,6 +22,16 @@
 # @subpackage Installation
 # @version 1.0
 
+echo
+echo
+echo "****************************************"
+echo "****************************************"
+echo "****   eGloo Dependency Installer   ****"
+echo "****************************************"
+echo "****************************************"
+echo
+echo
+
 ###########################################################
 ########## General Setup
 ###########################################################
@@ -135,27 +145,40 @@ fi
 if [ $DETECTED_PLATFORM -eq 0 ]
 then
 	# Ubuntu 10.04
-	echo "Installing dependencies for" $DETECTED_OS_NAME
+        echo
+        echo "****************************"
+        echo "* Adding ppa repo for php5 *"
+        echo "****************************"
+        echo
 
-	apt-get --assume-yes install python-software-properties
 	add-apt-repository ppa:l-mierzwa/lucid-php5
+
+	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
 
 	apt-get --assume-yes install curl apache2 memcached php5 php-apc \
 		php5-imagick php5-mcrypt php5-memcache php5-memcached \
 		php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
 		php-soap php-openid php5-odbc php5-gd php5-xmlrpc
 
+        echo
+        echo "* DONE: installing dependencies *"
+        echo
+
 	exit 0
 elif [ $DETECTED_PLATFORM -eq 1 ]
 then
 	# Ubuntu 12.04
-	echo "Installing dependencies for" $DETECTED_OS_NAME
+	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
 
         apt-get --assume-yes install curl apache2 memcached \
-		python-software-properties php5 php-apc \
+		php5 php-apc \
                 php5-imagick php5-mcrypt php5-memcache php5-memcached \
                 php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
                 php-soap php-openid php5-odbc php5-gd php5-xmlrpc
+
+        echo
+        echo "* DONE: installing dependencies *"
+        echo
 
 	exit 0
 elif [ $DETECTED_PLATFORM -eq 2 ]
@@ -170,3 +193,5 @@ else
 	echo "Unknown system detected...exiting"
 	exit 1
 fi
+
+exit
