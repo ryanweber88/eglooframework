@@ -67,24 +67,34 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 
 		$auth_response = $this->doDirectPayment( $params );
 
-		$capture_response = $this->doCapture(
-			urldecode($auth_response['TRANSACTIONID']),
-			urldecode($auth_response['AMT']),
-			urldecode($auth_response['CURRENCYCODE']),
-			'Complete',
-			$params['invoiceID']
-		);
+		if ( 'SUCCESS' === strtoupper($auth_response["ACK"]) ||
+			 'SUCCESSWITHWARNING' === strtoupper($auth_response["ACK"]) ) {
 
-		$retVal = array(
-			'auth_request' => $params,
-			'auth_response' => $auth_response,
-			'capture_request' => array(
+			$capture_request = array(
 				'auth_id' => urldecode($auth_response['TRANSACTIONID']),
 				'amount' => urldecode($auth_response['AMT']),
 				'currency' => urldecode($auth_response['CURRENCYCODE']),
 				'codeType' => 'Complete',
 				'invoiceID' => $params['invoiceID'],
-			),
+			);
+
+			$capture_response = $this->doCapture(
+				urldecode($auth_response['TRANSACTIONID']),
+				urldecode($auth_response['AMT']),
+				urldecode($auth_response['CURRENCYCODE']),
+				'Complete',
+				$params['invoiceID']
+			);
+		} else {
+			$capture_request = array();
+			$capture_response = array();
+		}
+
+
+		$retVal = array(
+			'auth_request' => $params,
+			'auth_response' => $auth_response,
+			'capture_request' => $capture_request,
 			'capture_response' => $capture_response,
 			'api_request_history' => $this->_api_request_history,
 		);
@@ -164,12 +174,12 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 		// Execute the API operation; see the PPHttpPost function above.
 		$httpParsedResponseAr = $this->postHTTPRequest('DoCapture', $nvpStr);
 
-		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-			// echo_r( 'Capture Completed Successfully: '.print_r($httpParsedResponseAr, true) );
-			// exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		} else  {
-			exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
-		}
+		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+		// 	// echo_r( 'Capture Completed Successfully: '.print_r($httpParsedResponseAr, true) );
+		// 	// exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		// } else  {
+		// 	exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
+		// }
 
 		return $httpParsedResponseAr;
 	}
@@ -212,11 +222,11 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 		$httpParsedResponseAr = $this->postHTTPRequest('DoDirectPayment', $nvpStr);
 
 
-		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-			// echo_r('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		} else  {
-			exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
-		}
+		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+		// 	// echo_r('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		// } else  {
+		// 	exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
+		// }
 
 		return $httpParsedResponseAr;
 	}
