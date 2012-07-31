@@ -622,6 +622,10 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	protected function postHTTPRequest( $methodName_, $nvpStr_ ) {
 			$environment_credentials = $this->getEnvironmentCredentials();
 
+			$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
+				$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
+				urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
+
 			// Set up your API credentials, PayPal end point, and API version.
 			$API_UserName = urlencode( $environment_credentials['API_UserName'] );
 			$API_Password = urlencode( $environment_credentials['API_Password'] );
@@ -643,7 +647,8 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 			curl_setopt($ch, CURLOPT_POST, 1);
 
 			// Set the API operation, version, and API signature in the request.
-			$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+			$nvpreq = "IPADDRESS=$customer_ip_address&METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+			// $nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
 
 			// Set the request as a POST FIELD for curl.
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
