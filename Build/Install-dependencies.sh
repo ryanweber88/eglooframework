@@ -173,7 +173,7 @@ then
 	apt-get --assume-yes install curl apache2 memcached php5 php-apc \
 		php5-imagick php5-mcrypt php5-memcache php5-memcached \
 		php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
-		php-soap php-openid php5-odbc php5-gd php5-xmlrpc
+		php-soap php-openid php5-odbc php5-gd php5-xmlrpc php5-suhosin
 
         echo
         echo "* DONE: installing dependencies *"
@@ -193,7 +193,7 @@ then
 		php5 php-apc \
                 php5-imagick php5-mcrypt php5-memcache php5-memcached \
                 php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
-                php-soap php-openid php5-odbc php5-gd php5-xmlrpc
+                php-soap php-openid php5-odbc php5-gd php5-xmlrpc php5-suhosin
 
         echo
         echo "* DONE: installing dependencies *"
