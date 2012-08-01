@@ -169,7 +169,7 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 		$note = urlencode( $note );
 
 		// Add request-specific fields to the request string.
-		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&INVOICEID=$invoiceID&NOTE=$note";
+		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&INVOICEID=$invoiceID&INVNUM=$invoiceID&NOTE=$note";
 
 		// Execute the API operation; see the PPHttpPost function above.
 		$httpParsedResponseAr = $this->postHTTPRequest('DoCapture', $nvpStr);
