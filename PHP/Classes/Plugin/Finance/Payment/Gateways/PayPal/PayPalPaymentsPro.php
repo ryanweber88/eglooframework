@@ -57,7 +57,7 @@ abstract class PayPalPaymentsPro extends PaymentGatewayProduct {
 	 *
 	 *
 	 */
-	abstract public function authAndCapture( $params );
+	abstract public function doAuthAndCapture( $params );
 
 	abstract public function createRecurringPaymentsProfile();
 

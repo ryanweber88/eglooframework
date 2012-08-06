@@ -58,7 +58,7 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 *
 	 */
-	public function authAndCapture( $params ) {
+	public function doAuthAndCapture( $params ) {
 		$retVal = null;
 
 		if ( !isset($params['paymentType']) ) {
@@ -96,6 +96,31 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 			'auth_response' => $auth_response,
 			'capture_request' => $capture_request,
 			'capture_response' => $capture_response,
+			'api_request_history' => $this->_api_request_history,
+		);
+
+		$this->_api_request_history = array();
+
+		return $retVal;
+	}
+
+	/**
+	 * Auth and capture in one go
+	 *
+	 *
+	 */
+	public function doSale( $params ) {
+		$retVal = null;
+
+		if ( !isset($params['paymentType']) ) {
+			$params['paymentType'] = 'Sale';
+		}
+
+		$sale_response = $this->doDirectPayment( $params );
+
+		$retVal = array(
+			'sale_request' => $params,
+			'sale_response' => $sale_response,
 			'api_request_history' => $this->_api_request_history,
 		);
 
