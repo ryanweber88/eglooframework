@@ -91,6 +91,18 @@ abstract class RequestProcessor extends Object {
 		return $this->decoratorInfoBean;
 	}
 	
+
+	/**
+	 * Forward current request to a different controller; 
+	 */
+	public function forward($controller) {
+		require_once $controller;
+		
+		if (class_exists($controller)) {
+			// @TODO
+		}
+	}
+	
 	/**
 	 * Convenience method for logging
 	 */

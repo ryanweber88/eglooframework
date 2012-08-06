@@ -274,6 +274,8 @@ class SQLVisitor implements Visitor
 		}
 		
 		$limit_sql = "";
+		var_export($node->limit);
+		
 		if ( $limit = $node->limit )
 		{
 			$limit_sql = " LIMIT {$limit}";

@@ -28,7 +28,7 @@
 
 /**
  * 
- * Handles HTTP $method requests
+ * Handles HTTP $method requests; also as a FRONT controller of sorts to 
  * e.g. www.egloo.com).
  * 
  * @package RequestProcessing
@@ -46,11 +46,13 @@ class RESTRequestProcessor extends RequestProcessor {
 	 * @access public
 	 */
 	public function processRequest() {
+		
+		
 		// determine http method, request parameters, and call appropriate method
 		$method = strtoupper($this->bean->requestMethod());
 		
 		$this->log(
-			"RESTRequestProcessor: Entered processRequest() on $method Request"
+			"RESTRequestProcessor ({$this->ident()}): Entered processRequest() on $method Request"
 		);
 		
 		
@@ -66,7 +68,7 @@ class RESTRequestProcessor extends RequestProcessor {
 			else {
 				// determin
 				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
-				$this->index();				
+				$value = $this->index();				
 			}
 			
 			
@@ -75,25 +77,27 @@ class RESTRequestProcessor extends RequestProcessor {
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
-			$this->create();
+			$value = $this->create();
 		}
 		
 		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
-			$this->edit();			
+			$value = $this->edit();			
 		}
 		
 		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
-			$this->destroy();
+			$value = $this->destroy();
 		}
 
+		// @TODO determine echo value should be inspected, etc
+		echo $value;
 		
 		//eGlooResponse::outputXHTML( $templateVariables );
 		$this->log(
-			"RESTRequestProcessor: Exiting processRequest() on $method Request"
+			"RESTRequestProcessor ({$this->ident()}): Exiting processRequest() on $method Request"
 		);
 	}
 	

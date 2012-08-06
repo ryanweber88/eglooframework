@@ -50,6 +50,7 @@ $this->run_once(function() {
 	}
 });
 
+
 // Build a request info bean
 $requestInfoBean = RequestInfoBean::getInstance();
 
@@ -57,11 +58,12 @@ $requestInfoBean = RequestInfoBean::getInstance();
 $requestValidator =
 	RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
 
-	
+
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
 }
+
 
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
@@ -69,7 +71,9 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
+	
 	$requestProcessor->processRequest();
+	
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 	

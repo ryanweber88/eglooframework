@@ -1495,6 +1495,26 @@ abstract class Model extends Delegator
 	}	
 	
 	/**
+	 * Serialize model instance to json
+	 */
+	public function toJson() {
+		$data = [ ];
+		
+		// first merge attribute values to data
+		$data = array_merge(
+			$data, $this->associations()
+		);
+		
+		// second we pull associations and determine their links
+		// @TODO decouple link generation from model
+		foreach ($this->relationships as $name => $ignore) {
+			$data[ "uri_$name" ] = $name;
+		}
+		
+		return json_encode($data);
+	}
+	
+	/**
 	 * @TODO currently aliasing __toArray; need to change once references
 	 * are removed
 	 */

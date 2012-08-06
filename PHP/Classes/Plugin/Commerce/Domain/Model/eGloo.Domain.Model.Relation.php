@@ -243,8 +243,16 @@ class Relation extends \eGloo\Dialect\ObjectSafe
 			: $this->sql;
 	}
 	
-	public function limit($number) { }
-	public function offset($number) { }
+	public function limit($number) {
+		$this->chain = $this->chain->limit($number);
+		
+		return $this;
+	}
+	public function offset($number) {
+		$this->chain = $this->chain->offset($number);
+
+		return $this;		
+	}
 	public function group($number) { }
 	
 	/**

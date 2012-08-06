@@ -132,6 +132,8 @@ abstract class eGlooRequestDefinitionParser {
 		// Set the web application and UI bundle
 		$requestInfoBean->setApplication( $this->webapp );
 		$requestInfoBean->setInterfaceBundle( $this->uibundle );
+		
+		
 
 		// Check if there is a request class.  If there isn't, log it and return not setting any request processor
 		if ( !isset( $_GET[ self::REQUEST_CLASS_KEY ] ) ) {
@@ -146,6 +148,7 @@ abstract class eGlooRequestDefinitionParser {
 		} else {
 			$requestInfoBean->setRequestClass( $_GET[ self::REQUEST_CLASS_KEY ] );
 		}
+		
 
 		// Check if there is a request id.  If there isn't, log it and return not setting any request processor
 		if ( !isset( $_GET[ self::REQUEST_ID_KEY ] ) ) {
@@ -159,7 +162,7 @@ abstract class eGlooRequestDefinitionParser {
 		} else {
 			$requestInfoBean->setRequestID( $_GET[ self::REQUEST_ID_KEY ] );
 		}
-
+		
 		return $retVal;
 	}
 

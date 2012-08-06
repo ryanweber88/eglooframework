@@ -75,4 +75,5 @@ class Table implements \arrayaccess
 	{
 		return new NodeAttribute($offset, $this);
 	}
+	
 }

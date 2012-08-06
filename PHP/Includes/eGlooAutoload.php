@@ -319,9 +319,13 @@ function eglooAutoload( $class_name ) {
 				try {
 					__constructStatic($class_name);
 				} catch ( \Exception $e ) {
-					var_export($e); exit;
-					$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
-					$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
+					$errorMessage = $e->getMessage();
+					
+					// @TODO found message below to be misleading; removed and replaced with actual
+					// error message
+					// @TODO I can't remember why we were actually catching exception in first place 
+					//$errorMessage = '__constructStatic failed for class "' . $class_name . '".  ';
+					//$errorMessage .= 'It is likely that the load chain for this class and its children has failed.  ';
 
 					// In case you want to know why we do this, it's because exceptions in a PHP autoloader
 					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand

@@ -46,6 +46,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			', $table);	
 		});
 	}
+	
+	/**
+	 * Uses information schema to retrieve all table names
+	 */
+	public static function entities() {
+		// @PASS
+	}
 
 	
 	/**

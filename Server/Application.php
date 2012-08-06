@@ -6,7 +6,7 @@ const PATH_APPLICATION = '/var/www/api/PHP/Classes';
 // this is a special case where we need to autoload eGloo base library
 // classes; it is not built to be performant, and will be dropped
 // from the stack once Application initializes
-spl_autoload_register($__autoload = function($name) {
+spl_autoload_register($GLOBALS['__autoload'] = function($name) {
 	$filename = preg_replace('/\\\\/', '.', $name) . '.php';
 	
 	//$namspace = 
@@ -67,6 +67,7 @@ class Application extends \eGloo\Dialect\Object
     		parent::__construct();
 				
 				// remove __autoload from registered autoload stack
+				spl_autoload_unregister($GLOBALS['__autoload']);
 				
     		
         $this->tpl = file_get_contents(__DIR__.'/template.html'); // caching template in local-memory
@@ -77,8 +78,7 @@ class Application extends \eGloo\Dialect\Object
         );
     }
 
-    public function __invoke($context)
-    {
+    public function __invoke($context) {
     		
     		$this->_initEgloo($context);
 				
@@ -178,7 +178,14 @@ class Application extends \eGloo\Dialect\Object
 			$_SERVER = array_merge($_SERVER, $context['env']);			
 			
 			// fill in default values to play nicely with config load
-			$_SERVER['SCRIPT_NAME'] = '/index.php';				
+			$_SERVER['SCRIPT_NAME'] = '/index.php';			
+			
+			// fake setting of requestClass and requestID
+			// @TODO this needs to be automated from our .htaccess file
+			$GLOBALS['_GET']['eg_requestClass'] = 'user';
+			$GLOBALS['_GET']['eg_requestID']    = 'egDefault';
+			
+			 			
 		}
 
 }

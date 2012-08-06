@@ -10,8 +10,8 @@ servers:
   -
     protocol: HTTP
     socket: 'tcp://192.168.10.36:9998'
-    min-children: 5
-    max-children: 10
+    min-children: 1
+    max-children: 1
     app: *Application
   -
     protocol: SCGI
