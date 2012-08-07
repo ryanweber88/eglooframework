@@ -103,9 +103,13 @@ class SelectManager extends TreeManager
 	
 	public function offset($number) {
 		$this->ast->offset = $number;
+		
+		return $this;
 	}
 	
 	public function limit($number) {
 		$this->ast->limit = $number;
+		
+		return $this;
 	}
 }

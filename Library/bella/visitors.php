@@ -274,12 +274,15 @@ class SQLVisitor implements Visitor
 		}
 		
 		$limit_sql = "";
-		var_export($node->limit);
 		
-		if ( $limit = $node->limit )
+		if ( ($limit = $node->limit) )
 		{
-			$limit_sql = " LIMIT {$limit}";
+			$limit_sql = " LIMIT {$limit} OFFSET {$node->offset} ";
+			
+			
 		}
+		
+		
 		
 		return "SELECT{$projections_sql}{$from_sql}{$joins_sql}{$where_sql}{$group_sql}{$having_sql}{$order_sql}{$limit_sql}";
 	}

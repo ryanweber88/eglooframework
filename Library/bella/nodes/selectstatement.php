@@ -3,7 +3,8 @@ namespace Bella;
 
 class NodeSelectStatement extends Node
 {
-	public $orders, $froms, $projections, $wheres, $groups, $having, $offset,  $limit;
+	public $orders, $froms, $projections, $wheres, $groups, $having, $limit;
+	public $offset = 0;
 	
 	public $joins = array();
 	public $on    = array();
@@ -12,7 +13,7 @@ class NodeSelectStatement extends Node
 	public function __construct()
 	{
 		$this->limit = NULL;
-		$this->offset = NULL;
+		//$this->offset = NULL;
 		$this->orders = array();
 		$this->froms = array();
 		$this->projections = array();

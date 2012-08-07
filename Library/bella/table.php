@@ -44,6 +44,14 @@ class Table implements \arrayaccess
 		return $this->from($this)->where($condition);
 	}
 	
+	public function limit($number) {
+		return $this->from($this)->limit($number);
+	}
+	
+	public function offset($number) {
+		return $this->from($this)->offset($number);
+	}
+	
 	public function take($amount)
 	{
 		return $this->from($this)->take($amount);
