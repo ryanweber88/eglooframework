@@ -4,18 +4,27 @@ apps:
     app: &Application
       class: Application
       file: Application.php
-      middlewares: [Session,HTTPParser]
+      middlewares: [ HTTPParser, ModPHP ]
 
 servers:
   -
     protocol: HTTP
+    socket: 'tcp://192.168.10.36:9996'
+    min-children: 1
+    max-children: 5
+    app: *Application
+    
+  -
+    protocol: HTTP
+    socket: 'tcp://192.168.10.36:9997'
+    min-children: 1
+    max-children: 5
+    app: *Application
+          
+  -
+    protocol: HTTP
     socket: 'tcp://192.168.10.36:9998'
     min-children: 1
-    max-children: 1
+    max-children: 5
     app: *Application
-  -
-    protocol: SCGI
-    socket: 'tcp://127.0.0.1:9999'
-    min-children: 1
-    max-children: 2
-    app: *Application
+

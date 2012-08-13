@@ -130,6 +130,16 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		);			
 	}
 	
+	public function toJson() {
+		$data = [ 'users' => [ ] ];
+		
+		foreach ($this as $model) {
+			$data['users'][] = $model->toArray();
+		}
+		
+		return json_encode($data, JSON_PRETTY_PRINT);
+	}
+	
 	/**
 	 * Adds reduce/inject functionality to set; please note that lambda takes two parameters
 	 * lambda (result, model)

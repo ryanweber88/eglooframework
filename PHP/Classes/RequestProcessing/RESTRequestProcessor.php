@@ -62,7 +62,8 @@ class RESTRequestProcessor extends RequestProcessor {
 		
 			// @TODO determine differentiation between index/show method
 			if (isset($this->bean['id'])) {
-				
+				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
+				$value = $this->show();
 			}
 			
 			else {

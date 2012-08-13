@@ -56,8 +56,7 @@ spl_autoload_register($GLOBALS['__autoload'] = function($name) {
 /**
  * 
  */
-class Application extends \eGloo\Dialect\Object
-{
+class Application extends \eGloo\Dialect\Object {
     private $local_storage;
     private $tpl = null;
 
@@ -79,19 +78,32 @@ class Application extends \eGloo\Dialect\Object
     }
 
     public function __invoke($context) {
-    		
+    	
+    	
     		$this->_initEgloo($context);
 				
-				
-				$handler = function() {
+				$handler = function() use ($context) {
 					ob_start();
+					
+					$method = "_{$_SERVER['REQUEST_METHOD']}";
+					
+					//parse_str(file_get_contents('php://input'), $tmp); 
+					//var_export($tmp);
+					
 					require 'handler.php';
 					$content = ob_get_clean();
+					
+					
 					
 					return $content;
 				};
 				$handler->bindTo($this);
 				$content = $handler();
+				
+				// unset globals
+				// @TODO why isn't this implemented in middleware
+				
+				unset($GLOBALS['_GET']);
 				
 				
 				
@@ -178,11 +190,29 @@ class Application extends \eGloo\Dialect\Object
 			$_SERVER = array_merge($_SERVER, $context['env']);			
 			
 			// fill in default values to play nicely with config load
-			$_SERVER['SCRIPT_NAME'] = '/index.php';			
+			$_SERVER['SCRIPT_NAME'] = '/index.php';	
+			
+			$GLOBALS['_GET']['limit']  = 10;		
+			$GLOBALS['_GET']['offset'] = 0;
 			
 			// fake setting of requestClass and requestID
 			// @TODO this needs to be automated from our .htaccess file
-			$GLOBALS['_GET']['eg_requestClass'] = 'user';
+			$tokens  = array_slice(explode('/', $_SERVER['PATH_INFO']), 1);
+			$service = $tokens[0]; 
+			
+			
+			// check if id has been passed
+			if (count($tokens) > 1) {
+				$GLOBALS['_GET']['id'] = $tokens[1];
+			}
+			
+			$GLOBALS['_GET']['id'] = 1;
+			
+			
+			// check query string for offset and limit
+			parse_str($_SERVER['QUERY_STRING'], $GLOBALS['_GET']);
+			
+			$GLOBALS['_GET']['eg_requestClass'] = $service;
 			$GLOBALS['_GET']['eg_requestID']    = 'egDefault';
 			
 			 			

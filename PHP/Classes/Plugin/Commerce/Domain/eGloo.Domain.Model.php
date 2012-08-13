@@ -1500,18 +1500,27 @@ abstract class Model extends Delegator
 	public function toJson() {
 		$data = [ ];
 		
+		
 		// first merge attribute values to data
 		$data = array_merge(
-			$data, $this->associations()
+			$data, $this->attributes()
 		);
 		
 		// second we pull associations and determine their links
 		// @TODO decouple link generation from model
-		foreach ($this->relationships as $name => $ignore) {
-			$data[ "uri_$name" ] = $name;
+		// @TODO remove tight coupling of server variables..
+		
+		
+		foreach ($this->associations as $name => $ignore) {
+			$name = strtolower($name);
+			$data[ "uri_$name" ] = strtolower("{$_SERVER['PATH_INFO']}/$name");
+
 		}
 		
-		return json_encode($data);
+		// @TODO remove pretty print
+		return json_encode(
+			$data, JSON_PRETTY_PRINT
+		);
 	}
 	
 	/**
