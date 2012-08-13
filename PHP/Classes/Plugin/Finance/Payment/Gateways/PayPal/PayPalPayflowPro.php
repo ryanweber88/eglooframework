@@ -12,9 +12,9 @@ use \Exception as Exception;
 use \ErrorException as ErrorException;
 
 /**
- * \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPaymentsPro Class File
+ * \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPayflowPro Class File
  *
- * Contains the class definition for the \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPaymentsPro
+ * Contains the class definition for the \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPayflowPro
  *
  * Copyright 2012 eGloo, LLC
  *
@@ -40,7 +40,7 @@ use \ErrorException as ErrorException;
  */
 
 /**
- * \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPaymentsPro
+ * \eGloo\Plugin\Finance\Payment\Gateways\PayPal\PayPalPayflowPro
  *
  * $short_description
  *
@@ -50,7 +50,7 @@ use \ErrorException as ErrorException;
  * @package $package
  * @subpackage $subpackage
  */
-abstract class PayPalPaymentsPro extends PaymentGatewayProduct {
+abstract class PayPalPayflowPro extends PaymentGatewayProduct {
 
 	/**
 	 * Auth and capture in one go
