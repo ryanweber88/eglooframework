@@ -133,8 +133,24 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	public function toJson() {
 		$data = [ 'users' => [ ] ];
 		
+		
 		foreach ($this as $model) {
-			$data['users'][] = $model->toArray();
+			$associations = [ ];
+			
+			// second we pull associations and determine their links
+			// @TODO decouple link generation from model
+			// @TODO remove tight coupling of server variables..
+			
+			
+			foreach ($model->reference('associations') as $name => $ignore) {
+				$name                        = strtolower($name);
+				$associations[ "uri_$name" ] = strtolower("{$_SERVER['PATH_INFO']}/$name");
+	
+			}
+					
+			$data['users'][] = array_merge(
+				$model->toArray(), $associations
+			);
 		}
 		
 		return json_encode($data, JSON_PRETTY_PRINT);
