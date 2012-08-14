@@ -85,15 +85,8 @@ class Application extends \eGloo\Dialect\Object {
 				$handler = function() use ($context) {
 					ob_start();
 					
-					$method = "_{$_SERVER['REQUEST_METHOD']}";
-					
-					//parse_str(file_get_contents('php://input'), $tmp); 
-					//var_export($tmp);
-					
 					require 'handler.php';
 					$content = ob_get_clean();
-					
-					
 					
 					return $content;
 				};

@@ -2,8 +2,8 @@
 apps:
   -
     app: &Application
-      class: Application
-      file: Application.php
+      class: APIApplication
+      file:  APIApplication.php
       middlewares: [ HTTPParser, ModPHP ]
 
 servers:
