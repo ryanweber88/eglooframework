@@ -1,7 +1,7 @@
 <?php
 // @TODO I'd like to find a more elegant more to autoinclude our autoloader 
 // but for now this is fine
-require_once 'autoload.php'
+require_once 'autoload.php';
 
 /**
  * Represents API application instance
@@ -28,8 +28,8 @@ class APIApplication extends \eGloo\Server\Application {
 			// @TODO move to master process
 			$handler = function() use ($context) {
 				ob_start();
-				
-				require 'handler.php';
+				var_export($_SERVER['REQUEST_URI']);
+				//require 'handler.php';
 				$content = ob_get_clean();
 				
 				return $content;
@@ -43,6 +43,8 @@ class APIApplication extends \eGloo\Server\Application {
           'Content-type', 'text/html; charset=utf-8',
           'Content-Length', strlen($content)
       );
+			
+			$this->afterInvoke();
 
       return array(200, $headers, $content);
     }
@@ -73,13 +75,20 @@ class APIApplication extends \eGloo\Server\Application {
 				$_SERVER[$parts[1]] = @$parts[2];
 			}
 					
-			
 			// @TODO this should definitly be done in middleware
 			$_SERVER = array_merge($_SERVER, $context['env']);			
 			
 			// fill in default values to play nicely with config load
 			$_SERVER['SCRIPT_NAME'] = '/index.php';	
-			 			
+			
+			// retrieve resource and resource tokens
+			if (isset($_GET['q'])) {
+				$_GET['resource']        = $_GET['q'];
+				$_GET['resource_tokens'] = array_slice(
+					explode('/', $_GET['q']), 1
+				);
+				$_GET['service'] = $_GET['resource_tokens'][0];
+			}			
 		}
 		
 		

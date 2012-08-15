@@ -43,6 +43,9 @@ abstract class RequestProcessor extends Object {
 	protected $requestInfoBean = null;
 	protected $decoratorInfoBean = null;
 	protected $bean = null;
+	
+	/* Private Data Members */
+	private $forwarded = false;
 
 	public function __construct() {
 		$this->requestInfoBean = RequestInfoBean::getInstance();
@@ -91,15 +94,47 @@ abstract class RequestProcessor extends Object {
 		return $this->decoratorInfoBean;
 	}
 	
+	/**
+	 * Stub method for pre dispatch execution
+	 */
+	protected function beforeProcessRequest() { }
+	
+	/**
+	 * Stub method for post dispatch execution
+	 */
+	protected function afterProcessRequest() { }
+	
+	/**
+	 * Encapsultes process request along with pre and
+	 * post hooks
+	 */
+	public function process() {
+		$this->beforeProcessRequest();
+		$this->processRequest();
+		$this->afterProcessRequest();
+	}
 
 	/**
-	 * Forward current request to a different controller; 
+	 * Forward current request to a different request processor; 
 	 */
-	public function forward($controller) {
-		require_once $controller;
+	public function forward($requestProcessor) {
+		require_once $requestProcessor;
 		
-		if (class_exists($controller)) {
-			// @TODO
+		if (class_exists($requestProcessor) &&
+		    $requestProcessor instanceof RequestProcessor) {
+
+			// copy/reference bean data to forwarded request processor
+			$requestProcessor       = new $requestProcessor;
+			$requestProcessor->bean = $this->bean;
+			
+			$requestProcessor->process();		    	
+		}
+		
+		else {
+			// @TODO throw exception that require controller failed
+			throw new \Exception(
+				"Faild to forward to Request Processor '$requestProcessor' because it does not exist"
+			);
 		}
 	}
 	

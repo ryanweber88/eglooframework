@@ -71,8 +71,7 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
-	
-	$requestProcessor->processRequest();
+	$requestProcessor->process()
 	
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );

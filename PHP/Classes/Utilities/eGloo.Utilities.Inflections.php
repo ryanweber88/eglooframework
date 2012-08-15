@@ -10,70 +10,76 @@ namespace eGloo\Utilities;
  */
 class Inflections extends \eGloo\Dialect\Object {
 	
-	use \eGloo\Utilities\SingletonTrait;
+	//use \eGloo\Utilities\SingletonTrait;
 	
 	function __construct() { 
-		$this->singulars = [
-	        [ '/(quiz)zes$/i'             , "$1" ],
-	        [ '/(matr)ices$/i'            , "$1ix" ],
-	        [ '/(vert|ind)ices$/i'        , "$1ex" ],
-	        [ '/^(ox)en$/i'               , "$1" ],
-	        [ '/(alias)es$/i'             , "$1" ],
-	        [ '/(octop|vir)i$/i'          , "$1us" ],
-	        [ '/(cris|ax|test)es$/i'      , "$1is" ],
-	        [ '/(shoe)s$/i'               , "$1" ],
-	        [ '/(o)es$/i'                 , "$1" ],
-	        [ '/(bus)es$/i'               , "$1" ],
-	        [ '/([m|l])ice$/i'            , "$1ouse" ],
-	        [ '/(x|ch|ss|sh)es$/i'        , "$1" ],
-	        [ '/(m)ovies$/i'              , "$1ovie" ],
-	        [ '/(s)eries$/i'              , "$1eries" ],
-	        [ '/([^aeiouy]|qu)ies$/i'     , "$1y" ],
-	        [ '/([lr])ves$/i'             , "$1f" ],
-	        [ '/(tive)s$/i'               , "$1" ],
-	        [ '/(hive)s$/i'               , "$1" ],
-	        [ '/(li|wi|kni)ves$/i'        , "$1fe" ],
-	        [ '/(shea|loa|lea|thie)ves$/i', "$1f" ],
-	        [ '/(^analy)ses$/i'           , "$1sis" ],
-	        [ '/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i'  , "$1$2sis" ],
-	        [ '/([ti])a$/i'               , "$1um" ],
-	        [ '/(n)ews$/i'                , "$1ews" ],
-	        [ '/(h|bl)ouses$/i'           , "$1ouse" ],
-	        [ '/(corpse)s$/i'             , "$1" ],
-	        [ '/(us)es$/i'                , "$1" ],
-	        [ '/s$/i'                     , "" ]			
-		];
+		$this->singulars = array(
+	        array( '/(quiz)zes$/i'             , "$1" ),
+	        array( '/(matr)ices$/i'            , "$1ix" ),
+	        array( '/(vert|ind)ices$/i'        , "$1ex" ),
+	        array( '/^(ox)en$/i'               , "$1" ),
+	        array( '/(alias)es$/i'             , "$1" ),
+	        array( '/(octop|vir)i$/i'          , "$1us" ),
+	        array( '/(cris|ax|test)es$/i'      , "$1is" ),
+	        array( '/(shoe)s$/i'               , "$1" ),
+	        array( '/(o)es$/i'                 , "$1" ),
+	        array( '/(bus)es$/i'               , "$1" ),
+	        array( '/([m|l])ice$/i'            , "$1ouse" ),
+	        array( '/(x|ch|ss|sh)es$/i'        , "$1" ),
+	        array( '/(m)ovies$/i'              , "$1ovie" ),
+	        array( '/(s)eries$/i'              , "$1eries" ),
+	        array( '/([^aeiouy]|qu)ies$/i'     , "$1y" ),
+	        array( '/([lr])ves$/i'             , "$1f" ),
+	        array( '/(tive)s$/i'               , "$1" ),
+	        array( '/(hive)s$/i'               , "$1" ),
+	        array( '/(li|wi|kni)ves$/i'        , "$1fe" ),
+	        array( '/(shea|loa|lea|thie)ves$/i', "$1f" ),
+	        array( '/(^analy)ses$/i'           , "$1sis" ),
+	        array( '/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i'  , "$1$2sis" ),
+	        array( '/([ti])a$/i'               , "$1um" ),
+	        array( '/(n)ews$/i'                , "$1ews" ),
+	        array( '/(h|bl)ouses$/i'           , "$1ouse" ),
+	        array( '/(corpse)s$/i'             , "$1" ),
+	        array( '/(us)es$/i'                , "$1" ),
+	        array( '/.*?status/i'              , "$0"),	
+	        array( '/.*?address$/i'            , "$0"),
+	        array( '/s$/i'                     , "" ),
+	        		
+		);
 		
-		$this->plurals = [
-			[ '/(quiz)$/i',			      "$1zes"   ],
-			[ '/^(ox)$/i',			      "$1en"	],
-			[ '/([m|l])ouse$/i',		  "$1ice"   ],
-			[ '/(matr|vert|ind)ix|ex$/i', "$1ices"  ],
-			[ '/(x|ch|ss|sh)$/i',		  "$1es"	],
-			[ '/([^aeiouy]|qu)y$/i',	  "$1ies"   ],
-			[ '/([^aeiouy]|qu)ies$/i',	  "$1y"	    ],
-			[ '/(hive)$/i',			      "$1s"	    ],
-			[ '/(?:([^f])fe|([lr])f)$/i', "$1$2ves" ],
-			[ '/sis$/i',				  "ses"	    ],
-			[ '/([ti])um$/i',			  "$1a"	    ],
-			[ '/(buffal|tomat)o$/i',	  "$1oes"   ],
-			[ '/(bu)s$/i',				  "$1ses"   ],
-			[ '/(alias|status)$/i',	      "$1es"	],
-			[ '/(octop|vir)us$/i',		  "$1i"	    ],
-			[ '/(ax|test)is$/i',		  "$1es"    ],
-			[ '/s$/i',					  "s"       ],
-			[ '/$/',					  "s"       ]
-		];
+		$this->plurals = array(
+			array( '/(quiz)$/i',			      "$1zes"   ),
+			array( '/^(ox)$/i',			      "$1en"	),
+			array( '/([m|l])ouse$/i',		  "$1ice"   ),
+			array( '/(matr|vert|ind)ix|ex$/i', "$1ices"  ),
+			array( '/(x|ch|ss|sh)$/i',		  "$1es"	),
+			array( '/([^aeiouy]|qu)y$/i',	  "$1ies"   ),
+			array( '/([^aeiouy]|qu)ies$/i',	  "$1ies"	    ),
+			array( '/(hive)$/i',			      "$1s"	    ),
+			array( '/(?:([^f])fe|([lr])f)$/i', "$1$2ves" ),
+			array( '/sis$/i',				  "ses"	    ),
+			array( '/([ti])um$/i',			  "$1a"	    ),
+			array( '/(buffal|tomat)o$/i',	  "$1oes"   ),
+			array( '/(bu)s$/i',				  "$1ses"   ),
+			array( '/(alias|status)$/i',	      "$1es"	),
+			array( '/(octop|vir)us$/i',		  "$1i"	    ),
+			array( '/(ax|test)is$/i',		  "$1es"    ),
+			array( '/^(categories)$/i',        "asdf"),
+			
+			array( '/s$/i',					  "s"       ),
+			array( '/$/',					  "s"       )
+		);
 		
-		$this->irregulars = [
-			[ 'move',   'moves'	],
-			[ 'sex',	'sexes'	],
-			[ 'child',  'children' ],
-			[ 'man',	'men'	  ],
-			[ 'person', 'people'   ],
-		];
+		$this->irregulars = array(
+			array( 'move',   'moves'	),
+			array( 'sex',	'sexes'	),
+			array( 'child',  'children' ),
+			array( 'man',	'men'	  ),
+			array( 'person', 'people'   ),
+			//array( 'status', 'status' )
+		);
 		
-		$this->uncountables = [ 
+		$this->uncountables = array( 
 			'sheep', 
 			'fish',
 			'series',
@@ -81,8 +87,9 @@ class Inflections extends \eGloo\Dialect\Object {
 			'money',
 			'rice',
 			'information',
-			'equipment'
-		];
+			'equipment',
+			//'status'
+		);
 	}
 	
 	/**
@@ -93,7 +100,7 @@ class Inflections extends \eGloo\Dialect\Object {
 	 * @return void
 	 */
 	public function plural($regexp, $replacement) { 
-		$this->plurals[] = [ $regexp, $replacement ];
+		$this->plurals[] = array($regexp, $replacement);
 	}
 
 	/**
@@ -104,7 +111,7 @@ class Inflections extends \eGloo\Dialect\Object {
 	 * @return void
 	 */
 	public function singular($regexp, $replacement) { 
-		$this->singulars[] = [ $regexp, $replacement ];
+		$this->singulars[] = array($regexp, $replacement);
 	}
 	
 	/**
@@ -116,7 +123,7 @@ class Inflections extends \eGloo\Dialect\Object {
 	 * @return void
 	 */
 	public function human($regexp, $replacement) { 
-		$this->humans[] = [ $regexp, $replacement ];
+		$this->humans[] = array($regexp, $replacement);
 	}	
 	
 	/**
@@ -128,7 +135,7 @@ class Inflections extends \eGloo\Dialect\Object {
 	 * @return void
 	 */
 	public function irregular($singular, $plural) { 
-		$this->irregulars[] = [ $singular, $plural ];
+		$this->irregulars[] = array($singular, $plural);
 	}		
 
 	/**
@@ -188,13 +195,14 @@ class Inflections extends \eGloo\Dialect\Object {
 		if ( in_array( strtolower( $string ), $inflections->uncountables ) ) {
 			return $string;
 		}
-		
+				
 		// check for irregular singular forms
 		foreach ( $inflections->irregulars as $noun ) {
 			if ( strtolower( $string ) == $noun[0] ) {
 				return $noun[1];
 			}
 		}
+		
 
 		// check for matches using regular expressions
 		foreach ( $inflections->singulars as $pattern ) {
@@ -204,6 +212,14 @@ class Inflections extends \eGloo\Dialect\Object {
 		}
 	
 		return $string;
+	}
+	
+	public static function isSingular($name) {
+		return static::singularize($name) == $name;
+	}
+	
+	public static function isPlural($name) {
+		return static::pluralize($name) == $name;
 	}
 
 	/**

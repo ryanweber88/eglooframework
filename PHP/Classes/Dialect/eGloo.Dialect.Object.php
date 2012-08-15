@@ -904,10 +904,29 @@ abstract class Object {
 		if ($caller->isReceivedStatically()) {
 			return static::__callstatic($name, $arguments);
 		}
+		
+		// implement method hooks for dynamically defined methods;
+		// this allows for intercepting method calls and then
+		// providing pre/post hooks on those methods
+		if (preg_match('/^(before|after)_?([a-z])+/i', $name, $match) && 
+		    isset($this->_methods[ strtolower($match[2]) ]))          {
+			
+			// now check that the first argument is a lambda
+			if (is_callable($arguments[0])) {
+				
+			}
+			
+			else {
+				throw new \Exception(
+					"Failed to define hook '$name' on dynamic method '{$match[2]}' " . 
+					"because it the first argument is not a lambda"
+				);
+			}
+		}
 
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
-
+			
 			return call_user_func_array(
 				$this->_methods[$name], $arguments	
 			);
@@ -1144,6 +1163,7 @@ abstract class Object {
 	protected        $_defers            = array();
 	protected        $_aliasedProperties = array(); 
 	protected        $_attributes        = array();
+	protected        $_hooks             = array();
 	
 	// @TODO return to protected and set as attr_reader
 	public           $class;
