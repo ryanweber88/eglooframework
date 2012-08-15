@@ -150,7 +150,12 @@ elif [ $DETECTED_PLATFORM -eq $OS_UBUNTU_1110 ]; then
         echo "****************************"
         echo
 
+	echo mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS \
+		| debconf-set-selections
+	echo mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASS \
+		| debconf-set-selections
         apt-get --assume-yes install mysql-server-5.1 mysql-client-5.1
+	unset $MYSQL_PASS
 
         echo
         echo "* DONE: installing dependencies *"
