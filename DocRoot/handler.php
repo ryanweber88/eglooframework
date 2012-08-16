@@ -52,7 +52,7 @@ $this->run_once(function() {
 
 
 // Build a request info bean
-$requestInfoBean = RequestInfoBean::getInstance();
+$requestInfoBean = &RequestInfoBean::getInstance();
 
 // Get a request validator based on the current application and UI bundle
 $requestValidator =
@@ -71,8 +71,9 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
-	$requestProcessor->process()
+	$requestProcessor->processRequest();
 	
+	 
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 	
@@ -84,3 +85,5 @@ if ( $isValidRequest ) {
 	}
 }
 
+// @TODO we need to abstract cleanup or post dispatch process - for the 
+$requestInfoBean = null;

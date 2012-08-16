@@ -28,8 +28,7 @@ class APIApplication extends \eGloo\Server\Application {
 			// @TODO move to master process
 			$handler = function() use ($context) {
 				ob_start();
-				var_export($_SERVER['REQUEST_URI']);
-				//require 'handler.php';
+				require 'handler.php';
 				$content = ob_get_clean();
 				
 				return $content;
@@ -82,16 +81,33 @@ class APIApplication extends \eGloo\Server\Application {
 			$_SERVER['SCRIPT_NAME'] = '/index.php';	
 			
 			// retrieve resource and resource tokens
-			if (isset($_GET['q'])) {
-				$_GET['resource']        = $_GET['q'];
+			if (isset($_GET['resource'])) {
 				$_GET['resource_tokens'] = array_slice(
-					explode('/', $_GET['q']), 1
+					explode('/', $_GET['resource']), 1
 				);
 				$_GET['service'] = $_GET['resource_tokens'][0];
-			}			
+			}
+			
+			// examine id if present and determine if multi-get id
+			if (isset($_GET['id']) && 
+			   (strlen($id = $_GET['id']) && !is_numeric($id))) {
+				// @TODO we need to check against correct delimiting token
+				$_GET['id'] = explode(';', $id);
+			}
+				 
+			// fill in defaults for offset and limit, should they
+			// not exist
+			// @TODO find a way to abstract this, because this very
+			// much application specific
+			isset($_GET['offset']) || $_GET['offset'] = 0;
+			isset($_GET['limit'])  || $_GET['limit']  = 10;
+			 			
 		}
 		
 		
-		private function afterInvoke() { }
+		private function afterInvoke() {
+			
+
+		}
 
 }

@@ -215,11 +215,19 @@ class Inflections extends \eGloo\Dialect\Object {
 	}
 	
 	public static function isSingular($name) {
-		return static::singularize($name) == $name;
+		$key = __FILE__ . __LINE__ . $name;
+		
+		return static::cache($key, function() { 
+			return static::singularize($name) == $name;
+		});
 	}
 	
 	public static function isPlural($name) {
-		return static::pluralize($name) == $name;
+		$key = __FILE__ . __LINE__ . $name;
+		
+		return static::cache($key, function() {
+			return static::pluralize($name) == $name;
+		});
 	}
 
 	/**

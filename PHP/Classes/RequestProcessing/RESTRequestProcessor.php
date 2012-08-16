@@ -112,8 +112,10 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function isCollectionRoute() {
 		// determines if requested resource/uri is for a
 		// collection	
-		return isset($this->bean['id']) && 
-		       strlen($this->bean['id']);
+		return empty($this->bean['id'])      || 
+		       is_array($this->bean['id'])   || 
+		       is_numeric($this->bean['id']);
+				
 	}
 	
 	protected function index()   { }

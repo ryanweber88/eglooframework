@@ -96,11 +96,11 @@ class RequestInfoBean implements \ArrayAccess {
 	 * getInstance()
 	 */
 	final public static function &getInstance() {
-		if ( !isset(self::$singleton) ) {
-			self::$singleton = new RequestInfoBean();
+		if ( !isset(static::$singleton) ) {
+			static::$singleton = new RequestInfoBean();
 		}
 
-		return self::$singleton;
+		return static::$singleton;
 	}
 
 	/**
