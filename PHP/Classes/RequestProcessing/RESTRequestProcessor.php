@@ -113,8 +113,7 @@ class RESTRequestProcessor extends RequestProcessor {
 		// determines if requested resource/uri is for a
 		// collection	
 		return empty($this->bean['id'])      || 
-		       is_array($this->bean['id'])   || 
-		       is_numeric($this->bean['id']);
+		       isset($this->bean['ids']);
 				
 	}
 	

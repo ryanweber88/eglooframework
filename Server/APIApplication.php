@@ -92,7 +92,8 @@ class APIApplication extends \eGloo\Server\Application {
 			if (isset($_GET['id']) && 
 			   (strlen($id = $_GET['id']) && !is_numeric($id))) {
 				// @TODO we need to check against correct delimiting token
-				$_GET['id'] = explode(';', $id);
+				$_GET['ids'] = explode(';', $id);
+				unset($_GET['id']);
 			}
 				 
 			// fill in defaults for offset and limit, should they
