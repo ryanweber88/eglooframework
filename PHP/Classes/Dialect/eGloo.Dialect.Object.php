@@ -908,18 +908,20 @@ abstract class Object {
 		// implement method hooks for dynamically defined methods;
 		// this allows for intercepting method calls and then
 		// providing pre/post hooks on those methods
-		if (preg_match('/^(before|after)_?([a-z])+/i', $name, $match) && 
-		    isset($this->_methods[ strtolower($match[2]) ]))          {
+		if (preg_match('/^(before|after)_?([a-z])+/i', $name, $match)  && 
+		    isset($this->_methods[ strtolower($method = $match[2]) ])) {
 			
 			// now check that the first argument is a lambda
-			if (is_callable($arguments[0])) {
-				
+			if (count($arguments) && 
+			    is_callable($lambda = $arguments[0])) {
+					
+				$this->_hooks[ $name ] = $lambda;
 			}
 			
 			else {
 				throw new \Exception(
 					"Failed to define hook '$name' on dynamic method '{$match[2]}' " . 
-					"because it the first argument is not a lambda"
+					"because the first argument is not a lambda"
 				);
 			}
 		}
@@ -927,11 +929,20 @@ abstract class Object {
 		// first check dynamically defined methods and fire if match
 		if (isset($this->_methods[$name])) {
 			
+			// check pre hooks
+			if (isset($this->_hooks[ $hook = "before_$name" ])) {
+				call_user_func($this->_hooks[$hook]);
+			}			
+			
+			// call dynamically defined method
 			return call_user_func_array(
 				$this->_methods[$name], $arguments	
 			);
 			
-							
+			// call post hooks
+			if (isset($this->_hooks[ $hook = "after_$name" ])) {
+				call_user_func($this->_hooks[$hook]);
+			}				
 		}
 		
 		// lets provide conversion to underscored and camel case

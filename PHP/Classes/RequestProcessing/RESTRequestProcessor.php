@@ -36,6 +36,7 @@
  */
 class RESTRequestProcessor extends RequestProcessor {
 
+
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
@@ -60,16 +61,22 @@ class RESTRequestProcessor extends RequestProcessor {
 		// request parameters 
 		if ($this->bean->request_is_get()) {
 		
-			// @TODO determine differentiation between index/show method
-			if (isset($this->bean['id'])) {
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
-				$value = $this->show();
+			// we leave determination of whether GET request is
+			// for collection resource to overrideable method in
+			// which we define a generic convention for determining
+			// collection routes (in this case, the presence of :id
+			// parameter)
+			if ($this->isCollectionRoute()) {
+				// determin
+				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
+				$value = $this->index();	
+
 			}
 			
 			else {
-				// determin
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
-				$value = $this->index();				
+								
+				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
+				$value = $this->show();			
 			}
 			
 			
@@ -100,6 +107,13 @@ class RESTRequestProcessor extends RequestProcessor {
 		$this->log(
 			"RESTRequestProcessor ({$this->ident()}): Exiting processRequest() on $method Request"
 		);
+	}
+
+	protected function isCollectionRoute() {
+		// determines if requested resource/uri is for a
+		// collection	
+		return isset($this->bean['id']) && 
+		       strlen($this->bean['id']);
 	}
 	
 	protected function index()   { }
