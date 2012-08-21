@@ -9,20 +9,20 @@
  namespace eGloo\Script\Git\Hook;
  
 // CONSTANTS //////////////////////////////////////////////////////////////////
- 
-const COMMAND_GIT_REVPARSE  = 'git rev-parse --verify HEAD 2> /dev/null';
-const COMMAND_GIT_DIFFINDEX = 'git diff-index --cached --name-only HEAD';
-const EXIT_SUCCESS          = 0;
-const EXIT_FAIL             = 1;
-const HASH_NEW_BRANCH       = '0000000000000000000000000000000000000000';
+
 
 // REQUIRES ///////////////////////////////////////////////////////////////////
 
+// @TODO move this to autoloader?
 require_once 'Hook.php';
+require_once 'Module.php';
 
 // CLASS //////////////////////////////////////////////////////////////////////
 
 class PreReceive extends Hook {
+	
+	const HASH_NEW_BRANCH = '0000000000000000000000000000000000000000';
+	
 	
 	/**
 	 * Examines files that were created/updated on HEAD push
@@ -40,7 +40,7 @@ class PreReceive extends Hook {
 				
 		// check if the first commit on a new branch, in which
 		// case our git diff command changes
-		if ($old == HASH_NEW_BRANCH) {
+		if ($old == self::HASH_NEW_BRANCH) {
 			$command = "git diff-tree --root $new";
 			$reg     = '/\:\w+ \w+ \w+ (\w+) \w (.+)/';
 		}
@@ -59,8 +59,14 @@ class PreReceive extends Hook {
 		// command and parse changed file names; finally
 		// return parsed files to caller
 		foreach($out as $line) {
-			preg_match($reg, $line, $match);
-			$files[] = $match[2];	
+			preg_match($reg, $line, $match); 
+			
+			// record blob (so we can see it later) and
+			// filename
+			$files[] = array(
+				'blob' => $match[1],
+				'file' => $match[2]	
+			);
 		}
 				
 		return $files;

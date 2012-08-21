@@ -20,20 +20,42 @@
 		$this->down();
 	}
 	
- 	abstract public function invoke($hook);
-	
-	public function up()   { }
-	public function down() { }
-	
-	public function before_invoke($hook) { }
-	public function after_invoke($hook, $binding = null) {
-		return $context;
-	}
-	
+	/**
+	 * Responsible for firing on instance callable event
+	 */
 	public function __invoke($hook) {
 		$this->before_invoke($hook);
 		$binding = $this->invoke($hook);
-		
 		return $this->after_invoke($hook, $binding);
+	}	
+	
+	/**
+	 * Called by __invoke and is meant as the definition 
+	 * container for module action
+	 */
+ 	abstract protected function invoke($hook);
+
+	/**
+	 * Perform and build-up operations
+	 */
+	protected function up() { }
+	
+	/**
+	 * Perform any tear-down operations
+	 */
+	protected function down() { }
+	
+	/** 
+	 * A pre-invoke hook
+	 */
+	protected function before_invoke($hook) { }
+	
+	/**
+	 * A post-invoke hook
+	 */
+	protected function after_invoke($hook, $binding = null) {
+		return $binding;
 	}
+	
+
  }

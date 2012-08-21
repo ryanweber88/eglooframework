@@ -5,6 +5,7 @@
  */
  namespace eGloo\Script\Git\Hook;
  
+
  /**
   * Defines concrete methods employed by git hook handlers
   */
@@ -19,7 +20,7 @@
   	// iterate through defined modules and call each
   	// passing an instance of self as the parameter
   	// @TODO do we need a way to organize module calls?
-  	foreach($this->modules() as $module) {
+  	foreach($this->modules() as $name => $module) {
   		$module($this);
   	}
   }
@@ -55,26 +56,37 @@
 			// require the file and, following convetion, build
 			// function name
 			require_once $file;
-			$name     = basename($file, '.php');
-			$function = "module_$name";
 			
-			// make sure function exists in required file
-			if (function_exists($function)) {
-				$modules[$name] = function($self) use ($function) {
-					return $function($self);
-				};
+			// get name of module class and make sure
+			// it exists
+			$name  = basename($file, '.php');
+			$class = __NAMESPACE__ . "\\Module\\$name";
+						
+			if (class_exists($class)) {
+				if (is_callable($module = new $class)) {
+					
+					$modules[ strtolower($name) ] = function($self) use ($module) {
+						return $module($self);
+					};
+				}
+				
+				else {
+					throw new \Exception(
+						"Could not invoke module '$name' because it does define #__invoke"
+					);
+				}
 				
 			// if function does not exist in required file then
 			// throw exception to that fact
 			} else {
-				throw new Exception(
-					"Failed to include module '$name' because function '$function' " .
-					"is not defined"
+				throw new \Exception(
+					"Failed to include module '$name' because class '$name' is not defined"
 				);
 			}
 
 		}
-
+		
+		
 		return $modules;
 	}
 	
