@@ -42,7 +42,9 @@ class PHPUnit extends Hook\Module {
 	
 			// iterate through modified files and retrieve
 			// class definitions
-			foreach($hook->modified_files() as $assoc) {
+			foreach($hook->modified_files() as $file) {
+				
+				$hook->show_file('test.7');
 				
 				// we need to issue git command to actually 
 				// get our file in question

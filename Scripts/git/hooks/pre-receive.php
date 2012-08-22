@@ -28,7 +28,7 @@ class PreReceive extends Hook {
 	 * Examines files that were created/updated on HEAD push
 	 * @TODO this may removed on refactor for reuse on other commit hooks
 	 */
-	protected function modified_files() {
+	public function modified_files() {
 		$files = array();
 		$out   = array();
 		
@@ -59,18 +59,26 @@ class PreReceive extends Hook {
 		// command and parse changed file names; finally
 		// return parsed files to caller
 		foreach($out as $line) {
-			preg_match($reg, $line, $match); 
-			
-			// record blob (so we can see it later) and
-			// filename
-			$files[] = array(
-				'blob' => $match[1],
-				'file' => $match[2]	
-			);
+			preg_match($reg, $line, $match);
+			$files[] = $match[2];	
 		}
 				
 		return $files;
 	}
+	
+	protected function input() {
+		//if 
+	} 
+	
+	public function show_file($filename) {
+		$resource = fopen('php://stdin', 'r');
+		list($old, $new, $ignore) = explode(
+			' ', fgets($resource)
+		);
+		
+		echo $new; exit(1);
+	}
+
 }
 
 

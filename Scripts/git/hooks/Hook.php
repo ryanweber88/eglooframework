@@ -25,7 +25,9 @@
   	}
   }
 	
-	
+	/**
+	 * @TODO temporary measure
+	 */
 	public function __call($name, $arguments) {
 		// provides simple dispatch to protected methods
 		// @TODO this will be removed once move to 5.4	
