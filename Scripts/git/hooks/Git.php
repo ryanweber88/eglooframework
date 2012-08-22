@@ -25,7 +25,7 @@ class Git {
 	 * Determines if given object exists in revision (defaults to head)
 	 */
 	public static function exists($object, $revision = 'HEAD') {
-		return stripos(`git ls-tree -r HEAD`, $object) !== false;	
+		return stripos(`git ls-tree -r $revision`, $object) !== false;	
 		
 	}
 	

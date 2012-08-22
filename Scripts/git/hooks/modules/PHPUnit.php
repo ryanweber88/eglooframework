@@ -44,32 +44,53 @@ class PHPUnit extends Hook\Module {
 			$hook->revision_old, $hook->revision_new
 		);
 		
+		
 		// iterate through modified files and retrieve
 		// class definitions
 		foreach($files as $file) {
 							
 			
 			// make sure we are looking at a php file
-			if ( preg_match('/\.php/i', $file) && 
-			     static::in_domain($file) )    {
+			if (preg_match('/\.php/i', $file) && 
+			    static::in_domain($file)) {
 				
-		
+				$file_content = Git::content(
+					$file, $hook->revision_new
+				);
+				
 				// iterate through class definitions and attempt to
 				// find the appropriate Test class definition
-				foreach (static::classes(Git::content($file, $hook->revision_new)) as $name) {
+				foreach (static::classes($file_content) as $name) {
 					
 					// we get the theoretical path to our test file based on
 					// the filename
 					$test_file = static::test_file($file);
 					
+					
 					// check if the test file exists in the most recent revision;
 					// if not, we check the repo in its entirety 
+					$in_head = false;
+					
 					if (Git::exists($test_file, $hook->revision_new) || 
-					    Git::exists($test_file)) {
+					    ($in_head = Git::exists($test_file))) {
 					    	
 						// get test file content, and perform reflection checks
 						// on methods and method body definitions
+						$test_file_methods = static::methods(Git::content(
+								$in_head 
+									? Git::content($test_file) 
+									: Git::content($test_file, $hook->revision_new) 
+						));
 						
+							
+						// make sure we have AT LEAST as many test methods defined on 
+						// test class as their are on class being tested (there should
+						// be 1 test method per public method)
+						// @TODO we should match method signatures as opposed to doiung
+						// a whole count		
+						if (count($test_file_methods) >= count(static::methods($file_content, '/public/i'))) {
+							
+						}
 						
 					
 					// @TODO a test definition does not exist, so we make note
@@ -116,6 +137,22 @@ class PHPUnit extends Hook\Module {
 	    }
 	  }
 	  return $classes;
+	}
+	
+	private static function methods($content, $__expressions = null) {
+		// retrieves all method definitions within a class definition
+		
+		// get list of possible expressions
+		$expressions = array_slice(func_get_args(), 1);
+		
+		// attempts to retrieve all methods
+		preg_match_all(
+			'/^.+?function\s+?([a-zA-Z0-9]+)/i', $content, $matches
+		);
+		
+		var_export($matches);
+		exit(1);
+	 
 	}
 	
 	private static function test_file($file) {
