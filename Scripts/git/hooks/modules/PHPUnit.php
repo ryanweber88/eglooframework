@@ -5,6 +5,7 @@
  */
  namespace eGloo\Script\Git\Hook\Module;
  use       \eGloo\Script\Git\Hook;
+ use       \eGloo\Script\Git\Git;
 
 
 /**
@@ -34,64 +35,70 @@ class PHPUnit extends Hook\Module {
 	
 	
 	protected function invoke($hook) {
-		// first ensure that hook is valid in the sense
-		// that it responds to modified_files method (
-		// we're approaching this from a duck-typing perspective
-		// as opposed to enforcingt type)	
-		if (method_exists($hook, 'modified_files')) {
-			$files = $hook->modified_files();
+		
+		$succeed = false;
+		
+		// get list of modified files between last commit and 
+		// current
+		$files = Git::modified_files(
+			$hook->revision_old, $hook->revision_new
+		);
+		
+		// iterate through modified files and retrieve
+		// class definitions
+		foreach($files as $file) {
+							
 			
-			// iterate through modified files and retrieve
-			// class definitions
-			foreach($files as $file) {
+			// make sure we are looking at a php file
+			if ( preg_match('/\.php/i', $file) && 
+			     static::in_domain($file) )    {
 				
-				// make sure we are looking at a php file
-				if (preg_match('/\.php/i', $file)) {
+		
+				// iterate through class definitions and attempt to
+				// find the appropriate Test class definition
+				foreach (static::classes(Git::content($file, $hook->revision_new)) as $name) {
 					
+					// we get the theoretical path to our test file based on
+					// the filename
+					$test_file = static::test_file($file);
+					
+					// check if the test file exists in the most recent revision;
+					// if not, we check the repo in its entirety 
+					if (Git::exists($test_file, $hook->revision_new) || 
+					    Git::exists($test_file)) {
+					    	
+						// get test file content, and perform reflection checks
+						// on methods and method body definitions
 						
-					// get class definitions
-					$classes = $this->classes(implode(
-						"\n", $out
-					));
 					
-					
-					// iterate through class definitions and attempt to
-					// find the appropriate Test class definition
-					foreach ($this->classes($hook->file_contents($file)) as $name) {
-						$test  = "{$name}Test";
-						$found = false;
-						exit('asdf');
-						 	
-						foreach($files as $compare_file) {
-								
-							// @TODO we need to match against an appropriate test
-							// class in the correct location
-							$compare = basename($compare_file, ".php");
-							      
-							if ($compare == $test) {
-								$found = true;
-								break;		
-							}
-						}
+					// @TODO a test definition does not exist, so we make note
+					// of the error	
+					} else {
+						$succeed = false;
 						
-						if (!$found) {
-							echo "Module::PHPUnit >> failed to find test class for '$name'";
-						}
-					}
+						// log error
+						// @TODO clearly we need a logging tool here
+						echo "Module::PHPUnit >> Failed to find test definition for class '$name' defined in '$file'. " . 
+						     "Please define test class '$test_file'\n";
+								 
+						echo "\n\n"; 
+					}		
+					 	
+					
 				}
+								
 			}
-			
-			exit(1);
 		}
 		
-		else {
-			throw new \Exception (
-				"Module phpunit failed because parameter hook does not respond to 'modified_files'"
-			);
-		}		
+		return $succeed;
 	}
 	
-	private function classes($content) {
+	
+
+	// @NOTE most of our methods below will be refactored later
+
+	
+	private static function classes($content) {
 		// this was culled from an online source and
 		// thus may not be reliable
 		
@@ -109,4 +116,52 @@ class PHPUnit extends Hook\Module {
 	  }
 	  return $classes;
 	}
+	
+	private static function test_file($file) {
+		// Determines test base directory given pattern from
+		// file name; this method assumes that file has
+		// fallen within the domain of acceptable/testable
+		// files
+		
+		// find our correct domain and then retrieve pre and
+		// post strings as we are using the pattern pre + test dir + 
+		// namespaced path to class
+		// @TODO this may wholly change as additional testable
+		// domains are added 		
+		foreach(static::$domains as $domain) {
+			if ( ($position = strpos($file, $domain)) !== false ) {
+				$pre  = substr($file, 0, $position);
+
+
+				// post is a bit more complicated, because we need to
+				// add 'Test' to the end of filename
+				$post = substr(
+					$file, $position + strlen($domain)
+				);				
+				$post = dirname($post) . 
+				        '/'            . 
+				        basename($post, '.php') . 'Test.php';
+				
+				return $pre . 'Test/PHPUnit/Classes/' . $post;
+			}
+		}	
+	}
+	
+	private static function in_domain($file) {
+		// determines if file path is in domain of testable
+		// code
+		foreach(static::$domains as $domain) {
+			if (strpos($file, $domain) !== false) {
+				return true;
+			}	
+		}
+		
+		return false;
+	}
+	
+	
+	
+	static private $domains = array(
+		'PHP/Classes/'
+	);
 }

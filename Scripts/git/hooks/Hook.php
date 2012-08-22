@@ -11,18 +11,51 @@
   */
  abstract class Hook {
  	
-	static public function fire() {
-		$instance = new static;
-		$instance->main();
+	// pre/post fire filters
+	
+	protected function before_fire() {
+		// shit was cold..
+		
+	}
+	protected function after_fire()  {
+		// well shit wasn't cold anymore dog
 	}
 	
+	/**
+	 * Our entry method
+	 */
+	static public function fire() {
+		
+		$instance = new static;
+		
+		$instance->before_fire();
+		$success = $instance->main();
+		$instance->after_fire();
+		
+		// this is kind of messy, but returns need to be
+		// 0 on success
+		exit((int)!$success);
+	}
+	
+	/**
+	 * Essentially our action body; it should be protected
+	 * but historical usage of main suggests others - 
+	 * this may change
+	 */
   public function main() {
+  	$failed = array();
+			
   	// iterate through defined modules and call each
   	// passing an instance of self as the parameter
   	// @TODO do we need a way to organize module calls?
+  	// @TODO rethink the way failed is determined
   	foreach($this->modules() as $name => $module) {
-  		$module($this);
+  		if (!$module($this)) {
+  			$failed[] = $name;
+  		};
   	}
+		
+		return count($failed) === 0;
   }
 	
 	/**
