@@ -39,26 +39,44 @@ class PHPUnit extends Hook\Module {
 		// we're approaching this from a duck-typing perspective
 		// as opposed to enforcingt type)	
 		if (method_exists($hook, 'modified_files')) {
-	
+			$files = $hook->modified_files();
+			
 			// iterate through modified files and retrieve
 			// class definitions
-			foreach($hook->modified_files() as $file) {
+			foreach($files as $file) {
 				
-				$hook->show_file('test.7');
-				
-				// we need to issue git command to actually 
-				// get our file in question
-				exec("git show {$assoc['blob']}", $out);
-				echo $assoc['blob'] . "\n";
-				var_export($out);
-				$classes = $this->classes(implode(
-					"\n", $out
-				));
-				
-				//var_export($classes); 
-				
-				foreach ($classes as $name) {
-				//	echo "$name\n";
+				// make sure we are looking at a php file
+				if (preg_match('/\.php/i', $file)) {
+						
+					// get class definitions
+					$classes = $this->classes(implode(
+						"\n", $out
+					));
+					
+					
+					// iterate through class definitions and attempt to
+					// find the appropriate Test class definition
+					foreach ($this->classes($hook->file_contents($file)) as $name) {
+						$test  = "{$name}Test";
+						$found = false;
+						exit('asdf');
+						 	
+						foreach($files as $compare_file) {
+								
+							// @TODO we need to match against an appropriate test
+							// class in the correct location
+							$compare = basename($compare_file, ".php");
+							      
+							if ($compare == $test) {
+								$found = true;
+								break;		
+							}
+						}
+						
+						if (!$found) {
+							echo "Module::PHPUnit >> failed to find test class for '$name'";
+						}
+					}
 				}
 			}
 			

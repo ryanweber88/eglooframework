@@ -27,6 +27,7 @@ class PreReceive extends Hook {
 	/**
 	 * Examines files that were created/updated on HEAD push
 	 * @TODO this may removed on refactor for reuse on other commit hooks
+	 * @TODO move to GIT class that provides static utility methods
 	 */
 	public function modified_files() {
 		$files = array();
@@ -36,7 +37,11 @@ class PreReceive extends Hook {
 		list($old, $new, $ignore) = explode(
 			' ', fgets($resource)
 		);
-				
+		
+		// bind old and new reference to member
+		// properties
+		$this->old = $old;
+		$this->new = $new;				
 				
 		// check if the first commit on a new branch, in which
 		// case our git diff command changes
@@ -62,23 +67,24 @@ class PreReceive extends Hook {
 			preg_match($reg, $line, $match);
 			$files[] = $match[2];	
 		}
+		
+
 				
 		return $files;
 	}
 	
-	protected function input() {
-		//if 
-	} 
-	
-	public function show_file($filename) {
-		$resource = fopen('php://stdin', 'r');
-		list($old, $new, $ignore) = explode(
-			' ', fgets($resource)
-		);
-		
-		echo $new; exit(1);
+	/**
+	 * Return file contents from new ref
+	 */
+	public function file_contents($filename) {
+		exec("git show {$this->new}:$filename", $out);
+		return implode("\n", $out);
+				
 	}
 
+	protected $old;
+	protected $new;
+	
 }
 
 
