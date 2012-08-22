@@ -13,7 +13,7 @@
  */
 class PHPUnit extends Hook\Module {
 	
-	const COMMAND_GIT_SHOW = 'git show';
+	const MIN_STATEMENTS = 5;
 	
 	protected function up() {
 		// include another library to do class checks
@@ -83,21 +83,33 @@ class PHPUnit extends Hook\Module {
 							: Git::content($test_file, $hook->revision_new); 
 									
 						
-						echo $test_file_content;
-						exit(1);
 						$test_file_methods = static::methods(
 							$test_file_content, '/public/i'
 						);
 						
-						
+
 							
 						// make sure we have AT LEAST as many test methods defined on 
 						// test class as their are on class being tested (there should
 						// be 1 test method per public method)
 						// @TODO we should match method signatures as opposed to doiung
 						// a whole count		
-						if (count($test_file_methods) >= count(static::methods($file_content, '/public/i'))) {
+						if (count($test_file_methods) >= ($count = count(static::methods($file_content, '/public/i')))) {
+								
+							// finally check number of statements in test method definition
+							echo $count;
+						}
+						
+						// send error message to log if test class does not contain enough
+						// test signatures to cover number of methods on tested class
+						else {
+							$succeed   = false;
+							$test_name = basename($test_file, ".php"); 
 							
+							echo "Module::PHPUnit >> Test definition '$test_name' defined in '$test_file' must " . 
+							     "contain at least '$count' method signatures";
+									 
+							echo "\n\n";
 						}
 						
 					
@@ -149,18 +161,34 @@ class PHPUnit extends Hook\Module {
 	
 	private static function methods($content, $__expressions = null) {
 		// retrieves all method definitions within a class definition
+		$methods = array();
 		
 		// get list of possible expressions
 		$expressions = array_slice(func_get_args(), 1);
 		
 		// attempts to retrieve all methods
 		preg_match_all(
-			'/.+?function\s+?([a-zA-Z0-9]+)/i', $content, $matches
+			'/.+?function\s+?([a-zA-Z0-9]+)/i', $content, $matches, PREG_SET_ORDER
 		);
 		
-		var_export($matches);
-		exit(1);
-	 
+		// now iterate through matches, apply those matches to
+		// our expression set and return to caller
+		foreach ($matches as $pair) {
+			$passed_expressions = true;
+						
+			foreach ($expressions as $expression) {
+				if (!preg_match($expression, $pair[0])) {
+					$passed_expressions = false;
+					continue;
+				}
+			}
+			
+			if ($passed_expressions) {
+				$methods[] = $pair[1];
+			}
+		}
+		
+		return $methods;
 	}
 	
 	private static function test_file($file) {
