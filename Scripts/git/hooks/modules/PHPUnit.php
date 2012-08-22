@@ -47,6 +47,7 @@ class PHPUnit extends Hook\Module {
 				
 				// make sure we are looking at a php file
 				if (preg_match('/\.php/i', $file)) {
+					
 						
 					// get class definitions
 					$classes = $this->classes(implode(
