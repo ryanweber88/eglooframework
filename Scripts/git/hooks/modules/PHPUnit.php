@@ -58,6 +58,7 @@ class PHPUnit extends Hook\Module {
 					$file, $hook->revision_new
 				);
 				
+				
 				// iterate through class definitions and attempt to
 				// find the appropriate Test class definition
 				foreach (static::classes($file_content) as $name) {
@@ -73,14 +74,21 @@ class PHPUnit extends Hook\Module {
 					
 					if (Git::exists($test_file, $hook->revision_new) || 
 					    ($in_head = Git::exists($test_file))) {
-					    	
+					    
+	
 						// get test file content, and perform reflection checks
 						// on methods and method body definitions
-						$test_file_methods = static::methods(Git::content(
-								$in_head 
-									? Git::content($test_file) 
-									: Git::content($test_file, $hook->revision_new) 
-						));
+						$test_file_content = $in_head 
+							? Git::content($test_file) 
+							: Git::content($test_file, $hook->revision_new); 
+									
+						
+						echo $test_file_content;
+						exit(1);
+						$test_file_methods = static::methods(
+							$test_file_content, '/public/i'
+						);
+						
 						
 							
 						// make sure we have AT LEAST as many test methods defined on 
@@ -147,7 +155,7 @@ class PHPUnit extends Hook\Module {
 		
 		// attempts to retrieve all methods
 		preg_match_all(
-			'/^.+?function\s+?([a-zA-Z0-9]+)/i', $content, $matches
+			'/.+?function\s+?([a-zA-Z0-9]+)/i', $content, $matches
 		);
 		
 		var_export($matches);
