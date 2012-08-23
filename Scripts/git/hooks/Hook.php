@@ -90,7 +90,7 @@
 			
 		// get global and hook specific modules
 		$files = array_merge(
-			glob(__DIR__ . '/modules/*.php'),
+			//glob(__DIR__ . '/modules/*.php'),
 			glob(__DIR__ . '/' . $this->hook_name() . '/modules/*.php')
 		);
 				
