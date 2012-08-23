@@ -109,9 +109,9 @@ class PreReceive extends Hook {
 // MAIN ///////////////////////////////////////////////////////////////////////
 
 
-PreReceive::fire();
+$success = PreReceive::fire();
 
 
 // if we have reached this point, fail our exit due to
 // unknown reasons
-exit(1);
+exit($success);
