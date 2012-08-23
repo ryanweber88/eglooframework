@@ -26,7 +26,7 @@ class PHPCodeSniffer extends Hook\Module {
 			
 			// make temporary directory in which to place files
 			// to be sniffed
-			mkdir(self::DIRECTORY);
+			@mkdir(self::DIRECTORY);
 			
 			// iterate through modified files and write to
 			// dump directory; we still maintain file path
@@ -42,7 +42,7 @@ class PHPCodeSniffer extends Hook\Module {
 				
 				// write file content
 				$resource = fopen(static::file($file), 'w'); 	
-				fwrite($file, Git::content($hook->revision_new));
+				fwrite($resource, Git::content($file, $hook->revision_new));
 				fclose($resource);
 				
 			}
@@ -55,7 +55,7 @@ class PHPCodeSniffer extends Hook\Module {
 			preg_match_all('/FOUND:.+/', $results, $error_matches, PREG_SET_ORDER);
 			
 			// now log all summarized results
-			if ($count($file_matches)) {
+			if (count($file_matches)) {
 				$counter = 0;
 				
 				foreach($file_matches as $file_match) {
@@ -69,13 +69,13 @@ class PHPCodeSniffer extends Hook\Module {
 			}
 			
 			// finally we drop the godamn dump directory
-			rmdir(self::DIRECTORY);
+			//static::rmdir(self::DIRECTORY);
 			
 		}
 		
 		else {
 			$this->log(
-				"Failed to run {$this->class} because PHP Mess Detector is not installed"
+				"Failed to run {$this->class} because PHP Code Sniffer is not installed"
 			);
 			
 		}
@@ -86,7 +86,7 @@ class PHPCodeSniffer extends Hook\Module {
 	 * Issues command to begin code check
 	 * @TODO refactor ModuleDependency class
 	 */
-	protected static execute() {
+	protected static function execute() {
 		$command = self::COMMAND;
 		$path    = self::DIRECTORY;
 		
@@ -97,7 +97,7 @@ class PHPCodeSniffer extends Hook\Module {
 	 * @TODO refactor to ModuleDependency class
 	 */
 	protected static function installed() {
-		return strlen( ` . self::COMMAND . `) > 0;
+		return strlen(`which phpcs`) > 0;
 	}
 	
 	private static function directory($path) {
@@ -107,4 +107,20 @@ class PHPCodeSniffer extends Hook\Module {
 	private static function file($file) {
 		return self::DIRECTORY . "/$file";
 	}
+	
+	protected static function rmdir($directory) {
+		
+    $files = glob( $directory . '*', GLOB_MARK ); 
+		
+    foreach( $files as $file ){ 
+        if( substr( $file, -1 ) == '/' ) 
+            static::rmdir( $file ); 
+        else 
+            unlink( $file ); 
+    } 
+    
+    if (is_dir($directory)) {
+    	rmdir( $directory );
+		}  		
+	}	
 }

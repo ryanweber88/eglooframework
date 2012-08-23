@@ -59,7 +59,7 @@
 			if ($module->has_errors()) {
 				$succeeded = false;
 				
-				foreach ($module->errors as $error) {
+				foreach ($module->errors() as $error) {
 					echo "$error\n\n";
 				} 		
 			}
@@ -87,12 +87,13 @@
 	 */
 	protected function modules() {
 		$modules = array();
-			
+					
 		// get global and hook specific modules
 		$files = array_merge(
 			//glob(__DIR__ . '/modules/*.php'),
 			glob(__DIR__ . '/' . $this->hook_name() . '/modules/*.php')
 		);
+		
 				
 		// iterate across files, include each, and wrap within
 		// closure
@@ -110,9 +111,7 @@
 			if (class_exists($class)) {
 				if (is_callable($module = new $class)) {
 					
-					$modules[ strtolower($name) ] = function($self) use ($module) {
-						return $module($self);
-					};
+					$modules[ strtolower($name) ] = $module;
 				}
 				
 				else {
@@ -146,7 +145,7 @@
 		// now use regular expression to replace camel
 		// case 
 		return strtolower(preg_replace(
-			'/[(a-z)(A-Z)]/', '$1-$2', $class
+			'/([a-z])([A-Z])/', '$1-$2', $class
 		));
 	}
 	

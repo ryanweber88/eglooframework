@@ -74,7 +74,6 @@ spl_autoload_register($GLOBALS['__autoload_egloo'] = function($name) {
 // REQUIRES ///////////////////////////////////////////////////////////////////
 
 // @TODO move this to autoloader?
-require_once 'Git.php';
 require_once 'Hook.php';
 require_once 'Module.php';
 

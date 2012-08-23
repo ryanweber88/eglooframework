@@ -34,7 +34,7 @@
 	 * module invocation
 	 * @return boolean
 	 */
-	protected function has_errors() {
+	public function has_errors() {
 		return count($this->log) > 0;
 	}	
 	
@@ -42,7 +42,7 @@
 	 * Returns outstanding errors
 	 * @TODO refactor and decouple from Module
 	 */
-	protected function errors() {
+	public function errors() {
 		return $this->log;
 	}
 	
