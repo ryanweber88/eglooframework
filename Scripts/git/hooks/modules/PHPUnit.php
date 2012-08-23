@@ -36,7 +36,7 @@ class PHPUnit extends Hook\Module {
 	
 	protected function invoke($hook) {
 		
-		$succeed = false;
+		$succeed = true;
 		
 		// get list of modified files between last commit and 
 		// current
@@ -97,7 +97,36 @@ class PHPUnit extends Hook\Module {
 						if (count($test_file_methods) >= ($count = count(static::methods($file_content, '/public/i')))) {
 								
 							// finally check number of statements in test method definition
-							echo $count;
+							//$method_definitions = static::method_definitions(
+							//	$test_file_content
+							//);
+							
+							
+							
+							// check number of statements
+							// @TODO for the time being, we're just going to check number
+							// of newlines; determining statements over multiline is
+							// extremely horrible and i am not sure there isn't a better
+							// way to do so
+							$counter = 0;
+							
+							/*
+							foreach($method_definitions as $definition) {
+								$method_name = $test_file_methods[$counter++];
+								preg_match('/\n/s', $definition, $matches);
+								
+								
+								
+								if (count($matches) < self::MIN_STATEMENTS) {
+									$succeed = false;
+										echo "Module::PHPUnit >> Test method '$test_name#$method_name' defined in '$test_file' must " . 
+										     "contain at least '' statements";
+												 
+										echo "\n\n";
+								}					
+							}
+							*/ 
+							 
 						}
 						
 						// send error message to log if test class does not contain enough
@@ -138,7 +167,12 @@ class PHPUnit extends Hook\Module {
 	
 
 	// @NOTE most of our methods below will be refactored later
-
+	private static function method_definitions($content) {
+		preg_match_all('/function.+(function|$)/is', $content, $matches);
+		
+		var_export($matches);
+		exit(1);
+	}
 	
 	private static function classes($content) {
 		// this was culled from an online source and
