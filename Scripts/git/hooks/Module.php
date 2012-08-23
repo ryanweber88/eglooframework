@@ -4,12 +4,13 @@
  * @author Christian Calloway callowaylc@gmail.com christian@petflow.com
  */
  namespace eGloo\Script\Git\Hook;
+ use       \eGloo\Dialect\ObjectSafe as Object;
  
  /**
   * Represents a hook module and is responsible for defining concrete methods
   * that are shared amongst hook module instances
   */
- abstract class Module {
+ abstract class Module extends Object {
  	
 	
 	function __construct() {

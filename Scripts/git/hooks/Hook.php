@@ -4,12 +4,12 @@
  * @author Christian Calloway callowaylc@gmail.com christian@petflow.com
  */
  namespace eGloo\Script\Git\Hook;
- 
+ use       \eGloo\Dialect\ObjectSafe as Object;
 
  /**
   * Defines concrete methods employed by git hook handlers
   */
- abstract class Hook {
+ abstract class Hook extends Object {
  	
 	// pre/post fire filters
 	
@@ -34,7 +34,8 @@
 		
 		// this is kind of messy, but returns need to be
 		// 0 on success
-		exit((int)!$success);
+		return ((int)!$success);
+		
 	}
 	
 	/**
