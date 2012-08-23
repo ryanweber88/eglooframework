@@ -13,14 +13,6 @@
  abstract class Module extends Object {
  	
 	
-	function __construct() {
-		$this->up();
-	}
-	
-	function __destruct() {
-		$this->down();
-	}
-	
 	/**
 	 * Responsible for firing on instance callable event
 	 */
@@ -28,23 +20,34 @@
 		$this->before_invoke($hook);
 		$binding = $this->invoke($hook);
 		return $this->after_invoke($hook, $binding);
-	}	
+	}
 	
 	/**
 	 * Called by __invoke and is meant as the definition 
 	 * container for module action
 	 */
  	abstract protected function invoke($hook);
-
-	/**
-	 * Perform and build-up operations
-	 */
-	protected function up() { }
+	
 	
 	/**
-	 * Perform any tear-down operations
+	 * Determined if errors occured during
+	 * module invocation
+	 * @return boolean
 	 */
-	protected function down() { }
+	protected function has_errors() {
+		return count($this->log) > 0;
+	}	
+	
+	/**
+	 * Returns outstanding errors
+	 * @TODO refactor and decouple from Module
+	 */
+	protected function errors() {
+		return $this->log;
+	}
+	
+
+
 	
 	/** 
 	 * A pre-invoke hook

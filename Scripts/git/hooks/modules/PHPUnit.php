@@ -35,9 +35,7 @@ class PHPUnit extends Hook\Module {
 	
 	
 	protected function invoke($hook) {
-		
-		$succeed = true;
-		
+				
 		// get list of modified files between last commit and 
 		// current
 		$files = Git::modified_files(
@@ -132,27 +130,27 @@ class PHPUnit extends Hook\Module {
 						// send error message to log if test class does not contain enough
 						// test signatures to cover number of methods on tested class
 						else {
-							$succeed   = false;
 							$test_name = basename($test_file, ".php"); 
 							
-							echo "Module::PHPUnit >> Test definition '$test_name' defined in '$test_file' must " . 
-							     "contain at least '$count' method signatures";
+							$this->log(
+								"Module::PHPUnit >> Test definition '$test_name' defined in '$test_file' must " . 
+							  "contain at least '$count' method signatures"
+							);
 									 
-							echo "\n\n";
 						}
 						
 					
 					// @TODO a test definition does not exist, so we make note
 					// of the error	
 					} else {
-						$succeed = false;
 						
 						// log error
 						// @TODO clearly we need a logging tool here
-						echo "Module::PHPUnit >> Failed to find test definition for class '$name' defined in '$file'. " . 
-						     "Please define test class '$test_file'\n";
+						$this->log(
+							"Module::PHPUnit >> Failed to find test definition for class '$name' defined in '$file'. " . 
+							"Please define test class '$test_file'"
+						);
 								 
-						echo "\n\n"; 
 					}		
 					 	
 					
@@ -161,7 +159,6 @@ class PHPUnit extends Hook\Module {
 			}
 		}
 		
-		return $succeed;
 	}
 	
 	

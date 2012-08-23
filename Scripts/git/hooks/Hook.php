@@ -44,19 +44,28 @@
 	 * this may change
 	 */
   public function main() {
-  	$failed = array();
-			
+		$succeeded = true;
+					
   	// iterate through defined modules and call each
   	// passing an instance of self as the parameter
   	// @TODO do we need a way to organize module calls?
   	// @TODO rethink the way failed is determined
   	foreach($this->modules() as $name => $module) {
-  		if (!$module($this)) {
-  			$failed[] = $name;
-  		};
+  		$module($this);
+			
+			// check if errors, and if case, push to stdout/email/etc
+			// @TODO decouple error checking, decouple reporting 
+			// mechanism and decouple error logging
+			if ($module->has_errors()) {
+				$succeeded = false;
+				
+				foreach ($module->errors as $error) {
+					echo "$error\n\n";
+				} 		
+			}
   	}
 		
-		return count($failed) === 0;
+		return $succeeded;
   }
 	
 	/**
