@@ -1,0 +1,24 @@
+########
+#  This file is to be included in other scripts
+########
+	DETECTED_OS_NAME="Ubuntu 12.04"
+
+	# Default Configuration Parameters (Ubuntu)
+	DEFAULT_APPLICATIONS="/usr/lib/egloo/applications"
+	DEFAULT_CACHE_DIR="/var/cache/egloo"
+	DEFAULT_CONFIG="/etc/egloo/"
+	DEFAULT_CUBES="/usr/lib/egloo/cubes"
+	DEFAULT_DATA_STORE="/var/egloo"
+	DEFAULT_DOCTRINE=`locate /usr/*/Doctrine.php | head -n 1`
+	DEFAULT_DOCUMENTATION="/usr/share/doc/egloo"
+	DEFAULT_DOCUMENTROOT="/var/www/egloo"
+	DEFAULT_FRAMEWORKROOT="/usr/lib/eglooframework"
+	DEFAULT_LOGPATH="/var/log/egloo"
+	DEFAULT_SMARTY=`locate /usr/*/Smarty.class.php | head -n 1`
+
+	DEFAULT_WEBUSER="www-data"
+	DEFAULT_WEBGROUP="www-data"
+
+	DEFAULT_CODE_DIR="/data/code"
+	DEFAULT_FRAMEWORK_INSTALL="$DEFAULT_CODE_DIR/eglooframework"
+

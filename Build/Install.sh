@@ -26,6 +26,16 @@
 # @subpackage Installation
 # @version 1.0
 
+echo
+echo
+echo "****************************************"
+echo "****************************************"
+echo "****        eGloo Installer         ****"
+echo "****************************************"
+echo "****************************************"
+echo
+echo
+
 ###########################################################
 ########## General Setup
 ###########################################################
@@ -169,8 +179,10 @@ fi
 ###########################################################
 if [ "$UBUNTU_FOUND" -eq 1 ]
 then
-	echo "Detected Ubuntu Linux"
+	echo "Detected Ubuntu GNU/Linux"
 	DETECTED_PLATFORM=$OS_UBUNTU
+
+	updatedb
 
 	# Default Configuration Parameters (Ubuntu)
 	DEFAULT_APPLICATIONS="/usr/lib/egloo/applications"
@@ -1186,7 +1198,7 @@ then
 					* )
 					;;
 				esac
-			done		
+			done
 		;;
 
 		# User chose the default path
@@ -1195,7 +1207,7 @@ then
 	esac
 else
 	echo "Smarty was not found at the default location."
-	echo 
+	echo
 
 	if [ $DEFAULT_EVERYTHING -eq 0 ]
 	then
@@ -1204,7 +1216,7 @@ else
 	else
 		CONFIRM_CONTINUE="YES"
 	fi
-	
+
 	# Check if the user wants to use the default or specify their own Smarty path
 	case "$CONFIRM_CONTINUE" in
 		# User chose to specify own Smarty path
@@ -1240,6 +1252,7 @@ else
 		* )
 			# TODO install Smarty
 			SMARTY_PATH="$FRAMEWORK_PATH/Library/Smarty3/libs/Smarty.class.php"
+			echo "Using Smarty package provided in eGloo Framework library"
 		;;
 	esac
 

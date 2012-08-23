@@ -26,7 +26,7 @@ echo
 echo
 echo "****************************************"
 echo "****************************************"
-echo "****   eGloo Dependency Installer   ****"
+echo "****       MySQL 5.1 Installer      ****"
 echo "****************************************"
 echo "****************************************"
 echo
@@ -55,11 +55,11 @@ OS_UBUNTU_10=0
 OS_UBUNTU_12=1
 OS_MACOSX=2
 OS_WINDOWS=3
-
+OS_UBUNTU_1110=4
 
 # Current platform
 # Default to Debian
-DETECTED_PLATFORM=0
+DETECTED_PLATFORM=9999
 # OS String
 DETECTED_OS_NAME="Unknown"
 
@@ -80,6 +80,7 @@ PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
 set +o errexit
 MACOSX_FOUND=`echo "$PLATFORM" | grep -i -c "Apple Mac OS X"`
 UBUNTU_10_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu 10.04"`
+UBUNTU_1110_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu 11.10"`
 UBUNTU_12_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu 12.04"`
 WINDOWS_FOUND=`echo "$PLATFORM" | grep -i -c "Windows"`
 set -o errexit
@@ -87,9 +88,7 @@ set -o errexit
 ###########################################################
 ########## Platform: OS X specific params
 ###########################################################
-if [ "$MACOSX_FOUND" -eq 1 ]
-then
-
+if [ "$MACOSX_FOUND" -eq 1 ]; then
 	DETECTED_OS_NAME="Apple Mac OS X"
         echo "Detected:" $DETECTED_OS_NAME
         DETECTED_PLATFORM=$OS_MACOSX
@@ -98,39 +97,38 @@ fi
 ###########################################################
 ########## Platform: Ubuntu specific params
 ###########################################################
-if [ "$UBUNTU_10_FOUND" -eq 1 ]
-then
+if [ "$UBUNTU_10_FOUND" -eq 1 ]; then
 	DETECTED_OS_NAME="Ubuntu 10.04"
         echo "Detected:" $DETECTED_OS_NAME
 	DETECTED_PLATFORM=$OS_UBUNTU_10
-
 fi
 
-if [ "$UBUNTU_12_FOUND" -eq 1 ]
-then
+if [ "$UBUNTU_1110_FOUND" -eq 1 ]; then
+	DETECTED_OS_NAME="Ubuntu 11.10"
+	echo "Detected:" $DETECTED_OS_NAME
+	DETECTED_PLATFORM=$OS_UBUNTU_1110
+fi
+
+if [ "$UBUNTU_12_FOUND" -eq 1 ]; then
 	DETECTED_OS_NAME="Ubuntu 12.04"
         echo "Detected:" $DETECTED_OS_NAME
         DETECTED_PLATFORM=$OS_UBUNTU_12
-
 fi
 
 ###########################################################
 ########## Platform: Winblows specific params
 ###########################################################
-if [ "$WINDOWS_FOUND" -eq 1 ]
-then
+if [ "$WINDOWS_FOUND" -eq 1 ]; then
 	DETECTED_OS_NAME="Windows"
         echo "Detected:" $DETECTED_OS_NAME
 	DETECTED_PLATFORM=$OS_WINDOWS
-
 fi
 
 ###########################################################
 ########## Check that we have correct permissions and correct user/group
 ###########################################################
 # Check for root
-if [[ "$UID" -ne "$ROOT_UID" && $DETECTED_PLATFORM -ne $OS_WINDOWS ]]
-then
+if [[ "$UID" -ne "$ROOT_UID" && $DETECTED_PLATFORM -ne $OS_WINDOWS ]]; then
 	echo "***********************************"
 	echo "* Must be root to run this script *"
 	echo "***********************************"
@@ -142,71 +140,35 @@ fi
 ########## Install!
 ###########################################################
 
-if [ $DETECTED_PLATFORM -eq 0 ]
-then
-	# Ubuntu 10.04
-        echo
-        echo "****************************"
-        echo "* Adding ppa repo for php5 *"
-        echo "****************************"
-        echo
-
-	add-apt-repository ppa:l-mierzwa/lucid-php5
-	echo
-	echo "* DONE: adding ppa repo for php5 *"
-	echo
-
-        echo
-        echo "**********************"
-        echo "* Updating apt-cache *"
-        echo "**********************"
-        echo
-
-	apt-get update
-
+if [ $DETECTED_PLATFORM -eq $OS_UBUNTU_10 ]; then
+	echo $DETECTED_OS_NAME "is not currently supported"
+	exit 0
+elif [ $DETECTED_PLATFORM -eq $OS_UBUNTU_1110 ]; then
 	echo
         echo "****************************"
-	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
+	echo "* Installing MySQL for" $DETECTED_OS_NAME "*"
         echo "****************************"
         echo
 
-	apt-get --assume-yes install curl apache2 memcached php5 php-apc \
-		php5-imagick php5-mcrypt php5-memcache php5-memcached \
-		php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
-		php-soap php-openid php5-odbc php5-gd php5-xmlrpc php5-suhosin
+	echo mysql-server-5.1 mysql-server/root_password password $MYSQL_PASS \
+		| debconf-set-selections
+	echo mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASS \
+		| debconf-set-selections
+        apt-get --assume-yes install mysql-server-5.1 mysql-client-5.1
+	unset $MYSQL_PASS
 
         echo
         echo "* DONE: installing dependencies *"
         echo
-
 	exit 0
-elif [ $DETECTED_PLATFORM -eq 1 ]
-then
-	# Ubuntu 12.04
-	echo
-        echo "****************************"
-	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
-        echo "****************************"
-        echo
-
-        apt-get --assume-yes install curl apache2 memcached \
-		php5 php-apc \
-                php5-imagick php5-mcrypt php5-memcache php5-memcached \
-                php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
-                php-soap php-openid php5-odbc php5-gd php5-xmlrpc php5-suhosin
-
-        echo
-        echo "* DONE: installing dependencies *"
-        echo
-
-	exit 0
-elif [ $DETECTED_PLATFORM -eq 2 ]
-then
-	echo $DETECTED_OS_NAME "is not currently supported by this dependency installation script"
+elif [ $DETECTED_PLATFORM -eq $OS_UBUNTU_12 ]; then
+	echo $DETECTED_OS_NAME "is not currently supported"
 	exit 1
-elif [ $DETECTED_PLATFORM -eq 3 ]
-then
-	echo $DETECTED_OS_NAME "is not currently supported by this dependency installation script"
+elif [ $DETECTED_PLATFORM -eq $OS_MACOSX ]; then
+	echo $DETECTED_OS_NAME "is not currently supported"
+	exit 1
+elif [ $DETECTED_PLATFORM -eq $OS_WINDOWS ]; then
+	echo $DETECTED_OS_NAME "is not currently supported"
 	exit 1
 else
 	echo "Unknown system detected...exiting"

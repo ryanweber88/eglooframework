@@ -51,6 +51,84 @@ use \ErrorException as ErrorException;
  */
 class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 
+	protected $_api_request_history = array();
+
+	/**
+	 * Auth and capture in one go
+	 *
+	 *
+	 */
+	public function doAuthAndCapture( $params ) {
+		$retVal = null;
+
+		if ( !isset($params['paymentType']) ) {
+			$params['paymentType'] = 'Authorization';	// or 'Sale'
+		}
+
+		$auth_response = $this->doDirectPayment( $params );
+
+		if ( 'SUCCESS' === strtoupper($auth_response["ACK"]) ||
+			 'SUCCESSWITHWARNING' === strtoupper($auth_response["ACK"]) ) {
+
+			$capture_request = array(
+				'auth_id' => urldecode($auth_response['TRANSACTIONID']),
+				'amount' => urldecode($auth_response['AMT']),
+				'currency' => urldecode($auth_response['CURRENCYCODE']),
+				'codeType' => 'Complete',
+				'invoiceID' => $params['invoiceID'],
+			);
+
+			$capture_response = $this->doCapture(
+				urldecode($auth_response['TRANSACTIONID']),
+				urldecode($auth_response['AMT']),
+				urldecode($auth_response['CURRENCYCODE']),
+				'Complete',
+				$params['invoiceID']
+			);
+		} else {
+			$capture_request = array();
+			$capture_response = array();
+		}
+
+
+		$retVal = array(
+			'auth_request' => $params,
+			'auth_response' => $auth_response,
+			'capture_request' => $capture_request,
+			'capture_response' => $capture_response,
+			'api_request_history' => $this->_api_request_history,
+		);
+
+		$this->_api_request_history = array();
+
+		return $retVal;
+	}
+
+	/**
+	 * Auth and capture in one go
+	 *
+	 *
+	 */
+	public function doSale( $params ) {
+		$retVal = null;
+
+		if ( !isset($params['paymentType']) ) {
+			$params['paymentType'] = 'Sale';
+		}
+
+		$sale_response = $this->doDirectPayment( $params );
+
+		$retVal = array(
+			'sale_request' => $params,
+			'sale_response' => $sale_response,
+			'api_request_history' => $this->_api_request_history,
+		);
+
+		$this->_api_request_history = array();
+
+		return $retVal;
+	}
+
 	/**
 	 * Create a recurring payments profile
 	 *
@@ -106,26 +184,29 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 *
 	 */
-	public function doCapture() {
+	public function doCapture( $auth_id, $amount, $currency, $codeType, $invoiceID, $note = '' ) {
 		// Set request-specific fields.
-		$authorizationID = urlencode('example_authorization_id');
-		$amount = urlencode('example_amount');
-		$currency = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
-		$completeCodeType = urlencode('Complete');				// or 'NotComplete'
-		$invoiceID = urlencode('example_invoice_id');
-		$note = urlencode('example_note');
+		$authorizationID = urlencode( $auth_id );
+		$amount = urlencode( $amount );
+		$currency = urlencode( $currency );							// USD or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$completeCodeType = urlencode( $codeType );				// 'Complete' or 'NotComplete'
+		$invoiceID = urlencode( $invoiceID );
+		$note = urlencode( $note );
 
 		// Add request-specific fields to the request string.
-		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&NOTE=$note";
+		$nvpStr="&AUTHORIZATIONID=$authorizationID&AMT=$amount&COMPLETETYPE=$completeCodeType&CURRENCYCODE=$currency&INVOICEID=$invoiceID&INVNUM=$invoiceID&NOTE=$note";
 
 		// Execute the API operation; see the PPHttpPost function above.
 		$httpParsedResponseAr = $this->postHTTPRequest('DoCapture', $nvpStr);
 
-		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-			exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		} else  {
-			exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
-		}
+		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+		// 	// echo_r( 'Capture Completed Successfully: '.print_r($httpParsedResponseAr, true) );
+		// 	// exit('Capture Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		// } else  {
+		// 	exit('DoCapture failed: ' . print_r($httpParsedResponseAr, true));
+		// }
+
+		return $httpParsedResponseAr;
 	}
 
 	/**
@@ -133,27 +214,28 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 *
 	 *
 	 */
-	public function doDirectPayment() {
+	public function doDirectPayment( $params ) {
 		// Set request-specific fields.
-		$paymentType = urlencode('Authorization');				// or 'Sale'
-		$firstName = urlencode('George');
-		$lastName = urlencode('Cooper');
-		$creditCardType = urlencode('visa');
-		$creditCardNumber = urlencode('4470966005764985');
-		$expDateMonth = '5';
+		$paymentType = urlencode($params['paymentType']);				// or 'Sale'
+		$firstName = urlencode($params['firstName']);
+		$lastName = urlencode($params['lastName']);
+		$creditCardType = urlencode($params['creditCardType']);
+		$creditCardNumber = urlencode($params['creditCardNumber']);
+		$expDateMonth = $params['expDateMonth'];
+
 		// Month must be padded with leading zero
 		$padDateMonth = urlencode(str_pad($expDateMonth, 2, '0', STR_PAD_LEFT));
 
-		$expDateYear = urlencode('2017');
-		$cvv2Number = urlencode('cc_cvv2_number');
-		$address1 = urlencode('90 West Street APT 19P');
-		$address2 = urlencode('');
-		$city = urlencode('New York');
-		$state = urlencode('New York');
-		$zip = urlencode('10006');
-		$country = urlencode('US');				// US or other valid country code
-		$amount = urlencode('10');
-		$currencyID = urlencode('USD');							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$expDateYear = urlencode($params['expDateYear']);
+		$cvv2Number = urlencode($params['cvv2Number']);
+		$address1 = urlencode($params['address1']);
+		$address2 = urlencode($params['address2']);
+		$city = urlencode($params['city']);
+		$state = urlencode($params['state']);
+		$zip = urlencode($params['zip']);
+		$country = urlencode($params['country']);				// US or other valid country code
+		$amount = urlencode($params['amount']);
+		$currencyID = urlencode($params['currencyID']);							// or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
 
 		// Add back &CVV2=$cvv2Number
 		// Add request-specific fields to the request string.
@@ -164,11 +246,14 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 		// Execute the API operation; see the PPHttpPost function above.
 		$httpParsedResponseAr = $this->postHTTPRequest('DoDirectPayment', $nvpStr);
 
-		if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
-			exit('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
-		} else  {
-			exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
-		}
+
+		// if("SUCCESS" == strtoupper($httpParsedResponseAr["ACK"]) || "SUCCESSWITHWARNING" == strtoupper($httpParsedResponseAr["ACK"])) {
+		// 	// echo_r('Direct Payment Completed Successfully: '.print_r($httpParsedResponseAr, true));
+		// } else  {
+		// 	exit('DoDirectPayment failed: ' . print_r($httpParsedResponseAr, true));
+		// }
+
+		return $httpParsedResponseAr;
 	}
 
 	/**
@@ -561,7 +646,11 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 */
 	protected function postHTTPRequest( $methodName_, $nvpStr_ ) {
 			$environment_credentials = $this->getEnvironmentCredentials();
-			echo_r($environment_credentials);
+
+			$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
+				$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
+				urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
+
 			// Set up your API credentials, PayPal end point, and API version.
 			$API_UserName = urlencode( $environment_credentials['API_UserName'] );
 			$API_Password = urlencode( $environment_credentials['API_Password'] );
@@ -583,10 +672,13 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 			curl_setopt($ch, CURLOPT_POST, 1);
 
 			// Set the API operation, version, and API signature in the request.
-			$nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+			$nvpreq = "IPADDRESS=$customer_ip_address&METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+			// $nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
 
 			// Set the request as a POST FIELD for curl.
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
+
+			$this->_api_request_history[] = $nvpreq;
 
 			// Get response from the server.
 			$httpResponse = curl_exec($ch);
