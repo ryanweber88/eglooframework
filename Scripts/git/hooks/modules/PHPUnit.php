@@ -5,7 +5,7 @@
  */
  namespace eGloo\Script\Git\Hook\Module;
  use       \eGloo\Script\Git\Hook;
- use       \eGloo\Script\Git\Git;
+ use       \eGloo\Utilities\Git;
 
 
 /**

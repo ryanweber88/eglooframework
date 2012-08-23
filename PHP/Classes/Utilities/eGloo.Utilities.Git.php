@@ -3,12 +3,13 @@
  * Contains Git class definition
  * author Christian Calloway callowaylc@gmail christian@petflow
  */
- namespace eGloo\Script\Git;
+ namespace eGloo\Utilities;
+ use       \eGloo\Dialect\ObjectSafe as Object;
  
 /**
  * Utility class - provides set of static public function to execute git commands
  */ 
-class Git {
+class Git extends Object {
 	
 	const HASH_NEW_BRANCH = '0000000000000000000000000000000000000000';
 	
