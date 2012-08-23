@@ -58,5 +58,13 @@
 		return $binding;
 	}
 	
-
+	/** @TODO temporary measure until logging has been
+	 * cleanly separated
+	 */
+	protected function log($message) {
+		$this->log[] = 
+			"Module::{$this->class->name} >> $message";
+	}
+	
+	private $log = array();
  }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Contains module_phpunit function definition
+ * Contains Module::PHPUnit class definition
  * @author Christian Calloway callowaylc@gmail.com christian@petflow.com
  */
  namespace eGloo\Script\Git\Hook\Module;
