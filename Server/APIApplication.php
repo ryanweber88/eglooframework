@@ -80,6 +80,10 @@ class APIApplication extends \eGloo\Server\Application {
 			// fill in default values to play nicely with config load
 			$_SERVER['SCRIPT_NAME'] = '/index.php';	
 			
+			if (isset($_GET['resource'])) {
+				$_SERVER['PATH_INFO']   = $_GET['resource'];
+			}
+				
 			// retrieve resource and resource tokens
 			if (isset($_GET['resource'])) {
 				$_GET['resource_tokens'] = array_slice(
@@ -91,10 +95,12 @@ class APIApplication extends \eGloo\Server\Application {
 			// examine id if present and determine if multi-get id
 			if (isset($_GET['id']) && 
 			   (strlen($id = $_GET['id']) && !is_numeric($id))) {
+
 				// @TODO we need to check against correct delimiting token
 				$_GET['ids'] = explode(';', $id);
 				unset($_GET['id']);
 			}
+				 
 				 
 				 
 			// fill in defaults for offset and limit, should they

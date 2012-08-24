@@ -250,7 +250,18 @@ abstract class Model extends Delegator
 			
 			
 			static::delegates(array(
-				'methods' => array('selects', 'search', 'like', 'where', 'from', 'join', 'limit', 'order', 'group'),
+				'methods' => array(
+					'selects', 
+					'search', 
+					'like', 
+					'where', 
+					'from', 
+					'join', 
+					'limit', 
+					'offset', 
+					'order', 
+					'group'
+				),
 				'to'      => new Model\Relation(static::classnamefull())
 			));
 		}

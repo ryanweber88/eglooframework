@@ -138,7 +138,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 	 * Returns json representation of models in set
 	 * @TODO use Model#toJson to create json representation 
 	 */
-	public function toJson() {
+	public function toJson($temporary = [ ]) {
 		$data = [ ];
 		
 		
@@ -152,7 +152,9 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			
 			foreach ($model->reference('associations') as $name => $ignore) {
 				$name                        = strtolower($name);
-				$associations[ "uri_$name" ] = strtolower("{$_SERVER['PATH_INFO']}/$name");
+				$associations[ "uri_$name" ] = strtolower(
+					"{$_SERVER['PATH_INFO']}/$name"
+				);
 	
 			}
 					
