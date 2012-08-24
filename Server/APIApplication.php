@@ -96,6 +96,7 @@ class APIApplication extends \eGloo\Server\Application {
 				unset($_GET['id']);
 			}
 				 
+				 
 			// fill in defaults for offset and limit, should they
 			// not exist
 			// @TODO find a way to abstract this, because this very
