@@ -54,7 +54,8 @@ class RequestInfoBean implements \ArrayAccess {
 	private $FILES   = null;
 	private $GET     = null;
 	private $POST    = null;
-	private $PUT     = array();
+	private $PUT     = [ ];
+	private $DELETE  = [ ];
 
 	private $forms = null;
 
@@ -140,7 +141,6 @@ class RequestInfoBean implements \ArrayAccess {
 	public function __call($name, $arguments) {
 		// @TODO test and implement this
 
-
 		if (preg_match('/^request_?is_?(.+)$/i', $name, $match)) {
 			return strtolower($match[1]) == strtolower($_SERVER['REQUEST_METHOD']);
 		}
@@ -187,12 +187,12 @@ class RequestInfoBean implements \ArrayAccess {
 		
 		// check for set_httpmethod, which will set a key value pair
 		// on instance property with corresponding name
-		else if (preg_match('/^set_?(a-z)+$/i', $name, $match)) {
+		else if (preg_match('/^set_?([a-z]+)$/i', $name, $match)) {
 			list($key, $value) = $arguments;
-			
+
 			// make sure instance property exist
 			if (\property_exists($this, $httpMethod = strtoupper($match[1]))) {
-				$this->$httpMethod[$key] = $value;
+				$this->{$httpMethod}[$key] = $value;
 			}
 			
 			// otherwise we throw an exception to the fact
@@ -260,22 +260,18 @@ class RequestInfoBean implements \ArrayAccess {
 		return false;
 	}
 
-
 	/**
-	 * (non-PHPdoc)
-	 * @see ArrayAccess::offsetGet()
+	 * 
 	 */
- /**
-     * (non-PHPdoc)
-     * @see ArrayAccess::offsetGet()
-     */
 	public function offsetGet($offset) {
+
 
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 
+			
 			// have to do this prior to 5.4
 			$property = &$this->$method;
-
+			
 			if (property_exists($this, $method) && isset($property[$offset])) {
 				return $property[$offset];
 			}

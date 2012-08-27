@@ -56,7 +56,7 @@ class APIApplication extends \eGloo\Server\Application {
 		 * @TODO move to tradional bootstrap loader
 		 */
 		private function beforeInvoke($context) {
-				
+							
 			// change directory to application instance; this is to allow for 
 			// relative includes in DocRoot/handler.php
 			// @TODO obviously this can't be hardcoded
@@ -101,14 +101,23 @@ class APIApplication extends \eGloo\Server\Application {
 				unset($_GET['id']);
 			}
 				 
-				 
-				 
 			// fill in defaults for offset and limit, should they
 			// not exist
 			// @TODO find a way to abstract this, because this very
 			// much application specific
 			isset($_GET['offset']) || $_GET['offset'] = 0;
 			isset($_GET['limit'])  || $_GET['limit']  = 10;
+			
+			// manage json payload;
+			// @TODO change to thrift and decouple from current layer 
+			foreach(array('POST', 'PUT') as $method) {
+				if (isset($GLOBALS[$m = "_$method"])) {
+					$GLOBALS[$m] = json_decode(
+						$GLOBALS[$m];
+					);
+					
+				}
+			}
 			 			
 		}
 		

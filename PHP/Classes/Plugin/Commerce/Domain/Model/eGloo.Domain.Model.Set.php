@@ -153,7 +153,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			foreach ($model->reference('associations') as $name => $ignore) {
 				$name                        = strtolower($name);
 				$associations[ "uri_$name" ] = strtolower(
-					"{$_SERVER['PATH_INFO']}/$name"
+					"{$_SERVER['PATH_INFO']}/{$model->id}/$name"
 				);
 	
 			}
