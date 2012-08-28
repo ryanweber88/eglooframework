@@ -48,6 +48,45 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	}
 	
 	/**
+	 * Uses information schema to retrieve entity primary keys
+	 */
+	public static function primaryKeys($table) {
+		$class = get_called_class();
+		$key   = __FUNCTION__ . "/$table";
+		
+		return static::cache($key, function() use ($class, $table) {
+			$keys    = [ ];	
+			$records = $class::statement("
+				SELECT               
+				  pg_attribute.attname, 
+				  format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
+				FROM pg_index, pg_class, pg_attribute 
+				WHERE 
+				  pg_class.oid = ?::regclass AND
+				  indrelid = pg_class.oid AND
+				  pg_attribute.attrelid = pg_class.oid AND 
+				  pg_attribute.attnum = any(pg_index.indkey)
+				  AND indisprimary
+						
+			", $table);	
+			
+			// retrieve key names only
+			// @TODO modify query so that filter does
+			// not have to be applied
+			if (Collection::isHash($records)) {
+				$records = [ $records ];
+			}
+			
+			foreach($records as $associative) {
+				$keys[] = $associative['attname'];
+			}
+
+			return $keys;
+		});		
+		
+	}
+	
+	/**
 	 * Uses information schema to retrieve all table names
 	 */
 	public static function entities() {
@@ -590,9 +629,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 	//	echo "$statement<br/><br/>";
 
-
+		
 		$result = $dataAccess->$method($statement, $arguments);
-
+		
 
 		if ($classification == 'update' && strpos($statement, 'session') !== false) {
 			//echo $statement;exit;

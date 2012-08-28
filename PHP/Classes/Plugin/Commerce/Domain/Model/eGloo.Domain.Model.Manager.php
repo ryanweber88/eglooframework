@@ -63,11 +63,12 @@ class Manager extends Object {
 			// model from lambda
 			else if (is_callable($lambda)) {
 				if (($model = $lambda($class, $key))) {
+	
 					// persist found model and return to caller
 					if ($model->exists()) {
 						$this->persist($model);
 					}
-					
+
 					return $model;
 				}
 			}

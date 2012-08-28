@@ -113,16 +113,15 @@ abstract class Model extends Delegator
 			static::defineMethod('find', function($__mixed, $class) {
 				
 				
-																
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = Collection::flatten(func_get_args());
-				$table     = $class::sendStatic('signature');
-				$field     = "{$table}_id";
+				$table     = $class::sendStatic('entity');
+				$field     = Data::primaryKeys($table)[0];
 				$key       = $arguments[0]; 
 				$set       = array();
 				$manager   = Model\Manager::instance();
-				
+								
 				
 				// we're GAURENTEED to throw an exception here if our by-conventions guess
 				// does not pan out; so callers will be explicitly aware
@@ -147,6 +146,7 @@ abstract class Model extends Delegator
 								$model  = $class::instance();
 								$model->id = $key;
 								
+									
 								// @TODO model caching is breaking references on callbacks and following
 								// trace is nearly impossible - for the time being, we are removing this
 								// functionality								
@@ -154,8 +154,8 @@ abstract class Model extends Delegator
 									$result = $class::sendStatic('process', $class::where(array(
 										$field => $key
 									)));
+									
 																		
-	
 									// we know that if result is not absolute false, it will be returned
 									// as a set from our process method									
 									if ($result) {
@@ -1975,13 +1975,13 @@ abstract class Model extends Delegator
 			$instance  = $tmp::instance();
 								
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-			
-				$result = $manager->find($instance, $key, function($class) use ($result) {				
+				$result = $manager->find($instance, $key, function($class) use ($result) {					
 					return new $class($result);
 				});				
-				
+								
 				
 				$result->send('runCallbacks', 'find', 'after');
+				
 			}
 					
 			// otherwise, we manually build set with model instances
@@ -2700,6 +2700,7 @@ abstract class Model extends Delegator
 	/**
 	 * Uses convention to determine primary key name - this is not a 
 	 * a gaurentee that is valid primary key name
+	 * @deprecated
 	 */
 	public static function primaryKey() {
 		return static::signature() . '_id';

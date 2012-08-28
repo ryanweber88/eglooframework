@@ -154,11 +154,12 @@ class Generic extends Domain\Model {
 	}
 	
 	public static function __callstatic($name, $arguments) {
-		if (in_array($name, $methods = array('selects', 'where', 'join', 'limit', 'order', 'group'))) {
-			static::delegates(array(
+		if (in_array($name, $methods = array('selects', 'where', 'join', 'limit', 'order', 'group', 'offset'))) {
+			static::delegates($a = array(
 				'methods' => $methods,
 				'to'      => new Relation(get_called_class())
-			));					
+			));			
+			
 		}
 		
 		return parent::__callstatic($name, $arguments);

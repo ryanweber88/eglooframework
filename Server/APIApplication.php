@@ -111,9 +111,9 @@ class APIApplication extends \eGloo\Server\Application {
 			// manage json payload;
 			// @TODO change to thrift and decouple from current layer 
 			foreach(array('POST', 'PUT') as $method) {
-				if (isset($GLOBALS[$m = "_$method"])) {
-					$GLOBALS[$m] = json_decode(
-						$GLOBALS[$m];
+				if (isset($GLOBALS[ $m = "_$method" ]['payload'])) {
+					$GLOBALS[$m]['payload'] = json_decode(
+						$GLOBALS[$m]['payload']
 					);
 					
 				}
