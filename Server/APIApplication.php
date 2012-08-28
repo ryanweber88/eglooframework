@@ -109,13 +109,17 @@ class APIApplication extends \eGloo\Server\Application {
 			isset($_GET['limit'])  || $_GET['limit']  = 10;
 			
 			// manage json payload;
-			// @TODO change to thrift and decouple from current layer 
+			// @NOTE will there be instances where post/put don't send
+			// encoded format?
+			// @TODO change to thrift 
+			// @TODO decouple from current layer 
 			foreach(array('POST', 'PUT') as $method) {
-				if (isset($GLOBALS[ $m = "_$method" ]['payload'])) {
-					$GLOBALS[$m]['payload'] = json_decode(
-						$GLOBALS[$m]['payload']
-					);
-					
+				
+				if (isset($GLOBALS[ $m = "_$method" ]) && 
+				   (count($GLOBALS[$m]) && 
+				   ($payload = json_decode(array_keys($GLOBALS[$m])[0])) !== null)) {
+						
+					$GLOBALS[$m]['payload'] = (array)$payload;
 				}
 			}
 			 			
