@@ -38,7 +38,7 @@
  * @package Forms
  * @subpackage Form
  */
-class Form {
+class Form implements \ArrayAccess {
 
 	protected $_formID = null;
 	protected $_formData = null;
@@ -103,6 +103,7 @@ class Form {
 		$this->_formID = $formID;
 		$this->_formData = $formData;
 	}
+	
 
 	public function addFormField( $form_field_id, $formField ) {
 		if ( !isset($this->_formFields[$form_field_id]) ) {
@@ -641,6 +642,43 @@ class Form {
 
 	public function __destruct() {
 		
+	}
+	
+	// ArrayAccess methods //////////////////////////////////////////////////////
+	
+	/**
+	 * Serves as a alias to getFormField, though using array notation
+	 */
+	public function offsetGet($offset) {
+		return $this->getFormField($offset);
+	}
+	
+	/**
+	 * Since form encapsulates the addition of form fields,
+	 * this method, though definied to satisfy interface,
+	 * will throw an exception
+	 */
+	public final function offsetSet($offset, $value) {
+		throw new \Exception(
+			"Form fields cannot be set using array notation accessor"
+		);
+	}
+	
+	/**
+	 * Determines if form field has been defined
+	 */
+	public function offsetExists($offset) {
+		return isset($this->_formFields[$offset]);
+	}
+	
+	/**
+	 * Also throws exception as form fields cannot be unset in this 
+	 * manner
+	 */
+	public final function offsetUnset($offset) {
+		throw new \Exception(
+			"Form fields cannot be unset using array notation accessor"
+		);
 	}
 
 }
