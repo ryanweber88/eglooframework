@@ -84,7 +84,13 @@ class S3Cmb extends Combine {
 	}
 
 	protected function info() {
-		echo 'hello info' . "\n";
+		echo 'This egloo CLI subcommand is designed to facilitate interaction' . "\n";
+		echo ' with Amazon S3. The commands currently supported are: ' . "\n";
+		echo '';
+		echo 'env  -- evaluate if the required env vars are set and print their' . "\n";
+		echo '  current values.' . "\n";
+		echo 'ls  --  list buckets' . "\n";
+		echo 'ls bucketName  --  list contents of the specified bucket' . "\n";
 	}
 
 	/**
