@@ -177,7 +177,7 @@ class PayPalPayflowProNVP extends PayPalPayflowPro {
 		// verbosity
 		$post_data .= 'VERBOSITY=HIGH' . '&';
 
-		$sale_response = $this->postHTTPRequest( 'Sale', $request_id, $post_data );
+		$sale_response = $this->postHTTPRequest( 'Sale', $request_id, $post_data, $params );
 
 		$params['request_id'] = $request_id;
 		$sale_response['request_id'] = $request_id;
@@ -437,12 +437,16 @@ class PayPalPayflowProNVP extends PayPalPayflowPro {
 	 * @param	string	The POST Message fields in &name=value pair format
 	 * @return	array	Parsed HTTP Response body
 	 */
-	protected function postHTTPRequest( $transaction_name, $request_id, $post_data ) {
+	protected function postHTTPRequest( $transaction_name, $request_id, $post_data, $extra_params ) {
 		$environment_credentials = $this->getEnvironmentCredentials();
 
-		$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
-			$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
-			urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
+		if ( isset($extra_params['customer_ip_address']) ) {
+			$customer_ip_address = $extra_params['customer_ip_address'];
+		} else {
+			$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
+				$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
+				urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
+		}
 
 		// Set up your API credentials, PayPal end point, and API version.
 		$API_UserName = ( $environment_credentials['API_UserName'] );
