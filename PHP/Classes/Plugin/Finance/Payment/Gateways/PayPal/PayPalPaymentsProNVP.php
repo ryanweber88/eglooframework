@@ -645,64 +645,64 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 	 * @return	array	Parsed HTTP Response body
 	 */
 	protected function postHTTPRequest( $methodName_, $nvpStr_ ) {
-			$environment_credentials = $this->getEnvironmentCredentials();
+		$environment_credentials = $this->getEnvironmentCredentials();
 
-			$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
-				$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
-				urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
+		$customer_ip_address = isset($_SERVER['SERVER_ADDR']) &&
+			$_SERVER['SERVER_ADDR'] !== '127.0.0.1' ?
+			urlencode($_SERVER['SERVER_ADDR']) : urlencode('68.169.110.99');
 
-			// Set up your API credentials, PayPal end point, and API version.
-			$API_UserName = urlencode( $environment_credentials['API_UserName'] );
-			$API_Password = urlencode( $environment_credentials['API_Password'] );
-			$API_Signature = urlencode( $environment_credentials['API_Signature'] );
-			$API_Endpoint = $environment_credentials['API_Endpoint'];
+		// Set up your API credentials, PayPal end point, and API version.
+		$API_UserName = urlencode( $environment_credentials['API_UserName'] );
+		$API_Password = urlencode( $environment_credentials['API_Password'] );
+		$API_Signature = urlencode( $environment_credentials['API_Signature'] );
+		$API_Endpoint = $environment_credentials['API_Endpoint'];
 
-			$version = urlencode( $environment_credentials['version'] );
+		$version = urlencode( $environment_credentials['version'] );
 
-			// Set the curl parameters.
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
-			curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// Set the curl parameters.
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $API_Endpoint);
+		curl_setopt($ch, CURLOPT_VERBOSE, 1);
 
-			// Turn off the server and peer verification (TrustManager Concept).
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		// Turn off the server and peer verification (TrustManager Concept).
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_POST, 1);
 
-			// Set the API operation, version, and API signature in the request.
-			$nvpreq = "IPADDRESS=$customer_ip_address&METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
-			// $nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+		// Set the API operation, version, and API signature in the request.
+		$nvpreq = "IPADDRESS=$customer_ip_address&METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
+		// $nvpreq = "METHOD=$methodName_&VERSION=$version&PWD=$API_Password&USER=$API_UserName&SIGNATURE=$API_Signature$nvpStr_";
 
-			// Set the request as a POST FIELD for curl.
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
+		// Set the request as a POST FIELD for curl.
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $nvpreq);
 
-			$this->_api_request_history[] = $nvpreq;
+		$this->_api_request_history[] = $nvpreq;
 
-			// Get response from the server.
-			$httpResponse = curl_exec($ch);
+		// Get response from the server.
+		$httpResponse = curl_exec($ch);
 
-			if(!$httpResponse) {
-				exit("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
+		if(!$httpResponse) {
+			throw new Exception("$methodName_ failed: ".curl_error($ch).'('.curl_errno($ch).')');
+		}
+
+		// Extract the response details.
+		$httpResponseAr = explode("&", $httpResponse);
+
+		$httpParsedResponseAr = array();
+		foreach ($httpResponseAr as $i => $value) {
+			$tmpAr = explode("=", $value);
+			if(sizeof($tmpAr) > 1) {
+				$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
 			}
+		}
 
-			// Extract the response details.
-			$httpResponseAr = explode("&", $httpResponse);
+		if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
+			throw new Exception("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
+		}
 
-			$httpParsedResponseAr = array();
-			foreach ($httpResponseAr as $i => $value) {
-				$tmpAr = explode("=", $value);
-				if(sizeof($tmpAr) > 1) {
-					$httpParsedResponseAr[$tmpAr[0]] = $tmpAr[1];
-				}
-			}
-
-			if((0 == sizeof($httpParsedResponseAr)) || !array_key_exists('ACK', $httpParsedResponseAr)) {
-				exit("Invalid HTTP Response for POST request($nvpreq) to $API_Endpoint.");
-			}
-
-			return $httpParsedResponseAr;
+		return $httpParsedResponseAr;
 	}
 
 	protected function getEnvironmentCredentials( $environment = null, $environment_key = null ) {
@@ -727,30 +727,30 @@ class PayPalPaymentsProNVP extends PayPalPaymentsPro {
 		// Set up your API credentials, PayPal end point, and API version.
 		switch( $config_environment ) {
 			case 'development' :
-				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
-				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
-				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_UserName = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPISignature');
 				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 
 				break;
 			case 'staging' :
-				$API_UserName = Configuration::getCustomVariable('PayPalStagingAPIUsername');
-				$API_Password = Configuration::getCustomVariable('PayPalStagingAPIPassword');
-				$API_Signature = Configuration::getCustomVariable('PayPalStagingAPISignature');
+				$API_UserName = Configuration::getCustomVariable('PayPalPaymentsProStagingAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalPaymentsProStagingAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalPaymentsProStagingAPISignature');
 				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 
 				break;
 			case 'production' :
-				$API_UserName = Configuration::getCustomVariable('PayPalProductionAPIUsername');
-				$API_Password = Configuration::getCustomVariable('PayPalProductionAPIPassword');
-				$API_Signature = Configuration::getCustomVariable('PayPalProductionAPISignature');
+				$API_UserName = Configuration::getCustomVariable('PayPalPaymentsProProductionAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalPaymentsProProductionAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalPaymentsProProductionAPISignature');
 				$API_Endpoint = 'https://api-3t.paypal.com/nvp';
 
 				break;
 			default :
-				$API_UserName = Configuration::getCustomVariable('PayPalDevelopmentAPIUsername');
-				$API_Password = Configuration::getCustomVariable('PayPalDevelopmentAPIPassword');
-				$API_Signature = Configuration::getCustomVariable('PayPalDevelopmentAPISignature');
+				$API_UserName = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPIUsername');
+				$API_Password = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPIPassword');
+				$API_Signature = Configuration::getCustomVariable('PayPalPaymentsProDevelopmentAPISignature');
 				$API_Endpoint = 'https://api-3t.sandbox.paypal.com/nvp';
 
 				break;

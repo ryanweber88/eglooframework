@@ -50,7 +50,10 @@ class S3Cmb extends Combine {
 	 */
 	protected static $_supported_commands = array(
 		'ls' => array(),
+		'lscf' => array(),
+		'get' => array(),
 		'env' => array(),
+		'put' => array(),
 		'_empty' => array(),
 		'_zero_argument' => array(),
 	);
@@ -67,8 +70,17 @@ class S3Cmb extends Combine {
 			case 'ls' :
 				$retVal = $this->ls();
 				break;
+			case 'lscf' :
+				$retVal = $this->lscf();
+				break;
+			case 'get' :
+				$retVal = $this->get();
+				break;
 			case 'env' :
 				$retVal = static::envIsSetup( true );
+				break;
+			case 'put' :
+				$retVal = $this->put();
 				break;
 			case '_empty' :
 				$retVal = $this->info();
@@ -86,11 +98,14 @@ class S3Cmb extends Combine {
 	protected function info() {
 		echo 'This egloo CLI subcommand is designed to facilitate interaction' . "\n";
 		echo ' with Amazon S3. The commands currently supported are: ' . "\n";
-		echo '';
+		echo "\n";
 		echo 'env  -- evaluate if the required env vars are set and print their' . "\n";
 		echo '  current values.' . "\n";
 		echo 'ls  --  list buckets' . "\n";
 		echo 'ls bucketName  --  list contents of the specified bucket' . "\n";
+		echo 'lscf  --  list the Cloud Front distributions' . "\n";
+		echo 'get  --  get a specific file' . "\n";
+		echo 'put  --  put a specific file into a specific bucket' . "\n";
 	}
 
 	/**
@@ -172,6 +187,112 @@ class S3Cmb extends Combine {
 			}
 		}
 	}
+
+	/**
+	 * List the Cloud Front distributions associated with the access/secret keys
+	 */
+	protected function lscf() {
+		// fail fast if the correct env vars are not set
+		if ( !static::envIsSetup() ) {
+			return false;
+		}
+		
+		// get the keys
+		$access_key = $_SERVER[static::getAccessKeyKey()];
+		$secret_key = $_SERVER[static::getSecretKeyKey()];
+		
+		$s3Obj = static :: s3( $access_key, $secret_key );
+		
+		print_r($s3Obj->listDistributions());
+	}
+	
+	/**
+	 * Get a file from s3
+	 */
+	protected function get() {
+		// fail fast if the correct env vars are not set
+		if ( !static::envIsSetup() ) {
+			return false;
+		}
+		
+		// get the keys
+		$access_key = $_SERVER[static::getAccessKeyKey()];
+		$secret_key = $_SERVER[static::getSecretKeyKey()];
+		
+		$s3Obj = static :: s3( $access_key, $secret_key );
+		
+		// get number of command args, used to check if a bucket is specified
+		$numArgs = count( $this->_command_arguments );
+		
+		// if a object is specified, get it
+		if ( $numArgs == 3 ) {
+			
+			$bucket = $this->_command_arguments[0];
+			$uri = $this->_command_arguments[1];
+			$fileToSave = $this->_command_arguments[2];
+
+			// get the object
+			$result = $s3Obj->getObject( $bucket,  $uri, $fileToSave );
+		}
+		// if a bucket is not specified
+		else {
+			echo 'Please use the format: bucketName folderOne/folderTwo/resource newFileName' . "\n";
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Put at file into s3.
+	 */
+	protected function put() {
+		// fail fast if the correct env vars are not set
+		if ( !static::envIsSetup() ) {
+			return false;
+		}
+		
+		$result = false;
+		
+		// get the keys
+		$access_key = $_SERVER[static::getAccessKeyKey()];
+		$secret_key = $_SERVER[static::getSecretKeyKey()];
+		
+		$s3Obj = static :: s3( $access_key, $secret_key );
+		
+		// get number of command args, used to check if a bucket is specified
+		$numArgs = count( $this->_command_arguments );
+		
+		// if a bucket and object are specified, put object in bucket
+		if ( $numArgs == 2 ) {
+			
+			$bucket = $this->_command_arguments[0];
+			$uri = $this->_command_arguments[1];
+
+			// this calculates the md5sum, etc
+			$inputInfo = $s3Obj->inputFile( $uri );
+
+			// put the object
+			$result = $s3Obj->putObject( $inputInfo, $bucket,  $uri );
+		}
+		// if a bucket+obj are not specified
+		else {
+			echo 'Please use the format: bucketName filNameToPut' . "\n";
+		}
+		
+		// print a summary of the results
+		if ( $result == 1) {
+			echo 'SUCCESS!' . "\n";
+			echo 'Object Info:' . "\n";
+			$info = $s3Obj->getObjectInfo( $bucket, $uri );
+			print_r( $info );
+		}
+		else {
+			echo 'FAIL' . "\n";
+			print_r( $result );
+		}
+		
+		return $result;
+	}
 	
 	/**
 	 * Small wrapper for the getBucket() method provided in the S3 lib
@@ -203,10 +324,16 @@ class S3Cmb extends Combine {
 		return 'helpString';
 	}
 
+	/**
+	 * Because static class vars are ugly in PHP5, let's just make a static method
+	 */
 	public static function getAccessKeyKey() {
 		return 'S3_ACCESS_KEY';
 	}
 	
+	/**
+	 * Because static class vars are ugly in PHP5, let's just make a static method
+	 */
 	public static function getSecretKeyKey() {
 		return 'S3_SECRET_KEY';
 	}
