@@ -50,6 +50,8 @@ class S3Cmb extends Combine {
 	 */
 	protected static $_supported_commands = array(
 		'ls' => array(),
+		'lscf' => array(),
+		'get' => array(),
 		'env' => array(),
 		'_empty' => array(),
 		'_zero_argument' => array(),
@@ -66,6 +68,12 @@ class S3Cmb extends Combine {
 		switch( $this->_command ) {
 			case 'ls' :
 				$retVal = $this->ls();
+				break;
+			case 'lscf' :
+				$retVal = $this->lscf();
+				break;
+			case 'get' :
+				$retVal = $this->get();
 				break;
 			case 'env' :
 				$retVal = static::envIsSetup( true );
@@ -86,7 +94,7 @@ class S3Cmb extends Combine {
 	protected function info() {
 		echo 'This egloo CLI subcommand is designed to facilitate interaction' . "\n";
 		echo ' with Amazon S3. The commands currently supported are: ' . "\n";
-		echo '';
+		echo "\n";
 		echo 'env  -- evaluate if the required env vars are set and print their' . "\n";
 		echo '  current values.' . "\n";
 		echo 'ls  --  list buckets' . "\n";
@@ -171,6 +179,54 @@ class S3Cmb extends Combine {
 				echo $val . "\n";
 			}
 		}
+	}
+
+	protected function lscf() {
+		// fail fast if the correct env vars are not set
+		if ( !static::envIsSetup() ) {
+			return false;
+		}
+		
+		// get the keys
+		$access_key = $_SERVER[static::getAccessKeyKey()];
+		$secret_key = $_SERVER[static::getSecretKeyKey()];
+		
+		$s3Obj = static :: s3( $access_key, $secret_key );
+		
+		print_r($s3Obj->listDistributions());
+	}
+	
+	protected function get() {
+		// fail fast if the correct env vars are not set
+		if ( !static::envIsSetup() ) {
+			return false;
+		}
+		
+		// get the keys
+		$access_key = $_SERVER[static::getAccessKeyKey()];
+		$secret_key = $_SERVER[static::getSecretKeyKey()];
+		
+		$s3Obj = static :: s3( $access_key, $secret_key );
+		
+		// get number of command args, used to check if a bucket is specified
+		$numArgs = count( $this->_command_arguments );
+		
+		// if a object is specified, get it
+		if ( $numArgs == 3 ) {
+			
+			$bucket = $this->_command_arguments[0];
+			$uri = $this->_command_arguments[1];
+			$fileToSave = $this->_command_arguments[2];
+
+			// get the object
+			$result = $s3Obj->getObject( $bucket,  $uri, $fileToSave );
+		}
+		// if a bucket is not specified, list all buckets available with the given credentials
+		else {
+			echo 'Please use the format: bucketName folderOne/folderTwo/resource newFileName' . "\n";
+		}
+		
+		return true;
 	}
 	
 	/**
