@@ -24,6 +24,7 @@
  * @package RequestProcessing
  * @version 1.0
  */
+ use \eGloo\HTTP;
 
 /**
  * RequestProcessor
@@ -41,6 +42,7 @@ abstract class RequestProcessor {
 	protected $requestInfoBean = null;
 	protected $decoratorInfoBean = null;
 	protected $bean = null;
+	protected $request;
 
 	public function __construct() {
 		$this->requestInfoBean = RequestInfoBean::getInstance();
@@ -48,6 +50,12 @@ abstract class RequestProcessor {
 
 		// serves simply as an alias
 		$this->bean = $this->requestInfoBean;
+		
+		// provides information about requests
+		// @TODO this may be a bit confusing since most
+		// frameworks combine the concept of bean and request
+		// as request
+		$this->request = HTTP\Request::instance();
 	}
 
 	public static function getClass() {
@@ -88,6 +96,5 @@ abstract class RequestProcessor {
 	public function getDecoratorInfoBean() {
 		return $this->decoratorInfoBean;
 	}
-
 
 }

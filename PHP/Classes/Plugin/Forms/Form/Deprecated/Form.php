@@ -644,13 +644,22 @@ class Form implements \ArrayAccess {
 		
 	}
 	
+
 	// ArrayAccess methods //////////////////////////////////////////////////////
 	
 	/**
-	 * Serves as a alias to getFormField, though using array notation
+	 * Calls getFormField, but retrieves form field value
+	 * @TODO i don't if this makes sense, but returning value
+	 * is much more useful
 	 */
 	public function offsetGet($offset) {
-		return $this->getFormField($offset);
+		if (($field = $this->getFormField($offset)) !== null) {
+			return $field->val();
+		}
+
+		throw new \Exception(
+			"Failed to get value of form field '$offset' because it cannot be found"
+		);
 	}
 	
 	/**
@@ -658,10 +667,18 @@ class Form implements \ArrayAccess {
 	 * this method, though definied to satisfy interface,
 	 * will throw an exception
 	 */
-	public final function offsetSet($offset, $value) {
-		throw new \Exception(
-			"Form fields cannot be set using array notation accessor"
-		);
+	public final function offsetSet($offset, $value) {		
+		if (($field = $this->getFormField($offset)) !== null) {
+			$field->setValue($value);
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed to set value of form field '$offset' because it cannot be found"
+			);
+		}
+		
+		return $this;
 	}
 	
 	/**

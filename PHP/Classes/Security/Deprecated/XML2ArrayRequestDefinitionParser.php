@@ -1501,6 +1501,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						if ( $formObj->validate() ) {
 							$formProcessedAndValid = true;
 						}
+					} else {
+						$formProcessedAndValid = true;
 					}
 
 					if ( isset($formProcessedAndValid) && $formProcessedAndValid ) {

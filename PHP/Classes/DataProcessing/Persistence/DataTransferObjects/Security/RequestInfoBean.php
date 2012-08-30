@@ -262,14 +262,16 @@ class RequestInfoBean implements \ArrayAccess {
 
 
 	/**
-	 * (non-PHPdoc)
-	 * @see ArrayAccess::offsetGet()
+	 * Uses array notation to access request parameter values
 	 */
- /**
-     * (non-PHPdoc)
-     * @see ArrayAccess::offsetGet()
-     */
 	public function offsetGet($offset) {
+		
+		// speicific cases
+		if ($offset == 'slug') {
+			return $this->getSlug();	
+		}
+		
+		// otherwise we look at "super global" representatives/class properties
 
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 

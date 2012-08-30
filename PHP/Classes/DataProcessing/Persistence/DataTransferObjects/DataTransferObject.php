@@ -26,6 +26,7 @@
  * @subpackage DataTransferObjects
  * @version 1.0
  */
+use \eGloo\Utilities;
 
 /**
  * DataTransferObject
@@ -36,6 +37,10 @@
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-abstract class DataTransferObject {
+abstract class DataTransferObject extends Utilities\Delegator {
+	public function initWithForm(Form $form) {
+		$this->delegatesTo($form);
+	}
+	
+	
 }
-

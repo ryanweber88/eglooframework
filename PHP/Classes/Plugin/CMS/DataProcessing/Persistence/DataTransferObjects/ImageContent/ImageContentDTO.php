@@ -307,7 +307,7 @@ class ImageContentDTO extends DataTransferObject {
 		return $newFileDTO;
 	}
 
-	public static function initWithForm( Form $form ) {
+	public function initWithForm( Form $form ) {
 	}
 
 	public function __destruct() {
