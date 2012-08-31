@@ -93,6 +93,7 @@
 		<Component id="requests" displayName="Request Library Combine Class" override="true" type="class" value="\eGloo\Combine\RequestLibrary"/>
 		<Component id="run" displayName="Runtime Combine Class" override="true" type="class" value="\eGloo\Combine\Runtime"/>
 		<Component id="runtime" displayName="Runtime Combine Class" override="true" type="class" value="\eGloo\Combine\Runtime"/>
+		<Component id="s3" displayName="Amazon S3 Combine Class" override="true" type="class" value="\eGloo\Combine\S3Cmb"/>
 		<Component id="search" displayName="Search Combine Class" override="true" type="class" value="\eGloo\Combine\Search"/>
 		<Component id="server" displayName="Cache Combine Class" override="true" type="class" value="\eGloo\Combine\Server"/>
 		<Component id="sim" displayName="Simulation Combine Class" override="true" type="class" value="\eGloo\Combine\Simulation"/>
