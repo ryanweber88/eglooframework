@@ -565,7 +565,7 @@ class PayPalPayflowProNVP extends PayPalPayflowPro {
 				$API_Vendor = Configuration::getCustomVariable('PayPalPayflowProductionAPIVendor');
 				$API_Partner = Configuration::getCustomVariable('PayPalPayflowProductionAPIPartner');
 				// $API_Signature = Configuration::getCustomVariable('PayPalProductionAPISignature');
-				$API_Endpoint = 'http://payflowpro.paypal.com/';
+				$API_Endpoint = 'https://payflowpro.paypal.com/';
 
 				break;
 			default :
