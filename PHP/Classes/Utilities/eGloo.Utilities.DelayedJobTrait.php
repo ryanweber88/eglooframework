@@ -1,4 +1,8 @@
 <?php
+/**
+ * Contains trait definition for 'DelayedJobTrait'
+ * @author Christian Calloway christian@petflow callowaylc@gmail
+ */
 namespace eGloo\Utilities;
 
 /**
@@ -18,7 +22,7 @@ trait DelayedJobTrait {
 		}
 		
 		// @TODO determine how to pass lambda to delayed job
-		// since it can be serialized 
+		// since it can't be serialized 
 	}
 	
 	/**
