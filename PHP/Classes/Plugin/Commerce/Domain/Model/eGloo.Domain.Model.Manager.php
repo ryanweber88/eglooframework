@@ -34,6 +34,7 @@ class Manager extends Object {
 	 * @return void
 	 * */
 	public function persist(Domain\Model $model) {
+		return ;
 		// we lock the model instance to read only and insert
 		// into persistence store		
 		$model->lock();

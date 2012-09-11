@@ -163,6 +163,7 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			);
 		}
 		
+		
 		// @TODO decouple pretty pretty
 		return json_encode($data, JSON_PRETTY_PRINT);
 	}
