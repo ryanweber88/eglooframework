@@ -39,7 +39,7 @@ use \eGloo\Utilities;
  */
 abstract class DataTransferObject {
 	public function initWithForm(Form $form) {
-		$this->delegatesTo($form);
+		//$this->delegatesTo($form);
 	}
 	
 	
