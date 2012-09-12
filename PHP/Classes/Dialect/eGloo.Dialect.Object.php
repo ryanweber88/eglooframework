@@ -461,6 +461,50 @@ abstract class Object {
 		static::aliasMethodsStatic();			
 	}
 	
+	/**
+	 * Forks the current process and returns pid; if passed a lambda
+	 * then block runs in child process and exits
+	 */
+	public static function fork(callable $lambda = null) {
+		if (is_null($lambda)) {
+			// @TODO	
+		}
+		
+		// otherwise, we assume lambda is long running and
+		// we run in child process, but return immediately 
+		// in parent process	
+		else {
+			$pid = pcntl_fork();
+			
+			// if attempting to fork on os that doesnt support
+			// fork, we throw an exception
+			if ($pid === -1) {
+				throw new \Exception(
+					"Failed to fork process on current environment"
+				);
+			
+			// as the parent process, we return immediately to caller;
+			// we have purposefully not used pcntl_wait, as that would
+			// void the purpose of throwing a long running task into
+			// the background, but it does present the possibility 
+			// of zombie tasks (zombie tasks should be managed in)
+			// at higher level
+			} else if ($pid) {
+				return ;	
+				
+			
+			// otherwise as child, we run process and exit
+			} else {
+				// @TODO possibly queue pid on background task
+				// responsible for managing possible zombies
+				$lambda();
+				
+				// finally exit child process
+				exit(1);
+			}
+			
+		}
+	}
 		
 	/**
 	 * Allows breaking of protected/private modifiers, from outside of the

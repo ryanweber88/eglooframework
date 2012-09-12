@@ -1,18 +1,23 @@
 <?php
 namespace eGloo\Utilities;
+use       \eGloo\Dialect\Object;
 
-// @TODO replace_object_safe
-use \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  *  Provides proxying to wrapped instance via call & callstatic
  */
 abstract class Delegator extends Object {
 
-	function __construct($delegated) {
+	function __construct($delegated = null) {
 		parent::__construct();
 		
-		$this->delegated = $delegated;
+		if ($delegated !== null) {
+			$this->delegated = $delegated;
+		}
+	}
+	
+	public function delegatesTo($object) {
+		$this->delegated = $object;
 	}
 	
 
@@ -63,7 +68,7 @@ abstract class Delegator extends Object {
 			
 			// 
 			if (class_exists($receiver)) {
-				$method = $this->defineMethod($name, function($__mixed) use ($receiver, $self) {
+				return call_user_func_array($this->defineMethod($name, function($__mixed) use ($receiver, $self) {
 					// get method arguments and append receiver	
 					$arguments = \eGloo\Utilities\Collection::flatten(func_get_args());
 					$arguments[] = $receiver;
@@ -75,9 +80,9 @@ abstract class Delegator extends Object {
 					
 					return $reflection->invokeArgs($self, $arguments);
 					
-				});	
+					
+				}), $arguments);	
 				
-				return call_user_func_array($method, $arguments);
 			}
 			
 			throw new \Exception(

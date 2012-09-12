@@ -108,9 +108,11 @@ if ( eGlooConfiguration::getUseDoctrine() ) {
 	spl_autoload_register(array('Doctrine', 'autoload'));
 }
 
-// Load Pimple DIC
+// Load Pimple/Resque files
 // TODO place into configuration
 include( eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
+include( eGlooConfiguration::getFrameworkRootPath() . '/Library/php-resque/lib/Resque.php' );
+
 
 // Let's override some built-in functions in profiling mode
 if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDProfile() ) {
