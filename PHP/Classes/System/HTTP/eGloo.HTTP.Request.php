@@ -47,7 +47,7 @@ use \Exception as Exception;
  * @package HTTP
  * @subpackage REST
  */
-class Request extends \eGloo\Dialect\ObjectSafe {
+class Request {
 
 	const NOT_FOUND_IN_HEADERS_MESSAGE = 'Not found in HTTP headers';
 
@@ -68,6 +68,14 @@ class Request extends \eGloo\Dialect\ObjectSafe {
 	public function method() {
 		return strtoupper($_SERVER['REQUEST_METHOD']);
 	}
+	
+	public static function instance() {
+		if (is_null(static::$instance)) {
+			static::$instance = new Request;
+		}
+		
+		return static::$instance;
+	} 
 	
 	public function __call($name, $arguments) {
 		if (preg_match('/^is_?(.+)$/i', $name, $match)) {
@@ -182,5 +190,7 @@ class Request extends \eGloo\Dialect\ObjectSafe {
 // strpos( $_SERVER["HTTP_HOST"], $_SERVER["SERVER_NAME"]) !==false )
 
 	*/
+	
+	private static $instance;
 }
 

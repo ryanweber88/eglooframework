@@ -37,7 +37,7 @@ use \eGloo\Utilities;
  * @package Persistence
  * @subpackage DataTransferObjects
  */
-abstract class DataTransferObject extends Utilities\Delegator {
+abstract class DataTransferObject {
 	public function initWithForm(Form $form) {
 		$this->delegatesTo($form);
 	}
