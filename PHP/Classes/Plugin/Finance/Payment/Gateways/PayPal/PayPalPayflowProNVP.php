@@ -424,6 +424,94 @@ class PayPalPayflowProNVP extends PayPalPayflowPro {
 	public function transactionSearch() {}
 
 	/**
+	 * Validate CC details provided
+	 *
+	 *
+	 */
+	public function validateCreditCard( $params ) {
+		$retVal = null;
+
+		if ( !isset($params['paymentType']) ) {
+			$params['paymentType'] = 'Authorization';
+		}
+
+		// Set request-specific fields.
+		$paymentType = ($params['paymentType']);
+		$firstName = ($params['firstName']);
+		$lastName = ($params['lastName']);
+		$creditCardType = ($params['creditCardType']);
+		$creditCardNumber = ($params['creditCardNumber']);
+		$expDateMonth = $params['expDateMonth'];
+
+		// Month must be padded with leading zero
+		$padDateMonth = (str_pad($expDateMonth, 2, '0', STR_PAD_LEFT));
+
+		$expDateYear = ($params['expDateYear']);
+		$cvv2Number = ($params['cvv2Number']);
+		$address1 = ($params['address1']);
+		$address2 = ($params['address2']);
+		$city = ($params['city']);
+		$state = ($params['state']);
+		$zip = ($params['zip']);
+		$country = ($params['country']); // US or other valid country code
+		$currencyID = ($params['currencyID']); // or other currency ('GBP', 'EUR', 'JPY', 'CAD', 'AUD')
+		$invoiceID = ($params['invoiceID']);
+
+		// build hash
+		$tempstr = $creditCardNumber . '0.00' . date('YmdGis') . "1";
+		$request_id = md5($tempstr);
+
+		// body
+		$post_data = 'TENDER=' . 'C' . '&'; // C = credit card, P = PayPal
+		$post_data .= 'TRXTYPE=' . 'A' . '&'; // A = Authorization
+		$post_data .= 'INVNUM=' . $invoiceID . '&'; //  Invoice or Order ID
+		$post_data .= 'ACCT=' . $creditCardNumber . '&';
+
+		// $post_data .= 'ACCT=5555555555554444&';
+
+		$post_data .= 'EXPDATE=' . $padDateMonth . substr($expDateYear, 2) . '&';
+		$post_data .= 'AMT=0.00&';
+
+		// extra data
+		$post_data .= 'CURRENCY=' . $currencyID . '&';
+		$post_data .= 'COMMENT1=' . 'Authorization' . '&';
+		$post_data .= 'FIRSTNAME=' . $firstName . '&';
+		$post_data .= 'LASTNAME=' . $lastName . '&';
+		$post_data .= 'STREET=' . $address1 . '&';
+		$post_data .= 'CITY=' . $city . '&';
+		$post_data .= 'STATE=' . $state . '&';
+
+		if ( ($pos = strpos($zip, '-' )) !== false ) {
+			$zip = substr($zip, 0, $pos);
+		}
+
+		$post_data .= 'ZIP=' . $zip .  '&';
+		$post_data .= 'COUNTRY=' . $country . '&';
+
+		if ( isset($params['cvv']) ) {
+			$post_data .= 'CVV2=' . $params['cvv'] . '&';
+		}
+
+		// verbosity
+		$post_data .= 'VERBOSITY=HIGH' . '&';
+
+		$validation_response = $this->postHTTPRequest( 'Authorization', $request_id, $post_data, $params );
+
+		$params['request_id'] = $request_id;
+		$validation_response['request_id'] = $request_id;
+
+		$retVal = array(
+			'validation_request' => $params,
+			'validation_response' => $validation_response,
+			'api_request_history' => $this->_api_request_history,
+		);
+
+		$this->_api_request_history = array();
+
+		return $retVal;
+	}
+
+	/**
 	 * Get name of the product being accessed
 	 *
 	 *

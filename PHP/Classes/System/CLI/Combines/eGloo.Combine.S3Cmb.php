@@ -50,6 +50,7 @@ class S3Cmb extends Combine {
 	 */
 	protected static $_supported_commands = array(
 		'ls' => array(),
+		'll' => array(),
 		'lscf' => array(),
 		'get' => array(),
 		'env' => array(),
@@ -69,6 +70,9 @@ class S3Cmb extends Combine {
 		switch( $this->_command ) {
 			case 'ls' :
 				$retVal = $this->ls();
+				break;
+			case 'll' :
+				$retVal = $this->ls( true );
 				break;
 			case 'lscf' :
 				$retVal = $this->lscf();
@@ -103,6 +107,7 @@ class S3Cmb extends Combine {
 		echo '  current values.' . "\n";
 		echo 'ls  --  list buckets' . "\n";
 		echo 'ls bucketName  --  list contents of the specified bucket' . "\n";
+		echo 'll bucketName  --  list contents of the specified bucket, with file details' . "\n";
 		echo 'lscf  --  list the Cloud Front distributions' . "\n";
 		echo 'get  --  get a specific file' . "\n";
 		echo 'put  --  put a specific file into a specific bucket' . "\n";
@@ -148,12 +153,16 @@ class S3Cmb extends Combine {
 	/**
 	 * Delegates listing of resources. depends whether a bucket name is specified
 	 */
-	protected function ls() {
+	protected function ls( $print_detailed = false ) {
 		
 		// fail fast if the correct env vars are not set
 		if ( !static::envIsSetup() ) {
 			return false;
 		}
+		
+		$byteConv = 1024;
+		$mb = $byteConv * $byteConv;
+		$gb = $byteConv * $mb;
 		
 		// get the keys
 		$access_key = $_SERVER[static::getAccessKeyKey()];
@@ -169,13 +178,34 @@ class S3Cmb extends Combine {
 			// get the contents of the bucket from S3
 			$result = $this->lsBucket( $s3Obj, $this->_command_arguments[0] );
 			
+
 			// print the contents of the bucket: file_size modified_date file_name
 			foreach( $result as $key => $val ) {
-				$formattedSizeInKbytes = number_format( $val['size'] / 1024, 0 ) . 'K';
-				$formattedDayTime = date('Y-m-d H:i', $val['time']);
+				if( $print_detailed ) {
+					
+					$size = $val['size'];
+					
+					if( $size > ($gb) ) {
+						$formattedSize = number_format( $size / $gb, 2 ) . 'g';
+					}
+					else if( $size > $mb ) {
+						$formattedSize = number_format( $size / $mb, 0 ) . 'm';
+					}
+					else if( $size > $byteConv ) {
+						$formattedSize = number_format( $size / $byteConv, 0 ) . 'k';
+					}
+					else {
+						$formattedSize = $size . 'b';
+					}
+					
+					$formattedDayTime = date('Y-m-d H:i', $val['time']);
 				
-				echo $formattedSizeInKbytes . ' ' . $formattedDayTime
-					. ' ' . $val['name'] . "\n";
+					echo $formattedSize . ' ' . $formattedDayTime
+						. ' ' . $val['name'] . "\n";
+				}
+				else {
+					echo $val['name'] . "\n";
+				}
 			}
 		}
 		// if a bucket is not specified, list all buckets available with the given credentials
