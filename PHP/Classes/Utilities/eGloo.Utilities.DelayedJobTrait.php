@@ -8,6 +8,9 @@ namespace eGloo\Utilities;
 /**
  * Provides convenience methods for automagically passing
  * method calls to DelayedJob handler
+ * @TODO this needs to be attached to actual background processor
+ * as opposed to running a fork, which is incredibly costly in regards
+ * to memory consumption
  */
 trait DelayedJobTrait {
 	
@@ -22,7 +25,7 @@ trait DelayedJobTrait {
 		}
 		
 		// otherwise we throw lambda into fork process
-		static::fork($lambda)
+		static::fork($lambda);
 		
 	}
 	
