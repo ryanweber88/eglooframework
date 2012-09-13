@@ -150,7 +150,13 @@ abstract class Object {
 				}
 			}
 			
-			
+			// otherwise, lets check the first character of key, which
+			// if a star indicates that we want to employ a "one-way"
+			// cache, which means this value will not be uncached at anypoint
+			else if (isset($key[0]) && $key[0] == '*') {
+				$trace = debug_backtrace(2)[1];
+				$key   = $trace['file'] . $trace['line'] . $key;			
+			}			
 
 			$cache = &$self->reference('_cache'); 
 			
@@ -339,6 +345,14 @@ abstract class Object {
 					//$class  = $lambda;
 				}
 				
+			}
+			
+			// otherwise, lets check the first character of key, which
+			// if a star indicates that we want to employ a "one-way"
+			// cache, which means this value will not be uncached at anypoint
+			else if (isset($key[0]) && $key[0] == '*') {
+				$trace = debug_backtrace(2)[1];
+				$key   = $trace['file'] . $trace['line'] . $key;			
 			}
 			
 
