@@ -1794,20 +1794,36 @@ abstract class Model extends Delegator
 		// in order to run callbacks
 		$model = new static;
 		
-		foreach ($arguments as $key) {
+		if (count($arguments)) {
+			foreach ($arguments as $key) {
+				
+				// we assign primary key value to model as identifying
+				// during our delete callback
+				$model->id = $key;
+				
+				// @TODO currently delete is limited to invidual deletes per callback
+				// session, as opposed to allowing for group deletes (single statement);
+				// don't know if there is really a use case where many keys will be
+				// pushed to this method to justify writing aorund this limitation
+				$model->send('runCallbacks', __FUNCTION__);
+			}
+		}
+		
+		// otherwise we are calling a delete all
+		else {
+			$model->send('runCallbacks', __FUNCTION__, 'before');
 			
-			// we assign primary key value to model as identifying
-			// during our delete callback
-			$model->id = $key;
+			// @TODO decouple explicit sql call
+			static::statement('
+				DELETE FROM ?	
 			
-			// @TODO currently delete is limited to invidual deletes per callback
-			// session, as opposed to allowing for group deletes (single statement);
-			// don't know if there is really a use case where many keys will be
-			// pushed to this method to justify writing aorund this limitation
-			$model->send('runCallbacks', __FUNCTION__);
+			', $model::entity());
+			
+			
+			$model->send('runCallbacks', __FUNCTION__, 'after');
 		}
 	}
-	
+		
 	
 	/**
 	 * Adds a callback of type $event, to a specific point (before, around, after)
@@ -2290,11 +2306,11 @@ abstract class Model extends Delegator
 		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
-			$block = $this->defineMethod($name, function($mixed) use ($self, $match) {
+			return call_user_func_array($this->defineMethod($name, function($mixed) use ($self, $match) {
 				$self->send('defineCallback', $event = $match[2], $match[1], $mixed)	;			
-			});
 			
-			return call_user_func_array($block, $arguments);
+			}), $arguments); ;
+			
 		}		
 		
 		throw $deferred; 
