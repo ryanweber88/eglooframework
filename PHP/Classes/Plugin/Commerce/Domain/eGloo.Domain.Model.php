@@ -8,6 +8,7 @@ use \eGloo\Domain\Model\Callback;
 use \eGloo\Domain\Cache;
 use \eGloo\Performance\Caching;
 use \eGloo\Domain\Model;
+use \eGloo\Utilities;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -17,6 +18,8 @@ abstract class Model extends Delegator
 	implements \eGloo\Utilities\ToArrayInterface, \eGloo\TemplateProcessing\ToTemplateInterface, 
 	           \ArrayAccess, \Serializable, Caching\CacheKeyInterface, Caching\CacheableInterface, 
 	           ModelInterface {
+	           	
+	use Utilities\DelayedJobTrait;
 
 	// this acts as a store for adding runtime instance properties
 	// @TODO this will be replaced, as storing values will be delegated
@@ -1503,6 +1506,25 @@ abstract class Model extends Delegator
 		
 		return $values;
 		
+	}
+	
+	/**
+	 * Updates instances attribute set; save must explicitly be called
+	 * post attribute update
+	 */
+	public function updateAttributes(array $attributes) {
+		if (Collection::isHash($attributes)) {	
+			foreach($attributes as $key => $value) {
+				$this->$key = $value;
+			}
+		}
+		
+		else {
+			throw new \Exception(
+				"Failed to update attributes on model '{$this->ident()}' " . 
+				"because parameter attributes must be a hash/associative array"
+			);
+		}
 	}
 	
 

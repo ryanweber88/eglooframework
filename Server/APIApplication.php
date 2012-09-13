@@ -2,6 +2,7 @@
 // @TODO I'd like to find a more elegant more to autoinclude our autoloader 
 // but for now this is fine
 require_once 'autoload.php';
+require_once 'error_handler.php';
 
 /**
  * Represents API application instance
@@ -18,13 +19,17 @@ class APIApplication extends \eGloo\Server\Application {
     }
 
     public function __invoke($context) {
+
+			
 			// run before invoke filters
 			// @TODO move to actual callback/event oriented
 			// system
   		$this->beforeInvoke($context);
 			
 			// define handler method which will load egloo
-			// into application
+			// into application; our handler is solely responsible
+			// for returning our message body - items like
+			// headers and response codes should be abstracted
 			// @TODO move to master process
 			$handler = function() use ($context) {
 				ob_start();
@@ -36,16 +41,25 @@ class APIApplication extends \eGloo\Server\Application {
 			$handler->bindTo($this);
 			$content = $handler();
 			
+			// @TODO inspect what has been returned by content
+			// as it will specify header, response code, body
+			// etc
+			
 			// build headers and return as response to
 			// application invocation
-      $headers = array(
-          'Content-type', 'text/html; charset=utf-8',
-          'Content-Length', strlen($content)
-      );
+			// @TODO we need a header system here
+      //$headers = array(
+      //    'Content-type', 'text/html; charset=utf-8',
+      //    'Content-Length', strlen($content)
+      //);
 			
 			$this->afterInvoke();
 
-      return array(200, $headers, $content);
+			// code, headers, content
+			// @TODO private#headers needs to be decoupled
+      return [ 
+      	http_response_code(), $this->headers(), $content 
+      ];
     }
 
 
@@ -56,6 +70,20 @@ class APIApplication extends \eGloo\Server\Application {
 		 * @TODO move to tradional bootstrap loader
 		 */
 		private function beforeInvoke($context) {
+    	// @TODO encapsulate within context/binding abstraction, but
+    	// for the time being, we are given global access to context
+    	// in order to set session and header data
+    	$GLOBALS['context'] = &$context;
+			$GLOBALS['headers'] = [
+	    	'Content-type', 'texåt/html; charset=utf-8',
+	      'Content-Length', strlen($content)			
+      ];
+			
+			// set our default response code
+			// @TODO obviously we need to determine if setting to default
+			// here and overriding at handler level is appropriate
+			// in terms of application architecture
+			http_response_code(200);			
 							
 			// change directory to application instance; this is to allow for 
 			// relative includes in DocRoot/handler.php
@@ -123,6 +151,12 @@ class APIApplication extends \eGloo\Server\Application {
 				}
 			}
 			 			
+		}
+
+		private function headers() {
+			// @TODO this will be replaced/decoupled, but for the time
+			// being, we grab from our global headers
+			return $GLOBALS['headers'];
 		}
 		
 		

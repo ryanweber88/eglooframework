@@ -124,5 +124,51 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function edit()    { }
 	protected function destroy() { }
 	protected function show()    { }
+	
+	/**
+	 * Attached error response code and message to response header
+	 * @TODO place is RequestProcessor
+	 */
+	protected function error($code, $message) {
+		// @TODO generate response header with error code and
+		// response message
+		// @TODO this is new to 5.4; it may be better to be backword
+		// compatible at the framework
+		http_response_code($code);
+		
+		// generate error response body
+		// @TODO decouple/encapsulate
+		// @TODO create application specific error code handler
+		echo json_encode([
+			'message' => $message
+		]);
+	}
+	
+	/**
+	 * Attach response type and body to response
+	 * @TODO place in RequestProcessor
+	 */
+	protected function render($type, $body) {
+		// @TODO attach response directly to rack object
+		echo $body;
+	}
+	
+	/**
+	 * Responsible for determinig request type and
+	 * providing a lambda to handle each type
+	 */
+	protected function respond(callable $lambda) {
+		// @TODO determine response type by looking
+		// at request or pulling from default; all of
+		// which needs to be handled in separate architecture
+		$format = 'json';
+		
+		// @TODO 
+		$this->render($type, $lambda($type));
+		
+		function($format) {
+			$format.
+		}
+	}
 
 }
