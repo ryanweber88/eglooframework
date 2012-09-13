@@ -25,6 +25,7 @@
  * @package RequestProcessing
  * @version 1.0
  */
+ use \eGloo\Utilities;
 
 /**
  * 
@@ -35,8 +36,13 @@
  * @subpackage RequestProcessors
  */
 class RESTRequestProcessor extends RequestProcessor {
+	// TRAITS
+	use Utilities\DelayedJobTrait;
 
-
+	// CONSTANTS
+	const RESPONSE_CODE_OK          = 200;
+	const RESPONSE_CODE_BAD_REQUEST = 400;
+	const RESPONSE_CODE_NOT_FOUND   = 404;
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
@@ -144,31 +150,37 @@ class RESTRequestProcessor extends RequestProcessor {
 		]);
 	}
 	
-	/**
-	 * Attach response type and body to response
-	 * @TODO place in RequestProcessor
-	 */
-	protected function render($type, $body) {
-		// @TODO attach response directly to rack object
-		echo $body;
-	}
 	
 	/**
 	 * Responsible for determinig request type and
 	 * providing a lambda to handle each type
 	 */
-	protected function respond(callable $lambda) {
+	protected function respond($with) {
 		// @TODO determine response type by looking
 		// at request or pulling from default; all of
 		// which needs to be handled in separate architecture
-		$format = 'json';
+		// @TODO introspect body, the requested format
+		// header and convert body
 		
-		// @TODO 
-		$this->render($type, $lambda($type));
-		
-		function($format) {
-			$format.
+		// check that we have an appropriate/ok
+		// response code and if the case, attach
+		// data to response body
+		if (http_response_code() === self::RESPONSE_CODE_OK) {
+			echo $with;
 		}
 	}
+	
+	
+	/**
+	 * Responsible for rendering to response body
+	 */
+	protected function respondWith($body) {
+		
+	}
+	
+	protected static function respondTo($__mixed = [ ]) {
+		
+	}
+
 
 }

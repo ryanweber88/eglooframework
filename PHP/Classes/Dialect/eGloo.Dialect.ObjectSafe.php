@@ -150,6 +150,13 @@ abstract class ObjectSafe {
 				}
 			}
 			
+			// we examine if out key's first character is a star, 
+			// then indicating a "one-way" (something that is uncacheable),
+			// and we use our debug backtrace to add file and line information
+			else {
+				// @TODO
+			}
+			
 			
 
 			$cache = &$self->reference('_cache'); 

@@ -505,6 +505,13 @@ abstract class Object {
 			
 		}
 	}
+
+	/**
+	 * Alias to fork
+	 */
+	public satic function background(callable $lambda = null) {
+		static::fork($lambda);
+	} 
 		
 	/**
 	 * Allows breaking of protected/private modifiers, from outside of the
