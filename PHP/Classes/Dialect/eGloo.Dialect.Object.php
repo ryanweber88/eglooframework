@@ -523,7 +523,7 @@ abstract class Object {
 	/**
 	 * Alias to fork
 	 */
-	public satic function background(callable $lambda = null) {
+	public static function background(callable $lambda = null) {
 		static::fork($lambda);
 	} 
 		

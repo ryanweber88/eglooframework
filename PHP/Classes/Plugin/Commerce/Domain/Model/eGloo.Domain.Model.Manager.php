@@ -2,7 +2,7 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain;
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * 
@@ -34,7 +34,7 @@ class Manager extends Object {
 	 * @return void
 	 * */
 	public function persist(Domain\Model $model) {
-		return ;
+		//return ;
 		// we lock the model instance to read only and insert
 		// into persistence store		
 		$model->lock();

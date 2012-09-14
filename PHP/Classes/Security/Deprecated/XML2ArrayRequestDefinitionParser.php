@@ -1428,7 +1428,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			foreach ($requestVariables as $key => $value) {
 				$requestInfoBean->$method($key, $value);
 			}
-						
+									
 		}		 
 			
 		return $retVal;

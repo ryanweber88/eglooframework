@@ -1002,10 +1002,13 @@ abstract class Model extends Delegator
 		foreach($this->validates as $attribute) {	
 			//$hasAttribute = "has_$attribute";
 			
+
 			// unfortunately, motherfucking references and '0' values can be viewed 
 			// as !isset === true, so we have to check against !is_null to ensure
 			// that we are not returning false positive
-			if (!isset($this->$attribute)) {
+			if (!isset($this->$attribute)   ||
+			    is_null($this->$attribute)) {
+ 	
 				return false;
 			}
 		}
@@ -1029,7 +1032,8 @@ abstract class Model extends Delegator
 			// wtfphp once again!! unfortunately, motherfucking references and '0' values can be viewed 
 			// as !isset === true, so we have to check against !is_null to ensure
 			// that we are not returning false positive			
-			if (!isset($this->$attribute)) {
+			if (!isset($this->$attribute)   ||
+			    is_null($this->$attribute)) {
 				$attributes[] = $attribute;
 			}
 		}
@@ -1592,6 +1596,14 @@ abstract class Model extends Delegator
 				$model->initialized = true;
 			}
 			
+			else {
+				throw new \Exception(
+					"Failed to create instance of '$model' because the following attributes are not valid : " . implode(
+						', ', $model->whatsInvalid()
+					) 
+				);
+			}
+			
 		}
 		
 		// otherwise we have passed an invalid argument to create and
@@ -1600,9 +1612,9 @@ abstract class Model extends Delegator
 			$class = static::getCalledClass();
 			
 			throw new \Exception(
-				"Failed to create instance of '$model' because argument(s) are invalid " . print_r(
-					$__mixed
-				)
+				"Failed to create instance of '$model' because the following attributes are not valid : " . implode(
+					', ', $model->whatsInvalid()
+				) 
 			);
 		}
 		

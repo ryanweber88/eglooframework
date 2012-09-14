@@ -41,17 +41,13 @@ class APIApplication extends \eGloo\Server\Application {
 			$handler->bindTo($this);
 			$content = $handler();
 			
-			// @TODO inspect what has been returned by content
-			// as it will specify header, response code, body
-			// etc
 			
-			// build headers and return as response to
-			// application invocation
-			// @TODO we need a header system here
-      //$headers = array(
-      //    'Content-type', 'text/html; charset=utf-8',
-      //    'Content-Length', strlen($content)
-      //);
+			// @TODO temporary; content-length should
+			// be determined outside of main context loop
+			$GLOBALS['header'][] = 'Content-length';
+			$GLOBALS['header'][] = strlen($content);
+			
+			
 			
 			$this->afterInvoke();
 
@@ -75,8 +71,7 @@ class APIApplication extends \eGloo\Server\Application {
     	// in order to set session and header data
     	$GLOBALS['context'] = &$context;
 			$GLOBALS['headers'] = [
-	    	'Content-type', 'texåt/html; charset=utf-8',
-	      'Content-Length', strlen($content)			
+	    	'Content-type', 'text/html; charset=utf-8'
       ];
 			
 			// set our default response code
@@ -146,7 +141,7 @@ class APIApplication extends \eGloo\Server\Application {
 				if (isset($GLOBALS[ $m = "_$method" ]) && 
 				   (count($GLOBALS[$m]) && 
 				   ($payload = json_decode(array_keys($GLOBALS[$m])[0])) !== null)) {
-						
+
 					$GLOBALS[$m]['payload'] = (array)$payload;
 				}
 			}

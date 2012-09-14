@@ -46,4 +46,11 @@ set_error_handler(function($id, $message, $file, $line, $context) {
 		}
 
 	}
+	
+	echo "$id $message $file $line\n";
+});
+
+set_exception_handler(function($exception) {
+	echo "here";
+	echo $exception->getTraceAsString();
 });

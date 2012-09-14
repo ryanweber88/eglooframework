@@ -75,14 +75,14 @@ class RESTRequestProcessor extends RequestProcessor {
 			if ($this->isCollectionRoute()) {
 				// determin
 				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
-				$value = $this->index();	
+				$this->index();	
 
 			}
 			
 			else {
 								
 				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
-				$value = $this->show();			
+				$this->show();			
 			}
 			
 			
@@ -91,23 +91,21 @@ class RESTRequestProcessor extends RequestProcessor {
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
-			$value = $this->create();
+			$this->create();
 		}
 		
 		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
-			$value = $this->edit();			
+			$this->edit();			
 		}
 		
 		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
-			$value = $this->destroy();
+			$this->destroy();
 		}
 
-		// @TODO determine echo value should be inspected, etc
-		echo $value;
 		
 		//eGlooResponse::outputXHTML( $templateVariables );
 		$this->log(
@@ -170,15 +168,8 @@ class RESTRequestProcessor extends RequestProcessor {
 		}
 	}
 	
-	
-	/**
-	 * Responsible for rendering to response body
-	 */
-	protected function respondWith($body) {
-		
-	}
-	
-	protected static function respondTo($__mixed = [ ]) {
+
+	protected static function respondsTo($__mixed = [ ]) {
 		
 	}
 
