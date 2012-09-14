@@ -395,8 +395,8 @@ abstract class Model extends Delegator
 	 * to describe table, document, etc.
 	 * @return string
 	 */
-	public static function entityName() {
-		return static::signature();
+	public static function entityName($name = null) {
+		return static::signature($name);
 	}
 	
 	/**
@@ -404,8 +404,8 @@ abstract class Model extends Delegator
 	 * signature better
 	 * @return string
 	 */
-	protected static function entity() {
-		return static::entityName();
+	protected static function entity($name = null) {
+		return static::entityName($name);
 	}
 
 
@@ -1397,11 +1397,15 @@ abstract class Model extends Delegator
 	 * Attempts to find a model's "signature" which is a pattern based on namespace + class;
 	 * basically everything appearing after "model" in namespace will be underscored 
 	 */
-	protected static function signature() {
+	protected static function signature($name = null) {
 		// get signature pattern - so Common\Domain\ModelProductOption\Status, will be
 		// converted to product_option_status; this could have been accomplished on 
 		// one line, but we sacrifice readability
-		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, static::classNameFull()));
+		$class = is_null($name)
+			? static::classnamefull()
+			: $name;
+			
+		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, $class));
 		$signature = strtolower(\eGlooString::toUnderscores(implode('_', $tokens)));
 		
 		return $signature;
@@ -1797,7 +1801,7 @@ abstract class Model extends Delegator
 		$this->runCallbacks(__FUNCTION__);
 	}
 	
-	public static function delete($__mixed) {
+	public static function delete($__mixed = null) {
 		$arguments = Collection::flatten(
 			func_get_args()
 		);
@@ -1826,12 +1830,12 @@ abstract class Model extends Delegator
 			$model->send('runCallbacks', __FUNCTION__, 'before');
 			
 			// @TODO decouple explicit sql call
-			static::statement('
-				DELETE FROM ?	
+			$model::statement("
+				DELETE FROM {$model::entity()}	
 			
-			', $model::entity());
+			");
 			
-			
+		
 			$model->send('runCallbacks', __FUNCTION__, 'after');
 		}
 	}

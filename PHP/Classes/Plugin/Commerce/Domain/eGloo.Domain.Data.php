@@ -32,9 +32,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function columns($table) {
 		$class = get_called_class();
-		$key =   __FUNCTION__ . "/$table";
+		
+		if (empty($table)) {
+			var_export(debug_backtrace());
+			exit;
+		}
 
-		return static::cache($key, function() use ($class, $table) {
+		return static::cache("*$table", function() use ($class, $table) {
 			return $class::statement('
 				SELECT
 					column_name
@@ -324,7 +328,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function statement($statement, $__mixed = null) {
 			
-
 		
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
@@ -629,7 +632,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 	//	echo "$statement<br/><br/>";
 
-		
+		//var_export(func_get_args()); 
 		$result = $dataAccess->$method($statement, $arguments);
 		
 
