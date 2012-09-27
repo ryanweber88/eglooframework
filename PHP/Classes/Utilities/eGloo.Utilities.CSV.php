@@ -60,16 +60,55 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 		// to a particular column
 		} else {
 
-			// we need to match the column
+			// if row is null, then we return an array of
+			// values associated to the index of column
+			// @TODO comeback
+			if (is_null($this->row)) {
+				$values = array();
+				$index  = $this->columnIndex($offset);
+				
+				foreach ($this->maxtrix as $row) {
+					$values[] = $row[$index];
+				}
+
+				return $values;
+			
+			// otherwise we are returning the value for a
+			// particular column
+			} else {
+				// unset row and return column value as index of column header
+				$this->row = null;
+				return $this->matrix[$this->row][$this->columnIndex($offset)];
+			}
 
 		}
 	}
 
 	public function offsetSet($offset, $value) {
-		// we are looking for a value at a specific index
-		if (is_numeric($offset)) {
-
 		
+		// determine correct index/offset, which if 
+		// not is numeric, we set with column index
+		// value 
+		if (!is_numeric($offset)) {
+			$offset = $this->columnIndex($offset);
+		}
+
+		// we are setting the value of a whole row
+		// if row is null
+		if (is_null($this->row)) {
+			if (is_array($values = $value)) {
+				$this->maxtrix[$this->row] = $values;
+
+			// otherwise we are setting a specific value
+			} else { 
+				$this->matrix[$this->row][$offset];
+			}
+		}
+
+		// @TODO enforce constrants against column/headers
+		if (is_numeric($offset)) {
+		
+
 
 		// we are looking for all values to associated
 		// to a particular column
@@ -86,13 +125,22 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 
 	}
 
-	public function columnIndex($colmn) {
+	private function columnIndex($colmn) {
+		// we attempt to determine the index of column using its
+		// symbolic representation; if column cannot be found, we
+		// (royal we) throw an exception
+
 		if (is_array($this->columns)) {
-			foreach ($this->columns as $compare) {
-				if ($this->columnAsSymbol($compare) == $column) {
-					return true;
+			for ($counter=0; $counter < count($this->columns); $counter++) { 	
+				if ($this->symbol($this->columns[$counter]) == $column) {
+					return $counter;
 				}
 			}
+
+			throw new \Exception(
+				"Failed to determine index of column '$column' " . 
+				"because it does not exist" 
+			)
 		}
 
 		// otherwise throw exception because csv does not
@@ -109,13 +157,10 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 	}
 
 
-	private function columnIndex($name) { 
-		// iterate through columns in attempt to match
-		// against		
-	}
 
 
-	private function columnAsSymbol($name) {
+
+	private function symbol($name) {
 		// the purpose of this method is convert a human readable
 		// column to a symbolic representation that can be conveniently
 		// used as hash key
