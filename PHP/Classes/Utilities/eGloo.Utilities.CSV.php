@@ -14,7 +14,7 @@ use       \eGloo\Utilities;
  *         contains the idea of headers
  * @author Christian Calloway callowaylc@gmail.com
  */
-class CSV extends Utilties\ArrayAccess implements 
+class CSV extends Utilities\ArrayAccess implements 
 	\ArrayAccess, \IteratorAggregate {
 
 	// @PASS
@@ -24,8 +24,23 @@ class CSV extends Utilties\ArrayAccess implements
 		// if arguments have been passed, then we are auto-setting
 		// our columns with list of arguments
 		if (func_num_args() > 0) {
-			$this->columns = $arguments
+			$this->columns = func_get_args();
 		}
+	}
+
+	public function __toString() {
+		$buf   = '';
+
+		if (count($this->columns)) {
+
+			$buf .= implode(',', $this->escape($this->columns)) . "\n";	
+		}
+
+		foreach($this->matrix as $row) {
+			$buf .= implode(',', $this->escape($row)) . "\n";
+		}
+
+		return $buf;
 	}
 
 
@@ -74,7 +89,7 @@ class CSV extends Utilties\ArrayAccess implements
 
 			// @TODO we need to do constraint check here
 			// and throw exception on out of bounds
-			return $this->matrix[$this->row][$offset]			
+			return $this->matrix[$this->row][$offset];	
 		}
 
 		
@@ -82,10 +97,19 @@ class CSV extends Utilties\ArrayAccess implements
 
 	public function offsetSet($offset, $value) {
 		
+		// if offset is null, our offset will be set
+		// to next available index of matrix row or 
+		// column, dependent upon whether row is already
+		// set or not
+		if (is_null($offset)) {
+			$offset = is_null($this->row)
+				? count($this->matrix)
+				: count($this->matrix[$this->row]);
+		
 		// determine correct index/offset, which if 
 		// not is numeric, we set with column index
 		// value 
-		if (!is_numeric($offset)) {
+		} else if (!is_numeric($offset)) {
 			$offset = $this->columnIndex($offset);
 		}
 
@@ -93,14 +117,35 @@ class CSV extends Utilties\ArrayAccess implements
 		// if row is null
 		if (is_null($this->row)) {
 			if (is_array($values = $value)) {
-				$this->maxtrix[$this->row] = $values;
+
+				// if a hash is passed we attempt to match key to
+				// symbolic column index
+				if (Utilities\Collection::isHash($values)) {
+					foreach ($values as $key => $value) {
+						try { 
+							$this->matrix[$offset][$this->columnIndex($key)] = 
+								$value;
+						} catch(\Exception $ignore) { }
+					}
+
+					// @WTFPHP we actually have to key sort integer index
+					// values that are inserted in non sequential order - 
+					// fuckers
+					ksort($this->matrix[$offset]);
+					
+				
+
+				// @TODO enforce column constraints
+				} else {
+					$this->maxtrix[$offset] = $values;					
+				}
 
 			// otherwise we are attempting to set a row
 			// with a specific value, which will throw
 			// an exception
 			} else { 
 				throw new \Exception(
-					"Cannot set row '{$this->row}' with scalar value"
+					"Cannot set row with scalar value '$value'"
 				);
 			}
 
@@ -125,7 +170,7 @@ class CSV extends Utilties\ArrayAccess implements
 
 	}
 
-	private function columnIndex($colmn) {
+	private function columnIndex($column) {
 		// we attempt to determine the index of column using its
 		// symbolic representation; if column cannot be found, we
 		// (royal we) throw an exception
@@ -140,7 +185,7 @@ class CSV extends Utilties\ArrayAccess implements
 			throw new \Exception(
 				"Failed to determine index of column '$column' " . 
 				"because it does not exist" 
-			)
+			);
 		}
 
 		// otherwise throw exception because csv does not
@@ -157,7 +202,14 @@ class CSV extends Utilties\ArrayAccess implements
 	}
 
 
+	private function escape(array $linear) {
+		// quotes individual indexed values and escapes any quotes
+		array_walk($linear, function(&$value) {
+			$value = '"' . addslashes($value) . '"';
+		});
 
+		return $linear;
+	}
 
 
 	private function symbol($name) {
