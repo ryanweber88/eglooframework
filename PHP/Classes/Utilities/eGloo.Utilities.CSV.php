@@ -14,7 +14,8 @@ use       \eGloo\Utilities;
  *         contains the idea of headers
  * @author Christian Calloway callowaylc@gmail.com
  */
-class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
+class CSV extends Utilties\ArrayAccess implements 
+	\ArrayAccess, \IteratorAggregate {
 
 	// @PASS
 	public static function parse($file, $headers = true) { }
@@ -27,61 +28,56 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 		}
 	}
 
+
+	public function getIterator() {
+		// allows for iteration across rows or columns
+		// given status of row property
+
+		return is_null($this->row)
+			// if row is null, then we iterate across rows
+			// using an ArrayIterator instance 
+			// @WTFPHP ArrayIterator is a class...
+			? new \ArrayIterator($this->matrix)
+
+			// otherwise we iterate across the columns of a specific 
+			// row			
+			: new \ArrayIterator($this->matrix[$this->row]);
+
+
+	}
+
 	public function offsetGet($offset) {
-		// we are looking for a value at a specific index
-		if (is_numeric($offset)) {
+		
+		// determine correct index/offset, which if 
+		// not is numeric, we set with column index
+		// value 
+		if (!is_numeric($offset)) {
+			$offset = $this->columnIndex($offset);
+		}
 
+		// next we check if we are "returning" a row
+		// which in reality means we are returning
+		// an instance of self so that we can chain
+		// array notation brackets $instance[row][column]
+		// or in laymens terms, present a true two dimensional
+		// array or matrix				
+		if (is_null($this->row)) {
+			$this->row = $offset;
+			return $this;
 
-			// next we check if we are "returning" a row
-			// which in reality means we are returning
-			// an instance of self so that we can chain
-			// array notation brackets $instance[row][column]
-			// or in laymens terms, present a true two dimensional
-			// array or matrix				
-			if (is_null($this->row)) {
-				$this->row = $offset;
-				return $this;
+		// if row property has been set to numeric value we are returning
+		// an actual column value
+		} else {
+			// reset row to null for next query and return
+			// associated column value
+			$this->row = null;
 
-			// if row property has been set to numeric value we are returning
-			// an actual column value
-			} else {
-				// reset row to null for next query and return
-				// associated column value
-				$this->row = null;
-
-				// @TODO we need to do constraint check here
-				// and throw exception on out of bounds
-				return $this->matrix[$this->row][$offset]			
-			}
+			// @TODO we need to do constraint check here
+			// and throw exception on out of bounds
+			return $this->matrix[$this->row][$offset]			
+		}
 
 		
-
-		// we are looking for all values to associated
-		// to a particular column
-		} else {
-
-			// if row is null, then we return an array of
-			// values associated to the index of column
-			// @TODO comeback
-			if (is_null($this->row)) {
-				$values = array();
-				$index  = $this->columnIndex($offset);
-				
-				foreach ($this->maxtrix as $row) {
-					$values[] = $row[$index];
-				}
-
-				return $values;
-			
-			// otherwise we are returning the value for a
-			// particular column
-			} else {
-				// unset row and return column value as index of column header
-				$this->row = null;
-				return $this->matrix[$this->row][$this->columnIndex($offset)];
-			}
-
-		}
 	}
 
 	public function offsetSet($offset, $value) {
@@ -99,22 +95,26 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 			if (is_array($values = $value)) {
 				$this->maxtrix[$this->row] = $values;
 
-			// otherwise we are setting a specific value
+			// otherwise we are attempting to set a row
+			// with a specific value, which will throw
+			// an exception
 			} else { 
-				$this->matrix[$this->row][$offset];
+				throw new \Exception(
+					"Cannot set row '{$this->row}' with scalar value"
+				);
 			}
-		}
 
-		// @TODO enforce constrants against column/headers
-		if (is_numeric($offset)) {
-		
-
-
-		// we are looking for all values to associated
-		// to a particular column
+		// otherwise row has been set and we are attempting 
+		// to set a specific column value
 		} else {
+			// if array is passed we set with 
+			if (is_array($values = $value)) {
+				$value = implode(';', $values);
+			}
 
+			$this->maxtrix[$this->row][$offset] = $value;
 		}
+
 	}
 
 	public function offsetUnset($offset) {
@@ -164,9 +164,9 @@ class CSV extends Utilties\ArrayAccess implements \ArrayAccess {
 		// the purpose of this method is convert a human readable
 		// column to a symbolic representation that can be conveniently
 		// used as hash key
-		return preg_replace(
-			'/\s/', 
-		);
+		return strtolower(preg_replace(
+			'/\s/', '_', $name
+		));
 	}
 
 
