@@ -71,6 +71,8 @@ GRAPHITE_CODE="${DEFAULT_CODE_DIR}/graphite-web"
 GRAPHITE_CONF="/opt/graphite/conf"
 CARBON_CODE="${DEFAULT_CODE_DIR}/carbon"
 WHISPER_CODE="${DEFAULT_CODE_DIR}/whisper"
+APACHE_CONF="/etc/apache2/sites-available"
+
 
 pushd $DEFAULT_CODE_DIR
 
@@ -112,3 +114,10 @@ cp ${GRAPHITE_CONF}/graphite.wsgi.example ${GRAPHITE_CONF}/graphite.wsgi
 sed -i 's/from graphite.logger/#from graphite.logger/g' ${GRAPHITE_CONF}/graphite.wsgi
 sed -i 's/log.info(/#log.info(/g' ${GRAPHITE_CONF}/graphite.wsgi
 sed -i 's/import graphite.metrics.search/#import graphite.metrics.search/g' ${GRAPHITE_CONF}/graphite.wsgi
+
+pushd /tmp
+wget https://gist.github.com/gists/4c7e5e710617084706ec/download
+tar xfz download
+cp gist*/gist* ${APACHE_CONF}/graphite
+popd
+
