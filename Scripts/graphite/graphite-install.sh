@@ -140,3 +140,10 @@ echo "please syncdb: python ${GRAPHITE_WEBAPP}/manage.py syncdb"
 chown www-data /opt/graphite/storage
 chown www-data:www-data /opt/graphite/storage/graphite.db
 chown -R www-data:www-data /opt/graphite/storage/log
+
+groupadd -g 999 carbon
+useradd -c "carbon user" -g 999 -u 999 -s /bin/false carbon
+chown -R carbon /opt/graphite/storage/whisper
+chown -R carbon /opt/graphite/storage/rrd
+
+python /opt/graphite/bin/carbon-cache.py start
