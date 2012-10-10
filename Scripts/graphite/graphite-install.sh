@@ -66,6 +66,11 @@ fi
 ###########################################################
 
 DEFAULT_CODE_DIR="/data/code"
+GRAPHITE_VER="0.9.10"
+GRAPHITE_CODE="${DEFAULT_CODE_DIR}/graphite-web"
+GRAPHITE_CONF="/opt/graphite/conf"
+CARBON_CODE="${DEFAULT_CODE_DIR}/carbon"
+WHISPER_CODE="${DEFAULT_CODE_DIR}/whisper"
 
 pushd $DEFAULT_CODE_DIR
 
@@ -80,7 +85,27 @@ apt-get install build-essential python-dev
 apt-get install python-cairo python-django python-django-tagging python-twisted python-zope.interface fontconfig apache2 libapache2-mod-wsgi python-pysqlite2 python-simplejson git
 
 git clone https://github.com/graphite-project/graphite-web.git
-
 git clone https://github.com/graphite-project/carbon.git
-
 git clone https://github.com/graphite-project/whisper.git
+
+pushd $CARBON_CODE
+git checkout $GRAPHITE_VER
+python setup.py install
+popd
+
+pushd $WHISPER_CODE
+git checkout $GRAPHITE_VER
+python setup.py install
+popd
+
+pushd $GRAPHITE_CODE
+git checkout $GRAPHITE_VER
+python setup.py install
+popd
+
+cp ${GRAPHITE_CONF}/carbon.conf.example ${GRAPHITE_CONF}/carbon.conf
+sed -i 's/USER = /USER = carbon/g' ${GRAPHITE_CONF}/carbon.conf
+
+cp ${GRAPHITE_CONF}/storage-schemas.conf.example ${GRAPHITE_CONF}/storage-schemas.conf
+
+cp ${GRAPHITE_CONF}/graphite.wsgi.example ${GRAPHITE_CONF}/graphite.wsgi
