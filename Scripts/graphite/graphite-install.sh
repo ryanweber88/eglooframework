@@ -69,9 +69,10 @@ DEFAULT_CODE_DIR="/data/code"
 GRAPHITE_VER="0.9.10"
 GRAPHITE_CODE="${DEFAULT_CODE_DIR}/graphite-web"
 GRAPHITE_CONF="/opt/graphite/conf"
+GRAPHITE_WEBAPP="/opt/graphite/webapp/graphite"
 CARBON_CODE="${DEFAULT_CODE_DIR}/carbon"
 WHISPER_CODE="${DEFAULT_CODE_DIR}/whisper"
-APACHE_CONF="/etc/apache2/sites-available"
+APACHE_CONF="/etc/apache2"
 
 
 pushd $DEFAULT_CODE_DIR
@@ -118,6 +119,24 @@ sed -i 's/import graphite.metrics.search/#import graphite.metrics.search/g' ${GR
 pushd /tmp
 wget https://gist.github.com/gists/4c7e5e710617084706ec/download
 tar xfz download
-cp gist*/gist* ${APACHE_CONF}/graphite
+cp gist*/gist* ${APACHE_CONF}/sites-available/graphite
 popd
 
+pushd ${APACHE_CONF}/sites-enabled
+ln -s ../sites-available/graphite
+popd
+
+pushd ${APACHE_CONF}/mods-enabled
+ln -s ../mods-available/ssl.conf
+ln -s ../mods-available/ssl.load
+popd
+
+# maybe setup password for access
+# htpasswd -c /etc/apache2/graphite.htpasswd demo
+
+# python ${GRAPHITE_WEBAPP}/manage.py syncdb
+echo "please syncdb: python ${GRAPHITE_WEBAPP}/manage.py syncdb"
+
+chown www-data /opt/graphite/storage
+chown www-data:www-data /opt/graphite/storage/graphite.db
+chown -R www-data:www-data /opt/graphite/storage/log
