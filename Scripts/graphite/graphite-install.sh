@@ -109,3 +109,6 @@ sed -i 's/USER = /USER = carbon/g' ${GRAPHITE_CONF}/carbon.conf
 cp ${GRAPHITE_CONF}/storage-schemas.conf.example ${GRAPHITE_CONF}/storage-schemas.conf
 
 cp ${GRAPHITE_CONF}/graphite.wsgi.example ${GRAPHITE_CONF}/graphite.wsgi
+sed -i 's/from graphite.logger/#from graphite.logger/g' ${GRAPHITE_CONF}/graphite.wsgi
+sed -i 's/log.info(/#log.info(/g' ${GRAPHITE_CONF}/graphite.wsgi
+sed -i 's/import graphite.metrics.search/#import graphite.metrics.search/g' ${GRAPHITE_CONF}/graphite.wsgi
