@@ -77,5 +77,6 @@ git clone https://github.com/etsy/statsd.git
 
 cp statsd/exampleConfig.js statsd/config.js
 
-# node /data/code/statsd/stats.js /data/code/statsd_config.js
+# node /data/code/statsd/stats.js /data/code/statsd/config.js
 # node ${DEFAULT_CODE_DIR}/statsd/stats.js ${DEFAULT_CODE_DIR}/statsd/config.js
+# alias statsd='sudo node /data/code/statsd/stats.js /data/code/statsd/config.js &'
