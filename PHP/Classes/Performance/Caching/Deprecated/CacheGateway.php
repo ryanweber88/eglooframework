@@ -320,6 +320,15 @@ class CacheGateway {
 
 			$id = $namespace . '::' . $id;
 
+			// check for the occurrence of a star character as 
+			// the first character, in which case we use backtrace
+			// to create a unique key using file and line number
+			if (isset($id[0]) && $id[0] == '*') {
+				$trace = debug_backtrace(2);
+				$trace = $trace[1];
+				$id    = $trace['file'] . $trace['line'] . $id;			
+			}						
+
 			if ( $keep_hot && isset($this->_piping_hot_cache[$id]) ) {
 				$retVal = $this->_piping_hot_cache[$id];
 			} else {
@@ -399,6 +408,15 @@ class CacheGateway {
 			}
 
 			$id = $namespace . '::' . $id;
+
+			// check for the occurrence of a star character as 
+			// the first character, in which case we use backtrace
+			// to create a unique key using file and line number
+			if (isset($id[0]) && $id[0] == '*') {
+				$trace = debug_backtrace(2);
+				$trace = $trace[1];
+				$id    = $trace['file'] . $trace['line'] . $id;			
+			}				
 
 			if ( $keep_hot ) {
 				$retVal = $this->_piping_hot_cache[$id] = $obj;
