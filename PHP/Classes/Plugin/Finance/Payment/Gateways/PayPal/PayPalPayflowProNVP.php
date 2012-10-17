@@ -170,6 +170,10 @@ class PayPalPayflowProNVP extends PayPalPayflowPro {
 		$post_data .= 'ZIP=' . $zip .  '&';
 		$post_data .= 'COUNTRY=' . $country . '&';
 
+		if ( isset($params['customer_email']) ) {
+			$post_data .= 'EMAIL=' . $params['customer_email'] . '&';
+		}
+
 		if ( isset($params['cvv']) ) {
 			$post_data .= 'CVV2=' . $params['cvv'] . '&';
 		}
