@@ -150,7 +150,13 @@ abstract class Object {
 				}
 			}
 			
-			
+			// otherwise, lets check the first character of key, which
+			// if a star indicates that we want to employ a "one-way"
+			// cache, which means this value will not be uncached at anypoint
+			else if (isset($key[0]) && $key[0] == '*') {
+				$trace = debug_backtrace(2)[1];
+				$key   = $trace['file'] . $trace['line'] . $key;			
+			}			
 
 			$cache = &$self->reference('_cache'); 
 			
@@ -341,6 +347,14 @@ abstract class Object {
 				
 			}
 			
+			// otherwise, lets check the first character of key, which
+			// if a star indicates that we want to employ a "one-way"
+			// cache, which means this value will not be uncached at anypoint
+			else if (isset($key[0]) && $key[0] == '*') {
+				$trace = debug_backtrace(2)[1];
+				$key   = $trace['file'] . $trace['line'] . $key;			
+			}
+			
 
 						
 			
@@ -461,6 +475,57 @@ abstract class Object {
 		static::aliasMethodsStatic();			
 	}
 	
+	/**
+	 * Forks the current process and returns pid; if passed a lambda
+	 * then block runs in child process and exits
+	 */
+	public static function fork(callable $lambda = null) {
+		if (is_null($lambda)) {
+			// @TODO	
+		}
+		
+		// otherwise, we assume lambda is long running and
+		// we run in child process, but return immediately 
+		// in parent process	
+		else {
+			$pid = pcntl_fork();
+			
+			// if attempting to fork on os that doesnt support
+			// fork, we throw an exception
+			if ($pid === -1) {
+				throw new \Exception(
+					"Failed to fork process on current environment"
+				);
+			
+			// as the parent process, we return immediately to caller;
+			// we have purposefully not used pcntl_wait, as that would
+			// void the purpose of throwing a long running task into
+			// the background, but it does present the possibility 
+			// of zombie tasks (zombie tasks should be managed in)
+			// at higher level
+			} else if ($pid) {
+				return ;	
+				
+			
+			// otherwise as child, we run process and exit
+			} else {
+				// @TODO possibly queue pid on background task
+				// responsible for managing possible zombies
+				$lambda();
+				
+				// finally exit child process
+				exit(1);
+			}
+			
+		}
+	}
+
+	/**
+	 * Alias to fork
+	 */
+	public static function background(callable $lambda = null) {
+		static::fork($lambda);
+	} 
 		
 	/**
 	 * Allows breaking of protected/private modifiers, from outside of the

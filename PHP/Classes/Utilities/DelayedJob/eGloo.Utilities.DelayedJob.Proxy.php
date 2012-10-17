@@ -1,5 +1,10 @@
 <?php
+/**
+ * Contains Proxy class definition
+ * @author Christian Calloway callowaylc@gmail christian@petflow
+ */
 namespace eGloo\Utilities\DelayedJob;
+use       \eGloo\Utilities;
 
 /**
  * Provides proxying/delegation of single method 
@@ -7,24 +12,19 @@ namespace eGloo\Utilities\DelayedJob;
  * to provide arguments to DelayedJob::enqueue
  * 
  */
-class Proxy {
+class Proxy extends Utilities\Delegator  {
 	
-	function __construct($object) {
-		if (is_object($object)) { 
-			$this->delegated = $object;
-		}
-		
-		else {			
-			throw new \Exception (
-				"Failed delaying call on object argument because it is not an object"
-			);
-		}
-	}
 	
 	function __call($name, $arguments) {
-		// @TODO queue on delayed job
 		
+		// fork call to proxied instance
+		static::fork(function() use ($name, $arguments) {
+			call_user_func_array(
+				array($this, $name), $arguments
+			);
+		});
+		
+
 	}
 	
-	protected $delegated;
 }

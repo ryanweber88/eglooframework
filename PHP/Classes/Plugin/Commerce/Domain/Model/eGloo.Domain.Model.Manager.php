@@ -2,7 +2,7 @@
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain;
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * 
@@ -34,6 +34,7 @@ class Manager extends Object {
 	 * @return void
 	 * */
 	public function persist(Domain\Model $model) {
+		//return ;
 		// we lock the model instance to read only and insert
 		// into persistence store		
 		$model->lock();
@@ -63,11 +64,12 @@ class Manager extends Object {
 			// model from lambda
 			else if (is_callable($lambda)) {
 				if (($model = $lambda($class, $key))) {
+	
 					// persist found model and return to caller
 					if ($model->exists()) {
 						$this->persist($model);
 					}
-					
+
 					return $model;
 				}
 			}

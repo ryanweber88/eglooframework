@@ -124,7 +124,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		if ( !isset(self::$link) ) {
 			self::$link = $this->getConnection();
 		}
-
+		
 		if (false !== ($result = pg_query_params(self::$link, $sql, $params))) {
 			return is_callable($callback)
 				? $callback($result, self::$link)

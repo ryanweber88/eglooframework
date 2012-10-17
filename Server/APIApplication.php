@@ -2,6 +2,7 @@
 // @TODO I'd like to find a more elegant more to autoinclude our autoloader 
 // but for now this is fine
 require_once 'autoload.php';
+require_once 'error_handler.php';
 
 /**
  * Represents API application instance
@@ -18,13 +19,17 @@ class APIApplication extends \eGloo\Server\Application {
     }
 
     public function __invoke($context) {
+
+			
 			// run before invoke filters
 			// @TODO move to actual callback/event oriented
 			// system
   		$this->beforeInvoke($context);
 			
 			// define handler method which will load egloo
-			// into application
+			// into application; our handler is solely responsible
+			// for returning our message body - items like
+			// headers and response codes should be abstracted
 			// @TODO move to master process
 			$handler = function() use ($context) {
 				ob_start();
@@ -36,16 +41,21 @@ class APIApplication extends \eGloo\Server\Application {
 			$handler->bindTo($this);
 			$content = $handler();
 			
-			// build headers and return as response to
-			// application invocation
-      $headers = array(
-          'Content-type', 'text/html; charset=utf-8',
-          'Content-Length', strlen($content)
-      );
+			
+			// @TODO temporary; content-length should
+			// be determined outside of main context loop
+			$GLOBALS['header'][] = 'Content-length';
+			$GLOBALS['header'][] = strlen($content);
+			
+			
 			
 			$this->afterInvoke();
 
-      return array(200, $headers, $content);
+			// code, headers, content
+			// @TODO private#headers needs to be decoupled
+      return [ 
+      	http_response_code(), $this->headers(), $content 
+      ];
     }
 
 
@@ -56,7 +66,20 @@ class APIApplication extends \eGloo\Server\Application {
 		 * @TODO move to tradional bootstrap loader
 		 */
 		private function beforeInvoke($context) {
-				
+    	// @TODO encapsulate within context/binding abstraction, but
+    	// for the time being, we are given global access to context
+    	// in order to set session and header data
+    	$GLOBALS['context'] = &$context;
+			$GLOBALS['headers'] = [
+	    	'Content-type', 'text/html; charset=utf-8'
+      ];
+			
+			// set our default response code
+			// @TODO obviously we need to determine if setting to default
+			// here and overriding at handler level is appropriate
+			// in terms of application architecture
+			http_response_code(200);			
+							
 			// change directory to application instance; this is to allow for 
 			// relative includes in DocRoot/handler.php
 			// @TODO obviously this can't be hardcoded
@@ -80,6 +103,10 @@ class APIApplication extends \eGloo\Server\Application {
 			// fill in default values to play nicely with config load
 			$_SERVER['SCRIPT_NAME'] = '/index.php';	
 			
+			if (isset($_GET['resource'])) {
+				$_SERVER['PATH_INFO']   = $_GET['resource'];
+			}
+				
 			// retrieve resource and resource tokens
 			if (isset($_GET['resource'])) {
 				$_GET['resource_tokens'] = array_slice(
@@ -91,8 +118,10 @@ class APIApplication extends \eGloo\Server\Application {
 			// examine id if present and determine if multi-get id
 			if (isset($_GET['id']) && 
 			   (strlen($id = $_GET['id']) && !is_numeric($id))) {
+
 				// @TODO we need to check against correct delimiting token
-				$_GET['id'] = explode(';', $id);
+				$_GET['ids'] = explode(';', $id);
+				unset($_GET['id']);
 			}
 				 
 			// fill in defaults for offset and limit, should they
@@ -101,7 +130,28 @@ class APIApplication extends \eGloo\Server\Application {
 			// much application specific
 			isset($_GET['offset']) || $_GET['offset'] = 0;
 			isset($_GET['limit'])  || $_GET['limit']  = 10;
+			
+			// manage json payload;
+			// @NOTE will there be instances where post/put don't send
+			// encoded format?
+			// @TODO change to thrift 
+			// @TODO decouple from current layer 
+			foreach(array('POST', 'PUT') as $method) {
+				
+				if (isset($GLOBALS[ $m = "_$method" ]) && 
+				   (count($GLOBALS[$m]) && 
+				   ($payload = json_decode(array_keys($GLOBALS[$m])[0])) !== null)) {
+
+					$GLOBALS[$m]['payload'] = (array)$payload;
+				}
+			}
 			 			
+		}
+
+		private function headers() {
+			// @TODO this will be replaced/decoupled, but for the time
+			// being, we grab from our global headers
+			return $GLOBALS['headers'];
 		}
 		
 		

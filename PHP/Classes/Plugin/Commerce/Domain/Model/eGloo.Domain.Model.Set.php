@@ -1,4 +1,8 @@
 <?php
+/**
+ * Contains eGloo.Domain.Model.Set Class definition
+ * @author Christian Calloway callowaylc@gmail christian@petflow
+ */
 namespace eGloo\Domain\Model;
 
 use \eGloo\Domain;
@@ -130,8 +134,12 @@ class Set extends \eGloo\Dialect\ObjectSafe
 		);			
 	}
 	
-	public function toJson() {
-		$data = [ 'users' => [ ] ];
+	/**
+	 * Returns json representation of models in set
+	 * @TODO use Model#toJson to create json representation 
+	 */
+	public function toJson($temporary = [ ]) {
+		$data = [ ];
 		
 		
 		foreach ($this as $model) {
@@ -144,15 +152,19 @@ class Set extends \eGloo\Dialect\ObjectSafe
 			
 			foreach ($model->reference('associations') as $name => $ignore) {
 				$name                        = strtolower($name);
-				$associations[ "uri_$name" ] = strtolower("{$_SERVER['PATH_INFO']}/$name");
+				$associations[ "uri_$name" ] = strtolower(
+					"{$_SERVER['PATH_INFO']}/{$model->id}/$name"
+				);
 	
 			}
 					
-			$data['users'][] = array_merge(
+			$data[] = array_merge(
 				$model->toArray(), $associations
 			);
 		}
 		
+		
+		// @TODO decouple pretty pretty
 		return json_encode($data, JSON_PRETTY_PRINT);
 	}
 	

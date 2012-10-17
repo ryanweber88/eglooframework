@@ -32,9 +32,13 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function columns($table) {
 		$class = get_called_class();
-		$key =   __FUNCTION__ . "/$table";
+		
+		if (empty($table)) {
+			var_export(debug_backtrace());
+			exit;
+		}
 
-		return static::cache($key, function() use ($class, $table) {
+		return static::cache("*$table", function() use ($class, $table) {
 			return $class::statement('
 				SELECT
 					column_name
@@ -45,6 +49,45 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						
 			', $table);	
 		});
+	}
+	
+	/**
+	 * Uses information schema to retrieve entity primary keys
+	 */
+	public static function primaryKeys($table) {
+		$class = get_called_class();
+		$key   = __FUNCTION__ . "/$table";
+		
+		return static::cache($key, function() use ($class, $table) {
+			$keys    = [ ];	
+			$records = $class::statement("
+				SELECT               
+				  pg_attribute.attname, 
+				  format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
+				FROM pg_index, pg_class, pg_attribute 
+				WHERE 
+				  pg_class.oid = ?::regclass AND
+				  indrelid = pg_class.oid AND
+				  pg_attribute.attrelid = pg_class.oid AND 
+				  pg_attribute.attnum = any(pg_index.indkey)
+				  AND indisprimary
+						
+			", $table);	
+			
+			// retrieve key names only
+			// @TODO modify query so that filter does
+			// not have to be applied
+			if (Collection::isHash($records)) {
+				$records = [ $records ];
+			}
+			
+			foreach($records as $associative) {
+				$keys[] = $associative['attname'];
+			}
+
+			return $keys;
+		});		
+		
 	}
 	
 	/**
@@ -285,7 +328,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function statement($statement, $__mixed = null) {
 			
-
 		
 		// make sence of our params - we are providing variable length argument
 		// lists - the second param may be an array, or simply accept all arguments
@@ -590,9 +632,9 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 		
 	//	echo "$statement<br/><br/>";
 
-
+		//var_export(func_get_args()); 
 		$result = $dataAccess->$method($statement, $arguments);
-
+		
 
 		if ($classification == 'update' && strpos($statement, 'session') !== false) {
 			//echo $statement;exit;

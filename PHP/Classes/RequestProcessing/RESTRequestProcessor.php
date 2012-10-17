@@ -25,6 +25,7 @@
  * @package RequestProcessing
  * @version 1.0
  */
+ use \eGloo\Utilities;
 
 /**
  * 
@@ -35,8 +36,13 @@
  * @subpackage RequestProcessors
  */
 class RESTRequestProcessor extends RequestProcessor {
+	// TRAITS
+	use Utilities\DelayedJobTrait;
 
-
+	// CONSTANTS
+	const RESPONSE_CODE_OK          = 200;
+	const RESPONSE_CODE_BAD_REQUEST = 400;
+	const RESPONSE_CODE_NOT_FOUND   = 404;
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
@@ -69,14 +75,14 @@ class RESTRequestProcessor extends RequestProcessor {
 			if ($this->isCollectionRoute()) {
 				// determin
 				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
-				$value = $this->index();	
+				$this->index();	
 
 			}
 			
 			else {
 								
 				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
-				$value = $this->show();			
+				$this->show();			
 			}
 			
 			
@@ -85,23 +91,21 @@ class RESTRequestProcessor extends RequestProcessor {
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
-			$value = $this->create();
+			$this->create();
 		}
 		
 		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
-			$value = $this->edit();			
+			$this->edit();			
 		}
 		
 		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
 			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
-			$value = $this->destroy();
+			$this->destroy();
 		}
 
-		// @TODO determine echo value should be inspected, etc
-		echo $value;
 		
 		//eGlooResponse::outputXHTML( $templateVariables );
 		$this->log(
@@ -112,9 +116,10 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function isCollectionRoute() {
 		// determines if requested resource/uri is for a
 		// collection	
-		return empty($this->bean['id'])      || 
-		       is_array($this->bean['id'])   || 
-		       is_numeric($this->bean['id']);
+					 
+		// @wtfphp empty(variable_is_0) === true
+		return isset($this->bean['ids'])  ||
+		       (!isset($this->bean['id']) || !is_numeric($this->bean['id']));
 				
 	}
 	
@@ -123,5 +128,50 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function edit()    { }
 	protected function destroy() { }
 	protected function show()    { }
+	
+	/**
+	 * Attached error response code and message to response header
+	 * @TODO place is RequestProcessor
+	 */
+	protected function error($code, $message) {
+		// @TODO generate response header with error code and
+		// response message
+		// @TODO this is new to 5.4; it may be better to be backword
+		// compatible at the framework
+		http_response_code($code);
+		
+		// generate error response body
+		// @TODO decouple/encapsulate
+		// @TODO create application specific error code handler
+		echo json_encode([
+			'message' => $message
+		]);
+	}
+	
+	
+	/**
+	 * Responsible for determinig request type and
+	 * providing a lambda to handle each type
+	 */
+	protected function respond($with) {
+		// @TODO determine response type by looking
+		// at request or pulling from default; all of
+		// which needs to be handled in separate architecture
+		// @TODO introspect body, the requested format
+		// header and convert body
+		
+		// check that we have an appropriate/ok
+		// response code and if the case, attach
+		// data to response body
+		if (http_response_code() === self::RESPONSE_CODE_OK) {
+			echo $with;
+		}
+	}
+	
+
+	protected static function respondsTo($__mixed = [ ]) {
+		
+	}
+
 
 }

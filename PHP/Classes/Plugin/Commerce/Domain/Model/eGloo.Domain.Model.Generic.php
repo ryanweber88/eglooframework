@@ -129,15 +129,12 @@ class Generic extends Domain\Model {
 		);
 	}
 
-	
-	protected static function signature() {
-		// get signature pattern - so Common\Domain\ModelProductOption\Status, will be
-		// converted to product_option_status; this could have been accomplished on 
-		// one line, but we sacrifice readability
-		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, static::classNameFull()));
-		$signature = strtolower(\eGlooString::toUnderscores(implode('_', $tokens)));
+	public static function instance($model = null) {
+		if ($model !== null) {
+			static::$pseudonym = $model;
+		}
 		
-		return $signature;
+		return parent::instance();
 	}
 	
 	public static function className() {
@@ -154,11 +151,12 @@ class Generic extends Domain\Model {
 	}
 	
 	public static function __callstatic($name, $arguments) {
-		if (in_array($name, $methods = array('selects', 'where', 'join', 'limit', 'order', 'group'))) {
-			static::delegates(array(
+		if (in_array($name, $methods = array('selects', 'where', 'join', 'limit', 'order', 'group', 'offset'))) {
+			static::delegates($a = array(
 				'methods' => $methods,
 				'to'      => new Relation(get_called_class())
-			));					
+			));			
+			
 		}
 		
 		return parent::__callstatic($name, $arguments);

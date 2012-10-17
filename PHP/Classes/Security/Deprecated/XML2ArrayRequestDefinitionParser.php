@@ -1396,19 +1396,39 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		if ($requestInfoBean->request_is_put()     || 
 		    $requestInfoBean->request_is_delete()) {
 		    	
-		    	
 			// #wtfphp or really #wtfmodphp, we have to explicitly
 			// retrieve put/delete request variables from input stream;
 			// we use parse_str method to explicitly feed query string
 			// into array, with which we will iterate and set on request
 			// info bean instance
 			// @TODO error checking - see above
-			parse_str(file_get_contents('php://input'), $requestVariables);
+			$ns = '_' . strtoupper(
+				$requestInfoBean->requestMethod()
+			);
+			
+			// because superglobal $_PUT and $_DELETE do not exist
+			// we have to explicitly check against $GLOBAL to see
+			// if they have been defined at application server level;
+			// @TODO it would be better to fake php://input stream - 
+			// need to research this
+			// @TODO this is an inherent security issue as we are not 
+			// checking against Requests.xml
+			if (isset($GLOBALS[$ns])) {
+				$requestVariables = $GLOBALS[$ns];
+				
+			// otherwise attempt to grab from stdin	- this would be the 
+			// case for 
+			} else {
+				parse_str(file_get_contents('php://input'), $requestVariables);
+			}
+			
+			
 			$method = 'set_' . $requestInfoBean->requestMethod();
-									
+												
 			foreach ($requestVariables as $key => $value) {
 				$requestInfoBean->$method($key, $value);
 			}
+									
 		}		 
 			
 		return $retVal;
