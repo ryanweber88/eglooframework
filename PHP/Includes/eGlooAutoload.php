@@ -968,3 +968,14 @@ function __constructStatic($name) {
 	}
 }
 
+
+/**
+ *  An experimental attempt to lend ActiveSupport functionality
+ *  to php
+ */
+function __($mixed) {
+	if (is_integer($mixed)) {
+		return new \eGloo\Utilities\ActiveSupport\Number;
+	}
+}
+

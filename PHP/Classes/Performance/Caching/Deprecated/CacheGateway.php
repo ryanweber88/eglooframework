@@ -342,7 +342,9 @@ class CacheGateway {
 				
 				$trace = debug_backtrace(2);
 				$trace = $trace[1];
-				$id    = $trace['file'] . $trace['line'] . $id;			
+				$id    = $trace['file'] . 
+				         $trace['line'] . 
+				         substr($id, 1);			
 			}	
 
 			// if lambda contains and value and the result from getObject
@@ -351,7 +353,7 @@ class CacheGateway {
 				  is_callable($lambda)) {
 				
 				// finally store object 
-				$this->storeObject($id, $result = $lambda(), null, $age);
+				$this->storeObject($id, $result = $lambda($id), null, $age);
 			} 
 
 			return $result;
