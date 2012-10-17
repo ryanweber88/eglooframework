@@ -978,4 +978,3 @@ function __($mixed) {
 		return new \eGloo\Utilities\ActiveSupport\Number;
 	}
 }
-
