@@ -24,12 +24,11 @@ class Number extends Utilities\ActiveSupport {
 	protected static $symbols = array(
 		'second' => 1,
 		'minute' => 60,
-		'hour'   => 60 * 60,
-		'day'    => 60 * 60 * 24,
+		'hour'   => 3600,
+		'day'    => 86400,
 
-		// month and year will have to be measured in relation
-		// to current time
-		'month'  => 60 * 60 * 24 * 30, 
-		'year'   => 60 * 60 * 24 * 30
+		// month and year are based on average
+		'month'  => 2.63e+6,
+		'year'   => 3.156e+7
 	);
 }
