@@ -313,7 +313,27 @@ class CacheGateway {
    * Shortcut method to retrieve/store which makes use of
    * lambda parameter if not null
    */
-	public function get($id = null, $lambda = null) {
+	public function get($id = null, $age = null, $lambda = null) {
+
+			// determine age, as it can be passed at any
+			// place along the three arguments
+			// @TODO look for a cleaner way to do this
+			foreach(func_get_args() as $argument) {
+				// our cache id may only be a string
+				if (is_string($argument)) {
+					$id = $argument;
+				
+				// age may only be an integer value
+				} else if (is_integer($argument)) { 
+					$age = $argument;
+				
+				} else if (is_callable($argument)) {
+					$lambda = $argument;
+				} 
+
+			}
+
+
 			// check for the occurrence of a star character as 
 			// the first character, in which case we use backtrace
 			// to create a unique key using file and line number
@@ -330,16 +350,6 @@ class CacheGateway {
 			if (is_null($result = $this->getObject($id)) &&
 				  is_callable($lambda)) {
 				
-				$result = $lambda();
-
-				// because the usage of lambda in calling get makes it 
-				// less than idiomatic to pass ttl, we instead check
-				// result of lambda to see if an age property has
-				// been passed
-				$age = is_array($result) && isset($result['age']) 
-					? $result['age']
-					: null;
-
 				// finally store object 
 				$this->storeObject($id, $result = $lambda(), null, $age);
 			} 
