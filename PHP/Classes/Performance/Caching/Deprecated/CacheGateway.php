@@ -315,50 +315,56 @@ class CacheGateway {
    */
 	public function get($id = null, $age = null, $lambda = null) {
 
-			// determine age, as it can be passed at any
-			// place along the three arguments
-			// @TODO look for a cleaner way to do this
-			foreach(func_get_args() as $argument) {
-				// our cache id may only be a string
-				if (is_string($argument)) {
-					$id = $argument;
-				
-				// age may only be an integer value
-				} else if (is_integer($argument)) { 
-					$age = $argument;
-				
-				} else if (is_callable($argument)) {
-					$lambda = $argument;
-				} 
-
-			}
-
-
-			// check for the occurrence of a star character as 
-			// the first character, in which case we use backtrace
-			// to create a unique key using file and line number
-			if (is_null($id) || 
-				 (isset($id[0]) && $id[0] == '*')) {
-				
-				$trace = debug_backtrace(2);
-				$trace = $trace[1];
-				$id    = $trace['file'] . 
-				         $trace['line'] . 
-				         substr($id, 1);			
-			}	
-
-			// if lambda contains and value and the result from getObject
-			// is null, then we call lambda to get value to be cached
-			if (is_null($result = $this->getObject($id)) &&
-				  is_callable($lambda)) {
-				
-				// finally store object 
-				$this->storeObject($id, $result = $lambda($id), null, $age);
+		// determine age, as it can be passed at any
+		// place along the three arguments
+		// @TODO look for a cleaner way to do this
+		foreach(func_get_args() as $argument) {
+			// our cache id may only be a string
+			if (is_string($argument)) {
+				$id = $argument;
+			
+			// age may only be an integer value
+			} else if (is_integer($argument)) { 
+				$age = $argument;
+			
+			} else if (is_callable($argument)) {
+				$lambda = $argument;
 			} 
 
-			return $result;
+		}
 
 
+		// check for the occurrence of a star character as 
+		// the first character, in which case we use backtrace
+		// to create a unique key using file and line number
+		if (is_null($oid = $id) || 
+			 (isset($id[0]) && $id[0] == '*')) {
+			
+			// first we attempt to get our original id
+			// without leading star character
+			$oid = substr($id, 1);
+
+			// next we prepend file + line number
+			// to id
+			$trace = debug_backtrace(2);
+			$trace = $trace[1];
+			$id    = $trace['file'] . 
+			         $trace['line'] . 
+			         substr($id, 1);	
+
+		}	
+
+
+		// if lambda contains and value and the result from getObject
+		// is null, then we call lambda to get value to be cached
+		if (!($result = $this->getObject($id)) &&
+			  is_callable($lambda)) {
+
+			// finally store object 
+			$this->storeObject($id, $result = $lambda($oid), null, $age);
+		} 
+
+		return $result;
 	}
 
 

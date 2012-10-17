@@ -10,7 +10,7 @@ use       \eGloo\Utilities;
 class Number extends Utilities\ActiveSupport {
 	
 	public function __get($name) { 
-		foreach (static::symbols as $symbol => $seconds) {
+		foreach (static::$symbols as $symbol => $seconds) {
 			if (preg_match("/^$symbol/i", $name)) {
 				return (int) $this->value * $seconds;
 			}
