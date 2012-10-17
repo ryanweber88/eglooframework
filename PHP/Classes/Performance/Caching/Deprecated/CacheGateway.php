@@ -309,6 +309,47 @@ class CacheGateway {
 		return $retVal;
 	}
 
+	/**
+   * Shortcut method to retrieve/store which makes use of
+   * lambda parameter if not null
+   */
+	public function get($id = null, $lambda = null) {
+			// check for the occurrence of a star character as 
+			// the first character, in which case we use backtrace
+			// to create a unique key using file and line number
+			if (is_null($id) || 
+				 (isset($id[0]) && $id[0] == '*')) {
+				
+				$trace = debug_backtrace(2);
+				$trace = $trace[1];
+				$id    = $trace['file'] . $trace['line'] . $id;			
+			}	
+
+			// if lambda contains and value and the result from getObject
+			// is null, then we call lambda to get value to be cached
+			if (is_null($result = $this->getObject($id)) &&
+				  is_callable($lambda)) {
+				
+				$result = $lambda();
+
+				// because the usage of lambda in calling get makes it 
+				// less than idiomatic to pass ttl, we instead check
+				// result of lambda to see if an age property has
+				// been passed
+				$age = is_array($result) && isset($result['age']) 
+					? $result['age']
+					: null;
+
+				// finally store object 
+				$this->storeObject($id, $result = $lambda(), null, $age);
+			} 
+
+			return $result;
+
+
+	}
+
+
 	public function getObject( $id, $namespace = null, $keep_hot = false ) {
 		// TODO extensive error checking and input validation
 		$retVal = null;
@@ -318,16 +359,7 @@ class CacheGateway {
 				$namespace = 'egDefault';
 			}
 
-			$id = $namespace . '::' . $id;
-
-			// check for the occurrence of a star character as 
-			// the first character, in which case we use backtrace
-			// to create a unique key using file and line number
-			if (isset($id[0]) && $id[0] == '*') {
-				$trace = debug_backtrace(2);
-				$trace = $trace[1];
-				$id    = $trace['file'] . $trace['line'] . $id;			
-			}						
+			$id = $namespace . '::' . $id;				
 
 			if ( $keep_hot && isset($this->_piping_hot_cache[$id]) ) {
 				$retVal = $this->_piping_hot_cache[$id];
@@ -408,15 +440,7 @@ class CacheGateway {
 			}
 
 			$id = $namespace . '::' . $id;
-
-			// check for the occurrence of a star character as 
-			// the first character, in which case we use backtrace
-			// to create a unique key using file and line number
-			if (isset($id[0]) && $id[0] == '*') {
-				$trace = debug_backtrace(2);
-				$trace = $trace[1];
-				$id    = $trace['file'] . $trace['line'] . $id;			
-			}				
+			
 
 			if ( $keep_hot ) {
 				$retVal = $this->_piping_hot_cache[$id] = $obj;
