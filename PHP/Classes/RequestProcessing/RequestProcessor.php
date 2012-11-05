@@ -35,6 +35,10 @@
  */
 abstract class RequestProcessor {
 
+	const RESPONSE_CODE_ERROR_REQUEST = 400;
+	const RESPONSE_CODE_ERROR_INTERNAL = 500;
+
+
 	/* Public Static Members */
 	public static $calledClass = null;
 

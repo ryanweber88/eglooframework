@@ -18,7 +18,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *  
- * @author Keith Buel
+ * @author Christian Calloway christian@petflow callowaylc@gmail
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @package RequestProcessing
@@ -33,68 +33,48 @@
  * 
  * @package RequestProcessing
  */
-abstract class RequestProcessor {
+abstract class AJAXRequestProcessor {
 
-	/* Public Static Members */
-	public static $calledClass = null;
 
-	/* Protected Data Members */
-	protected $requestInfoBean = null;
-	protected $decoratorInfoBean = null;
-	protected $bean = null;
-	protected $request;
 
-	public function __construct() {
-		$this->requestInfoBean = RequestInfoBean::getInstance();
-		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
 
-		// serves simply as an alias
-		$this->bean = $this->requestInfoBean;
+  /**   
+   * Overwrites parent to convert response 
+   * to JSON
+   * @TODO place in RequestProcessor
+   */
+	protected function respond($with) {
+		// @TODO check that 
+		if (($content = json_encode($with)) !== false) {
+			echo json_encode($content);
 		
-		// provides information about requests
-		// @TODO this may be a bit confusing since most
-		// frameworks combine the concept of bean and request
-		// as request
-		$this->request = HTTP\Request::instance();
-	}
-
-	public static function getClass() {
-		$retVal = null;
-
-		if ( isset(static::$calledClass) ) {
-			$retVal = static::$calledClass;
 		} else {
-			$retVal = static::$calledClass = get_called_class();
+			$this->error(
+				self::RESPONSE_CODE_ERROR_INTERNAL, 
+				'Failed to convert argument $with to JSON'
+			);
 		}
-
-		return $retVal;
 	}
 
-	abstract public function processRequest();
+    /**
+   * Attached error response code and message to response header
+   * @TODO place is RequestProcessor
+   */
+  protected function error($code, $message) {
+	  // @TODO generate response header with error code and
+	  // response message
+	  // @TODO this is new to 5.4; it may be better to be backword
+	  // compatible at the framework
+	  //http_response_code($code);
 
-	public function processErrorRequest() {
-		echo "Please implement processErrorRequest()";
-	}
+	  // generate error response body
+	  // @TODO decouple/encapsulate
+	  // @TODO create application specific error code handler
+	  $this->respond([
+	  	'codes'   => $code,
+	  	'message' => $message
+	  ]);
+  }
 
-    // TODO we need to make a templated method for processing
-    // both the header information and then the content information
-    // to guarantee that by default we handle content headers and
-    // and other prerequisites correctly 
-    
- 	public function setRequestInfoBean( $requestInfoBean ) {
- 		$this->requestInfoBean = $requestInfoBean;
- 	}
- 	
- 	public function getRequestInfoBean() {
- 		return $this->requestInfoBean;
- 	}
-
-	public function setDecoratorInfoBean( $decoratorInfoBean ) {
-		$this->decoratorInfoBean = $decoratorInfoBean;
-	}
-
-	public function getDecoratorInfoBean() {
-		return $this->decoratorInfoBean;
-	}
 
 }
