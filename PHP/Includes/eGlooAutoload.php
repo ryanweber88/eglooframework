@@ -1,6 +1,7 @@
 <?php
-use \eGloo\Utility\Logger     as Logger;
-use \eGloo\Dialect\ObjectSafe as Object;
+namespace {
+use       \eGloo\Utility\Logger     as Logger;
+use       \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * Class and Interface Autoloader
@@ -977,4 +978,19 @@ function __($mixed) {
 	if (is_integer($mixed)) {
 		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
 	}
+}
+
+} namespace eGloo {
+
+	/**
+	 * Convenience method for logging
+	 */
+	function log($message) {
+		
+		eGlooLogger::writeLog( 
+			eGlooLogger::DEBUG, $message
+		);		
+		
+	}
+
 }
