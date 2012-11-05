@@ -122,6 +122,20 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function edit()    { }
 	protected function destroy() { }
 	protected function show()    { }
+
+	public function __call($name, $arguments) {
+
+		// allow for calling error methods with response
+		// codes as part of method name
+		if (preg_match('/^error_([0-9]+)$/', $name, $match)) {
+			// @TODO check if message has been passed?
+			return $this->error($match[1], $arguments[0])
+		}
+
+		// allow for calling respond method with response
+		// type as part of method name
+		// @PASS
+	}
 	
 	/**
 	 * Attached error response code and message to response header
@@ -161,8 +175,7 @@ class RESTRequestProcessor extends RequestProcessor {
 			echo json_encode($content);
 		
 		} else {
-			$this->error(
-				self::RESPONSE_CODE_ERROR_INTERNAL, 
+			$this->error_500(
 				'Failed to convert argument $with to JSON'
 			);
 		}
