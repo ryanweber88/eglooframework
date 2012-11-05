@@ -36,13 +36,7 @@
  * @subpackage RequestProcessors
  */
 class RESTRequestProcessor extends RequestProcessor {
-	// TRAITS
-	use Utilities\DelayedJobTrait;
 
-	// CONSTANTS
-	const RESPONSE_CODE_OK          = 200;
-	const RESPONSE_CODE_BAD_REQUEST = 400;
-	const RESPONSE_CODE_NOT_FOUND   = 404;
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
@@ -58,7 +52,7 @@ class RESTRequestProcessor extends RequestProcessor {
 		// determine http method, request parameters, and call appropriate method
 		$method = strtoupper($this->bean->requestMethod());
 		
-		$this->log(
+		eGloo\log(
 			"RESTRequestProcessor ({$this->ident()}): Entered processRequest() on $method Request"
 		);
 		
@@ -74,14 +68,14 @@ class RESTRequestProcessor extends RequestProcessor {
 			// parameter)
 			if ($this->isCollectionRoute()) {
 				// determin
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
+				eGloo\log("Invoking #index");
 				$this->index();	
 
 			}
 			
 			else {
 								
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
+				eGloo\log("Invoking #show");
 				$this->show();			
 			}
 			
@@ -90,26 +84,26 @@ class RESTRequestProcessor extends RequestProcessor {
 		
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
+			eGloo\log("Invoking #create");
 			$this->create();
 		}
 		
 		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
+			eGloo\log("Invoking #edit");
 			$this->edit();			
 		}
 		
 		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
+			eGloo\log("Invoking #destroy");
 			$this->destroy();
 		}
 
 		
 		//eGlooResponse::outputXHTML( $templateVariables );
-		$this->log(
-			"RESTRequestProcessor ({$this->ident()}): Exiting processRequest() on $method Request"
+		eGloo\log(
+			"Exiting processRequest() on $method Request"
 		);
 	}
 
@@ -138,14 +132,17 @@ class RESTRequestProcessor extends RequestProcessor {
 		// response message
 		// @TODO this is new to 5.4; it may be better to be backword
 		// compatible at the framework
-		http_response_code($code);
+		header(
+			"HTTP/1.0 $code $message", true, $code
+		);
 		
 		// generate error response body
 		// @TODO decouple/encapsulate
 		// @TODO create application specific error code handler
-		echo json_encode([
-			'message' => $message
-		]);
+	  $this->respond([
+	  	'codes'   => array($code),
+	  	'message' => $message
+	  ]);
 	}
 	
 	
@@ -160,18 +157,18 @@ class RESTRequestProcessor extends RequestProcessor {
 		// @TODO introspect body, the requested format
 		// header and convert body
 		
-		// check that we have an appropriate/ok
-		// response code and if the case, attach
-		// data to response body
-		if (http_response_code() === self::RESPONSE_CODE_OK) {
-			echo $with;
+		if (($content = json_encode($with)) !== false) {
+			echo json_encode($content);
+		
+		} else {
+			$this->error(
+				self::RESPONSE_CODE_ERROR_INTERNAL, 
+				'Failed to convert argument $with to JSON'
+			);
 		}
 	}
 	
 
-	protected static function respondsTo($__mixed = [ ]) {
-		
-	}
 
 
 }

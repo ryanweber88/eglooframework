@@ -33,48 +33,9 @@
  * 
  * @package RequestProcessing
  */
-abstract class AJAXRequestProcessor {
+abstract class AJAXRequestProcessor extends RESTRequestProcessor {
 
 
-
-
-  /**   
-   * Overwrites parent to convert response 
-   * to JSON
-   * @TODO place in RequestProcessor
-   */
-	protected function respond($with) {
-		// @TODO check that 
-		if (($content = json_encode($with)) !== false) {
-			echo json_encode($content);
-		
-		} else {
-			$this->error(
-				self::RESPONSE_CODE_ERROR_INTERNAL, 
-				'Failed to convert argument $with to JSON'
-			);
-		}
-	}
-
-    /**
-   * Attached error response code and message to response header
-   * @TODO place is RequestProcessor
-   */
-  protected function error($code, $message) {
-	  // @TODO generate response header with error code and
-	  // response message
-	  // @TODO this is new to 5.4; it may be better to be backword
-	  // compatible at the framework
-	  //http_response_code($code);
-
-	  // generate error response body
-	  // @TODO decouple/encapsulate
-	  // @TODO create application specific error code handler
-	  $this->respond([
-	  	'codes'   => $code,
-	  	'message' => $message
-	  ]);
-  }
 
 
 }
