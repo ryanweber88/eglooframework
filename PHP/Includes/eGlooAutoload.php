@@ -987,8 +987,8 @@ function __($mixed) {
 	 */
 	function log($message) {
 		
-		eGlooLogger::writeLog( 
-			eGlooLogger::DEBUG, $message
+		\eGlooLogger::writeLog( 
+			\eGlooLogger::DEBUG, $message
 		);		
 		
 	}

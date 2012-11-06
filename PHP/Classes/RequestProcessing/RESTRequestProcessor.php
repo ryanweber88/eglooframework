@@ -113,7 +113,8 @@ class RESTRequestProcessor extends RequestProcessor {
 					 
 		// @wtfphp empty(variable_is_0) === true
 		return isset($this->bean['ids'])  ||
-		       (!isset($this->bean['id']) || !is_numeric($this->bean['id']));
+		       (!isset($this->bean['id']) || 
+		       	!is_numeric($this->bean['id']));
 				
 	}
 	
@@ -129,7 +130,7 @@ class RESTRequestProcessor extends RequestProcessor {
 		// codes as part of method name
 		if (preg_match('/^error_([0-9]+)$/', $name, $match)) {
 			// @TODO check if message has been passed?
-			return $this->error($match[1], $arguments[0])
+			return $this->error($match[1], $arguments[0]);
 		}
 
 		// allow for calling respond method with response
@@ -153,10 +154,10 @@ class RESTRequestProcessor extends RequestProcessor {
 		// generate error response body
 		// @TODO decouple/encapsulate
 		// @TODO create application specific error code handler
-	  $this->respond([
+	  $this->respond(array(
 	  	'codes'   => array($code),
 	  	'message' => $message
-	  ]);
+	  ));
 	}
 	
 	
