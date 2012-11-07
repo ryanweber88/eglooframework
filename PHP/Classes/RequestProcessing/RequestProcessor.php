@@ -49,7 +49,7 @@ abstract class RequestProcessor {
 	protected $request;
 
 	public function __construct() {
-		$this->requestInfoBean = RequestInfoBean::getInstance();
+		$this->requestInfoBean   = RequestInfoBean::getInstance();
 		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
 
 		// serves simply as an alias

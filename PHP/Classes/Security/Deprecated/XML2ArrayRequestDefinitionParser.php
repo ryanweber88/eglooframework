@@ -290,6 +290,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 		// Iterate over the RequestClass nodes so that we can parse each request definition
 		foreach( $requestXMLObject->xpath( '/tns:Requests/RequestClass' ) as $requestClass ) {
+
 			// Grab the ID for this particular RequestClass
 			$requestClassID = isset($requestClass['id']) ? (string) $requestClass['id'] : null;
 
@@ -332,9 +333,18 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				}
 
 				// Request Properties
-				$requestClasses[$requestClassID]['requests'][$requestID] =
-					array('requestClass' => $requestClassID, 'requestID' => $requestID, 'requestType' => $requestType,
-					'processorID' => $processorID, 'errorProcessorID' => $errorProcessorID );
+				$requestClasses[$requestClassID]['requests'][$requestID] = array(
+					'requestClass'     => $requestClassID, 
+					'requestID'        => $requestID, 
+					'requestType'      => $requestType,
+					'processorID'      => $processorID, 
+					'errorProcessorID' => $errorProcessorID,
+					'cache'            => isset($request['cache']) &&
+					                      $request['cache'] == 'true',
+					'ttl'              => isset($request['ttl']) 
+					                      	? $request['ttl']
+					                      	: null 
+				);
 
 				$eglooXMLObj = new eGlooXML( $request );
 
@@ -777,6 +787,9 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						$requestInfoBean->setWildCardRequestID( $requestID );
 						$requestInfoBean->setRequestClass( self::REQUEST_CLASS_WILDCARD_KEY );
 						$requestInfoBean->setRequestID( self::REQUEST_ID_WILDCARD_KEY );
+						
+						$requestInfoBean->setCached(true);
+
 					}
 
 				}

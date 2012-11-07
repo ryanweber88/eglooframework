@@ -39,23 +39,24 @@ final class RequestProcessorFactory {
         $requestProcessorID = $requestInfoBean->getRequestProcessorID();
         $requestProcessor = null;
 
-		$requestProcessorID = (string) $requestProcessorID;
+				$requestProcessorID = (string) $requestProcessorID;
 
-		if ( $requestProcessorID !== null ) {
-			$requestProcessor = new $requestProcessorID;
+				if ( $requestProcessorID !== null ) {
+					$requestProcessor = new $requestProcessorID;
 
-			//now add the decorators
-			foreach( $requestInfoBean->getDecoratorArray() as $decoratorID ){
-				$requestDecorator = new $decoratorID;
+					//now add the decorators
+					foreach( $requestInfoBean->getDecoratorArray() as $decoratorID ){
+						$requestDecorator = new $decoratorID;
 
-				$requestDecorator->setChildRequestProcessor( $requestProcessor );
+						$requestDecorator->setChildRequestProcessor( $requestProcessor );
 
-				//now set this decorator as the request processor
-				$requestProcessor = $requestDecorator;
-			}
-		}
+						//now set this decorator as the request processor
+						$requestProcessor = $requestDecorator;
+					}
+				}
 
         $requestProcessor->setRequestInfoBean( $requestInfoBean );
+
 
         return $requestProcessor;
     }
