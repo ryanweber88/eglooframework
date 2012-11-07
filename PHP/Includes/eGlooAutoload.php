@@ -982,15 +982,18 @@ function __($mixed) {
 
 } namespace eGloo {
 
-	/**
-	 * Convenience method for logging
-	 */
-	function log($message) {
-		
-		\eGlooLogger::writeLog( 
-			\eGlooLogger::DEBUG, $message
-		);		
-		
-	}
+/**
+ * Convenience method for logging
+ */
+function log($message) {
+
+	var_export(debug_backtrace());
+	exit;
+	
+	\eGlooLogger::writeLog( 
+		\eGlooLogger::DEBUG, $message
+	);		
+	
+}
 
 }

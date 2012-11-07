@@ -109,7 +109,8 @@ abstract class RequestProcessor {
 
 		// if ttl is null, we set to a year which is effectively
 		// infinite by internet standards
-		$ttl = ?: __(1)->year;
+		// @TODO uhoh don't tell george
+		is_null($ttl) && $ttl = __(1)->year;
 
 		// @TODO underlying cache mechanism should be both decoupled
 		// and abstracted; for now, cache will simply supply cache 
@@ -127,8 +128,8 @@ abstract class RequestProcessor {
 		// but for the time being we will use http headers to 
 		// control cache on a gateway cache
 
-		// we are purposefully using past date to force cache expiry
-		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT')
+		// we are purposefully using past date to force cache
+		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
 
 	}
 
