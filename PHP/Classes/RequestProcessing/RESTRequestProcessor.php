@@ -53,7 +53,7 @@ class RESTRequestProcessor extends RequestProcessor {
 		$method = strtoupper($this->bean->requestMethod());
 		
 		eGloo\log(
-			"RESTRequestProcessor ({$this->ident()}): Entered processRequest() on $method Request"
+			"Entered processRequest() on $method Request"
 		);
 		
 		

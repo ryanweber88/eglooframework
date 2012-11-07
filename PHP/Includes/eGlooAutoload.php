@@ -987,11 +987,19 @@ function __($mixed) {
  */
 function log($message) {
 
-	var_export(debug_backtrace());
-	exit;
-	
+	// add class#method to message using backtrace
+	$trace = debug_backtrace();
+	$trace = $trace[1]; 
+	$head  = $trace['function']; 
+
+	// determine if caller was within the context
+	// of a class, and then update message with
+	// caller information
+	isset($trace['class']) && $head = "{$trace['class']}.$head";
+
+
 	\eGlooLogger::writeLog( 
-		\eGlooLogger::DEBUG, $message
+		\eGlooLogger::DEBUG, "$head : $message"
 	);		
 	
 }
