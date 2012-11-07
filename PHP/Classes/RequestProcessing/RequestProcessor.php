@@ -43,9 +43,9 @@ abstract class RequestProcessor {
 	public static $calledClass = null;
 
 	/* Protected Data Members */
-	protected $requestInfoBean = null;
+	protected $requestInfoBean   = null;
 	protected $decoratorInfoBean = null;
-	protected $bean = null;
+	protected $bean              = null;
 	protected $request;
 
 	public function __construct() {
@@ -99,6 +99,37 @@ abstract class RequestProcessor {
 
 	public function getDecoratorInfoBean() {
 		return $this->decoratorInfoBean;
+	}
+
+	/**
+	 *
+	 * Caches page for given period of time (ttl)
+	 */
+	public function cache($ttl = null) {
+
+		// if ttl is null, we set to a year which is effectively
+		// infinite by internet standards
+		$ttl = ?: __(1)->year;
+
+		// @TODO underlying cache mechanism should be both decoupled
+		// and abstracted; for now, cache will simply supply cache 
+		// control headers to be served to gateway/http cache
+		header("Cache-Control: must-revalidate, max-age=$ttl");
+	
+	}
+
+	/**
+	 *
+	 * Expires cache for page (if any)
+	 */	
+	public function expire() {
+		// @TODO again, this should be decoupled and abstracted, 
+		// but for the time being we will use http headers to 
+		// control cache on a gateway cache
+
+		// we are purposefully using past date to force cache expiry
+		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT')
+
 	}
 
 }

@@ -18,7 +18,12 @@ class Number extends Utilities\ActiveSupport {
 	}
 
 	public function __call($name, $arguments) {
-
+		foreach (static::$symbols as $symbol => $seconds) {
+			if (preg_match("/^$symbol/i", $name)) {
+				$this->current = (int) $this->value * $seconds;
+				return $this;
+			}
+		}
 	}
 
 	protected static $symbols = array(
@@ -31,4 +36,6 @@ class Number extends Utilities\ActiveSupport {
 		'month'  => 2.63e+6,
 		'year'   => 3.156e+7
 	);
+
+	protected $current;
 }

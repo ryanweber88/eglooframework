@@ -173,7 +173,11 @@ class RESTRequestProcessor extends RequestProcessor {
 		// header and convert body
 		
 		if (($content = json_encode($with)) !== false) {
-			echo json_encode($content);
+			// @TODO decouple response content type
+			header('Content-Type:application/json');
+			
+			// return json encoded data to stdout
+			echo $content;
 		
 		} else {
 			$this->error_500(
