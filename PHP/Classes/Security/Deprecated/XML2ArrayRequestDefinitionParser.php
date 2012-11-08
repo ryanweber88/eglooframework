@@ -2161,7 +2161,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			$order = $decorator['order'];
 
 			// instantiate new decorator and pass node values as argument
-			$decoratorArray[ $order ] = new $class($requestNode);
+			$decoratorArray[ $order ] = new $class($decorator);
 		}
 
 		//sort the array based on the keys, to get the order correct
