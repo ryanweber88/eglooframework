@@ -42,20 +42,12 @@ abstract class RequestProcessorDecorator extends RequestProcessor {
 
 	function __construct($node) {
 		// call parent constructor to setup requestinfobean property
-		parent::__construct($bean);
+		parent::__construct();
 
-		// Iterate through node and find node that represents
-		// this decorator;
-
-		// here we create a meta or eigenclass to represent this (or
-		// current polymorphic instance) class
-		$class = new Klass($this);
-
-		foreach ($node['decorators'] as $name => $properties) {
-			if ($name == $class->name) {
-				$this->node = $properties;
-			}
-		}
+		// set node property, which is associative array containing
+		// the decorator attribute (and children) values from
+		// requests.xml
+		$this->node = $node;
 
 	}
 

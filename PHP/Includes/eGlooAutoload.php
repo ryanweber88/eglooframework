@@ -979,8 +979,8 @@ function __($mixed) {
 		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
 	
 	} else if (is_array($mixed)) {
-		return new \eGloo\Utilities\ActiveSupport\Array($mixed);
-		
+		//return new \eGloo\Utilities\ActiveSupport\Array($mixed);
+
 	}
 }
 
