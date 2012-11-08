@@ -48,6 +48,8 @@ class RequestInfoBean implements \ArrayAccess {
 	private $_wildCardRequest = false;
 	private $_wildCardRequestClass = null;
 	private $_wildCardRequestID = null;
+	protected $cache = false;
+
 
 	// Sanitized
 	private $COOKIES = null;

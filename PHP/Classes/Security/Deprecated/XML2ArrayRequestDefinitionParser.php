@@ -252,7 +252,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 			foreach( $eglooXMLObj->xpath( 'child::Decorator' ) as $decorator ) {
 				$requestAttributeSets[$attributeSetID]['attributes']['decorators'][(string) $decorator->decoratorID] =
-					$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ATTRIBUTES, eGlooXML::PROCESS_ALL );
+					$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ALL, eGlooXML::PROCESS_ALL );
 			}
 
 			// Init Routines
@@ -338,12 +338,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					'requestID'        => $requestID, 
 					'requestType'      => $requestType,
 					'processorID'      => $processorID, 
-					'errorProcessorID' => $errorProcessorID,
-					'cache'            => isset($request['cache']) &&
-					                      $request['cache'] == 'true',
-					'ttl'              => isset($request['ttl']) 
-					                      	? $request['ttl']
-					                      	: null 
+					'errorProcessorID' => $errorProcessorID
 				);
 
 				$eglooXMLObj = new eGlooXML( $request );
@@ -463,8 +458,9 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				$requestClasses[$requestClassID]['requests'][$requestID]['decorators'] = array();
 
 				foreach( $eglooXMLObj->xpath( 'child::Decorator' ) as $decorator ) {
+
 					$requestClasses[$requestClassID]['requests'][$requestID]['decorators'][(string) $decorator->decoratorID] =
-						$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ATTRIBUTES, eGlooXML::PROCESS_ALL );
+						$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ALL, eGlooXML::PROCESS_ALL );
 				}
 
 				// InitRoutines
@@ -2158,10 +2154,12 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		
 		$decoratorArray = array();
 		$requestNode['decorators'];
-		foreach( $requestNode['decorators'] as $decoratorArg ) {
-			$decoratorID = $decoratorArg['decoratorID'];
-			$order = $decoratorArg['order'];
-			$decoratorArray[ $order ] = $decoratorID; 
+
+		foreach( $requestNode['decorators'] as $decorator ) {
+			list($id, $order) = __($decorator)->values('id', 'order');
+
+			// instantiate new decorator and pass node values as argument
+			$decoratorArray[ $order ] = new $decorator($order);
 		}
 
 		//sort the array based on the keys, to get the order correct

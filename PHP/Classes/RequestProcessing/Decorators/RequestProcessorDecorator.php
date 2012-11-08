@@ -1,4 +1,6 @@
 <?php
+use \eGloo\Dialect\_ClassSafe as Klass;
+
 /**
  * RequestProcessorDecorator Abstract Class File
  *
@@ -35,7 +37,27 @@
  */
 abstract class RequestProcessorDecorator extends RequestProcessor {
 
-	private $childRequestProcessor = null;
+	private   $childRequestProcessor = null;
+	protected $node;
+
+	function __construct($node) {
+		// call parent constructor to setup requestinfobean property
+		parent::__construct($bean);
+
+		// Iterate through node and find node that represents
+		// this decorator;
+
+		// here we create a meta or eigenclass to represent this (or
+		// current polymorphic instance) class
+		$class = new Klass($this);
+
+		foreach ($node['decorators'] as $name => $properties) {
+			if ($name == $class->name) {
+				$this->node = $properties;
+			}
+		}
+
+	}
 
 	public function setChildRequestProcessor( $requestProcessor ){
 		$this->childRequestProcessor = $requestProcessor;

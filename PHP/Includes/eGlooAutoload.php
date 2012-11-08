@@ -977,6 +977,10 @@ function __constructStatic($name) {
 function __($mixed) {
 	if (is_integer($mixed)) {
 		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
+	
+	} else if (is_array($mixed)) {
+		return new \eGloo\Utilities\ActiveSupport\Array($mixed);
+		
 	}
 }
 

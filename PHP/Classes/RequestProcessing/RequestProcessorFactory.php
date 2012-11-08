@@ -45,13 +45,12 @@ final class RequestProcessorFactory {
 					$requestProcessor = new $requestProcessorID;
 
 					//now add the decorators
-					foreach( $requestInfoBean->getDecoratorArray() as $decoratorID ){
-						$requestDecorator = new $decoratorID;
+					foreach( $requestInfoBean->getDecoratorArray() as $decorator ){
 
-						$requestDecorator->setChildRequestProcessor( $requestProcessor );
+						$decorator->setChildRequestProcessor( $requestProcessor );
 
 						//now set this decorator as the request processor
-						$requestProcessor = $requestDecorator;
+						$requestProcessor = $decorator;
 					}
 				}
 
@@ -65,21 +64,19 @@ final class RequestProcessorFactory {
         $errorRequestProcessorID = $requestInfoBean->getErrorRequestProcessorID();
         $errorRequestProcessor = null;
 
-		if ( $errorRequestProcessorID !== null ) {
-			$errorRequestProcessor = new $errorRequestProcessorID;
+				if ( $errorRequestProcessorID !== null ) {
+					$errorRequestProcessor = new $errorRequestProcessorID;
 
-			//now add the decorators
-			foreach( $requestInfoBean->getDecoratorArray() as $decoratorID ){
-				$requestDecorator = new $decoratorID;
+					//now add the decorators
+					foreach( $requestInfoBean->getDecoratorArray() as $decorator ){
+						$decorator->setChildRequestProcessor( $errorRequestProcessor );
 
-				$requestDecorator->setChildRequestProcessor( $errorRequestProcessor );
+						//now set this decorator as the request processor
+						$errorRequestProcessor = $decorator;
+					}
 
-				//now set this decorator as the request processor
-				$errorRequestProcessor = $requestDecorator;
-			}
-
-			$errorRequestProcessor->setRequestInfoBean( $requestInfoBean );
-		}
+					$errorRequestProcessor->setRequestInfoBean( $requestInfoBean );
+				}
 
         return $errorRequestProcessor;
     }
