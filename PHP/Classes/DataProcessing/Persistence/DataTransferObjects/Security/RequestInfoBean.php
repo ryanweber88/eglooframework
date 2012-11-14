@@ -48,6 +48,8 @@ class RequestInfoBean implements \ArrayAccess {
 	private $_wildCardRequest = false;
 	private $_wildCardRequestClass = null;
 	private $_wildCardRequestID = null;
+	protected $cache = false;
+
 
 	// Sanitized
 	private $COOKIES = null;
@@ -240,6 +242,15 @@ class RequestInfoBean implements \ArrayAccess {
 	 * @see ArrayAccess::offsetExists()
 	 */
 	public function offsetExists($offset) {
+		
+		if (method_exists($this, $method = "get" . ucfirst($offset))) {
+			$result = call_user_func(array(
+				$this, $method
+			));
+			
+			return !empty($result);
+		}
+		
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 			// have to assign into holder prior to 5.4
 			$property = &$this->$method;
@@ -261,9 +272,16 @@ class RequestInfoBean implements \ArrayAccess {
 	}
 
 	/**
-	 * 
+	 * Uses array notation to access request parameter values
 	 */
 	public function offsetGet($offset) {
+		
+		// speicific cases
+		if ($offset == 'slug') {
+			return $this->getSlug();	
+		}
+		
+		// otherwise we look at "super global" representatives/class properties
 
 
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {

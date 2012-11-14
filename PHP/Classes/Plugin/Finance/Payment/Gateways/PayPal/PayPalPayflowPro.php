@@ -93,4 +93,6 @@ abstract class PayPalPayflowPro extends PaymentGatewayProduct {
 
 	abstract public function transactionSearch();
 
+	abstract public function validateCreditCard( $params );
+
 }

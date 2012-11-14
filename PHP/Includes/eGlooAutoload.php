@@ -1,6 +1,7 @@
 <?php
-use \eGloo\Utility\Logger     as Logger;
-use \eGloo\Dialect\ObjectSafe as Object;
+namespace {
+use       \eGloo\Utility\Logger     as Logger;
+use       \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * Class and Interface Autoloader
@@ -974,3 +975,43 @@ function __constructStatic($name) {
 	}
 }
 
+
+/**
+ *  An experimental attempt to lend ActiveSupport functionality
+ *  to php
+ */
+function __($mixed) {
+	if (is_integer($mixed)) {
+		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
+	
+	} else if (is_array($mixed)) {
+		//return new \eGloo\Utilities\ActiveSupport\Array($mixed);
+
+	}
+}
+
+} namespace eGloo {
+
+/**
+ * Convenience method for logging
+ */
+function log($message) {
+
+	// add class#method to message using backtrace
+	$trace = debug_backtrace();
+	$trace = $trace[1]; 
+	$head  = $trace['function']; 
+
+	// determine if caller was within the context
+	// of a class, and then update message with
+	// caller information
+	isset($trace['class']) && $head = "{$trace['class']}.$head";
+
+
+	\eGlooLogger::writeLog( 
+		\eGlooLogger::DEBUG, "$head : $message"
+	);		
+	
+}
+
+}

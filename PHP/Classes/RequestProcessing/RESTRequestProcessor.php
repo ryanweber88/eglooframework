@@ -26,6 +26,7 @@
  * @version 1.0
  */
  use \eGloo\Utilities;
+ use \eGloo\HTTP\Response;
 
 /**
  * 
@@ -36,13 +37,8 @@
  * @subpackage RequestProcessors
  */
 class RESTRequestProcessor extends RequestProcessor {
-	// TRAITS
-	use Utilities\DelayedJobTrait;
 
-	// CONSTANTS
-	const RESPONSE_CODE_OK          = 200;
-	const RESPONSE_CODE_BAD_REQUEST = 400;
-	const RESPONSE_CODE_NOT_FOUND   = 404;
+
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
@@ -58,8 +54,8 @@ class RESTRequestProcessor extends RequestProcessor {
 		// determine http method, request parameters, and call appropriate method
 		$method = strtoupper($this->bean->requestMethod());
 		
-		$this->log(
-			"RESTRequestProcessor ({$this->ident()}): Entered processRequest() on $method Request"
+		eGloo\log(
+			"Entered processRequest() on $method Request"
 		);
 		
 		
@@ -74,14 +70,13 @@ class RESTRequestProcessor extends RequestProcessor {
 			// parameter)
 			if ($this->isCollectionRoute()) {
 				// determin
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#index");
+				eGloo\log("Invoking #index");
 				$this->index();	
 
 			}
 			
-			else {
-								
-				$this->log("RESTRequestProcessor: Invoking {$this->ident()}#show");
+			else {							
+				eGloo\log("Invoking #show");
 				$this->show();			
 			}
 			
@@ -90,26 +85,25 @@ class RESTRequestProcessor extends RequestProcessor {
 		
 		// a post request will invoke create
 		else if ($this->bean->request_is_post()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#create");
+			eGloo\log("Invoking #create");
 			$this->create();
 		}
 		
 		// a put request will invoke edit
 		else if ($this->bean->request_is_put()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#edit");
+			eGloo\log("Invoking #edit");
 			$this->edit();			
 		}
 		
 		// a delete request will invoke destroy
 		else if ($this->bean->request_is_delete()) {
-			$this->log("RESTRequestProcessor: Invoking {$this->ident()}#destroy");
+			eGloo\log("Invoking #destroy");
 			$this->destroy();
 		}
 
 		
-		//eGlooResponse::outputXHTML( $templateVariables );
-		$this->log(
-			"RESTRequestProcessor ({$this->ident()}): Exiting processRequest() on $method Request"
+		eGloo\log(
+			"Exiting processRequest() on $method Request"
 		);
 	}
 
@@ -119,7 +113,8 @@ class RESTRequestProcessor extends RequestProcessor {
 					 
 		// @wtfphp empty(variable_is_0) === true
 		return isset($this->bean['ids'])  ||
-		       (!isset($this->bean['id']) || !is_numeric($this->bean['id']));
+		       (!isset($this->bean['id']) || 
+		       	!is_numeric($this->bean['id']));
 				
 	}
 	
@@ -128,6 +123,21 @@ class RESTRequestProcessor extends RequestProcessor {
 	protected function edit()    { }
 	protected function destroy() { }
 	protected function show()    { }
+
+
+	public function __call($name, $arguments) {
+
+		// allow for calling error methods with response
+		// codes as part of method name
+		if (preg_match('/^error_([0-9]+)$/', $name, $match)) {
+			// @TODO check if message has been passed?
+			return $this->error($match[1], $arguments[0]);
+		}
+
+		// allow for calling respond method with response
+		// type as part of method name
+		// @PASS
+	}
 	
 	/**
 	 * Attached error response code and message to response header
@@ -139,13 +149,17 @@ class RESTRequestProcessor extends RequestProcessor {
 		// @TODO this is new to 5.4; it may be better to be backword
 		// compatible at the framework
 		http_response_code($code);
+		header(
+			"HTTP/1.0 $code $message", true, $code
+		);
 		
 		// generate error response body
 		// @TODO decouple/encapsulate
 		// @TODO create application specific error code handler
-		echo json_encode([
-			'message' => $message
-		]);
+	  $this->respond(array(
+	  	'codes'   => array($code),
+	  	'message' => $message
+	  ));
 	}
 	
 	
@@ -160,18 +174,18 @@ class RESTRequestProcessor extends RequestProcessor {
 		// @TODO introspect body, the requested format
 		// header and convert body
 		
-		// check that we have an appropriate/ok
-		// response code and if the case, attach
-		// data to response body
-		if (http_response_code() === self::RESPONSE_CODE_OK) {
-			echo $with;
+		if (($content = json_encode($with)) !== false) {
+			// @TODO decouple response content type
+			header('Content-Type:application/json');
+			
+			// return json encoded data to stdout
+			echo $content;
+		
+		} else {
+			$this->error_500(
+				'Failed to convert argument $with to JSON'
+			);
 		}
 	}
 	
-
-	protected static function respondsTo($__mixed = [ ]) {
-		
-	}
-
-
 }

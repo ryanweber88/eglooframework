@@ -26,6 +26,7 @@
  * @subpackage DataTransferObjects
  * @version 1.0
  */
+use \eGloo\Utilities;
 
 /**
  * DataTransferObject
@@ -37,5 +38,9 @@
  * @subpackage DataTransferObjects
  */
 abstract class DataTransferObject {
+	public function initWithForm(Form $form) {
+		//$this->delegatesTo($form);
+	}
+	
+	
 }
-

@@ -252,7 +252,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 			foreach( $eglooXMLObj->xpath( 'child::Decorator' ) as $decorator ) {
 				$requestAttributeSets[$attributeSetID]['attributes']['decorators'][(string) $decorator->decoratorID] =
-					$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ATTRIBUTES, eGlooXML::PROCESS_ALL );
+					$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ALL, eGlooXML::PROCESS_ALL );
 			}
 
 			// Init Routines
@@ -290,6 +290,7 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 
 		// Iterate over the RequestClass nodes so that we can parse each request definition
 		foreach( $requestXMLObject->xpath( '/tns:Requests/RequestClass' ) as $requestClass ) {
+
 			// Grab the ID for this particular RequestClass
 			$requestClassID = isset($requestClass['id']) ? (string) $requestClass['id'] : null;
 
@@ -332,9 +333,13 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				}
 
 				// Request Properties
-				$requestClasses[$requestClassID]['requests'][$requestID] =
-					array('requestClass' => $requestClassID, 'requestID' => $requestID, 'requestType' => $requestType,
-					'processorID' => $processorID, 'errorProcessorID' => $errorProcessorID );
+				$requestClasses[$requestClassID]['requests'][$requestID] = array(
+					'requestClass'     => $requestClassID, 
+					'requestID'        => $requestID, 
+					'requestType'      => $requestType,
+					'processorID'      => $processorID, 
+					'errorProcessorID' => $errorProcessorID
+				);
 
 				$eglooXMLObj = new eGlooXML( $request );
 
@@ -453,8 +458,9 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 				$requestClasses[$requestClassID]['requests'][$requestID]['decorators'] = array();
 
 				foreach( $eglooXMLObj->xpath( 'child::Decorator' ) as $decorator ) {
+
 					$requestClasses[$requestClassID]['requests'][$requestID]['decorators'][(string) $decorator->decoratorID] =
-						$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ATTRIBUTES, eGlooXML::PROCESS_ALL );
+						$decorator->getHydratedArray( eGlooXML::RETURN_ARRAY, eGlooXML::BUILD_ALL, eGlooXML::PROCESS_ALL );
 				}
 
 				// InitRoutines
@@ -777,6 +783,9 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						$requestInfoBean->setWildCardRequestID( $requestID );
 						$requestInfoBean->setRequestClass( self::REQUEST_CLASS_WILDCARD_KEY );
 						$requestInfoBean->setRequestID( self::REQUEST_ID_WILDCARD_KEY );
+						
+						$requestInfoBean->setCached(true);
+
 					}
 
 				}
@@ -1519,6 +1528,8 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 						if ( $formObj->validate() ) {
 							$formProcessedAndValid = true;
 						}
+					} else {
+						$formProcessedAndValid = true;
 					}
 
 					if ( isset($formProcessedAndValid) && $formProcessedAndValid ) {
@@ -2161,10 +2172,14 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		
 		$decoratorArray = array();
 		$requestNode['decorators'];
-		foreach( $requestNode['decorators'] as $decoratorArg ) {
-			$decoratorID = $decoratorArg['decoratorID'];
-			$order = $decoratorArg['order'];
-			$decoratorArray[ $order ] = $decoratorID; 
+
+		foreach( $requestNode['decorators'] as $decorator ) {
+			//list($id, $order) = __($decorator)->values('id', 'order');
+			$class = $decorator['decoratorID'];
+			$order = $decorator['order'];
+
+			// instantiate new decorator and pass node values as argument
+			$decoratorArray[ $order ] = new $class($decorator);
 		}
 
 		//sort the array based on the keys, to get the order correct

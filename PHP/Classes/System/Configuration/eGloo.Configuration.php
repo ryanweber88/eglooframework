@@ -10,21 +10,21 @@ use \ErrorException as ErrorException;
  * eGloo\Configuration Class File
  *
  * Contains the class definition for the eGloo\Configuration
- * 
+ *
  * Copyright 2011 eGloo LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author George Cooper
  * @copyright 2011 eGloo LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -148,7 +148,7 @@ final class Configuration {
 			// $application_path = self::getApplicationPath();
 
 			// $success = self::loadApplicationConfigurationCache( $application_path, $overwrite, $config_cache );
-		
+
 			if ( !$success && $found_application_path ) {
 				self::loadApplicationConfigurationXML( $application_path, $overwrite );
 			}
@@ -221,7 +221,7 @@ final class Configuration {
 		}
 
 		self::$uniqueInstanceID = md5(realpath('.') . self::getApplicationPath() . self::getUIBundleName());
-		
+
 		if ( isset( $_SERVER['EG_SECURE_ENVIRONMENT'] ) && $_SERVER['EG_SECURE_ENVIRONMENT'] === 'ON' ) {
 			self::secureEnvironment();
 		}
@@ -255,6 +255,20 @@ final class Configuration {
 					break;
 				case 'OFF' :
 					$webRootConfigOptions['egAPDTrace'] = false;
+					break;
+				default :
+					break;
+			}
+		}
+
+		// Check if we're displaying traces in the UI or not
+		if ( isset($_SERVER['EG_XDEBUG_TRACE']) ) {
+			switch( $_SERVER['EG_XDEBUG_TRACE'] ) {
+				case 'ON' :
+					$webRootConfigOptions['egXdebugTrace'] = true;
+					break;
+				case 'OFF' :
+					$webRootConfigOptions['egXdebugTrace'] = false;
 					break;
 				default :
 					break;
@@ -730,7 +744,7 @@ final class Configuration {
 			// TODO Error handling
 			// $errors = libxml_get_errors();
 
-			// Load applications after system... 
+			// Load applications after system...
 			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:Applications/tns:Component' ) as $component ) {
 				$componentID = (string) $component['id'];
 
@@ -744,7 +758,7 @@ final class Configuration {
 
 			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:Applications/tns:Option' ) as $option ) {
 				$optionID = (string) $option['id'];
-			
+
 				if (isset(self::$configuration_possible_options[$optionID])) {
 					// if (!isset(self::$configuration_options[$optionID])) {
 						self::$configuration_options[$optionID] = (string) $option['value'];
@@ -795,7 +809,7 @@ final class Configuration {
 	}
 
 	public static function writeApplicationConfigurationXML( $application_name, $config_xml_path = 'Config.xml' ) {
-		
+
 	}
 
 	public static function clearApplicationCache( $application_cache_path = null ) {
@@ -844,7 +858,7 @@ final class Configuration {
 
 		if ( file_exists($config_cache_path) && is_file($config_cache_path) && is_readable($config_cache_path) ) {
 			$cached_options_array_string = file_get_contents($config_cache_path);
-			
+
 			if ($cached_options_array_string) {
 				$cached_options = eval( 'return ' . file_get_contents($config_cache_path) .';' );
 
@@ -903,7 +917,7 @@ final class Configuration {
 				}
 			}
 
-			// Load applications after system... 
+			// Load applications after system...
 			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:Applications/tns:Component' ) as $component ) {
 				$componentID = (string) $component['id'];
 
@@ -944,6 +958,53 @@ final class Configuration {
 				} else if ( !isset(self::$configuration_options['Alerts']['Alerts'][$alert_id]) ) {
 					self::$configuration_options['Alerts']['Alerts'][$alert_id] = array( 'id' => $alert_id, 'type' => $alert_type, 'trigger' => $alert_trigger,
 						'value' => $alert_value, 'active' => $alert_active );
+				}
+			}
+
+			if ( !isset(self::$configuration_options['DataConnections']) ) {
+				self::$configuration_options['DataConnections'] = array();
+			}
+
+			foreach( $configXMLObject->xpath( '/tns:Configuration/tns:DataConnections/tns:DataConnection' ) as $data_connection ) {
+				$data_connection_id = (string) $data_connection['id'];
+				$data_connection_active = (string) $data_connection['active'];
+				$data_connection_type = (string) $data_connection['type'];
+				$data_connection_override = (string) $data_connection['override'];
+
+				$data_connection_options = array();
+
+				foreach( $data_connection->xpath( 'tns:Option' ) as $data_connection_option ) {
+					$data_connection_option_id = (string) $data_connection_option['id'];
+
+					$data_connection_options[$data_connection_option_id] = array();
+
+					foreach($data_connection_option->attributes() as $attribute_name => $attribute_value ) {
+						$data_connection_options[$data_connection_option_id][$attribute_name] = (string) $attribute_value;
+					}
+				}
+
+				if ( $data_connection_type === 'RDBMS' ) {
+					$data_connection_options['engine']['value'] =
+						self::getEngineModeFromString( $data_connection_options['engine']['value'] );
+				} else if ( $data_connection_type === 'CDN' ) {
+					$data_connection_options['provider']['value'] =
+						self::getCDNProviderFromString( $data_connection_options['provider']['value'] );
+				}
+
+				if ( isset(self::$configuration_possible_options['DataConnections'][$data_connection_type][$data_connection_id]) ) {
+					self::$configuration_options['DataConnections'][$data_connection_type][$data_connection_id] = array(
+						'id' => $data_connection_id,
+						'type' => $data_connection_type,
+						'active' => $data_connection_active,
+						'options' => $data_connection_options,
+					);
+				} else if ( !isset(self::$configuration_options['DataConnections'][$data_connection_type][$data_connection_id]) ) {
+					self::$configuration_options['DataConnections'][$data_connection_type][$data_connection_id] = array(
+						'id' => $data_connection_id,
+						'type' => $data_connection_type,
+						'active' => $data_connection_active,
+						'options' => $data_connection_options,
+					);
 				}
 			}
 
@@ -996,22 +1057,22 @@ final class Configuration {
 			$xmlData .= '<tns:Configuration xmlns:tns="com.egloo.www/eGlooConfiguration" ';
 			$xmlData .= 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
 			$xmlData .= 'xsi:schemaLocation="com.egloo.www/eGlooConfiguration ../XML/Schemas/eGlooConfiguration.xsd">';
-			
+
 			$xmlData .= '</tns:Configuration>';
 
 			$xmlObject = new SimpleXMLElement($xmlData);
 
-			$applicationsXMLObject	= $xmlObject->addChild('Applications');
-			$cachingXMLObject		= $xmlObject->addChild('Caching');
-			$cubesXMLObject			= $xmlObject->addChild('Cubes');
-			$databasesXMLObject		= $xmlObject->addChild('Databases');
-			$documentsXMLObject		= $xmlObject->addChild('Documents');
-			$frameworkXMLObject		= $xmlObject->addChild('Framework');
-			$libraryXMLObject		= $xmlObject->addChild('Library');
-			$networkXMLObject		= $xmlObject->addChild('Network');
-			$peeringXMLObject		= $xmlObject->addChild('Peering');
-			$systemXMLObject		= $xmlObject->addChild('System');
-			
+			$applicationsXMLObject		= $xmlObject->addChild('Applications');
+			$cachingXMLObject			= $xmlObject->addChild('Caching');
+			$cubesXMLObject				= $xmlObject->addChild('Cubes');
+			$dataconnectionsXMLObject	= $xmlObject->addChild('DataConnections');
+			$documentsXMLObject			= $xmlObject->addChild('Documents');
+			$frameworkXMLObject			= $xmlObject->addChild('Framework');
+			$libraryXMLObject			= $xmlObject->addChild('Library');
+			$networkXMLObject			= $xmlObject->addChild('Network');
+			$peeringXMLObject			= $xmlObject->addChild('Peering');
+			$systemXMLObject			= $xmlObject->addChild('System');
+
 			foreach (self::$configuration_possible_options as $key => $value) {
 				$childXMLObject = null;
 
@@ -1079,7 +1140,7 @@ final class Configuration {
 			// $domObject->save( $config_xml_path );
 
 			echo $formattedXML;
-			// 
+			//
 			die;
 		}
 	}
@@ -1426,11 +1487,11 @@ final class Configuration {
 			$xmlData .= '<tns:Configuration xmlns:tns="com.egloo.www/eGlooConfiguration" ';
 			$xmlData .= 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ';
 			$xmlData .= 'xsi:schemaLocation="com.egloo.www/eGlooConfiguration ../XML/Schemas/eGlooConfiguration.xsd">';
-			
+
 			$xmlData .= '</tns:Configuration>';
 
 			$xmlObject = new SimpleXMLElement($xmlData);
-			
+
 			foreach ($system_configuration as $sectionID => $section) {
 
 				$sectionXMLObject = $xmlObject->addChild($sectionID);
@@ -1575,6 +1636,48 @@ final class Configuration {
 		unset($_SERVER['REDIRECT_EG_SECURE_ENVIRONMENT']);
 	}
 
+	/**
+	 *
+	 * Provides meta-lookup for configuration options not explicitly
+	 * provided by accessor methods
+	 * @param string   $name
+	 * @param string[] $arguments
+	 */
+	public function __call($name, $arguments) {
+		// determine action and variable argument
+		$allowedActions = array(
+			'get'
+		);
+
+		if (preg_match('/([a-z])+([A-Z][a-zA-Z]+)/', $name, $match)) {
+			$action = $match[1];
+			$on     = lcfirst($match[2]);
+
+			// if action falls in range of allowed actions, we then check
+			// on what we acting on - explicitly, is it available in config
+			// options
+			if (in_array($action, $allowedActions)) {
+
+				// since configuration names can start with either lower
+				// or upper case, we have to check both - this leaves
+				// the possibility of selecting the wrong config option,
+				// but that should a fringe case (great tv show)
+				if ($action == 'get') {
+
+					// we don't explicitly check whether configuration option
+					// exists - we just check against case and default/guess
+					// opposite case is correct value
+					if (is_null(self::$configuration_options[$on])) {
+						$on = lcfirst($on);
+					}
+
+					return self::$configuration_options[$on];
+
+				}
+			}
+		};
+	}
+
 	// Accessors
 	public static function getAlerts() {
 		$retVal = array();
@@ -1592,7 +1695,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['AppBuild'])) {
 			$retVal = self::$configuration_options['AppBuild'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1602,7 +1705,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['AppMaintenanceVersion'])) {
 			$retVal = self::$configuration_options['AppMaintenanceVersion'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1612,7 +1715,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['AppMajorVersion'])) {
 			$retVal = self::$configuration_options['AppMajorVersion'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1622,7 +1725,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['AppMinorVersion'])) {
 			$retVal = self::$configuration_options['AppMinorVersion'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1632,7 +1735,7 @@ final class Configuration {
 
 	public static function getApplicationPath( $absolute_path = false ) {
 		$retVal = null;
-		
+
 		if ( $absolute_path ) {
 			$retVal = self::getApplicationsPath() . '/' . self::$configuration_options['egApplication'];
 		} else {
@@ -1660,7 +1763,7 @@ final class Configuration {
 
 	public static function getApplicationTemplatesPath( $absolute_path = false ) {
 		$retVal = null;
-		
+
 		if ( $absolute_path ) {
 			$retVal = self::getApplicationsPath() . '/' . self::$configuration_options['egApplication'] . '/Templates';
 		} else {
@@ -1672,7 +1775,7 @@ final class Configuration {
 
 	public static function getApplicationXMLPath( $absolute_path = false ) {
 		$retVal = null;
-		
+
 		if ( $absolute_path ) {
 			$retVal = self::getApplicationsPath() . '/' . self::$configuration_options['egApplication'] . '/XML';
 		} else {
@@ -1685,7 +1788,7 @@ final class Configuration {
 	public static function getUIBundleName() {
 		return self::$configuration_options['egInterfaceBundle'];
 	}
-	
+
 	public static function getDeployment() {
 		return self::$configuration_options['egEnvironment'];
 	}
@@ -1759,7 +1862,18 @@ final class Configuration {
 	public static function getCDNConnectionInfo( $connection_name = 'egCDNPrimary' ) {
 		$retVal = null;
 
-		if (isset(self::$configuration_options['egCDNConnections'][$connection_name])) {
+		if (isset(self::$configuration_options['DataConnections']['CDN'][$connection_name])) {
+			$connection_info = self::$configuration_options['DataConnections']['CDN'][$connection_name];
+
+			$retVal = array(
+				'name'		=> $connection_info['options']['name']['value'],
+				'provider'		=> $connection_info['options']['provider']['value'],
+				'bucket'		=> $connection_info['options']['bucket']['value'],
+				'distribution_url'	=> $connection_info['options']['distribution_url']['value'],
+				'access_key_id'		=> $connection_info['options']['access_key_id']['value'],
+				'secret_access_key'	=> $connection_info['options']['secret_access_key']['value'],
+			);
+		} else if (isset(self::$configuration_options['egCDNConnections'][$connection_name])) {
 			$retVal = self::$configuration_options['egCDNConnections'][$connection_name];
 		} else {
 			throw new ErrorException('Details for unknown CDN connection \'' . $connection_name . '\' requested');
@@ -1779,7 +1893,19 @@ final class Configuration {
 	public static function getDatabaseConnectionInfo( $connection_name = 'egPrimary' ) {
 		$retVal = null;
 
-		if (isset(self::$configuration_options['egDatabaseConnections'][$connection_name])) {
+		if (isset(self::$configuration_options['DataConnections']['RDBMS'][$connection_name])) {
+			$connection_info = self::$configuration_options['DataConnections']['RDBMS'][$connection_name];
+
+			$retVal = array(
+				'name'		=> $connection_info['options']['name']['value'],
+				'host'		=> $connection_info['options']['host']['value'],
+				'port'		=> $connection_info['options']['port']['value'],
+				'database'	=> $connection_info['options']['database']['value'],
+				'user'		=> $connection_info['options']['user']['value'],
+				'password'	=> $connection_info['options']['password']['value'],
+				'engine'	=> $connection_info['options']['engine']['value'],
+			);
+		} else if (isset(self::$configuration_options['egDatabaseConnections'][$connection_name])) {
 			$retVal = self::$configuration_options['egDatabaseConnections'][$connection_name];
 		} else {
 			throw new ErrorException('Details for unknown database connection \'' . $connection_name . '\' requested');
@@ -1831,7 +1957,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['egBuild'])) {
 			$retVal = self::$configuration_options['egBuild'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1851,7 +1977,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['egMaintenanceVersion'])) {
 			$retVal = self::$configuration_options['egMaintenanceVersion'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1861,7 +1987,7 @@ final class Configuration {
 		if (isset(self::$configuration_options['egMajorVersion'])) {
 			$retVal = self::$configuration_options['egMajorVersion'];
 		}
-		
+
 		return $retVal;
 	}
 
@@ -1871,45 +1997,63 @@ final class Configuration {
 		if (isset(self::$configuration_options['egMinorVersion'])) {
 			$retVal = self::$configuration_options['egMinorVersion'];
 		}
-		
+
+		return $retVal;
+	}
+
+	public static function getCDNProviderFromString( $provider ) {
+		$retVal = null;
+
+		switch( strtoupper($provider) ) {
+			case 'AKAMAI' :
+				$retVal = self::AKAMAI;
+				break;
+			case 'CLOUDFRONT' :
+				$retVal = self::CLOUDFRONT;
+				break;
+			default :
+				$retVal = self::CLOUDFRONT;
+				break;
+		}
+
 		return $retVal;
 	}
 
 	public static function getEngineModeFromString( $engine_mode ) {
 		$retVal = null;
 
-		switch( $engine_mode ) {
-			case 'Aquinas' :
+		switch( strtoupper($engine_mode) ) {
+			case 'AQUINAS' :
 				$retVal = self::AQUINAS;
 				break;
-			case 'Cassandra' :
+			case 'CASSANDRA' :
 				$retVal = self::CASSANDRA;
 				break;
-			case 'Doctrine' :
+			case 'DOCTRINE' :
 				$retVal = self::DOCTRINE;
 				break;
-			case 'eGloo' :
+			case 'EGLOO' :
 				$retVal = self::EGLOO;
 				break;
-			case 'Mongo' :
+			case 'MONGO' :
 				$retVal = self::MONGO;
 				break;
-			case 'MySQL' :
+			case 'MYSQL' :
 				$retVal = self::MYSQL;
 				break;
-			case 'MySQLi' :
+			case 'MYSQLI' :
 				$retVal = self::MYSQLI;
 				break;
-			case 'MySQLiOOP' :
+			case 'MYSQLIOOP' :
 				$retVal = self::MYSQLIOOP;
 				break;
-			case 'Oracle' :
+			case 'ORACLE' :
 				$retVal = self::ORACLE;
 				break;
 			case 'PDO' :
 				$retVal = self::PDO;
 				break;
-			case 'PostgreSQL' :
+			case 'POSTGRESQL' :
 				$retVal = self::POSTGRESQL;
 				break;
 			case 'REST' :
@@ -2085,7 +2229,7 @@ final class Configuration {
 			if ( $update_cache_on_set ) {
 				// TODO see if we should move this into an "update cache" method
 				self::writeFrameworkConfigurationCache();
-			
+
 				if (self::getUseRuntimeCache()) {
 					// self::writeRuntimeCache();
 					self::writeRuntimeCacheClass();
@@ -2099,7 +2243,7 @@ final class Configuration {
 	public static function getLoggingPath() {
 		return self::$configuration_options['LoggingPath'];
 	}
-	
+
 	public static function getLoggingLevel( $update_cache_on_set = true ) {
 		if ( !isset(self::$configuration_options['egLogLevel']) ) {
 			self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
@@ -2115,19 +2259,19 @@ final class Configuration {
 			}
 		} else if ( is_string(self::$configuration_options['egLogLevel']) ) {
 			switch( strtoupper(self::$configuration_options['egLogLevel']) ) {
-				case 'LOG_OFF' : 
+				case 'LOG_OFF' :
 					self::$configuration_options['egLogLevel'] = Logger::LOG_OFF;
 					break;
-				case 'PRODUCTION' : 
+				case 'PRODUCTION' :
 					self::$configuration_options['egLogLevel'] = Logger::PRODUCTION;
 					break;
-				case 'STAGING' : 
+				case 'STAGING' :
 					self::$configuration_options['egLogLevel'] = Logger::STAGING;
 					break;
-				case 'DEVELOPMENT' : 
+				case 'DEVELOPMENT' :
 					self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
 					break;
-				default : 
+				default :
 					self::$configuration_options['egLogLevel'] = Logger::DEVELOPMENT;
 					break;
 			}
@@ -2135,7 +2279,7 @@ final class Configuration {
 			if ( $update_cache_on_set ) {
 				// TODO see if we should move this into an "update cache" method
 				self::writeFrameworkConfigurationCache();
-			
+
 				if (self::getUseRuntimeCache()) {
 					// self::writeRuntimeCache();
 					self::writeRuntimeCacheClass();
@@ -2353,7 +2497,7 @@ final class Configuration {
 
 	public static function issetCustomVariable( $index ) {
 		$retVal = false;
-		
+
 		if (isset(self::$configuration_options['CustomVariables'][$index])) {
 			$retVal = true;
 		}

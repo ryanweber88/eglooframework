@@ -141,7 +141,7 @@ class eGlooXML {
 
 		if ( $this->getChildCount() === 0 && $this->getAttributeCount() === 0 ) {
 			$retVal = (string) $this->_simpleXMLObject;
-		} else {
+		} else {			
 			$children = array();
 
 			if ( $process_flags & self::PROCESS_CHILDREN ) {
@@ -152,6 +152,7 @@ class eGlooXML {
 						} else {
 							$elementGroup = $child->getName();
 						}
+
 
 						if ( isset($children[$child->getName()]) ) {
 							$children[$elementGroup] = array();
