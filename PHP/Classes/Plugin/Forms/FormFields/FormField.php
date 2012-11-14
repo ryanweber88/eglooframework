@@ -121,6 +121,30 @@ class FormField {
 
 		return $this;
 	}
+	
+	/**
+	 * Alias to getValue and setValue; should be provide a level of 
+	 * familiarity for jquery devs 
+	 */
+	public function val($val = null) {
+		if (is_null($val)) {
+			return $this->getValue();
+		
+		} else {
+			$this->setValue($val);
+		}
+		
+		
+	}
+	
+	/**
+	 * String representation of form field
+	 * @TODO it may not make sense to print value
+	 * as opposed to html representation
+	 */
+	public function __toString() {
+		return $this->val();
+	}
 
 	public function getFormField( $child_form_field_id ) {
 		return $this->_formFieldChildren[$child_form_field_id];

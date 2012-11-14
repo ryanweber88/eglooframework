@@ -1,4 +1,6 @@
 <?php
+use \eGloo\Dialect\_ClassSafe as Klass;
+
 /**
  * RequestProcessorDecorator Abstract Class File
  *
@@ -35,7 +37,19 @@
  */
 abstract class RequestProcessorDecorator extends RequestProcessor {
 
-	private $childRequestProcessor = null;
+	private   $childRequestProcessor = null;
+	protected $node;
+
+	function __construct($node) {
+		// call parent constructor to setup requestinfobean property
+		parent::__construct();
+
+		// set node property, which is associative array containing
+		// the decorator attribute (and children) values from
+		// requests.xml
+		$this->node = $node;
+
+	}
 
 	public function setChildRequestProcessor( $requestProcessor ){
 		$this->childRequestProcessor = $requestProcessor;

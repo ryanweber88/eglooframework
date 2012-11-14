@@ -38,39 +38,12 @@ class Application
         return array(200, $headers, $content);
     }
 
-    private function prepareData($context)
+		private function prepareData($context)
     {
+
+    		$this->__initEgloo();
 				
-    		/**
-        $c = ++$this->local_storage['counter'];
-        $m = memory_get_usage();
-        $p = memory_get_peak_usage();
 
-        if ($p > $this->local_storage['prev_memory_peak']) {
-            $this->local_storage['prev_memory_peak'] = $p;
-            $this->local_storage['memory_peak_counter'] = $c;
-        }
-
-        $buffer = '<pre>';
-        $buffer .= 'Hello world! #'.$c."\n";
-        $buffer .= 'Memory usage: '.$m."\n";
-        $buffer .= 'Peak Memory usage: '.$p."\n";
-        $buffer .= 'Memory usage last growed at request#'.$this->local_storage['memory_peak_counter']."\n\n";
-        $buffer .= "HEADERS:\n".var_export($context['env'], true)."\n";
-        $buffer .= "COOKIES:\n".var_export($context['_COOKIE']->__toArray(), true)."\n";
-        $buffer .= "GET:\n".var_export($context['_GET'], true)."\n";
-
-        if ($context['env']['REQUEST_METHOD'] === 'POST') {
-            $buffer .= "POST:\n".var_export($context['_POST'], true)."\n";
-            $buffer .= "FILES:\n".var_export($context['_FILES'], true)."\n";
-        } elseif (!in_array($context['env']['REQUEST_METHOD'], array('GET', 'HEAD'))) {
-            $buffer .= "BODY:\n".var_export(stream_get_contents($context['stdin']), true)."\n";
-        }
-
-        $buffer .= '</pre>';
-
-        return $buffer;
-				 **/ 
     }
 
 		/**
@@ -100,4 +73,5 @@ class Application
 			$_SERVER['SCRIPT_NAME'] = '/index.php';			
 			
 		}
+
 }

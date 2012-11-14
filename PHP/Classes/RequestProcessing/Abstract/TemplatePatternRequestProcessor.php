@@ -241,6 +241,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		return $this->_templateVariables[$key];
 	}
 
+
 	protected function getTemplateVariables() {
 		return $this->_templateVariables;
 	}

@@ -10,7 +10,7 @@ abstract class ObjectSafe {
 	
 	function __construct() {
 		$self = $this;
-		
+
 		// fire our alias properties and methods
 		//$this->aliasMethods();
 		//$this->aliasProperties();

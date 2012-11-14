@@ -52,13 +52,22 @@ use \ErrorException as ErrorException;
  */
 abstract class PayPalPaymentsPro extends PaymentGatewayProduct {
 
+	/**
+	 * Auth and capture in one go
+	 *
+	 *
+	 */
+	abstract public function doAuthAndCapture( $params );
+
+	abstract public function doSale( $params );
+
 	abstract public function createRecurringPaymentsProfile();
 
 	abstract public function doAuthorization();
 
-	abstract public function doCapture();
+	abstract public function doCapture( $auth_id, $amount, $currency, $codeType, $invoiceID, $note = ''  );
 
-	abstract public function doDirectPayment();
+	abstract public function doDirectPayment( $params );
 
 	abstract public function doExpressCheckoutPayment();
 

@@ -1,6 +1,7 @@
 <?php
-use \eGloo\Utility\Logger     as Logger;
-use \eGloo\Dialect\ObjectSafe as Object;
+namespace {
+use       \eGloo\Utility\Logger     as Logger;
+use       \eGloo\Dialect\ObjectSafe as Object;
 
 /**
  * Class and Interface Autoloader
@@ -156,7 +157,7 @@ function eglooAutoload( $class_name ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
-				include( $autoload_hash[$class_name] );
+				include_once( $autoload_hash[$class_name] );
 
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
@@ -306,7 +307,7 @@ function eglooAutoload( $class_name ) {
 					}
 				}
 
-				include( $realPath );
+				include_once( $realPath );
 
 				// attempt a construct static; this will be ignored if class
 				// does not fall in \eGloo\Dialect\Object class
@@ -398,7 +399,7 @@ function eglooAutoload( $class_name ) {
 				// Did we find something?
 				if ( $realPath !== null ) {
 					// We did.  Let's cache it and leave
-					include( $realPath );
+					include_once( $realPath );
 					$autoload_hash[$class_name] = realpath( $realPath );
 					$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 					break;
@@ -432,7 +433,7 @@ function eglooAutoload( $class_name ) {
 		}
 
 		if ( $realPath !== null ) {
-			include ( $realPath );
+			include_once( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
 			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 
@@ -968,3 +969,43 @@ function __constructStatic($name) {
 	}
 }
 
+
+/**
+ *  An experimental attempt to lend ActiveSupport functionality
+ *  to php
+ */
+function __($mixed) {
+	if (is_integer($mixed)) {
+		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
+	
+	} else if (is_array($mixed)) {
+		//return new \eGloo\Utilities\ActiveSupport\Array($mixed);
+
+	}
+}
+
+} namespace eGloo {
+
+/**
+ * Convenience method for logging
+ */
+function log($message) {
+
+	// add class#method to message using backtrace
+	$trace = debug_backtrace();
+	$trace = $trace[1]; 
+	$head  = $trace['function']; 
+
+	// determine if caller was within the context
+	// of a class, and then update message with
+	// caller information
+	isset($trace['class']) && $head = "{$trace['class']}.$head";
+
+
+	\eGlooLogger::writeLog( 
+		\eGlooLogger::DEBUG, "$head : $message"
+	);		
+	
+}
+
+}

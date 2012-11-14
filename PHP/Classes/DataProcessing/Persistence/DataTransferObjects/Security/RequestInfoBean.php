@@ -48,12 +48,15 @@ class RequestInfoBean implements \ArrayAccess {
 	private $_wildCardRequest = false;
 	private $_wildCardRequestClass = null;
 	private $_wildCardRequestID = null;
+	protected $cache = false;
+
 
 	// Sanitized
 	private $COOKIES = null;
-	private $FILES = null;
-	private $GET = null;
-	private $POST = null;
+	private $FILES   = null;
+	private $GET     = null;
+	private $POST    = null;
+	private $PUT     = array();
 
 	private $forms = null;
 
@@ -183,6 +186,34 @@ class RequestInfoBean implements \ArrayAccess {
 				}
 			}
 		}
+		
+		// check for set_httpmethod, which will set a key value pair
+		// on instance property with corresponding name
+		else if (preg_match('/^set_?(a-z)+$/i', $name, $match)) {
+			list($key, $value) = $arguments;
+			
+			// make sure instance property exist
+			if (\property_exists($this, $httpMethod = strtoupper($match[1]))) {
+				$this->$httpMethod[$key] = $value;
+			}
+			
+			// otherwise we throw an exception to the fact
+			else {
+				throw new \Exception(
+					"Failed to set request property '$key' with value '$value' because http method '$httpMethod' does not exist"
+				);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * Returns http method of request; this is really just an abstraction of
+	 * $_SERVER.REQUEST_METHOD
+	 * @returns string
+	 */
+	public function requestMethod() {
+		return strtolower($_SERVER['REQUEST_METHOD']);
 	}
 
 	/**
@@ -211,6 +242,15 @@ class RequestInfoBean implements \ArrayAccess {
 	 * @see ArrayAccess::offsetExists()
 	 */
 	public function offsetExists($offset) {
+		
+		if (method_exists($this, $method = "get" . ucfirst($offset))) {
+			$result = call_user_func(array(
+				$this, $method
+			));
+			
+			return !empty($result);
+		}
+		
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 			// have to assign into holder prior to 5.4
 			$property = &$this->$method;
@@ -233,14 +273,16 @@ class RequestInfoBean implements \ArrayAccess {
 
 
 	/**
-	 * (non-PHPdoc)
-	 * @see ArrayAccess::offsetGet()
+	 * Uses array notation to access request parameter values
 	 */
- /**
-     * (non-PHPdoc)
-     * @see ArrayAccess::offsetGet()
-     */
 	public function offsetGet($offset) {
+		
+		// speicific cases
+		if ($offset == 'slug') {
+			return $this->getSlug();	
+		}
+		
+		// otherwise we look at "super global" representatives/class properties
 
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 

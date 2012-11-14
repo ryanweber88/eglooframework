@@ -65,6 +65,24 @@ class Request {
 
 // eGloo\HTTP\Request::getRemoteAddress()
 
+	public function method() {
+		return strtoupper($_SERVER['REQUEST_METHOD']);
+	}
+	
+	public static function instance() {
+		if (is_null(static::$instance)) {
+			static::$instance = new Request;
+		}
+		
+		return static::$instance;
+	} 
+	
+	public function __call($name, $arguments) {
+		if (preg_match('/^is_?(.+)$/i', $name, $match)) {
+			return strtolower($match[1]) == strtolower($this->method());
+		}
+	}
+
 	public static function getHTTPHost() {
 		if ( self::$http_host === null ) {
 			self::$http_host = isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '';
@@ -172,5 +190,7 @@ class Request {
 // strpos( $_SERVER["HTTP_HOST"], $_SERVER["SERVER_NAME"]) !==false )
 
 	*/
+	
+	private static $instance;
 }
 

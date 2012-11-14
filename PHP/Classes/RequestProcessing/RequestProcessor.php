@@ -24,6 +24,7 @@
  * @package RequestProcessing
  * @version 1.0
  */
+ use \eGloo\HTTP;
 
 /**
  * RequestProcessor
@@ -34,20 +35,31 @@
  */
 abstract class RequestProcessor {
 
+	const RESPONSE_CODE_ERROR_REQUEST  = 400;
+	const RESPONSE_CODE_ERROR_INTERNAL = 500;
+
+
 	/* Public Static Members */
 	public static $calledClass = null;
 
 	/* Protected Data Members */
-	protected $requestInfoBean = null;
+	protected $requestInfoBean   = null;
 	protected $decoratorInfoBean = null;
-	protected $bean = null;
+	protected $bean              = null;
+	protected $request;
 
 	public function __construct() {
-		$this->requestInfoBean = RequestInfoBean::getInstance();
+		$this->requestInfoBean   = RequestInfoBean::getInstance();
 		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
 
 		// serves simply as an alias
 		$this->bean = $this->requestInfoBean;
+		
+		// provides information about requests
+		// @TODO this may be a bit confusing since most
+		// frameworks combine the concept of bean and request
+		// as request
+		$this->request = HTTP\Request::instance();
 	}
 
 	public static function getClass() {
@@ -89,5 +101,36 @@ abstract class RequestProcessor {
 		return $this->decoratorInfoBean;
 	}
 
+	/**
+	 *
+	 * Caches page for given period of time (ttl)
+	 */
+	public function cache($ttl = null) {
+
+		// if ttl is null, we set to a year which is effectively
+		// infinite by internet standards
+		// @TODO uhoh don't tell george
+		is_null($ttl) && $ttl = __(1)->year;
+
+		// @TODO underlying cache mechanism should be both decoupled
+		// and abstracted; for now, cache will simply supply cache 
+		// control headers to be served to gateway/http cache
+		header("Cache-Control: must-revalidate, max-age=$ttl");
+	
+	}
+
+	/**
+	 *
+	 * Expires cache for page (if any)
+	 */	
+	public function expire() {
+		// @TODO again, this should be decoupled and abstracted, 
+		// but for the time being we will use http headers to 
+		// control cache on a gateway cache
+
+		// we are purposefully using past date to force cache
+		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
+
+	}
 
 }

@@ -26,7 +26,6 @@
  */
 
 // Check for the minimum PHP version to run the framework
-
 if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
 		'eGloo requires PHP version 5.3.0 or higher.';
