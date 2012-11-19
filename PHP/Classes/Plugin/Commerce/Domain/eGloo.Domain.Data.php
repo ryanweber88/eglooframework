@@ -32,9 +32,11 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 */
 	public static function columns($table) {
 		$class = get_called_class();
-		
+
 		if (empty($table)) {
-			var_export(debug_backtrace());
+			return array();
+			//var_export(debug_backtrace());
+			var_dump(debug_backtrace());
 			exit;
 		}
 

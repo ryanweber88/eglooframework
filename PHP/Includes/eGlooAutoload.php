@@ -235,6 +235,8 @@ function eglooAutoload( $class_name ) {
 		$instances = array();
 	}
 
+	//var_export($possible_path); exit;
+
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();
@@ -259,14 +261,18 @@ function eglooAutoload( $class_name ) {
 							}
 						}
 					}
-				} else if ( $ns_class_name !== '' && strpos( $currentNode->getFileName(), $ns_class_name ) !== false ) {
+
+				} else if ( $ns_class_name !== '' && 
+					          strpos( $currentNode->getFileName(), $ns_class_name ) !== false ) {
+					
 					// class_name was included, now compare against all permitted file name patterns
 					foreach ( $possibility as $compare ) {
 						// by using $compare, you will get a qualified file name
 
 						if ( $compare === $currentNode->getFileName() ) {
 							$realPath = $currentNode->getPathName();
-							if ($sanityCheckClassLoading && !in_array($realPath, $instances[$directory])) {
+							if ($sanityCheckClassLoading && 
+								  !in_array($realPath, $instances[$directory])) {
 								$instances[$directory][] = $realPath;
 							} else {
 								break;

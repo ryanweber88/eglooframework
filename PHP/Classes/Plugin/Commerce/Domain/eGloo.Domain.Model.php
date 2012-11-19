@@ -395,8 +395,8 @@ abstract class Model extends Delegator
 	 * to describe table, document, etc.
 	 * @return string
 	 */
-	public static function entityName($name = null) {
-		return static::signature($name);
+	public static function entityName() {
+		return static::signature(static::classnamefull());
 	}
 	
 	/**
@@ -404,8 +404,8 @@ abstract class Model extends Delegator
 	 * signature better
 	 * @return string
 	 */
-	protected static function entity($name = null) {
-		return static::entityName($name);
+	protected static function entity() {
+		return static::entityName();
 	}
 
 
