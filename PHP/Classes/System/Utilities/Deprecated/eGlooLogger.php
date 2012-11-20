@@ -591,6 +591,7 @@ final class eGlooLogger {
 	}
 
 	public static function global_error_handler( $severity, $message, $filename, $linenum, $context ) {
+		// @TODO this is for debug only
 		echo "$filename @ #$linenum\n";
 		throw new ErrorException($message, 0, $severity, $filename, $linenum);
 	}

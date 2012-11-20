@@ -123,7 +123,8 @@ class ArrayAccess extends Object implements \ArrayAccess {
 								
 				if (is_null($result) && \method_exists($delegated, '__callstatic')) {
 					try {
-						$result = $delegated::$$member();
+						//$result = $delegated::$$member();
+						$result = $delegated::{$member}();
 					}
 					catch (\Exception $ignore) {
 						$result = null;
