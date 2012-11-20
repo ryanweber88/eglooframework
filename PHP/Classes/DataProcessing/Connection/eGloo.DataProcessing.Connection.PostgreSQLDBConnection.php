@@ -228,7 +228,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 * @return type
 	 */
 	public function executeSelect($sql, $params = array()) {
-		return pg_fetch_all(self::execute($sql, $params ));
+		return \pg_fetch_all(self::execute($sql, $params ));
 	}
 
 	/**

@@ -36,11 +36,13 @@ class Generic extends Domain\Model {
 			$arguments = $__mixed;
 		}
 		
+		static::$pseudonym = $pseudonym;
 			
 		parent::__construct($arguments);
 			
 		// now lets create our fake namespaced pseudonym
 		static::$pseudonym = "{$this->namespace()}\\$pseudonym";
+
 		
 		// fakes like the class it's pretending to be! unfortunately this
 		// has to be a static call in order to create a static method; an
@@ -83,6 +85,16 @@ class Generic extends Domain\Model {
 	 */
 	static function __static() {
 			
+	}
+
+	public static function entity() {
+		return static::entityName();
+	}
+
+	public static function entityName() {
+		return static::signature(
+			static::$pseudonym
+		);
 	}
 	
 	public function ident() {

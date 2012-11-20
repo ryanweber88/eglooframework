@@ -127,7 +127,7 @@ abstract class RequestProcessor extends Object {
 	/**
 	 * Forward current request to a different request processor; 
 	 */
-	public function forward($requestProcessor) {
+	protected function forward($requestProcessor) {
 		require_once $requestProcessor;
 		
 		if (class_exists($requestProcessor) &&
@@ -136,7 +136,6 @@ abstract class RequestProcessor extends Object {
 			// copy/reference bean data to forwarded request processor
 			$requestProcessor       = new $requestProcessor;
 			$requestProcessor->bean = $this->bean;
-			
 			$requestProcessor->process();		    	
 		}
 		
