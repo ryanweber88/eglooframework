@@ -1246,6 +1246,21 @@ abstract class Model extends Delegator
 		
 		$this->after_initialize(function() use ($self, $class, $signature) {
 
+			// assign left-over columns to model
+			// @TODO delegate this to overrideable method, or place into
+			// 'after' initialize
+			// @TODO I don't remember why user entity was removed
+			// from column assignment
+			if (!in_array($signature = static::entity(), array('user')) && 
+			    is_array ($columns   = Data::columns($signature))) {
+			    	
+				foreach($columns as $attribute) {
+					if (!\property_exists($this, $attribute)) {
+						$this->$attribute = null;
+					}
+				}
+			}				
+
 			$attributes = $class::cache($signature, function() use ($self) {
 				return $self->reference('attributes');
 			});
@@ -1259,9 +1274,9 @@ abstract class Model extends Delegator
 				// look for a field matching the exact name
 				$match = array();
 				
-				if (preg_match("/^{$signature}_(.+)/", $name, $match) || $name == $signature) {
+				if (preg_match("/^{$signature}_(.+)/", $name, $match) || 
+					  $name == $signature) {
 					
-
 					
 					// first lets alias 'name' to 'signature'
 					if ($name == $signature) {
@@ -1296,8 +1311,7 @@ abstract class Model extends Delegator
 						
 					}
 				}
-			}	
-			
+			}
 		
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
