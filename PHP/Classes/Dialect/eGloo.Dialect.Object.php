@@ -128,8 +128,58 @@ abstract class Object {
 		});
 		
 		
-		$this->defineMethod('cache', function($mixed, $lambda = null) { 
-			$key = $mixed;
+		$this->defineMethod('cache', function($__mixed) { 
+			$expiration = null;
+
+			// if three arguments have been passed, then key, expire
+			// and code block have all been explicitly passed, and
+			// in proper order
+			// @TODO explicitly check against proper order?
+			if (count($arguments = func_get_args()) === 3) {
+				list($key, $expiration, $lambda) = func_get_args();
+
+			// two arguments may be a comination of all
+			// possible
+			} else if (count($arguments) == 2) {
+				// first argument may be either a key or
+				// expiration value
+				if (is_string($argument = $arguments[0])) {
+
+					// check if valid strtotime argument; we are
+					// going to use the eGloo variant so as to accept
+					// a larger idiomatic expression 
+					if (($expiration = eGloo\strtotime($argument))) {
+						$key
+					// otherwise we assume argument is a key - be
+					// careful here, as an unintentionally invalid
+					// strtotime argument will end up being a key
+					} else {
+						$key = $argument;
+					}
+
+				// an integer value indicates expiration
+				// value
+				} else if (is_integer($argument)) {
+					$expiration = $argument;
+
+				// otherwise an invalid value has been passed
+				// and we throw an exception to that fact
+				} else {
+					throw new \Exception(
+						"Cache block failed because argument '$argument' "   . 
+						"must be either a valid key (string) or time-based " .
+						"expiration value"
+					)
+				}
+
+			// a single argument can be either a key or 
+			// a lambda value
+			} else {
+				$key = $arguments[0];
+			}
+
+			
+
 			
 			
 			// check if mixed is an object, or callable; because php implements
@@ -138,10 +188,10 @@ abstract class Object {
 			// If we have passed an object, or a lambda, a signature can be generated
 			// that uniquely identifies the instance, thus creating a key for cached
 			// value
-			if (is_object($mixed) || is_callable($mixed)) {
-				//$reflection = new \ReflectionFunction($mixed);
-				//$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
-				$key = spl_object_hash($mixed);
+			if (is_object($key) || is_callable($key)) {
+				$key = spl_object_hash(
+					$mixed = $key
+				);
 				
 				// now we check if mixed is indeed a closure, in which case
 				// we set lambda to mixed
