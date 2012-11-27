@@ -1020,4 +1020,25 @@ function log($message) {
 	
 }
 
+/**
+ * An extension to \strtotime; allows for wider range of idiomatic
+ * expressions to be used
+ */
+function strtotime($symbol) {
+
+	// first we check if our symbolic representation of
+	// time is already valid, if not, we proceed to check
+	// on symbols within string
+	if (is_null($timestamp = \strtotime($symbol))) {
+		if (preg_match('/^in/i', $symbol)) {
+			$symbol = preg_replace('/^in/i', 'in', $symbol);
+		
+		} else if (preg_match('/^on/i', $symbol)) {
+			$symbol = preg_replace('/^on/i', null, $symbol);
+		}
+	}
+
+	return \strtotime($symbol);
+}
+
 }
