@@ -128,7 +128,7 @@ abstract class Object {
 		});
 		
 		
-		$this->defineMethod('cache', function($mixed, $lambda = null) use ($self) { 
+		$this->defineMethod('cache', function($mixed, $lambda = null) { 
 			$key = $mixed;
 			
 			
@@ -158,7 +158,7 @@ abstract class Object {
 				$key   = $trace['file'] . $trace['line'] . $key;			
 			}			
 
-			$cache = &$self->reference('_cache'); 
+			$cache = &$this->_cache; 
 			
 			if (!isset($cache[$key])) {
 				$cache[$key] = $lambda($key);
