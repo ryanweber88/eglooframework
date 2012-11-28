@@ -130,6 +130,7 @@ abstract class Object {
 		
 		$this->defineMethod('cache', function($__mixed) { 
 			$expiration = null;
+			$lambda     = null;
 
 			// if three arguments have been passed, then key, expire
 			// and code block have all been explicitly passed, and
@@ -141,36 +142,20 @@ abstract class Object {
 			// two arguments may be a comination of all
 			// possible
 			} else if (count($arguments) == 2) {
-				// first argument may be either a key or
-				// expiration value
-				if (is_string($argument = $arguments[0])) {
+				
+				// default our second value as lambda/block
+				$lambda = $arguments[1];
 
-					// check if valid strtotime argument; we are
-					// going to use the eGloo variant so as to accept
-					// a larger idiomatic expression 
-					if (($expiration = eGloo\strtotime($argument))) {
-						$key
-					// otherwise we assume argument is a key - be
-					// careful here, as an unintentionally invalid
-					// strtotime argument will end up being a key
-					} else {
-						$key = $argument;
-					}
-
-				// an integer value indicates expiration
-				// value
-				} else if (is_integer($argument)) {
-					$expiration = $argument;
-
-				// otherwise an invalid value has been passed
-				// and we throw an exception to that fact
-				} else {
-					throw new \Exception(
-						"Cache block failed because argument '$argument' "   . 
-						"must be either a valid key (string) or time-based " .
-						"expiration value"
-					)
+				// default key to first argument, but check if key passes
+				// as valid strtotime argument; we use eGloo\strtotime
+				// to allow for wider or more idiomatic time expressions
+				// @TOOD condition expression may be a bit hard to read
+				if (($expiration = eGloo\strtotime($key = $arguments[0]))) {
+					// if our first argument is indeed an expire, then we
+					// default key to lambda
+					$key = $lambda;
 				}
+
 
 			// a single argument can be either a key or 
 			// a lambda value
@@ -178,9 +163,6 @@ abstract class Object {
 				$key = $arguments[0];
 			}
 
-			
-
-			
 			
 			// check if mixed is an object, or callable; because php implements
 			// callable as an instance of type Closure, the second condition will
@@ -190,13 +172,13 @@ abstract class Object {
 			// value
 			if (is_object($key) || is_callable($key)) {
 				$key = spl_object_hash(
-					$mixed = $key
+					$object = $key
 				);
 				
 				// now we check if mixed is indeed a closure, in which case
 				// we set lambda to mixed
-				if (is_callable($mixed)) {
-					$lambda = $mixed;
+				if (is_callable($object)) {
+					$lambda = $object;
 				}
 			}
 			
@@ -208,13 +190,37 @@ abstract class Object {
 				$key   = $trace['file'] . $trace['line'] . $key;			
 			}			
 
+			// finally lets check if value is contained in
+			// cache, set if not and then return
 			$cache = &$this->_cache; 
 			
 			if (!isset($cache[$key])) {
-				$cache[$key] = $lambda($key);
+
+				if (is_callable($lambda)) {
+					$cache[$key] = [
+						'expiration' => $expiration
+						'value'      => $lambda($key);
+					];
+
+				} else {
+					throw new \Exception(
+						'Failed to set cache because lambda (callable block) ' . 
+						'is unavailable'
+					);
+				}
+			
+			// otherwise check cache to determine if valid - a null
+			// cache is never time expired
+			} else if ($cache[$key]['expiration'] !== null   && 
+				         $cache[$key]['expiration'] <= time()) {
+
+				return call_user_func_array(array(
+					$this, 'cache'
+
+				), func_get_args())	
 			}
 						
-			return $cache[$key];
+			return $cache[$key]['value'];
 		});
 		
 		// run_once is essentially a aliasMethod to cache, but the differentiation is

@@ -1030,11 +1030,25 @@ function strtotime($symbol) {
 	// time is already valid, if not, we proceed to check
 	// on symbols within string
 	if (is_null($timestamp = \strtotime($symbol))) {
-		if (preg_match('/^in/i', $symbol)) {
-			$symbol = preg_replace('/^in/i', 'in', $symbol);
 		
-		} else if (preg_match('/^on/i', $symbol)) {
-			$symbol = preg_replace('/^on/i', null, $symbol);
+		// if is numeric, we assume a value like '60' has
+		// been passed and we make the further assumption that
+		// this is an addition to current timestamp
+
+		if (is_numeric($symbol)) {
+			$symbol = "+$symbol";
+
+		// otherwise we assume that a string like "in 60 seconds"
+		// has been passed
+			
+		} else {
+
+			if (preg_match('/^in/i', $symbol)) {
+				$symbol = preg_replace('/^in/i', '+', $symbol);
+			
+			} else if (preg_match('/^on/i', $symbol)) {
+				$symbol = preg_replace('/^on/i', null, $symbol);
+			}
 		}
 	}
 
