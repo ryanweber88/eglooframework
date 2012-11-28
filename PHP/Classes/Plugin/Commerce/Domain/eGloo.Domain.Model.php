@@ -432,7 +432,7 @@ abstract class Model extends Delegator
 		if (is_null($lambda)) {
 						
 			$lambda = function($model) {
-				$key    = $this->send('primaryKeyName');
+				$key    = $this->primaryKeyName();
 				$method = "find_one_by_{$key}";	
 				
 				return $model::$method($this->id);
@@ -477,7 +477,6 @@ abstract class Model extends Delegator
 	 */
 	protected function belongsTo($mixed, $lambda = null) {
 		
-		$self       = $this;
 		$arguments  = Collection::flatten( func_get_args() );
 		
 		
@@ -492,7 +491,7 @@ abstract class Model extends Delegator
 		// it is up to the developer to determine otherwise ( ie, provide your
 		// own lambda)
 		else {
-			$lambda = function($model) use ($self) {
+			$lambda = function($model) {
 		  	// belongs to convention dictates that a foreign key with name
 		  	// signature_id exists on calling model	
 		  	$fk = $model->send('primaryKeyName');
@@ -507,13 +506,13 @@ abstract class Model extends Delegator
 					// check 
 					if (isset($self->$fk)) {
 						// find, using belonged_to primary key
-				  	$result = $model::find($self->$fk);
+				  	$result = $model::find($this->$fk);
 					}
 					
 					else {
 						throw new \Exception(
 							"Failed to create 'belongsTo' relationship with '{$model->class->qualified_name}' " .
-							"because '{$self->ident()}' does not have foreign key attribute '$fk'"
+							"because '{$this->ident()}' does not have foreign key attribute '$fk'"
 						);	
 					}
 					
@@ -529,7 +528,7 @@ abstract class Model extends Delegator
 				else {
 					throw new \Exception(
 						"Failed to create 'belongsTo' relationship with '{$model->class->qualified_name}' " .
-						"from '{$self->class->qualified_name}' because model '{$model->class->name}' does " . 
+						"from '{$this->class->qualified_name}' because model '{$model->class->name}' does " . 
 						"not have a primary key"
 					);
 				}
@@ -544,6 +543,7 @@ abstract class Model extends Delegator
 		
 		foreach($relationships as $name) {
 			
+			// @TODO check whether this is needed anymore
 			// otherwise, we follow convention that foreign reference is within
 			// table, so we set property
 			// @TODO we need to grab an actual signature as opposed to making a 
@@ -561,25 +561,23 @@ abstract class Model extends Delegator
 			*/			
 
 			// finally, we create our 1 - 1 relationship
-			$this->hasOne($name, $lambda);	
+			static::hasOne($name, $lambda);	
 		}		
 
 	}
 	
-	protected function hasMany($name, $lambda = null) {
+	protected static function hasMany($name, $lambda = null) {
 		
 		
 		// if lambda has not been defined, we provide a by-convention
 		// handler which will assume that foreign key is the same as
 		// primary key name
-		if (is_null($lambda)) {
-			$self = $this;
-						
-			$lambda = function($model) use ($self) {
-				$key    = $self->send('primaryKeyName');
+		if (is_null($lambda)) {						
+			$lambda = function($model)  {
+				$key    = $this->primaryKeyName();
 				$method = "find_by_{$key}";	
 				
-				return $model::$method($self->id);
+				return $model::$method($this->id);
 			};
 		}
 		
@@ -603,7 +601,7 @@ abstract class Model extends Delegator
 		
 		
 		if (InflectionsSafe::isPlural($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
-			return $this->defineRelationship($name, $lambda, false, $join);
+			return static::defineRelationship($name, $lambda, false, $join);
 		}
 		
 		throw new \Exception(
@@ -611,8 +609,10 @@ abstract class Model extends Delegator
 		);
 	}
 	
-	public function hasRelationship($name) {
-		return isset($this->relationships[$name]);
+	public static function hasRelationship($name) {
+		return isset(
+			static::$sassociations[static::classnamefull()][$name]
+		);
 	}
 	
 	/**
@@ -627,7 +627,7 @@ abstract class Model extends Delegator
 		// belong here
 
 		// check if an 'as Alias' has been specified
-		$aliases = array();
+		$aliases = [ ]
 		
 		if (preg_match($pattern = '/\s+as\s+([A-Z].*)$/', $name, $match)) {
 			$name = trim(preg_replace(
@@ -642,9 +642,9 @@ abstract class Model extends Delegator
 		
 		$relationshipName = $name;
 		$name             = ucfirst(
-													\eGloo\Utilities\InflectionsSafe::instance()
-						          		                                ->singularize($name)
-												);
+			InflectionsSafe::instance()
+			               ->singularize($name)
+		);
 		//$ns               = $this->namespace();
 
 		// @TODO this has to be determined dynamically, but for the time being
@@ -653,19 +653,17 @@ abstract class Model extends Delegator
 		//$ns   = '\\Common\\Domain\\Model';
 		preg_match('/^.+?Model/', $this->class->namespace, $match);
 		$ns   = $match[0];
-		$self = $this;
 		
-
 		// determine relationship type based on either $singular parameter, 
 		// which takes prescedence, or looks at plurality using inflections
 		$singular = $singular === true
-			? $singular
-			: InflectionsSafe::isSingular($relationshipName);
-			
-
+			? : InflectionsSafe::isSingular($relationshipName);
+		
 			
 		// if class does not exist, then replace with generic	handler
-		if (!class_exists($model = "$ns\\{$this->className()}\\$name") && 
+		$classname = static::classname();
+			
+		if (!class_exists($model = "$ns\\{$classname}\\$name") && 
 		    !class_exists($model = "$ns\\$name"))	{
 		  
 			// use callers namespace; this makes the assumption that generic

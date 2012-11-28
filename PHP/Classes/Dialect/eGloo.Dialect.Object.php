@@ -1312,6 +1312,12 @@ abstract class Object {
 	public static function classNameFull() {
 		return get_called_class();
 	}
+
+	public static function klass() {
+		return static::cache(get_called_class(), function($class)  {
+			return new _ClassSafe($class);
+		});		
+	}
 	
 
 	
