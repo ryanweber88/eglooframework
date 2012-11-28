@@ -423,20 +423,19 @@ abstract class Model extends Delegator
 	 * Convenience method to specify 1 - 1 relationships; note that you
 	 * must still follow plurality conventions
 	 */
-	protected function hasOne($name, $lambda = null) {
+	protected static function hasOne($name, $lambda = null) {
 	
 	
  		// if lambda has not been defined, we provide a by-convention
 		// handler which will assume that foreign key is the same as
 		// primary key name
 		if (is_null($lambda)) {
-			$self = $this;
 						
-			$lambda = function($model) use ($self) {
-				$key    = $self->send('primaryKeyName');
+			$lambda = function($model) {
+				$key    = $this->send('primaryKeyName');
 				$method = "find_one_by_{$key}";	
 				
-				return $model::$method($self->id);
+				return $model::$method($this->id);
 			};
 		}
 		
@@ -458,9 +457,13 @@ abstract class Model extends Delegator
 			// retrieve join from match
 			$join = $match[1];	
 		}
-				
-		if (InflectionsSafe::isSingular($relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name))) {
-			return $this->defineRelationship($name, $lambda, true, $join);
+		
+		$singular = InflectionsSafe::isSingular(
+			$relation = preg_replace('/\s+as\s+([A-Z].*)$/', null, $name)
+		);
+
+		if ($singular) {
+			return static::defineRelationship($name, $lambda, true, $join);
 		}
 		
 		throw new \Exception(
@@ -1195,6 +1198,10 @@ abstract class Model extends Delegator
 	
 	/** Model Constructors *****************************************************/
 	
+	protected static function __srelationships() {
+
+	}
+
 	/**
 	 * A stubb method here to be used by concrete model classes
 	 */
@@ -1419,7 +1426,7 @@ abstract class Model extends Delegator
 			? static::classnamefull()
 			: $name;
 			
-		$tokens    = explode('\\', preg_replace('/^.+Model[\\\]?/', null, $class));
+		$tokens    = explode('\\', preg_replace("/^.+Model[\\\]?/", null, $class));
 		$signature = strtolower(\eGlooString::toUnderscores(implode('_', $tokens)));
 		
 		return $signature;
@@ -3028,6 +3035,10 @@ abstract class Model extends Delegator
 	protected $cached         = false;
 	protected $primaryKeyName; 
 	protected $association;
+
+	protected static $sassociations = [ ];
+	protected static $scallbacks    = [ ];
+	protected static $svalidates    = [ ];
 	
 }
 
