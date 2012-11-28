@@ -366,21 +366,41 @@ abstract class Object {
 		});
 		
 		
-		static::defineMethod('cache', function($mixed, $lambda = null, $class = null) {
+		static::defineMethod('cache', function($__mixed) {
+			$expiration = null;
+			$lambda     = null;
 
-			// first we need to make sence of the parameters; lambda may be the first
-			// or second or argument, as our first parameter, which may be a lambda,
-			// or cache key only, is option as a key value (we can get a unique key 
-			// by getting a signature from closure/block
-			$key = $mixed;
+			// if three arguments have been passed, then key, expire
+			// and code block have all been explicitly passed, and
+			// in proper order
+			// @TODO explicitly check against proper order?
+			if (count($arguments = func_get_args()) === 3) {
+				list($key, $expiration, $lambda) = func_get_args();
 
-			if (is_callable($mixed)) {
-				$reflection = new \ReflectionFunction($mixed);
-				$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
-				$class      = $lambda;
-				$lambda     = $mixed;
+			// two arguments may be a comination of all
+			// possible
+			} else if (count($arguments) == 2) {
 				
+				// default our second value as lambda/block
+				$lambda = $arguments[1];
+
+				// default key to first argument, but check if key passes
+				// as valid strtotime argument; we use eGloo\strtotime
+				// to allow for wider or more idiomatic time expressions
+				// @TOOD condition expression may be a bit hard to read
+				if (($expiration = eGloo\strtotime($key = $arguments[0]))) {
+					// if our first argument is indeed an expire, then we
+					// default key to lambda
+					$key = $lambda;
+				}
+
+
+			// a single argument can be either a key or 
+			// a lambda value
+			} else {
+				$key = $arguments[0];
 			}
+
 			
 			// check if mixed is an object, or callable; because php implements
 			// callable as an instance of type Closure, the second condition will
@@ -388,19 +408,16 @@ abstract class Object {
 			// If we have passed an object, or a lambda, a signature can be generated
 			// that uniquely identifies the instance, thus creating a key for cached
 			// value
-		
-			if (is_object($mixed) || is_callable($mixed)) {
-				//$reflection = new \ReflectionFunction($mixed);
-				//$key        = "{$reflection->getFileName()}::{$reflection->getStartLine()}";
-				$key = spl_object_hash($mixed);
+			if (is_object($key) || is_callable($key)) {
+				$key = spl_object_hash(
+					$object = $key
+				);
 				
 				// now we check if mixed is indeed a closure, in which case
 				// we set lambda to mixed
-				if (is_callable($mixed)) {
-					$lambda = $mixed;
-					//$class  = $lambda;
+				if (is_callable($object)) {
+					$lambda = $object;
 				}
-				
 			}
 			
 			// otherwise, lets check the first character of key, which
@@ -409,27 +426,39 @@ abstract class Object {
 			else if (isset($key[0]) && $key[0] == '*') {
 				$trace = debug_backtrace(2)[1];
 				$key   = $trace['file'] . $trace['line'] . $key;			
-			}
-			
+			}			
 
+			// finally lets check if value is contained in
+			// cache, set if not and then return
+			$cache = &static::$_scache; 
+			
+			if (!isset($cache[$key])) {
+
+				if (is_callable($lambda)) {
+					$cache[$key] = [
+						'expiration' => $expiration
+						'value'      => $lambda($key);
+					];
+
+				} else {
+					throw new \Exception(
+						'Failed to set cache because lambda (callable block) ' . 
+						'is unavailable'
+					);
+				}
+			
+			// otherwise check cache to determine if valid - a null
+			// cache is never time expired
+			} else if ($cache[$key]['expiration'] !== null   && 
+				         $cache[$key]['expiration'] <= time()) {
+
+				return forward_static_call_array(array(
+					$this, 'cache'
+
+				), func_get_args())	
+			}
 						
-			
-			// now determine if static cache has been previously
-			// set for the given key and class 
-			$cache = &$class::referenceStatic('_scache');
-			
-			if (!isset($cache[$class][$key]) &&
-			    !is_null($value = $lambda($key))) {
-
-				$cache[$class][$key] = $value;
-			}		
-			
-			
-			
-			// invalidate cachhe
-			if (isset($cache[$class][$key])) {
-				return $cache[$class][$key];
-			}
+			return $cache[$key]['value'];
 					
 		});
 		
