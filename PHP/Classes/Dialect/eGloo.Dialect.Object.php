@@ -21,12 +21,10 @@ abstract class Object {
 		
 		// ClassSafe is a class metaclass instance; here we statically cache it
 		// and key it fully qualified class name
-		$this->class = static::cache(get_called_class(), function() use ($self) {
-			return new _ClassSafe($self);
-		});		
+		$this->class = static::klass();
 		
 		// provide some generic attr_reader properties
-		$this->attr_reader('ident');
+		//$this->attr_reader('ident');
 	}
 	
 	/**
@@ -1315,7 +1313,7 @@ abstract class Object {
 
 	public static function klass() {
 		return static::cache(get_called_class(), function($class)  {
-			return new _ClassSafe($class);
+			return new Klass($class);
 		});		
 	}
 	

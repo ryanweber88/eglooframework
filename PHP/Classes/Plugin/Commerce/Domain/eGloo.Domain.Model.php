@@ -609,19 +609,46 @@ abstract class Model extends Delegator
 		);
 	}
 	
+	/** @TODO Remove once hasRelationship references are removed */
 	public static function hasRelationship($name) {
 		return isset(
 			static::$sassociations[static::classnamefull()][$name]
 		);
 	}
+
+	/** Determines if association exists */
+	public static function hasAssociation($name) {
+		return isset(
+			static::$sassociations[static::classnamefull()][$name]
+		);
+	}	
 	
+
+	/**
+	 * Returns reference to current association hash;
+	 * does not error check against whether association 
+	 * yet to be defined; this method is an internal 
+	 * convenience
+	 */
+	protected static function &association($name, $value = null) {
+		// if value is null, we are returning association value
+		if (is_null($value)) {
+			return static::$sassociations[static::classnamefull()][$name];
+
+		// otherwise we are setting association value
+		} else {
+			$association = &static::association($name);
+			$association = $value; 
+		}
+	}
+
 	/**
 	 * This is an alias to defineMethod - currently it is here for 
 	 * idiomatic reasons only
 	 * @type experimental the moment - will be used to indicate relationship
 	 * type if plurality rules are ineffective
 	 */
-	protected function defineRelationship($name, $lambda, $singular = null, $join = null) {
+	protected static function defineRelationship($name, $lambda, $singular = null, $join = null) {
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
@@ -651,7 +678,7 @@ abstract class Model extends Delegator
 		// will ensure that proper model is instantiated if attempting an alias
 		// call on \Model will return \Common\Domain\Model\*
 		//$ns   = '\\Common\\Domain\\Model';
-		preg_match('/^.+?Model/', $this->class->namespace, $match);
+		preg_match('/^.+?Model/', static::klass()->namespace, $match);
 		$ns   = $match[0];
 		
 		// determine relationship type based on either $singular parameter, 
@@ -661,7 +688,7 @@ abstract class Model extends Delegator
 		
 			
 		// if class does not exist, then replace with generic	handler
-		$classname = static::classname();
+		$classname = static::classnamefull();
 			
 		if (!class_exists($model = "$ns\\{$classname}\\$name") && 
 		    !class_exists($model = "$ns\\$name"))	{
@@ -694,9 +721,10 @@ abstract class Model extends Delegator
 		// @TODO we shouldn't have to check on callable status on relationship; there is a 
 		// currently a bug somewhere that is setting a relationship name without attaching
 		// lambda?
-		if ($this->hasRelationship($relationshipName)             && 
-		    is_callable($this->relationships[$relationshipName])) {
+		if (static::hasAssociation($relationshipName) && 
+		    is_callable(static::association($relationshipName))) {
 		    	
+		  exit('check why we have lambda defined in sassociations');
 			if (count($aliases)) {
 				$relationshipName = array_shift($aliases);
 			}
@@ -704,232 +732,226 @@ abstract class Model extends Delegator
 			else {
 				//var_export($this->relationships); exit;
 				throw new \Exception(
-					"Failed to define relationship '$relationshipName' on model '{$this->ident()}' because it already exists. " .
-					"You must provide an alias if you wish to define additional relationship of the same type"
+					"Failed to define relationship '$relationshipName' on model '$classname' ". 
+					"because it already exists. You must provide an alias if you wish to "    .
+					"define additional relationship of the same type"
 				);
 			}
 		}
 		
-		$this->relationships[$relationshipName] = $model;
+		static::association($relationshipName, [
+			'model'  => $model,
 
-		
-		$this->defineMethod($relationshipName, function() use ($model, $self, $relationshipName, $lambda, $singular, $join, $name) {
-			
-			$self->send('runCallbacks', 'relationship', 'before');
-							 
-			$association = new Model\Association(array(
-				'owner'       => $self,
-				'target'      => $model,
-				'through'     => $join,
-				'cardinality' => $singular 
-					? Model\Association::SINGULAR
-					: Model\Association::MANY 
-			));	
+			// this lambda is considered to be in the context/scope
+			// of an instance, though it is defined within a class scope
+			'lambda' => function() use 
+				($model, $relationshipName, $lambda, $singular, $join, $name) {
+				
+				//$self->send('runCallbacks', 'relationship', 'before');
+				static::runCallbacks('relationship', 'before');
+								 
+				$association = new Model\Association(array(
+					'owner'       => $self,
+					'target'      => $model,
+					'through'     => $join,
+					'cardinality' => $singular 
+						? Model\Association::SINGULAR
+						: Model\Association::MANY 
+				));	
+							
+
+				// get reference to relationships and make reference that relationship is
+				// beging created
+				$result = null;
+
+				// check if the model exists in the database to ensure we are
+				// not running queries against an empty/shallow model - because
+				// there is nothing to match against here
+				if ($this->exists()) {
 						
-
-			// get reference to relationships and make reference that relationship is
-			// beging created
-			$result = null;
-
-			// check if the model exists in the database to ensure we are
-			// not running queries against an empty/shallow model - because
-			// there is nothing to match against here
-			
-		
-			if ($self->exists()) {
-					
-				// check if model is generic - in which case we have to set
-				// pseudonym before feeding to our lambda
-				// @TODO this is cumbersome and inefficient - lets figure out
-				// more elegant solution or at least clear up exactly what
-				// is happening here
-				if (($model = $model::instance()) instanceof Model\Generic) {
-					$model = $model::instantiate($name);
-				}
-				
-				
-					
-				// create relation instance - for time being this is used for caching
-				// $relation = new Model\Relation($model);
-				
-				// check cache to determine if model exists, either as a singular
-				// or as a collection/set
-				//$cache = new Cache\Relation($self);
-				
-				//$result = $cache->find($relation, function() use ($model, $lambda) {
-				try {
-					$result = $lambda($model);
-				}
-				
-				catch(\Exception $pass) {
-					throw $pass;
-				}
-				//});
-
-
-			
-				
-				// if returned result is an instance of relationship, which is a query build tool
-				// then evaluate and pass to statement
-				// @TODO the relation should be responsible for the build of model instance, not just
-				// as a query build tool - this will have to be addressed, but converting right now
-				// will present too much variability
-				if ($result instanceof Model\Relation) {
-					try { 
-						$result = $result->build();
+					// check if model is generic - in which case we have to set
+					// pseudonym before feeding to our lambda
+					// @TODO this is cumbersome and inefficient - lets figure out
+					// more elegant solution or at least clear up exactly what
+					// is happening here
+					if (($model = $model::instance()) instanceof Model\Generic) {
+						$model = $model::instantiate($name);
 					}
 					
-					catch(\Exception $passthrough) {
-						throw $passthrough;
-					}
+					
+						
+					// create relation instance - for time being this is used for caching
+					// $relation = new Model\Relation($model);
+					
+					// check cache to determine if model exists, either as a singular
+					// or as a collection/set
+					//$cache = new Cache\Relation($self);
+					
+					//$result = $cache->find($relation, function() use ($model, $lambda) {
+					// first bind lambda to this context
+					$lambda = $lambda->bindTo($this);
 
-				}
+					try {
+						$result = $lambda($model);
+					}
+					
+					catch(\Exception $pass) {
+						throw $pass;
+					}
+					//});
+
+
 				
-
-				// check if singular result or hash (which would indicate
-				// a single record being returned); if an array is returned
-				// then it should contain 1+ elements as this is-a required
-				// contract of the defineRelationship method
-				if (is_array($result)) {
 					
-					
-					if (\eGloo\Utilities\Collection::isHash($result)) {						
-						$result = new $model($result);
-						
-			
-						// @TODO this is a shortcut to we establish a better rule
-						// in terms of convetion around singular vs set
-						
-						if (!$singular) {
-							$result = new Model\Set(array($result));
-						}	
-						
-					}
-					
-					// otherwise we have a set return; check if elements are
-					// model instances, in which case we can simply wrap
-					// reset in set instance
-					else if ($result[0] instanceof Model) {
-
-						$result = new Model\Set($result);
-					
-					}
-					
-					// otherwise, we manually build set with model instances
-					else {
-						
-			
-						
-						foreach($result as $record) {
-							$temporary[] = new $model($record);	
+					// if returned result is an instance of relationship, which is a query build tool
+					// then evaluate and pass to statement
+					// @TODO the relation should be responsible for the build of model instance, not just
+					// as a query build tool - this will have to be addressed, but converting right now
+					// will present too much variability
+					if ($result instanceof Model\Relation) {
+						try { 
+							$result = $result->build();
 						}
-												
-
 						
-						// replace result with temporary
-						$result = new Model\Set($temporary);
+						catch(\Exception $passthrough) {
+							throw $passthrough;
+						}
+
 					}
 					
+
+					// check if singular result or hash (which would indicate
+					// a single record being returned); if an array is returned
+					// then it should contain 1+ elements as this is-a required
+					// contract of the defineRelationship method
+					if (is_array($result)) {
+						
+						if (\eGloo\Utilities\Collection::isHash($result)) {						
+							$result = new $model($result);
+							
+							// @TODO this is a shortcut to we establish a better rule
+							// in terms of convetion around singular vs set
+							
+							if (!$singular) {
+								$result = new Model\Set(array($result));
+							}	
+							
+						}
+						
+						// otherwise we have a set return; check if elements are
+						// model instances, in which case we can simply wrap
+						// reset in set instance
+						else if ($result[0] instanceof Model) {
+							$result = new Model\Set($result);	
+						}
+						
+						// otherwise, we manually build set with model instances
+						else {
+							foreach($result as $record) {
+								$temporary[] = new $model($record);	
+							}
+													
+							// replace result with temporary
+							$result = new Model\Set($temporary);
+						}
+					}
+				}
+
+				// if the model doesn't exist (the case where we have a "shallow"
+				// model) or our return result from lambda is false (which indicates 
+				// an empty result or a failure to find data), 
+				// we return a shallow copy of our relationship(s), either as an instance
+				// of model or emptyset, based on plurality rules
+				
+				if (!$result) {
+
+					$result = $singular
+						
+						// return an empty instance of model
+						? new $model
+						
+						
+						: new Model\Set($model);
+
 				}
 				
-				
-			}
-
-
-
-
-
-			
-			// if the model doesn't exist (the case where we have a "shallow"
-			// model) or our return result from lambda is false (which indicates 
-			// an empty result or a failure to find data), 
-			// we return a shallow copy of our relationship(s), either as an instance
-			// of model or emptyset, based on plurality rules
-			
-			if (!$result) {
-
-				$result = $singular
-					
-					// return an empty instance of model
-					? new $model
-					
-					
-					: new Model\Set($model);
-
-			}
-			
-			// because our find_by methods returns sets automatically, we need to
-			// check $singular argument to see if this is truely intended
-			else if ($singular && $result instanceof Model\Set) {
-				$result = $result[0];
-			}
-			
-						
-
-			// check finally if result is set; if the case, pass in our association
-			// meta data
-			// @TODO is there a reason to set results of type Model with association
-			// as well
-			//$result->association = $association;
-			if ($result instanceof Model) {
-
-				 
-				// the the result belongs to this model - meaning
-				// that result has a foreign key with the same signature
-				// as this model, then aliasAttribute on result to top this
-				// model primary key 
-				$foreignKey = $self->send('primaryKeyName');
-				
-				if(\property_exists($result, $foreignKey)) {
-					
-					// unset the property, otherwise our aliasAttribute call will never register
-					//unset($result->$foreignKey);
-					$result->$foreignKey = $self->id;
-					// now alias foreign key on result to primary key of this model
-					$result->send('aliasAttribute', $foreignKey, function & () use ($self) {
-						return $self->id;
-					});
-					
-					// @TODO this is temporary - our alias does not fucking exist because its
-					// being deferred, thus our isset calls will return false
-					$result->$foreignKey;
+				// because our find_by methods returns sets automatically, we need to
+				// check $singular argument to see if this is truely intended
+				else if ($singular && $result instanceof Model\Set) {
+					$result = $result[0];
 				}
 				
-				if ($association->usesJunction()) {
+							
+
+				// check finally if result is set; if the case, pass in our association
+				// meta data
+				// @TODO is there a reason to set results of type Model with association
+				// as well
+				//$result->association = $association;
+				if ($result instanceof Model) {
+
+					 
+					// the the result belongs to this model - meaning
+					// that result has a foreign key with the same signature
+					// as this model, then aliasAttribute on result to top this
+					// model primary key 
+					$foreignKey = $this->primaryKeyName();
 					
-					/*
-					$owner  = $association->owner;
-					$target = $association->target;
-					$join   = $association->through; 
+					if(\property_exists($result, $foreignKey)) {
 						
+						// unset the property, otherwise our aliasAttribute call will 
+						// never register
+						//unset($result->$foreignKey);
+						// @TODO why is foreign key being set and then being aliased?
+						$result->$foreignKey = $this->id;
+
+						// now alias foreign key on result to primary key of this model
+						$result->send('aliasAttribute', $foreignKey, function & () {
+							return $this->id;
+						});
+						
+						// @TODO this is temporary - our alias does not fucking exist because its
+						// being deferred, thus our isset calls will return false
+						$result->$foreignKey;
+					}
 					
-					$joinModel = class_exists($class = "{$owner->class->namespace}\\$join")
-						? $class 
-						: Model\Generic::factory($join);
+					if ($association->usesJunction()) {
 						
-					// @TODO this should be accomplished in a single query
-					$joinModel::find_one_by
-					*/
+						/*
+						$owner  = $association->owner;
+						$target = $association->target;
+						$join   = $association->through; 
+							
+						
+						$joinModel = class_exists($class = "{$owner->class->namespace}\\$join")
+							? $class 
+							: Model\Generic::factory($join);
+							
+						// @TODO this should be accomplished in a single query
+						$joinModel::find_one_by
+						*/
+					}
+						
+
 				}
-					
+				
+				else if ($result instanceof Model\Set) {
+					$result->association = $association;
+				}
 
-			}
-			
-			else if ($result instanceof Model\Set) {
-				$result->association = $association;
-			}
+				
+				//$self->send('runCallbacks', 'relationship', 'after');
+				static::runCallbacks('relationship', 'after');
 
-			
-			$self->send('runCallbacks', 'relationship', 'after');
-			
-			// otherwise we return result as is, which can be any value outside
-			// of null
-			return $result;
-			
-		});
+				// otherwise we return result as is, which can be any value outside
+				// of null
+				return $result;
+				
+			}
+		];
 		
 		foreach($aliases as $alias) {			
-			$this->aliasRelationship($alias, $relationshipName);
+			static::aliasRelationship($alias, $relationshipName);
 		}
 		
 		
@@ -940,22 +962,20 @@ abstract class Model extends Delegator
 		
 	}
 
-	protected function aliasRelationship($alias, $relation) {
-		$self = $this;
+	protected static function aliasRelationship($alias, $relation) {
 		
-		if ($this->hasRelationship($relation)) {
-			$this->aliasAttribute($alias, function & () use ($self, $relation) {
-				// we unfortunately (from a style/syntactical perspective) have to
-				// to first initialize relationship with non-returning call, and then
-				// we can return a reference to relationship 
-				$self->$relation;
-				return $self->$relation;
-			});	
-		}
+		// check if we have valid relationship/association in which
+		// to alias in first place
+		if (static::hasRelationship($relation)) {
+			static::$sassociations[$class = static::classnamefull()][$alias] =
+				&static::$sassociations[$class][$relation];
 		
-		else {
+		// otherwise we need to throw an exception to fact that association
+		// does not exist
+		} else {
 			throw new \Exception(
-				"Failed to alias relation '$relation' because it does not exist in instance receiver '{$this->ident()}'"
+				"Failed to alias relation '$relation' because it does not exist ". 
+				"in instance receiver '{$this->ident()}'"
 			);
 		}	
 	}
@@ -1813,6 +1833,7 @@ abstract class Model extends Delegator
 		
 		return $associations;
 	}
+
 
 	
 	
@@ -2806,53 +2827,43 @@ abstract class Model extends Delegator
 		//if ( isset($this->properties[$key] )) {
 		//	return $this->properties[$key];
 		//}
-		$class = strtolower( \eGlooString::toUnderscores(static::classname()) );
+
+		// @TODO determine if this even used
+		$class = strtolower( 
+			\eGlooString::toUnderscores(static::classname()) 
+		);
 	
+		// check if $name matches defined association
+		if (static::hasAssociation($name)) {
+			// retrieve lambda which defines nature of
+			// association and subseqently, bind that
+			// association to the current instance context
+			$lambda = static::association($name)['lambda'];
+			$lambda->bindTo($this);
 
+			// now execute/call block and pass Model reference
+			// that represents the association and pass value
+			// to instance property
+			// @TODO check whether name needs to be "initialized"
+			// with null value.. i remember there being a reason
+			// before..
+			$this->$name = null;
 
-		// check if name has been defined in methods - if so, 
-		// and method does not take arguments, call method
-		if (isset($this->_methods[$name])) {
-			$reflection = new \ReflectionFunction(
-					$this->_methods[$name]
-			);
+			try { 
+				$this->$name = $lambda(
+					static::association($name)['model']
+				);
 
-			// we don't want to use __get as replacement or alternative
-			// to __call, but simply to call methods, which look like
-			// properties, where it makes sense 
-			if (count($reflection->getParameters()) == 0) {
-		
-			
-				// for some reason, removing this allows us to see relationship in 
-				// export statements (even the valid relationship model value is there..)
-				try {
-					$this->$name = null;
-					$this->$name = call_user_func(
-							$this->_methods[$name]
-					);
-				}
-				
-				catch(\Exception $pass) {
-					throw $pass;
-				}
-				
-
-				
-						
-				// lets add an automatic bind of foreign key to relationship, if
-				// it belongsTo current model instance
-				//if($this->$name instanceof Model && $this->$name->belongsTo($this->classname())) {
-					//$field = $this->primaryKeyName;
-
-					//if (!is_null($this->$name)) {
-					//	$this->$name->$field = $this->$field;
-					//}
-				//}
-				
-				return $this->$name;
+			} catch(\Exception $exception) {
+				throw $exception;
 			}
+
+			// if an exception hasnt been passed, the return
+			// to calling context
+			return $this->$name;
 		}
-		
+
+		// @TODO this should be replaced at some point
 		if ((preg_match('/^(.+?)(_?)Count$/', $name, $match))) {
 			
 			// convert to underscore to appease master
@@ -2930,7 +2941,8 @@ abstract class Model extends Delegator
 			}
 		}
 
-				
+		// @TOOD confirm that this works or is still required since we
+		// do aliases after model initialization		
 		if (\property_exists($this, $field = "{$class}_$name")) {
 			$this->aliasProperty($name, $field);
 			return $this->$name;
