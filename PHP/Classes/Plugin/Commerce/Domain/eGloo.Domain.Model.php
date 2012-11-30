@@ -38,7 +38,7 @@ abstract class Model extends Delegator
 		
 		// calls our index method, in which we are responsible for defining
 		// attributes which will servce as cache indicies
-		$this->__indexes();
+		//$this->__indexes();
 		
 			
 		// call our validates method, which provides validation definitions
@@ -105,12 +105,17 @@ abstract class Model extends Delegator
 		
 		Delegator::delegate($class, get_class(static::data()));
 
+		// call static model construct methods
 
+
+		// @TODO below shouldnt be needed anymore as we are following
+		// heirarchy strain to Domain::Model
 		// explicitly define find if we haven't found a suitable alias;
 		// we can't explicitly define this method because it would interfere
 		// with aliases, which for the time being are more correct (specific)
 		// @TODO these need to be moved to __methodStatic
 		
+		/*
 		if ( !static::respondTo('find') ) {
 			
 			static::defineMethod('find', function($__mixed, $class) {
@@ -206,6 +211,7 @@ abstract class Model extends Delegator
 			});
 			
 		}
+		*/
 		
 		
 		if ( !static::respondTo('all') ) {
@@ -311,7 +317,7 @@ abstract class Model extends Delegator
 	/**
 	 * A "method space" to provide validation definitions
 	 */
-	protected function __validates() { }
+	protected static function __validates() { }
 
 	/**
 	 * Responsible for initialize of model attributes
@@ -748,7 +754,7 @@ abstract class Model extends Delegator
 				($model, $relationshipName, $lambda, $singular, $join, $name) {
 				
 				//$self->send('runCallbacks', 'relationship', 'before');
-				static::runCallbacks('relationship', 'before');
+				$this->runCallbacks('relationship', 'before');
 								 
 				$association = new Model\Association(array(
 					'owner'       => $self,
@@ -789,7 +795,7 @@ abstract class Model extends Delegator
 					
 					//$result = $cache->find($relation, function() use ($model, $lambda) {
 					// first bind lambda to this context
-					$lambda = $lambda->bindTo($this);
+					$lambda = $lambda->bindTo($this, $this);
 
 					try {
 						$result = $lambda($model);
@@ -940,8 +946,7 @@ abstract class Model extends Delegator
 				}
 
 				
-				//$self->send('runCallbacks', 'relationship', 'after');
-				static::runCallbacks('relationship', 'after');
+				$this->runCallbacks('relationship', 'after');
 
 				// otherwise we return result as is, which can be any value outside
 				// of null
@@ -967,8 +972,9 @@ abstract class Model extends Delegator
 		// check if we have valid relationship/association in which
 		// to alias in first place
 		if (static::hasRelationship($relation)) {
-			static::$sassociations[$class = static::classnamefull()][$alias] =
-				&static::$sassociations[$class][$relation];
+			static::association(
+				$alias, &static::$sassociations[$class][$relation]
+			);
 		
 		// otherwise we need to throw an exception to fact that association
 		// does not exist
@@ -1004,10 +1010,9 @@ abstract class Model extends Delegator
 	 * Provides a variable length argument list of items that
 	 * must exist prior to certain callbacks
 	 */
-	protected function validates($__mixed) {
-		$this->validates = is_array($__mixed[0])
-			? $__mixed
-			: func_get_args();
+	protected static function validates($__mixed) {
+		static::$svalidates[static::classnamefull()] = 
+			Collection::flatten(func_get_args());
 	}
 	
 	/**
@@ -1020,7 +1025,7 @@ abstract class Model extends Delegator
 		$this->runCallbacks('validate', 'before');
 		
 		// explicitly check fields
-		foreach($this->validates as $attribute) {	
+		foreach(static::$svalidates[static::classnamefull()] as $attribute) {	
 			//$hasAttribute = "has_$attribute";
 			
 
@@ -1216,17 +1221,14 @@ abstract class Model extends Delegator
 	
 	/** Model Constructors *****************************************************/
 	
-	protected static function __srelationships() {
-
-	}
 
 	/**
 	 * A stubb method here to be used by concrete model classes
 	 */
-	protected function __relationships() {
+	protected static function __relationships() {
 		
-		$class     = $this->class->name;
-		$namespace = $this->class->namespace;
+		$class     = static::classname();
+		$namespace = static::klass()->namespace;
 		
 		// check for status relationship and draw if exists, we could
 		// explicitly do this in a try/catch, but would present a serious
@@ -1236,10 +1238,8 @@ abstract class Model extends Delegator
 		// relationship"
 
 		if (class_exists($model = "$namespace\\$class\\Status")) {
-			$self = $this;
-
-			$this->hasOne('Status', function() use ($self, $model) {
-				return $model::find($self->status_id);
+			static::hasOne('Status', function($model) {
+				return $model::find($this->status_id);
 			});
 			
 						
@@ -1250,26 +1250,25 @@ abstract class Model extends Delegator
 	/**
 	 * Alias to relationships; want to replace with association terminology
 	 */
-	protected function __associations() {
+	protected static function __associations() {
 		$this->__relationships();
 	}
 
-	protected function __callbacks() {
+	protected static function __callbacks() {
 		
-		$self      = $this;
-		$class     = $this->class->qualified_name;
+		$class     = static::classnamefull();
 		$signature = static::signature(); 
 		
-		$this->defineCallback('transaction', 'before', function() use ($self) {
+		static::defineCallback('transaction', 'before', function() {
 			
 		});
 		
-		$this->defineCallback('transaction', 'after', function() use ($self) {
+		static::defineCallback('transaction', 'after', function()  {
 
 		});	
 		
 		
-		$this->after_initialize(function() use ($self, $class, $signature) {
+		static::after_initialize(function() use ($class, $signature) {
 
 			// assign left-over columns to model
 			// @TODO delegate this to overrideable method, or place into
@@ -1286,8 +1285,8 @@ abstract class Model extends Delegator
 				}
 			}				
 
-			$attributes = $class::cache($signature, function() use ($self) {
-				return $self->reference('attributes');
+			$attributes = $class::cache($signature, function() {
+				return $this->attributes;
 			});
 			
 
@@ -1307,13 +1306,12 @@ abstract class Model extends Delegator
 					if ($name == $signature) {
 						
 						try { 
-							//$self->send('aliasProperty', 'name', $name);
-							$self->send('aliasProperty', 'value', $name);
-						}
+							// @TODO whi is this not alias attribute?
+							$this->aliasProperty('value', $name);
 						
 						// the only reason an exception would be thrown, is if 
 						// 'name' attribute already exists
-						catch(\Exception $ignore) { }
+						} catch(\Exception $ignore) { }
 					}
 					
 					else {
@@ -1329,26 +1327,21 @@ abstract class Model extends Delegator
 						
 
 					try { 
-						$self->send( 'aliasProperty', strtolower($alias), $name );							
-					}
+						// @TODO aliasAttribute?
+						$this->aliasProperty(strtolower($alias), $name);
 	
-					catch(\Exception $ignore) {
-						
-					}
+					} catch(\Exception $ignore) { }
 				}
 			}
 		
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
-			if (isset($self->status_id)                   &&
-			    $self->send('hasRelationship', 'Status')) {
-
+			if (isset($this->status_id) &&
+			    static::hasAssociation('Status') {
 			    	
 				$field = "{$signature}_status";
-				$self  = $self;
-				
-				$self->send('aliasAttribute', 'status', function & () use ($self, $field) {
-					return $self->Status->$field;
+				$this->aliasAttribute('status', function & () use ($field) {
+					return $this->Status->$field;
 				});
 			}
 						
@@ -1358,19 +1351,22 @@ abstract class Model extends Delegator
 		// redefine our create/update callback to automatically
 		// account for meta fields (last_action, last_action_taken, action_by)
 		foreach(array('create', 'update', 'delete') as $name) {
-			$this->setCallback($name, Callback\CRUD::instance());	
+			static::setCallback($name, Callback\CRUD::instance());	
 		}		
 		
-		$this->after_find( Callback\CRUD::instance() );
+		static::after_find( Callback\CRUD::instance() );
 		
 		// finally lets add cache callback; test that
 		// instance is cacheable before adding callback
 		// instance
-		if ($this->cacheable()) {
+
+		// @TODO comeback for review as I dont know whether to
+		// have cacheable at instance/class level
+		//if ($this->cacheable()) {
 			//$this->after_find( Callback\Cache::instance() );
-			$this->after_save( Callback\Cache::instance() );
-			$this->after_delete( Callback\Cache::instance() );
-		}
+		//	$this->after_save( Callback\Cache::instance() );
+		//	$this->after_delete( Callback\Cache::instance() );
+		//}
 		
 
 				
@@ -1553,6 +1549,24 @@ abstract class Model extends Delegator
 		
 		return $values;
 		
+	}
+
+	/**
+	 * Gets/Sets static attributes within "class domain"
+	 */	
+	private static function attribute($name, $value = null) {
+
+		$domain = &static::$sattributes[static::classnamefull()];
+
+		// if value is null, we are returning a reference to
+		// current element
+		if (is_null($value)) {
+			return $domain[$name];
+
+		// otherwise set value on attribute 
+		} else {
+			$domain[$name] = $value;
+		}
 	}
 	
 	/**
@@ -1885,7 +1899,7 @@ abstract class Model extends Delegator
 	 * Adds a callback of type $event, to a specific point (before, around, after)
 	 * and pushes callback $lambda on event + point stack
 	 */
-	protected function defineCallback($event, $mixed, $lambda = null) {
+	protected static function defineCallback($event, $mixed, $lambda = null) {
 	
 		$point = $mixed;
 		
@@ -1907,9 +1921,10 @@ abstract class Model extends Delegator
 			// callback instance and wrapping within closure; this can be done
 			// at class level, as there should exist only one instance of callback
 			// type
-			$self   = $this;
-			$key    = "{$object->ident()}/$event";
-			//$lambda = static::cache($object, function() use ($object, $event, $self, $point) {
+			// @TODO i don't believe static cache is needed anymore
+
+			$lambda = static::cache($object, function($object) use 
+				($event, $self, $point) {
 
 				// check if callback class has like/appropriately named method;
 				// if so, return as closure
@@ -1941,16 +1956,16 @@ abstract class Model extends Delegator
 					);
 				}
 				
-			//});
+			});
 		}
 
 	
 	
 		if (is_callable($lambda)) {
-			$this->callbacks[$event][$point][] = $lambda;
-		}
-	
-		else {
+			$callback = &static::callback($event, $point);
+			$callback = $lambda;
+		
+		} else {
 			throw new \Exception(
 				"A block/lambda/closure must be provided when defining a callback on receiver {$this->ident()}"
 			);
@@ -1962,16 +1977,17 @@ abstract class Model extends Delegator
 	 * Does the same as defineCallback, but first unsets an event + point callback stack and
 	 * pushes on new event
 	 */
-	protected function setCallback($event, $mixed, $lambda = null) {
-			
+	protected static function setCallback($event, $mixed, $lambda = null) {
 		
-		$this->callbacks[$event] = array();
-		
+		// assign empty array to callback stack, effectively
+		// unsetting all callbacks	
+		$callback = &static::callbacks($event);
+		$callback = [];		
+
 		try {
-			$this->defineCallback($event, $mixed, $lambda);
-		}
+			static::defineCallback($event, $mixed, $lambda);
 		
-		catch(\Exception $pass) {
+		} catch(\Exception $pass) {
 			throw $pass;
 		}
 	}
@@ -1979,9 +1995,9 @@ abstract class Model extends Delegator
 	/**
 	 * Determines if an event + point callback stack exists
 	 */
-	protected function hasCallbacks($event, $point) {
+	protected static function hasCallbacks($event, $point) {
 		// reference callbacks so my fingers fall off
-		$cs = &$this->callbacks;
+		$cs = &static::$scallbacks[$];
 		
 		// now return condition
 		return isset($cs[$event])         && 
@@ -1989,6 +2005,17 @@ abstract class Model extends Delegator
 		       count($cs[$event][$point]);
 			
 	}
+
+	protected static function &callbacks($event, $point = null) {
+		if (is_null($point)) {
+			return static::$scallbacks[static::classnamefull()][$event];
+
+		} else {
+			return static::$scallbacks[static::classnamefull()][$event][$point];
+		}
+	}
+
+
 	
 
 	
@@ -2021,17 +2048,18 @@ abstract class Model extends Delegator
 		
 		// run our before/around callbacks
 		foreach($points as $point) {
-			if (isset($this->callbacks[$event][$point])) {
-				foreach($this->callbacks[$event][$point] as $callback) {
+			if (static::hasCallbacks($event, $point)) {
+				foreach(static::callbacks($event, $point) as $callback) {
+					$callback = $callback->bindTo($this);
 					try { 
-						if (($callback($this)) === false) {
+						if (($callback()) === false) {
 							return ;
 						}
-					}
+					
 					
 					// @TODO this exception is not bubbling up, for now, exit 
 					// and 
-					catch(\Exception $pass) {
+					} catch(\Exception $pass) {
 						throw $pass;
 						
 					}
@@ -2196,7 +2224,7 @@ abstract class Model extends Delegator
 	 * properties on a model are termed "attributes", "aliasAttribute" is
 	 * moreso fitting
 	 */
-	protected function aliasAttribute($__mixed) {
+	protected static function aliasAttribute($__mixed) {
 		
 		// flatten arguments and check if last argument is a lambda
 		// and determine our aliases
@@ -2223,14 +2251,16 @@ abstract class Model extends Delegator
 			
 			if ($reflection->returnsReference()) {
 
-				$self = $this;
 				
 				// now specify alias as attribute accessor and set with
 				// value as lambda
 				foreach($aliases as $alias) {
+
+					static::attribute($alias, $lambda);
 					
 					// unset our attribute; this will make sure referenced values
 					// are not unset as well
+					/*
 					$initialValue = null;
 					
 					if (isset($self->$alias)) {
@@ -2266,6 +2296,7 @@ abstract class Model extends Delegator
 						// to $this->$alias, since we have already done so above
 						return null;
 					});
+					*/
 				}
 				
 				
@@ -2839,7 +2870,7 @@ abstract class Model extends Delegator
 			// association and subseqently, bind that
 			// association to the current instance context
 			$lambda = static::association($name)['lambda'];
-			$lambda->bindTo($this);
+			$lambda->bindTo($this, $this);
 
 			// now execute/call block and pass Model reference
 			// that represents the association and pass value
@@ -3033,6 +3064,12 @@ abstract class Model extends Delegator
 		);
 	}	
 
+	private function &domain($staticProperty) {
+		// returns portion of static property that
+		// falls in a classes domain
+		return static::{$staticProperty}[static::classnamefull()];
+	}
+
 	protected $primaryKeys    = null;
 	protected $attributes     = array();
 	protected $validates      = array();
@@ -3049,6 +3086,7 @@ abstract class Model extends Delegator
 	protected static $sassociations = [ ];
 	protected static $scallbacks    = [ ];
 	protected static $svalidates    = [ ];
+	protected static $sattributes   = [ ];
 	
 }
 

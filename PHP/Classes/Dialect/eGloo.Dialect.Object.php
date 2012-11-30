@@ -102,9 +102,9 @@ abstract class Object {
 			
 		});
 		
-		$this->defineMethod('defer', function($name, $lambda) use ($self) {
+		$this->defineMethod('defer', function($name, $lambda) {
 			if (is_callable($lambda)) {
-				$defers = &$self->reference('_defers');
+				$defers = &$this->_defers;
 				$defers[$name] = $lambda;
 			}
 			
@@ -161,6 +161,10 @@ abstract class Object {
 				$key = $arguments[0];
 			}
 
+			// make sure to keep track of initial key value as 
+			// this will be passed back to our lambda
+			$initialKey = $key;
+
 			
 			// check if mixed is an object, or callable; because php implements
 			// callable as an instance of type Closure, the second condition will
@@ -197,7 +201,7 @@ abstract class Object {
 				if (is_callable($lambda)) {
 					$cache[$key] = [
 						'expiration' => $expiration
-						'value'      => $lambda($key);
+						'value'      => $lambda($initialKey);
 					];
 
 				} else {
@@ -298,9 +302,9 @@ abstract class Object {
 			//return $self;
 		};
 		
-		static::defineMethod('defer', function($name, $lambda, $class) {
-			$defers = &$class::referenceStatic('defers');
-			$defers[$class][$name] = $lambda;
+		static::defineMethod('defer', function($name, $lambda) {
+			$defers = &static::$_sdefers;
+			$defers[static::classnamefull()][$name] = $lambda;
 		});
 		
 		static::defineMethod('respondTo', function($method, $class) { 
@@ -399,6 +403,10 @@ abstract class Object {
 				$key = $arguments[0];
 			}
 
+			// make sure to keep track of initial key value as 
+			// this will be passed back to our lambda
+			$initialKey = $key;			
+
 			
 			// check if mixed is an object, or callable; because php implements
 			// callable as an instance of type Closure, the second condition will
@@ -435,7 +443,7 @@ abstract class Object {
 				if (is_callable($lambda)) {
 					$cache[$key] = [
 						'expiration' => $expiration
-						'value'      => $lambda($key);
+						'value'      => $lambda($initialKey);
 					];
 
 				} else {
@@ -609,6 +617,7 @@ abstract class Object {
 	public static function background(callable $lambda = null) {
 		static::fork($lambda);
 	} 
+
 		
 	/**
 	 * Allows breaking of protected/private modifiers, from outside of the
@@ -1323,6 +1332,7 @@ abstract class Object {
 	protected static $_scache            = array();
 	protected static $_methodsStatic     = array();
 	protected static $ns;
+	protected static $_sdefers           = [ ];
 	protected        $_methods           = array();
 	protected        $_cache             = array();
 	protected        $_defers            = array();
