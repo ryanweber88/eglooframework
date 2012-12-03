@@ -148,10 +148,13 @@ then
         echo "****************************"
         echo
 
+	apt-get --assume-yes install python-software-properties
+
 	add-apt-repository ppa:ondrej/php5
+
 	apt-get update
 
-        apt-get --assume-yes install curl apache2 memcached \
+        apt-get --assume-yes install git git-flow curl apache2 memcached \
 		php5 php5-dev php5-memcache php5-mysql php5-pgsql php5-mcrypt \
 		php-apc php5-imagick php5-memcached php5-common \
                 php-soap php5-gd
