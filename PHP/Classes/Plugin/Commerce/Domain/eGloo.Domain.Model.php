@@ -86,23 +86,22 @@ abstract class Model extends Delegator
 		Delegator::delegate($class, get_class(static::data()));
 
 		// call static model construct methods
+
 		// call our validates method, which provides validation definitions
 		// for Model attributes
-		$this->__validates();
-		
+		static::__validates();
 		
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
-		$this->__relationships();
+		static::__relationships();
 		
-	
 		// call __callbacks method, which defines behaviors during life cycle
 		// of instance
-		$this->__callbacks();
+		static::__callbacks();
 		
 		// finally call attributes, which sets up convience attributes for
 		// instance		
-		$this->__attributes();
+		static::__attributes();
 		
 
 
@@ -616,14 +615,14 @@ abstract class Model extends Delegator
 	/** @TODO Remove once hasRelationship references are removed */
 	public static function hasRelationship($name) {
 		return isset(
-			static::$sassociations[static::classnamefull()][$name]
+			static::domain('sassociations')[$name]
 		);
 	}
 
 	/** Determines if association exists */
 	public static function hasAssociation($name) {
 		return isset(
-			static::$sassociations[static::classnamefull()][$name]
+			static::domain('sassociations')[$name]
 		);
 	}	
 	
@@ -637,7 +636,7 @@ abstract class Model extends Delegator
 	protected static function &association($name, $value = null) {
 		// if value is null, we are returning association value
 		if (is_null($value)) {
-			return static::$sassociations[static::classnamefull()][$name];
+			return static::domain('sassociations')[$name];
 
 		// otherwise we are setting association value
 		} else {
@@ -658,7 +657,7 @@ abstract class Model extends Delegator
 		// belong here
 
 		// check if an 'as Alias' has been specified
-		$aliases = [ ]
+		$aliases = [ ];
 		
 		if (preg_match($pattern = '/\s+as\s+([A-Z].*)$/', $name, $match)) {
 			$name = trim(preg_replace(
@@ -951,7 +950,7 @@ abstract class Model extends Delegator
 				return $result;
 				
 			}
-		];
+		]);
 		
 		foreach($aliases as $alias) {			
 			static::aliasRelationship($alias, $relationshipName);
@@ -971,7 +970,7 @@ abstract class Model extends Delegator
 		// to alias in first place
 		if (static::hasRelationship($relation)) {
 			static::association(
-				$alias, &static::$sassociations[$class][$relation]
+				$alias, static::domain('sassociations')[$relation]
 			);
 		
 		// otherwise we need to throw an exception to fact that association
@@ -1335,7 +1334,7 @@ abstract class Model extends Delegator
 			// check if model has status relationship
 			// @TODO this may be a bit too specific for this instance
 			if (isset($this->status_id) &&
-			    static::hasAssociation('Status') {
+			    static::hasAssociation('Status')) {
 			    	
 				$field = "{$signature}_status";
 				$this->aliasAttribute('status', function & () use ($field) {
@@ -1557,7 +1556,7 @@ abstract class Model extends Delegator
 		// if value is null, we are returning a reference to
 		// current element
 		if (is_null($value)) {
-			return static::domain('sdefer')[$name]
+			return static::domain('sdefers')[$name];
 
 		// otherwise set value on attribute 
 		} else {
@@ -1993,7 +1992,7 @@ abstract class Model extends Delegator
 	 */
 	protected static function hasCallbacks($event, $point) {
 		// reference callbacks so my fingers fall off
-		$cs = &static::$scallbacks[$];
+		$cs = &static::domain('scallbacks');
 		
 		// now return condition
 		return isset($cs[$event])         && 
@@ -2004,10 +2003,10 @@ abstract class Model extends Delegator
 
 	protected static function &callbacks($event, $point = null) {
 		if (is_null($point)) {
-			return static::$scallbacks[static::classnamefull()][$event];
+			return static::domain('scallbacks')[$event];
 
 		} else {
-			return static::$scallbacks[static::classnamefull()][$event][$point];
+			return static::domain('scallbacks')[$event][$point];
 		}
 	}
 
@@ -2899,9 +2898,9 @@ abstract class Model extends Delegator
 
 		// check if $name matches defined static attribute - 
 		// if so, we assign value to local attribute
-		if (isset(static::domain('sdefer')[$name])) {
+		if (isset(static::domain('sdefers')[$name])) {
 			// we need to replace lambda with bound version
-			$lambda = &static::domain('sdefer')[$name];
+			$lambda = &static::domain('sdefers')[$name];
 			$lambda = $lambda->bindTo($this);
 
 			// now we call as static method, which will take care
@@ -3074,17 +3073,15 @@ abstract class Model extends Delegator
 		if (class_exists($class)) {
 			return new $class;
 		}
-		*/
+	
 		throw new \Exception(
 				"Failed to create model $class becfause it does not exist"
 		);
+		*/
+
+		throw new \Exception('Model::factory is not implemented');
 	}	
 
-	private function &domain($staticProperty) {
-		// returns portion of static property that
-		// falls in a classes domain
-		return static::{$staticProperty}[static::classnamefull()];
-	}
 
 	protected $primaryKeys    = null;
 	protected $attributes     = array();

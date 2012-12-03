@@ -1199,9 +1199,9 @@ abstract class Object {
 
 			// lets check our deferrables, which are run-once method
 			// calls without parameters 
-			} else if (isset(static::$sdefers[$current][$name])) {
-				$lambda = static::$sdefers[$current][$name];
-				unset(static::$sdefers[$current][$name]);
+			} else if (isset(static::$_sdefers[$current][$name])) {
+				$lambda = static::$_sdefers[$current][$name];
+				unset(static::$_sdefers[$current][$name]);
 
 				return call_user_func($lambda);
 			}
