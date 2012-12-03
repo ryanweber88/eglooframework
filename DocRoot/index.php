@@ -57,6 +57,9 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 // Validate this request and update the info bean accordingly
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
+$test = new \Common\Domain\Model\TestMeSilly;
+exit;
+
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );

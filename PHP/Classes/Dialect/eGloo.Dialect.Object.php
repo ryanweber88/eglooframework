@@ -200,8 +200,8 @@ abstract class Object {
 
 				if (is_callable($lambda)) {
 					$cache[$key] = [
-						'expiration' => $expiration
-						'value'      => $lambda($initialKey);
+						'expiration' => $expiration,
+						'value'      => $lambda($initialKey)
 					];
 
 				} else {
@@ -219,7 +219,7 @@ abstract class Object {
 				return call_user_func_array(array(
 					$this, 'cache'
 
-				), func_get_args())	
+				), func_get_args());	
 			}
 						
 			return $cache[$key]['value'];
@@ -450,8 +450,8 @@ abstract class Object {
 
 				if (is_callable($lambda)) {
 					$cache[$key] = [
-						'expiration' => $expiration
-						'value'      => $lambda($initialKey);
+						'expiration' => $expiration,
+						'value'      => $lambda($initialKey)
 					];
 
 				} else {
@@ -469,7 +469,7 @@ abstract class Object {
 				return forward_static_call_array(array(
 					$this, 'cache'
 
-				), func_get_args())	
+				), func_get_args());	
 			}
 						
 			return $cache[$key]['value'];
@@ -580,15 +580,15 @@ abstract class Object {
 	 */
 	protected static function &domain($staticProperty) {
 		if (property_exists(static::classnamefull(), $staticProperty)) {
-			$reference = &static::{$staticProperty};
+			$reference = &static::$$staticProperty;
 
 			if (is_array($reference)) {
 				return $reference[static::classnamefull()];
 
 			} else {
 				throw new \Exception(
-					'Domain method only currently support array properties'
-				)
+					'Domain method only currently supports array properties'
+				);
 			}
 		} else {
 			throw new \Exception(
@@ -598,7 +598,7 @@ abstract class Object {
 		}
 
 
-		return static::{$staticProperty}
+		return static::$$staticProperty;
 	}
 	
 	/**
