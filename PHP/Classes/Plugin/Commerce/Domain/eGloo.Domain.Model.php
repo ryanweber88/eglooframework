@@ -40,27 +40,7 @@ abstract class Model extends Delegator
 		// attributes which will servce as cache indicies
 		//$this->__indexes();
 		
-			
-		// call our validates method, which provides validation definitions
-		// for Model attributes
-		$this->__validates();
-		
-		
-		// call our relationships method, which provides callbacks attached
-		// to the names of our relationships
-		$this->__relationships();
-		
-	
-		// call __callbacks method, which defines behaviors during life cycle
-		// of instance
-		$this->__callbacks();
-		
-		// finally call attributes, which sets up convience attributes for
-		// instance		
-		$this->__attributes();
-		
-
-		
+					
 		// make sence of parameter - this will change as EPA
 		// is folded into our domain model
 		if ((is_array($__mixed) || $__mixed instanceof \ArrayAccess) && 
@@ -106,6 +86,24 @@ abstract class Model extends Delegator
 		Delegator::delegate($class, get_class(static::data()));
 
 		// call static model construct methods
+		// call our validates method, which provides validation definitions
+		// for Model attributes
+		$this->__validates();
+		
+		
+		// call our relationships method, which provides callbacks attached
+		// to the names of our relationships
+		$this->__relationships();
+		
+	
+		// call __callbacks method, which defines behaviors during life cycle
+		// of instance
+		$this->__callbacks();
+		
+		// finally call attributes, which sets up convience attributes for
+		// instance		
+		$this->__attributes();
+		
 
 
 		// @TODO below shouldnt be needed anymore as we are following
@@ -1554,18 +1552,16 @@ abstract class Model extends Delegator
 	/**
 	 * Gets/Sets static attributes within "class domain"
 	 */	
-	private static function attribute($name, $value = null) {
-
-		$domain = &static::$sattributes[static::classnamefull()];
+	private static function attribute($name, callable $value = null) {
 
 		// if value is null, we are returning a reference to
 		// current element
 		if (is_null($value)) {
-			return $domain[$name];
+			return static::domain('sdefer')[$name]
 
 		// otherwise set value on attribute 
 		} else {
-			$domain[$name] = $value;
+			static::defer($name, $value);
 		}
 	}
 	
@@ -1590,7 +1586,7 @@ abstract class Model extends Delegator
 	
 
 	
-	protected function __attributes() {
+	protected static function __attributes() {
 		// call our parent method to ensure any property work is done
 		// up hierarchy chain
 		parent::__properties();
@@ -2174,18 +2170,16 @@ abstract class Model extends Delegator
 	/**
 	 * Aliases our primary key to 'id'
 	 */
-	protected function aliasPrimaryKey($from) {
+	protected static function aliasPrimaryKey($from) {
 		// for now we ignore our exception as primary
 		// has already been aliased	
 		try {
-			$this->aliasProperty( 'id', $from );
-		}
+			static::aliasAttribute( 'id', $from );
 		
-		catch(\Exception $ignore) {
-		}
-		
+		} catch(\Exception $ignore) { }
 
-		$this->primaryKeyName = $from;
+		static::$primaryKeyName = $from;
+		
 	}
 	
 	/**
@@ -2310,8 +2304,17 @@ abstract class Model extends Delegator
 		}
 		
 		else {
+			// @TODO why aren't we iterating through aliases here?
+			// Ahh because it doesn't make sense otherwise, or at 
+			// least isnt very readable
+			list($alias, $from) = $arguments;
+
+			static::attribute($alias, function & () use ($alias, $from) {
+				return $this->$alias = &$this->$from;
+			});
+
 			//foreach($aliases as $alias) {
-				$this->aliasProperty($arguments[0], $arguments[1]);
+			//$this->aliasProperty($arguments[0], $arguments[1]);
 			//}
 		}
 	}
@@ -2894,6 +2897,19 @@ abstract class Model extends Delegator
 			return $this->$name;
 		}
 
+		// check if $name matches defined static attribute - 
+		// if so, we assign value to local attribute
+		if (isset(static::domain('sdefer')[$name])) {
+			// we need to replace lambda with bound version
+			$lambda = &static::domain('sdefer')[$name];
+			$lambda = $lambda->bindTo($this);
+
+			// now we call as static method, which will take care
+			// of running deffered method and then popping from
+			// deferred stack
+			$this->$name = static::{$name}();
+		}
+
 		// @TODO this should be replaced at some point
 		if ((preg_match('/^(.+?)(_?)Count$/', $name, $match))) {
 			
@@ -3080,9 +3096,9 @@ abstract class Model extends Delegator
 	protected $associations   = null;
 	protected $indicies       = array();
 	protected $cached         = false;
-	protected $primaryKeyName; 
 	protected $association;
 
+	protected static $primaryKeyName;
 	protected static $sassociations = [ ];
 	protected static $scallbacks    = [ ];
 	protected static $svalidates    = [ ];

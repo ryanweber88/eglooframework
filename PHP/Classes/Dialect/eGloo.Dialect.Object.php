@@ -306,6 +306,14 @@ abstract class Object {
 			$defers = &static::$_sdefers;
 			$defers[static::classnamefull()][$name] = $lambda;
 		});
+
+		// the purpose of run deferred is to execute deferred block and
+		// pop from stack
+		// @TODO I still don't know if i like this idea; popping from 
+		// deferred stack should somehow be done implicitly..
+		static::defineMethod('run_deferred', function($name) {
+
+		});
 		
 		static::defineMethod('respondTo', function($method, $class) { 
 			$current = $class;
@@ -564,6 +572,33 @@ abstract class Object {
 	
 	protected static function __methodsStatic() {
 		static::aliasMethodsStatic();			
+	}
+
+	/** Retrieves static property that falls in current
+	 ** class domain 
+	 ** @TODO I dont know if I like this idea yet..
+	 */
+	protected static function &domain($staticProperty) {
+		if (property_exists(static::classnamefull(), $staticProperty)) {
+			$reference = &static::{$staticProperty};
+
+			if (is_array($reference)) {
+				return $reference[static::classnamefull()];
+
+			} else {
+				throw new \Exception(
+					'Domain method only currently support array properties'
+				)
+			}
+		} else {
+			throw new \Exception(
+				"Failed to retrieve class domain on static property '$staticProperty' ".
+				"because it does not exist"
+			);
+		}
+
+
+		return static::{$staticProperty}
 	}
 	
 	/**
@@ -1131,6 +1166,7 @@ abstract class Object {
 		// inheritence; to do this, we move up class hierarchy,
 		// from Current to Object and check against methods
 		
+		// @TOD I don't think this is needed anymore
 		// @TODO we need a way to call this all within one method 
 		// regardless of fucking context
 		// @TODO this needs to be profiled
@@ -1160,6 +1196,14 @@ abstract class Object {
 				catch(\Exception $passthrough) {
 					throw $passthrough;
 				}
+
+			// lets check our deferrables, which are run-once method
+			// calls without parameters 
+			} else if (isset(static::$sdefers[$current][$name])) {
+				$lambda = static::$sdefers[$current][$name];
+				unset(static::$sdefers[$current][$name]);
+
+				return call_user_func($lambda);
 			}
 			
 		} while (($current = get_parent_class($current)));
@@ -1171,7 +1215,7 @@ abstract class Object {
 		// this will die UNGRACEFULLY if method does not exist
 		// (intended behavior)		
 		throw new \Exception(
-				"Call to undefined class method \"$name\" on receiver " . get_called_class()
+			"Call to undefined class method \"$name\" on receiver " . get_called_class()
 		);		
 	}
 
