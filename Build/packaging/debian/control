@@ -1,0 +1,13 @@
+Package: eglooframework
+Version: 1.0
+Section: devel
+Priority: optional
+Architecture: any
+Depends: git, apache2, memcached, php5, php5-dev, php5-memcache, php5-mysql,
+	php5-pgsql, php5-mcrypt, php-apc, php5-imagick, php5-memcached,
+	php5-common, php-soap, php5-gd, python-software-properties
+Recommends: git-flow
+Standards-Version: 3.9.3.1
+Homepage: http://www.egloo.com/
+Maintainer: benjamin.roberson@gmail.com
+Description: basic egloo framework install
