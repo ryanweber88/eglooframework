@@ -43,19 +43,14 @@ TIMESTAMP=$(date +%s)
 DEFAULT_CODE_DIR="/usr/share"
 DEFAULT_FRAMEWORK_INSTALL="$DEFAULT_CODE_DIR/eglooframework"
 
-. $DEFAULT_FRAMEWORK_INSTALL/Scripts/common/params-ubuntu-1204
-
-if [ -d $DEFAULT_FRAMEWORKROOT ]; then
-	EGLOO_INSTALLED=1
-      fi
-fi
 
 ###########################################################
 ########## Functions
 ###########################################################
 
 pushd "$DEFAULT_FRAMEWORK_INSTALL"
-git checkout feature/conversion
+git checkout feature/conversion-new
+. $DEFAULT_FRAMEWORK_INSTALL/Scripts/common/params-ubuntu-1204
 bash "Build/Install.sh" -d
 
 git checkout master

@@ -74,7 +74,7 @@ mkdir -p $FRAMEWORK_INSIDE_PACKAGING
 cp -r $EXISTING_REPO .
 
 # rename the dir
-mv eglooframework $FRAMEWORK_INSIDE_PACKAGING/eglooframework-$VERSION
+mv eglooframework $FRAMEWORK_INSIDE_PACKAGING
 
 cp -r $DEBIAN_DIR DEBIAN
 
