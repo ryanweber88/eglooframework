@@ -1,5 +1,6 @@
 <?php 
 namespace eGloo\Dialect;
+use       \egloo;
 
 /**
  * Essentially stubb class for superclass Object, which has been written to 5.4
@@ -148,7 +149,7 @@ abstract class Object {
 				// as valid strtotime argument; we use eGloo\strtotime
 				// to allow for wider or more idiomatic time expressions
 				// @TOOD condition expression may be a bit hard to read
-				if (($expiration = eGloo\strtotime($key = $arguments[0]))) {
+				if (($expiration = \eGloo\strtotime($key = $arguments[0]))) {
 					// if our first argument is indeed an expire, then we
 					// default key to lambda
 					$key = $lambda;
@@ -291,15 +292,12 @@ abstract class Object {
 		// but makes use of object id to 
 		$class = get_called_class();
 		
-		static::$_methodsStatic[$class]['defineMethod'] = function($name, $lambda, $class) {
+		static::$_smethods[$class]['defineMethod'] = function &($name, $lambda) {
 		
 			// create a reference to methods, since they cannot be directly referenced
 			// by self given class access modifer protected
-			$methods                = &$class::referenceStatic('_methodsStatic');
-			$methods[$class][$name] = $lambda;
-		
-			return $methods[$class][$name];
-			//return $self;
+			static::$_smethods[$class = get_called_class()][$name] = $lambda;
+			return static::$_smethods[$class][$name];
 		};
 		
 		static::defineMethod('defer', function($name, $lambda) {
@@ -315,7 +313,7 @@ abstract class Object {
 
 		});
 		
-		static::defineMethod('respondTo', function($method, $class) { 
+		static::defineMethod('respondTo', function($method) { 
 			$current = $class;
 			$methods = &$class::referenceStatic('_methodsStatic');
 
@@ -332,9 +330,9 @@ abstract class Object {
 		});
 		
 		// returns a closure representing a member method
-		static::defineMethod('closure', function($method, $class) { 
-			$current = $class;
-			
+		static::defineMethod('closure', function($method) { 
+			$class = get_called_class();
+
 			// first we check statically linked methods 
 			if (method_exists($class, $method)) {
 				
@@ -342,7 +340,7 @@ abstract class Object {
 			// for dynamic method
 			} else { 
 			
-				$methods = &$class::referenceStatic('_methodsStatic');
+				$methods = &static::$_smethods;
 	
 				do {
 					if (isset($methods[$current][$method])) {
@@ -359,6 +357,36 @@ abstract class Object {
 			);
 			
 		});		
+
+		// returns a closure representing a member method
+		static::defineMethod('method', function($method) { 
+			$class = get_called_class();
+
+			// first we check statically linked methods 
+			if (method_exists($class, $method)) {
+				
+			// 	otherwise, we check up method hierarchy chain
+			// for dynamic method
+			} else { 
+			
+				$methods = &static::$_smethods;
+				$current = $class;
+	
+				do {
+					if (isset($methods[$current][$method])) {
+				
+						return $methods[$current][$method];
+					}
+						
+				} while (($current = get_parent_class($current)));
+			
+			}
+			
+			throw new \Exception(
+				"Failed to return closure of '$method' because it does not exist"
+			);
+			
+		});				
 				
 		
 		static::defineMethod('namespacename', function($class) {
@@ -398,7 +426,7 @@ abstract class Object {
 				// as valid strtotime argument; we use eGloo\strtotime
 				// to allow for wider or more idiomatic time expressions
 				// @TOOD condition expression may be a bit hard to read
-				if (($expiration = eGloo\strtotime($key = $arguments[0]))) {
+				if (($expiration = \eGloo\strtotime($key = $arguments[0]))) {
 					// if our first argument is indeed an expire, then we
 					// default key to lambda
 					$key = $lambda;
@@ -410,6 +438,7 @@ abstract class Object {
 			} else {
 				$key = $arguments[0];
 			}
+
 
 			// make sure to keep track of initial key value as 
 			// this will be passed back to our lambda
@@ -466,34 +495,20 @@ abstract class Object {
 			} else if ($cache[$key]['expiration'] !== null   && 
 				         $cache[$key]['expiration'] <= time()) {
 
-				return forward_static_call_array(array(
-					$this, 'cache'
-
-				), func_get_args());	
+				return forward_static_call_array(
+					static::method('cache'), func_get_args()
+				);	
 			}
 						
 			return $cache[$key]['value'];
 					
 		});
 		
-		static::defineMethod('clear_cache', function($key, $class = null) {
+		static::defineMethod('clear_cache', function($key) {
 			$cache = &$class::referenceStatic('_scache');
 			unset($cache[$class][$key]);
 		});
 		
-		
-		static::defineMethod('method', function($method, $class) {
-			$methods                = &$class::referenceStatic('_methodsStatic');
-						
-			if (isset($methods[$class][$method])) {
-				return $methods[$class][$method];
-			}
-			
-			throw new \Exception(
-				"Failed to retrieve method '$method' because it does not exist"
-			);
-		
-		});
 	
 		
 		static::defineMethod('aliasMethod', function($alias, $from, $class) {
@@ -1179,16 +1194,15 @@ abstract class Object {
 		// by define method, we need to inject our current
 		// context into the method definition
 		//if ($name == 'defineMethod' && is_callable($arguments[1])) {
-		array_push($arguments, $class);
 		//}
 		
 		
 		do {
-			if (isset(static::$_methodsStatic[$current][$name])) {
-				
+			if (isset(static::$_smethods[$current][$name])) {
+
 				try { 
 					return call_user_func_array(
-						static::$_methodsStatic[$current][$name], $arguments	
+						static::$_smethods[$current][$name], $arguments	
 					);
 				}
 				
@@ -1207,9 +1221,6 @@ abstract class Object {
 			}
 			
 		} while (($current = get_parent_class($current)));
-		
-
-		
 		
 		
 		// this will die UNGRACEFULLY if method does not exist
@@ -1374,7 +1385,7 @@ abstract class Object {
 	
 	protected static $_singleton;
 	protected static $_scache            = array();
-	protected static $_methodsStatic     = array();
+	protected static $_smethods          = [ ];
 	protected static $ns;
 	protected static $_sdefers           = [ ];
 	protected        $_methods           = array();

@@ -30,11 +30,12 @@ abstract class Model extends Delegator
 	 * @param variable-length $__mixed
 	 */
 	function __construct($__mixed = null) {
-		
+		echo "asdf";
+		exit;
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
-		
+
 		
 		// calls our index method, in which we are responsible for defining
 		// attributes which will servce as cache indicies
@@ -1556,7 +1557,7 @@ abstract class Model extends Delegator
 		// if value is null, we are returning a reference to
 		// current element
 		if (is_null($value)) {
-			return static::domain('sdefers')[$name];
+			return static::domain('_sdefers')[$name];
 
 		// otherwise set value on attribute 
 		} else {
@@ -1918,8 +1919,8 @@ abstract class Model extends Delegator
 			// type
 			// @TODO i don't believe static cache is needed anymore
 
-			$lambda = static::cache($object, function($object) use 
-				($event, $self, $point) {
+			$lambda = static::cache($object, function($object) 
+				use ($event, $point) {
 
 				// check if callback class has like/appropriately named method;
 				// if so, return as closure
@@ -1934,9 +1935,7 @@ abstract class Model extends Delegator
 								array($object, $method), 
 								array( $model )
 							);
-						}
-						
-						catch(\Exception $pass) {
+						} catch(\Exception $pass) {
 							throw $pass;
 						}
 						
@@ -1957,12 +1956,13 @@ abstract class Model extends Delegator
 	
 	
 		if (is_callable($lambda)) {
-			$callback = &static::callback($event, $point);
-			$callback = $lambda;
+			$callback   = &static::callbacks($event, $point);
+			$callback[] = $lambda;
 		
 		} else {
 			throw new \Exception(
-				"A block/lambda/closure must be provided when defining a callback on receiver {$this->ident()}"
+				"A block/lambda/closure must be provided when defining a " .
+				"callback on receiver " . static::klass()
 			);
 		}
 	
@@ -1976,8 +1976,8 @@ abstract class Model extends Delegator
 		
 		// assign empty array to callback stack, effectively
 		// unsetting all callbacks	
-		$callback = &static::callbacks($event);
-		$callback = [];		
+		$callbacks = &static::callbacks($event);
+		$callbacks = [];		
 
 		try {
 			static::defineCallback($event, $mixed, $lambda);
@@ -2392,15 +2392,7 @@ abstract class Model extends Delegator
 		
 		// if unable to find matching meta call within
 		// __call chain, determine if 
-		// check for callback shortcut methods; instead of running 
-		// defineCallback, we can run this->before_create 
-		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
-			return call_user_func_array($this->defineMethod($name, function($mixed) use ($self, $match) {
-				$self->send('defineCallback', $event = $match[2], $match[1], $mixed)	;			
-			
-			}), $arguments); ;
-			
-		}		
+
 		
 		throw $deferred; 
 	}
@@ -2413,6 +2405,17 @@ abstract class Model extends Delegator
 			return parent::__callstatic($name, $arguments);
 		}
 		catch(\Exception $deferred) { }
+
+				// check for callback shortcut methods; instead of running 
+		// defineCallback, we can run this->before_create 
+		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
+			return call_user_func_array(
+				static::defineMethod($name, function($mixed) use ($match) {
+					static::defineCallback($event = $match[2], $match[1], $mixed);
+
+			}), $arguments);
+			
+		}		
 		
 		// if unable to find matching meta call within
 		// __call chain, determine if a dynamic finder
@@ -2898,9 +2901,9 @@ abstract class Model extends Delegator
 
 		// check if $name matches defined static attribute - 
 		// if so, we assign value to local attribute
-		if (isset(static::domain('sdefers')[$name])) {
+		if (isset(static::domain('_sdefers')[$name])) {
 			// we need to replace lambda with bound version
-			$lambda = &static::domain('sdefers')[$name];
+			$lambda = &static::domain('_sdefers')[$name];
 			$lambda = $lambda->bindTo($this);
 
 			// now we call as static method, which will take care
@@ -3102,4 +3105,3 @@ abstract class Model extends Delegator
 	protected static $sattributes   = [ ];
 	
 }
-
