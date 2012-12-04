@@ -21,7 +21,7 @@ DEFAULT_SMARTY=`locate /usr/*/Smarty.class.php | head -n 1`
 DEFAULT_WEBUSER="www-data"
 DEFAULT_WEBGROUP="www-data"
 
-DEFAULT_CODE_DIR="/data/code"
+DEFAULT_CODE_DIR="/usr/share"
 DEFAULT_FRAMEWORK_INSTALL="$DEFAULT_CODE_DIR/eglooframework"
 
 
