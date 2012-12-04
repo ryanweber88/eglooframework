@@ -30,8 +30,7 @@ abstract class Model extends Delegator
 	 * @param variable-length $__mixed
 	 */
 	function __construct($__mixed = null) {
-		echo "asdf";
-		exit;
+
 		// pass to parent delegator::__construct our *DataAccess
 		// instance or Domain\Data
 		parent::__construct(static::data());
@@ -80,6 +79,7 @@ abstract class Model extends Delegator
 		$class     = static::classNameFull();
 		$signature = static::signature();
 		$classname = static::classname();
+		exit('asdf');
 		
 			
 		// assign static delegation 
