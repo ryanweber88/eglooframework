@@ -440,11 +440,13 @@ abstract class Object {
 			}
 
 
+
+
 			// make sure to keep track of initial key value as 
 			// this will be passed back to our lambda
 			$initialKey = $key;			
 
-			
+
 			// check if mixed is an object, or callable; because php implements
 			// callable as an instance of type Closure, the second condition will
 			// never be called - it is simply there for idiomatic reasons alone.
@@ -461,27 +463,28 @@ abstract class Object {
 				if (is_callable($object)) {
 					$lambda = $object;
 				}
-			}
+				
 			
 			// otherwise, lets check the first character of key, which
 			// if a star indicates that we want to employ a "one-way"
 			// cache, which means this value will not be uncached at anypoint
-			else if (isset($key[0]) && $key[0] == '*') {
+			} else if (isset($key[0]) && $key[0] == '*') {
 				$trace = debug_backtrace(2)[1];
 				$key   = $trace['file'] . $trace['line'] . $key;			
-			}			
+			}		
+				
 
 			// finally lets check if value is contained in
 			// cache, set if not and then return
-			$cache = &static::$_scache; 
+			$cache = &static::domain('_scache'); 
 			
-			if (!isset($cache[$key])) {
+			if (!isset($cache[$key])) {			
 
 				if (is_callable($lambda)) {
 					$cache[$key] = [
-						'expiration' => $expiration,
+						'expiration' => $expiration ?: null,
 						'value'      => $lambda($initialKey)
-					];
+					];	
 
 				} else {
 					throw new \Exception(
@@ -489,6 +492,7 @@ abstract class Object {
 						'is unavailable'
 					);
 				}
+	
 			
 			// otherwise check cache to determine if valid - a null
 			// cache is never time expired
@@ -499,7 +503,8 @@ abstract class Object {
 					static::method('cache'), func_get_args()
 				);	
 			}
-						
+					
+							
 			return $cache[$key]['value'];
 					
 		});

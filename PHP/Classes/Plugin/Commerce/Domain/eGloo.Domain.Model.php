@@ -75,27 +75,23 @@ abstract class Model extends Delegator
 	/** @Polymorphic */ 
 	public static function __static() {
 		
-	
-		$class     = static::classNameFull();
-		$signature = static::signature();
-		$classname = static::classname();
-		exit('asdf');
-		
 			
 		// assign static delegation 
 		
-		Delegator::delegate($class, get_class(static::data()));
+		Delegator::delegate(
+			$class = \get_called_class(), get_class(static::data())
+		);
 
 		// call static model construct methods
 
 		// call our validates method, which provides validation definitions
 		// for Model attributes
 		static::__validates();
-		
+
 		// call our relationships method, which provides callbacks attached
 		// to the names of our relationships
 		static::__relationships();
-		
+
 		// call __callbacks method, which defines behaviors during life cycle
 		// of instance
 		static::__callbacks();
@@ -213,12 +209,12 @@ abstract class Model extends Delegator
 		
 		
 		if ( !static::respondTo('all') ) {
-			static::defineMethod('all', function($class) {
+			static::defineMethod('all', function() {
 					
 				// expand on parameter matching, but for, just match on primary
 				// and tablename_id pattern
 				$arguments = func_get_args();
-				$table     = $class::sendStatic('signature');
+				$table     = static::signature();
 				$field     = "{$table}_id";
 				$key       = $arguments[0]; 
 				
@@ -226,14 +222,12 @@ abstract class Model extends Delegator
 				// does not pan out; so callers will be explicitly aware
 				try {
 					
-					$result = $class::sendStatic('process', $class::selects('*'));
+					$result = static::selects('*')
+					                ->build();
 					
 					// our 'all' method should return an empty set if failed to return
 					// result
-					return $result === false
-						? new Model\Set($class)
-						: $result;
-					
+					return $result !== false ?: new Model\Set(\get_called_class());
 					
 				}
 				
@@ -1265,7 +1259,6 @@ abstract class Model extends Delegator
 
 		});	
 		
-		
 		static::after_initialize(function() use ($class, $signature) {
 
 			// assign left-over columns to model
@@ -1291,9 +1284,10 @@ abstract class Model extends Delegator
 			foreach($attributes as $name) {
 				
 				
-				// in some instances, for sub model types, like coupon\type, our convention doesn't work for
-				// fields with the same name as the class (ie, coupon_type.coupon_type); in these cases we
-				// look for a field matching the exact name
+				// in some instances, for sub model types, like coupon\type, 
+				// our convention doesn't work for fields with the same 
+				// name as the class (ie, coupon_type.coupon_type); in these 
+				// cases we look for a field matching the exact name
 				$match = array();
 				
 				if (preg_match("/^{$signature}_(.+)/", $name, $match) || 
@@ -1345,15 +1339,18 @@ abstract class Model extends Delegator
 						
 					
 		});
+
 		
 		// redefine our create/update callback to automatically
 		// account for meta fields (last_action, last_action_taken, action_by)
+		$counter = 0;
+
 		foreach(array('create', 'update', 'delete') as $name) {
-			static::setCallback($name, Callback\CRUD::instance());	
-		}		
-		
+			static::setCallback($name, Callback\CRUD::instance());
+		}	
+
 		static::after_find( Callback\CRUD::instance() );
-		
+
 		// finally lets add cache callback; test that
 		// instance is cacheable before adding callback
 		// instance
@@ -1906,46 +1903,46 @@ abstract class Model extends Delegator
 			$point  = 'around';
 			$lambda = $mixed;
 		}
-			
+
+
 		// check if mixed is an object of type Callback; if callable,
 		// it will be set on is_callable check, if not, and instsance of Callback, we 
 		// can wrap 
 		if (($object = $lambda) instanceof Model\Callback) {
-			
 
 			// cache the process of checking for appropriate callback method on
 			// callback instance and wrapping within closure; this can be done
 			// at class level, as there should exist only one instance of callback
 			// type
-			// @TODO i don't believe static cache is needed anymore
-
+			// @TODO i don't believe static cache is needed anymore			
 			$lambda = static::cache($object, function($object) 
 				use ($event, $point) {
 
 				// check if callback class has like/appropriately named method;
 				// if so, return as closure
-
 				 
 				if (\method_exists($object, $method = $event)                    ||
 				    \method_exists($object, $method = $point . ucfirst($event))) {
+
 					
-					$lambda = function($model) use ($object, $method) {
+					return function($model) use ($object, $method) {
 						try {
-							call_user_func_array(
+							return call_user_func_array(
 								array($object, $method), 
 								array( $model )
 							);
+
 						} catch(\Exception $pass) {
 							throw $pass;
 						}
 						
 					};
-					 
+
 				}
 							
 				else {
 					throw new \Exception(
-						"Failed to define callback '$event/$point' because callback instance ".
+						"Failed to define callback '$event/$point' because callback instance " .
 						"'{$mixed->ident()}' does not define method '$method'"
 					);
 				}
@@ -1953,18 +1950,21 @@ abstract class Model extends Delegator
 			});
 		}
 
-	
+
+		
 	
 		if (is_callable($lambda)) {
-			$callback   = &static::callbacks($event, $point);
-			$callback[] = $lambda;
-		
+			$callbacks   = &static::callbacks($event, $point);
+			$callbacks[] = $lambda;
+
 		} else {
 			throw new \Exception(
 				"A block/lambda/closure must be provided when defining a " .
 				"callback on receiver " . static::klass()
 			);
 		}
+
+
 	
 	}
 	
@@ -1979,12 +1979,15 @@ abstract class Model extends Delegator
 		$callbacks = &static::callbacks($event);
 		$callbacks = [];		
 
+
+
 		try {
 			static::defineCallback($event, $mixed, $lambda);
-		
+
 		} catch(\Exception $pass) {
 			throw $pass;
 		}
+
 	}
 	
 	/**
@@ -2406,12 +2409,25 @@ abstract class Model extends Delegator
 		}
 		catch(\Exception $deferred) { }
 
+
 				// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
 			return call_user_func_array(
 				static::defineMethod($name, function($mixed) use ($match) {
-					static::defineCallback($event = $match[2], $match[1], $mixed);
+
+					// if arguments have been passed, then we are defining
+					// a callback
+					if (func_num_args()) {				
+						static::defineCallback(
+							$event = $match[2], $match[1], $mixed
+						);
+
+					// otherwise we are executing/firing(?) the callback stack
+					} else {
+						static::runCallbacks($match[2], $match[1]);
+
+					}
 
 			}), $arguments);
 			
