@@ -58,7 +58,6 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
-echo "works?";
 exit;
 
 // If the request is valid, process it.  Otherwise, log it and die
