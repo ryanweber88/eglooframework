@@ -50,8 +50,8 @@ DEFAULT_FRAMEWORK_INSTALL="$DEFAULT_CODE_DIR/eglooframework"
 
 pushd "$DEFAULT_FRAMEWORK_INSTALL"
 git checkout feature/conversion-new
-. $DEFAULT_FRAMEWORK_INSTALL/Scripts/common/params-ubuntu-1204
-bash "Build/Install.sh" -d
+cd Build
+bash "./Install.sh" -d
 
 git checkout master
 exit
