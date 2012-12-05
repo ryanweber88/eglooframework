@@ -1,5 +1,5 @@
 <?php
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 use \eGloo\Performance\Caching;
 
 /**

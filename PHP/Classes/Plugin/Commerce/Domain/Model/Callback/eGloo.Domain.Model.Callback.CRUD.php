@@ -3,7 +3,7 @@ namespace eGloo\Domain\Model\Callback;
 
 use \eGloo\Domain;
 use \eGloo\Domain\Model;
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * Provides generic crud operations, wrapped with model callback

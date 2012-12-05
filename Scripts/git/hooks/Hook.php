@@ -4,7 +4,7 @@
  * @author Christian Calloway callowaylc@gmail.com christian@petflow.com
  */
  namespace eGloo\Script\Git\Hook;
- use       \eGloo\Dialect\ObjectSafe as Object;
+ use       \eGloo\Dialect\Object;
 
  /**
   * Defines concrete methods employed by git hook handlers

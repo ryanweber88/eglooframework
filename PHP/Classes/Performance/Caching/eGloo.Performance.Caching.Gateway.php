@@ -5,7 +5,7 @@ use \eGloo\Configuration as Configuration;
 use \eGloo\Utility\Logger as Logger;
 use \Exception as Exception;
 use \Memcache as Memcache;
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * eGloo\Performance\Caching\Gateway Class File

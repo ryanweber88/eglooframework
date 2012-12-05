@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Domain\Data;
 
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 use \eGloo\Domain;
 
 /**

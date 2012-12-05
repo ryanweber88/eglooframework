@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Domain\Utility;
 
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 use \eGloo\TemplateProcessing;
 use \eGloo\Domain\Utility;
 

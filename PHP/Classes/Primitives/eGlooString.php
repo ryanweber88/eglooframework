@@ -25,7 +25,7 @@
  * @version 1.0
  */
 
- use \eGloo\Dialect\ObjectSafe as Object;
+ use \eGloo\Dialect\Object;
 
 /**
  * eGlooString Class

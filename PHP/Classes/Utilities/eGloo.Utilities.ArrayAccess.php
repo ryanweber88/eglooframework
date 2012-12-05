@@ -1,6 +1,6 @@
 <?php
 namespace eGloo\Utilities;
-use       \eGloo\Dialect\ObjectSafe as Object;
+use       \eGloo\Dialect\Object;
 
 /**
  * 

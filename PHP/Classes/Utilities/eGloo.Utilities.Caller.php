@@ -2,7 +2,7 @@
 namespace eGloo\Utilities;
 
 // @TODO replace_object_safe
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * Not completely thought out yet - provides simplified interface

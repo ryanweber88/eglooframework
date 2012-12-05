@@ -4,7 +4,7 @@
  * @author Christian Calloway callowaylc@gmail christian@petflow
 **/ 
 namespace eGloo\Utilities;
-use       \eGloo\Dialect\ObjectSafe as Object;
+use       \eGloo\Dialect\Object;
 
 
 /**

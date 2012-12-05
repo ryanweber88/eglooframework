@@ -1,7 +1,7 @@
 <?php
 namespace {
 use       \eGloo\Utility\Logger     as Logger;
-use       \eGloo\Dialect\ObjectSafe as Object;
+use       \eGloo\Dialect\Object;
 
 /**
  * Class and Interface Autoloader

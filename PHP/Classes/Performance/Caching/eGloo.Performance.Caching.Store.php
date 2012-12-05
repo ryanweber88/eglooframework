@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Performance\Caching;
 
-use \eGloo\Dialect\ObjectSafe as Object,
+use \eGloo\Dialect\Object,
     \eGloo\Utilities\Collection;
 
 /**

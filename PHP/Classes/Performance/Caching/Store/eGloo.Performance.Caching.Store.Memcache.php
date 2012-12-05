@@ -2,7 +2,7 @@
 namespace eGloo\Performance\Caching\Store;
 
 use \eGloo\Performance\Caching;
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 class Memcache extends Caching\Store {
 	
