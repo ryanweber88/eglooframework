@@ -14,7 +14,7 @@ use \eGloo\Domain,
  * @TODO this->chain = $this->chain needs to scoped to a handler method
  * 
  */		
-class Relation extends \eGloo\Dialect\ObjectSafe 
+class Relation extends \eGloo\Dialect\Object 
 	implements \eGloo\Utilities\ToArrayInterface, Caching\CacheKeyInterface  {
 	
 	function __construct($model) {

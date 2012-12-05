@@ -8,7 +8,7 @@ namespace eGloo\Primitives;
  * @todo   method_missing
  *
  */
-class Range extends \eGloo\Dialect\ObjectSafe { 
+class Range extends \eGloo\Dialect\Object { 
 	
 	function __construct($range) {
 		if (static::valid($range)) {

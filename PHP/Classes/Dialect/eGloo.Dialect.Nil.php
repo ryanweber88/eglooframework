@@ -8,7 +8,7 @@ namespace eGloo\Dialect;
  * a __toString returning an empty string
  * @author Christian Calloway
  */
-class Nil extends ObjectSafe {
+class Nil extends \eGloo\Dialect\Object {
 	
 	public function __toString() {
 		return '';

@@ -5,7 +5,7 @@ namespace eGloo\Dialect;
  * Represents a php namespace and provides utility methods to manage
  * namespace/string manipulation
  */
-class _Namespace extends ObjectSafe {
+class _Namespace extends \eGloo\Dialect\Object {
 		
 		/**
 		 * Determine namespace, assuming a fully qualified class/function

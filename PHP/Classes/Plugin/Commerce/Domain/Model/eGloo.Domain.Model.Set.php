@@ -14,7 +14,7 @@ use \eGloo\Performance\Caching;
  * foreach 
  * @author Christian Calloway
  */
-class Set extends \eGloo\Dialect\ObjectSafe
+class Set extends \eGloo\Dialect\Object
 	implements \ArrayAccess, \IteratorAggregate, \Countable, Utilities\ToArrayInterface, \Serializable, Caching\CacheKeyInterface {
 	
 	

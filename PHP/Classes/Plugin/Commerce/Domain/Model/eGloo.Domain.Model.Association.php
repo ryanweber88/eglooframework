@@ -5,7 +5,7 @@ namespace eGloo\Domain\Model;
  * Meta information describing the cardinality of a relationship 
  * @author Christian Calloway
  */
-class Association extends \eGloo\Dialect\ObjectSafe {
+class Association extends \eGloo\Dialect\Object {
 	
 	const SINGULAR = 1;
 	const MANY     = 2;

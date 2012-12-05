@@ -8,7 +8,7 @@ namespace eGloo\Utilities;
  * @todo   Add rules as opposed to statically listing them in pluralize
  *
  */
-class InflectionsSafe extends \eGloo\Dialect\ObjectSafe {
+class InflectionsSafe extends \eGloo\Dialect\Object {
 	
 	//use \eGloo\Utilities\SingletonTrait;
 	

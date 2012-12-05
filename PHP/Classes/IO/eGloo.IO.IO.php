@@ -7,7 +7,7 @@ namespace eGloo\IO;
  * @author Christian Calloway
  *
  */
-abstract class IO extends \eGloo\Dialect\ObjectSafe { 
+abstract class IO extends \eGloo\Dialect\Object { 
 
 	/**
 	 * 
