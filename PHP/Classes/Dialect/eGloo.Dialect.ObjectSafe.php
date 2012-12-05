@@ -1,6 +1,9 @@
 <?php 
 namespace eGloo\Dialect;
 
+var_export(debug_backtrace());
+exit;
+
 /**
  * Essentially stubb class for superclass Object, which has been written to 5.4
  * standards

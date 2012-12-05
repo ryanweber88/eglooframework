@@ -314,12 +314,11 @@ abstract class Object {
 		});
 		
 		static::defineMethod('respondTo', function($method) { 
-			$current = $class;
-			$methods = &$class::referenceStatic('_methodsStatic');
+			$methods = &static::$_smethods;
+			$current = get_called_class();
 
 			do {
 				if (isset($methods[$current][$method])) {
-			
 					return true;
 				}
 					

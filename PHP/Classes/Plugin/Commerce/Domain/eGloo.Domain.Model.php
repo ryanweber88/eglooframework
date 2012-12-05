@@ -305,11 +305,6 @@ abstract class Model extends Delegator
 	protected function __indexes() {
 		$this->index('id');
 	}
-	
-	/**
-	 * A "method space" to provide validation definitions
-	 */
-	protected static function __validates() { }
 
 	/**
 	 * Responsible for initialize of model attributes
@@ -1215,6 +1210,11 @@ abstract class Model extends Delegator
 	
 
 	/**
+	 * A "method space" to provide validation definitions
+	 */
+	protected static function __validates() { }
+
+	/**
 	 * A stubb method here to be used by concrete model classes
 	 */
 	protected static function __relationships() {
@@ -1238,12 +1238,23 @@ abstract class Model extends Delegator
 		}
 		
 	}
+
+	protected static function __attributes() {
+		// alias our primary key, using convention of tablename_id - this
+		// is important as primary keys can now be accessed via instance->id
+		static::aliasPrimaryKey(
+			static::signature() . '_id'
+		);
+			
+			
+	}
+
 	
 	/**
 	 * Alias to relationships; want to replace with association terminology
 	 */
 	protected static function __associations() {
-		$this->__relationships();
+		static::__relationships();
 	}
 
 	protected static function __callbacks() {
@@ -1583,20 +1594,7 @@ abstract class Model extends Delegator
 	
 
 	
-	protected static function __attributes() {
-		// call our parent method to ensure any property work is done
-		// up hierarchy chain
-		parent::__properties();
 
-		// alias our primary key, using convention of tablename_id - this
-		// is important as primary keys can now be accessed via instance->id
-		$this->aliasPrimaryKey(
-			static::signature() . '_id'
-		);
-			
-			
-	}
-	
 	
 	
 	

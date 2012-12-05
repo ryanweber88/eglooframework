@@ -1,7 +1,7 @@
 <?php
 namespace eGloo\Domain\Model;
 
-use \eGloo\Dialect\ObjectSafe as Object;
+use \eGloo\Dialect\Object;
 
 /**
  * A callback instance is responsible for providing event handlers
@@ -9,6 +9,4 @@ use \eGloo\Dialect\ObjectSafe as Object;
  * type and take an instance of Model as a parameter
  * @author Christian Calloway
  */
-class Callback extends Object {
-	
-}
+class Callback extends Object { }
