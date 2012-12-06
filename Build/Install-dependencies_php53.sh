@@ -189,7 +189,7 @@ then
         echo "****************************"
         echo
 
-        apt-get --assume-yes install curl apache2 memcached \
+        apt-get --assume-yes install git git-flow curl apache2 memcached \
 		php5 php-apc \
                 php5-imagick php5-mcrypt php5-memcache php5-memcached \
                 php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \
