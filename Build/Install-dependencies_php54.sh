@@ -78,7 +78,7 @@ fi
 
 	apt-get --assume-yes install python-software-properties
 
-	add-apt-repository ppa:ondrej/php5
+	add-apt-repository --yes ppa:ondrej/php5
 
 	apt-get update
 
