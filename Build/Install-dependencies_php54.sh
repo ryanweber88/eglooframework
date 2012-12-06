@@ -50,14 +50,86 @@ E_NOTROOT=02   # Script not run as root
 # Script Constants
 ROOT_UID=0     # Only users with $UID 0 have root privileges.
 
+# OS Constants
+OS_UBUNTU_10=0
+OS_UBUNTU_12=1
+OS_MACOSX=2
+OS_WINDOWS=3
+
+
+# Current platform
+# Default to Debian
+DETECTED_PLATFORM=0
+# OS String
+DETECTED_OS_NAME="Unknown"
+
+# Get our parent directory
+PARENT_DIRECTORY=$(_egloo_parent_dir=$(pwd) ; echo "${_egloo_parent_dir%/*}")
+
 # Get our Timestamp
 TIMESTAMP=$(date +%s)
+
+###########################################################
+########## Platform Detection
+###########################################################
+
+# Get our platform
+PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
+
+# Temporarily disable errexit check because grep returns non-true on a result we need
+set +o errexit
+MACOSX_FOUND=`echo "$PLATFORM" | grep -i -c "Apple Mac OS X"`
+UBUNTU_10_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu 10.04"`
+UBUNTU_12_FOUND=`echo "$PLATFORM" | grep -i -c "Ubuntu 12.04"`
+WINDOWS_FOUND=`echo "$PLATFORM" | grep -i -c "Windows"`
+set -o errexit
+
+###########################################################
+########## Platform: OS X specific params
+###########################################################
+if [ "$MACOSX_FOUND" -eq 1 ]
+then
+
+	DETECTED_OS_NAME="Apple Mac OS X"
+        echo "Detected:" $DETECTED_OS_NAME
+        DETECTED_PLATFORM=$OS_MACOSX
+fi
+
+###########################################################
+########## Platform: Ubuntu specific params
+###########################################################
+if [ "$UBUNTU_10_FOUND" -eq 1 ]
+then
+	DETECTED_OS_NAME="Ubuntu 10.04"
+        echo "Detected:" $DETECTED_OS_NAME
+	DETECTED_PLATFORM=$OS_UBUNTU_10
+
+fi
+
+if [ "$UBUNTU_12_FOUND" -eq 1 ]
+then
+	DETECTED_OS_NAME="Ubuntu 12.04"
+        echo "Detected:" $DETECTED_OS_NAME
+        DETECTED_PLATFORM=$OS_UBUNTU_12
+
+fi
+
+###########################################################
+########## Platform: Winblows specific params
+###########################################################
+if [ "$WINDOWS_FOUND" -eq 1 ]
+then
+	DETECTED_OS_NAME="Windows"
+        echo "Detected:" $DETECTED_OS_NAME
+	DETECTED_PLATFORM=$OS_WINDOWS
+
+fi
 
 ###########################################################
 ########## Check that we have correct permissions and correct user/group
 ###########################################################
 # Check for root
-if [[ "$UID" -ne "$ROOT_UID" ]]
+if [[ "$UID" -ne "$ROOT_UID" && $DETECTED_PLATFORM -ne $OS_WINDOWS ]]
 then
 	echo "***********************************"
 	echo "* Must be root to run this script *"
@@ -70,25 +142,49 @@ fi
 ########## Install!
 ###########################################################
 
+if [ $DETECTED_PLATFORM -eq 0 ]
+then
+	# Ubuntu 10.04
+	echo $DETECTED_OS_NAME "is not currently supported by this dependency installation script"
+	exit 1
+elif [ $DETECTED_PLATFORM -eq 1 ]
+then
+	# Ubuntu 12.04
 	echo
         echo "****************************"
-	echo "* Installing dependencies for Ubuntu 12.04*"
+	echo "* Installing dependencies for" $DETECTED_OS_NAME "*"
         echo "****************************"
         echo
 
-	apt-get --assume-yes install python-software-properties
-
-	add-apt-repository --yes ppa:ondrej/php5
-
 	apt-get update
 
+	apt-get --assume-yes install python-software-properties
+
+        add-apt-repository --yes ppa:ondrej/php5
+
+        apt-get update
+
         apt-get --assume-yes install git git-flow curl apache2 memcached \
-		php5 php5-dev php5-memcache php5-mysql php5-pgsql php5-mcrypt \
-		php-apc php5-imagick php5-memcached php5-common \
+                php5 php5-dev php5-memcache php5-mysql php5-pgsql php5-mcrypt \
+                php-apc php5-imagick php5-memcached php5-common \
                 php-soap php5-gd
 
         echo
         echo "* DONE: installing dependencies *"
         echo
+
+	exit 0
+elif [ $DETECTED_PLATFORM -eq 2 ]
+then
+	echo $DETECTED_OS_NAME "is not currently supported by this dependency installation script"
+	exit 1
+elif [ $DETECTED_PLATFORM -eq 3 ]
+then
+	echo $DETECTED_OS_NAME "is not currently supported by this dependency installation script"
+	exit 1
+else
+	echo "Unknown system detected...exiting"
+	exit 1
+fi
 
 exit
