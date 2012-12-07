@@ -74,7 +74,7 @@ TIMESTAMP=$(date +%s)
 ###########################################################
 
 # Get our platform
-PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
+PLATFORM=$(cat /etc/issue)
 
 # Temporarily disable errexit check because grep returns non-true on a result we need
 set +o errexit
