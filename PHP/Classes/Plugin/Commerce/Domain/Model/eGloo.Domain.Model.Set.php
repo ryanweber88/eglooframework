@@ -82,8 +82,8 @@ class Set extends \eGloo\Dialect\Object
 			
 		$model = $this->model;
 			
-		if (!is_null($key = $model::constant('NATURAL_KEY'))) {
-			$this->key = $key;
+		if ($model::defined('NATURAL_KEY')) {
+			$this->key = $model::NATURAL_KEY;
 		}
 		
 		else if (isset($primaryKeyName) && !is_null($key = $primaryKeyName)) {

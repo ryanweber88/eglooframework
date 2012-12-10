@@ -1,6 +1,7 @@
 <?php 
 namespace eGloo\Dialect;
 use       \egloo;
+use       \eGloo\Utilities;
 
 /**
  * Essentially stubb class for superclass Object, which has been written to 5.4
@@ -11,267 +12,48 @@ abstract class Object {
 	
 	use \eGloo\Utilities\DelayedJobTrait;
 	
-	function __construct() {
-		$self = $this;
-		
-		// fire our alias properties and methods
-		//$this->aliasMethods();
-		//$this->aliasProperties();
-		$this->__methods();
-		$this->__properties();
-		
-		// ClassSafe is a class metaclass instance; here we statically cache it
-		// and key it fully qualified class name
-		$this->class = static::klass();
-		
-		// provide some generic attr_reader properties
-		//$this->attr_reader('ident');
-	}
-	
-	/**
-	 * Provides an idea of a static constructor - will have to be explicitly called from
-	 * autoloader and overriden in descendant classes
-	 */
-	static function __constructStatic() { 
-		static::__methodsStatic();
-	}
 	
 	
+	// STATIC CONSTRUCTORS ///////////////////////////////////////////////////
+
 	/**
 	 * Alias to __constructStatic - I think it's a little neater and carries
 	 * the idea of a static constructor without have to explicitly spell
 	 * it out
+	 * @polymorphic
 	 */
 	static function __static() {
-		static::__constructStatic();
+		// create instance of eigenclass class and
+		// set to static class property
+		static::$class = new Klass(get_called_class());
+
+		// call our class methods method
+		static::__smethods();
 	}
+
+	/** Stub method for static method definitions */
+	protected static function __smethods() { }
+
 	
-	public function constGet($name) {
-		return defined("static::$name")
-			? constant('static::' . $name)
-			: null;
+
+	// INSTANCE CONSTRUCTORS //////////////////////////////////////////////////
+	
+	function __construct() {	
+
+		// fire our method/property constructors
+		$this->__methods();
+		$this->__properties();
+		
+		
+		// provide some generic attr_reader properties
+		//$this->attr_reader('ident');
 	}
-	
-	// These are stubs but called by the constructor - so as they
-	// can be used inherited classes
-	protected function  aliasProperties() { }
-	
-	protected function  aliasMethods() {
-		
 
-		$self   = $this;
-		$caller = $this->caller();
+	/**
+	 * Alias to aliasProperties
+	 */
+	protected function __properties() { }	
 
-		// we need to immediately call define method, this will be the basis for
-		// all runtime defined methods
-		$this->_methods['defineMethod'] = function($name, $lambda) use ($self, $caller) {
-			
-			// @TODO this is a major bug; for some esoteric fuck-me-reason, $self becomes
-			// invalidated
-			if (!is_object($self)) {
-				echo 'self no longer defined in defineMethod';
-				var_export($caller);
-				exit('asdf');
-			}
-			//echo get_class($self) . "\n";
-				
-			// create a reference to methods, since they cannot be directly referenced
-			// by self given class access modifer protected
-			$methods        = &$self->reference('_methods');
-			$methods[$name] = $lambda;
-				
-			$lambda = $methods[$name];
-			
-			// fire methodAdded event
-			$self->send('methodAdded', $name, $lambda);
-			
-			// return lambda to caller
-			return $lambda;
-		};		
-		
-		// returns dynamically defined method as closure
-		$this->defineMethod('method', function($name) use ($self) {
-			$methods = &$self->reference($name);
-			
-			if (isset($methods[$name])) {
-				return $methods[$name];
-			}
-			
-			throw new \Exception (
-				"Failed to return closure of instance method '$name' on receiver '{$self->ident()}'"
-			);
-			
-		});
-		
-		$this->defineMethod('defer', function($name, $lambda) {
-			if (is_callable($lambda)) {
-				$defers = &$this->_defers;
-				$defers[$name] = $lambda;
-			}
-			
-			else {
-				throw new \Exception(
-					"Failed to defer action '$name' because lambda '$lambda' is not callable"
-				);
-			}
-		}); 
-
-		$this->defineMethod('respondTo', function($method) use ($self) {
-			$methods = &$self->reference('_methods');
-			return method_exists($self, $method) || isset($methods[$method]);
-		});
-		
-		$this->defineMethod('namespace', function() use ($self) {
-			$reflection = new \ReflectionClass($self);
-			return $reflection->getNamespaceName();
-		});
-		
-		
-		$this->defineMethod('cache', function($__mixed) { 
-			$expiration = null;
-			$lambda     = null;
-
-			// if three arguments have been passed, then key, expire
-			// and code block have all been explicitly passed, and
-			// in proper order
-			// @TODO explicitly check against proper order?
-			if (count($arguments = func_get_args()) === 3) {
-				list($key, $expiration, $lambda) = func_get_args();
-
-			// two arguments may be a comination of all
-			// possible
-			} else if (count($arguments) == 2) {
-				
-				// default our second value as lambda/block
-				$lambda = $arguments[1];
-
-				// default key to first argument, but check if key passes
-				// as valid strtotime argument; we use eGloo\strtotime
-				// to allow for wider or more idiomatic time expressions
-				// @TOOD condition expression may be a bit hard to read
-				if (($expiration = \eGloo\strtotime($key = $arguments[0]))) {
-					// if our first argument is indeed an expire, then we
-					// default key to lambda
-					$key = $lambda;
-				}
-
-
-			// a single argument can be either a key or 
-			// a lambda value
-			} else {
-				$key = $arguments[0];
-			}
-
-			// make sure to keep track of initial key value as 
-			// this will be passed back to our lambda
-			$initialKey = $key;
-
-			
-			// check if mixed is an object, or callable; because php implements
-			// callable as an instance of type Closure, the second condition will
-			// never be called - it is simply there for idiomatic reasons alone.
-			// If we have passed an object, or a lambda, a signature can be generated
-			// that uniquely identifies the instance, thus creating a key for cached
-			// value
-			if (is_object($key) || is_callable($key)) {
-				$key = spl_object_hash(
-					$object = $key
-				);
-				
-				// now we check if mixed is indeed a closure, in which case
-				// we set lambda to mixed
-				if (is_callable($object)) {
-					$lambda = $object;
-				}
-			}
-			
-			// otherwise, lets check the first character of key, which
-			// if a star indicates that we want to employ a "one-way"
-			// cache, which means this value will not be uncached at anypoint
-			else if (isset($key[0]) && $key[0] == '*') {
-				$trace = debug_backtrace(2)[1];
-				$key   = $trace['file'] . $trace['line'] . $key;			
-			}			
-
-			// finally lets check if value is contained in
-			// cache, set if not and then return
-			$cache = &$this->_cache; 
-			
-			if (!isset($cache[$key])) {
-
-				if (is_callable($lambda)) {
-					$cache[$key] = [
-						'expiration' => $expiration,
-						'value'      => $lambda($initialKey)
-					];
-
-				} else {
-					throw new \Exception(
-						'Failed to set cache because lambda (callable block) ' . 
-						'is unavailable'
-					);
-				}
-			
-			// otherwise check cache to determine if valid - a null
-			// cache is never time expired
-			} else if ($cache[$key]['expiration'] !== null   && 
-				         $cache[$key]['expiration'] <= time()) {
-
-				return call_user_func_array(array(
-					$this, 'cache'
-
-				), func_get_args());	
-			}
-						
-			return $cache[$key]['value'];
-		});
-		
-		// run_once is essentially a aliasMethod to cache, but the differentiation is
-		// that run once shouldn't return a value
-		$this->defineMethod('run_once', function($lambda) {
-			$lambda->bindTo($this);
-			$this->cache($lambda);
-		});
-
-		
-		
-		$this->defineMethod('memberExists', function($member) use ($self) {
-			return property_exists($self, $member) || method_exists($self, $member);
-		});
-		
-		// define aliasMethod at instance level
-		$this->defineMethod('aliasMethod', function($alias, $from) use ($self) {
-			if (\method_exists($self, $from)) {
-		
-				if (!\method_exists($self, $alias)) {
-					// use lambda/block to place method alias method definition into
-					// this instance "singleton" or eigenclass
-					$self->defineMethod($alias, function($__mixed = null) {
-							
-						// call original method
-						return call_user_func_array(array(
-								$self, $from
-						),  $__mixed);
-					});
-				}
-		
-				throw new \Exception(
-						"Attempted alias on $alias failed because it already exists as method on instance"
-				);
-			}
-			
-			else { 
-		
-				throw new \Exception(
-					"Failed attempting an instance alias on method '$from' because it does not exist on receiver " . get_class($self)
-				);
-			
-			}
-			
-		});
-				
-	}
-		
 	/**
 	 * Alias to aliasMethods - thought it fits more into the idea of
 	 * constructor/meta call
@@ -279,320 +61,248 @@ abstract class Object {
 	protected function __methods() {
 		$this->aliasMethods();
 	}
-	
+
+	// DUAL CONTEXT METHODS //////////////////////////////////////////////////
+	// Dual context methods simply means method in which current receiver
+	// may be an instance or a class. Why is this done?? There are many reasons,
+	// but foremost is that instance/static resolution on __call/__callstatic
+	// is impossible
+
 	/**
 	 *  Stubbed here; this can be used an handler for defineMethod events
 	 */
 	protected function methodAdded($name, $lambda) { }
-	
-	
-	protected static function aliasMethodsStatic() { 
-		
-		// the cache method stores the return of lambda into static space
-		// but makes use of object id to 
-		$class = get_called_class();
-		
-		static::$_smethods[$class]['defineMethod'] = function &($name, $lambda) {
-		
-			// create a reference to methods, since they cannot be directly referenced
-			// by self given class access modifer protected
-			static::$_smethods[$class = get_called_class()][$name] = $lambda;
-			return static::$_smethods[$class][$name];
-		};
-		
-		static::defineMethod('defer', function($name, $lambda) {
-			$defers = &static::$_sdefers;
-			$defers[static::classnamefull()][$name] = $lambda;
+
+
+	/**
+	 *  Defines a method on current context/self receiver (this
+	 *  may be class or instance)
+	 */
+	public function &defineMethod($name, callable $lambda) {
+
+		// determine if adding method to instance/class context,
+		// in which case create reference to correct member property
+		$methods = is_object(static::receiver())
+			? &$this->_methods
+			: &static::domain('_smethods');
+
+		// add method definition
+		$methods[$name] = $lambda;
+
+		// fire method added event
+		static::methodAdded($name, $lambda);
+
+		// finally return reference to lambda
+		return $methods[$name];		
+	}
+
+	/**
+	 *  Defines a deferrable block, that will act as an instance
+	 *  property and can only be run once
+	 *  @TODO this needs to be rethought in terms of 
+	 *  intsance/class context
+	 */
+	public function defer($name, callable $lambda) {
+		$defers = is_object(static::receiver())
+			? &$this->_defers;
+			: &static::domain('_sdefers');
+
+		$defers[static::classnamefull()][$name] = $lambda;
+	}
+
+	/**
+	 *  Retrieves current self namespace
+	 */
+	public function namespace() {
+		return static::$class->namespace;
+	}
+
+	/**
+	 * Retrieves current self namespace name
+	 */
+	public function namespacename() {
+		// @TODO is it worth adding cache here? May
+		// be just as much work to do lookup as it 
+		// is to do a string split
+
+		return static::cache(static::$class, function() {
+			$namespace = explode(
+				'\\', static::$class->namespace
+			);
+
+			return $namespace[count($namespace) - 1];
 		});
+	}
 
-		// the purpose of run deferred is to execute deferred block and
-		// pop from stack
-		// @TODO I still don't know if i like this idea; popping from 
-		// deferred stack should somehow be done implicitly..
-		static::defineMethod('run_deferred', function($name) {
+	/**
+	 * Provides an instance/static level cache
+	 */
+	public function cache($__mixed) {
+		$expiration = null;
+		$lambda     = null;
+		$instance   = is_object(
+			$receiver = static::receiver()
+		);
 
-		});
-		
-		static::defineMethod('respondTo', function($method) { 
-			$methods = &static::$_smethods;
-			$current = get_called_class();
+		// if three arguments have been passed, then key, expire
+		// and code block have all been explicitly passed, and
+		// in proper order
+		// @TODO explicitly check against proper order?
+		if (count($arguments = func_get_args()) === 3) {
+			list($key, $expiration, $lambda) = func_get_args();
 
-			do {
-				if (isset($methods[$current][$method])) {
-					return true;
-				}
-					
-			} while (($current = get_parent_class($current)));
+		// two arguments may be a comination of all
+		// possible
+		} else if (count($arguments) == 2) {
 			
-			return false;
-			
-		});
-		
-		// returns a closure representing a member method
-		static::defineMethod('closure', function($method) { 
-			$class = get_called_class();
+			// default our second value as lambda/block
+			$lambda = $arguments[1];
 
-			// first we check statically linked methods 
-			if (method_exists($class, $method)) {
-				
-			// 	otherwise, we check up method hierarchy chain
-			// for dynamic method
-			} else { 
+			// default key to first argument, but check if key passes
+			// as valid strtotime argument; we use eGloo\strtotime
+			// to allow for wider or more idiomatic time expressions
+			// @TOOD condition expression may be a bit hard to read
+			if (($expiration = \eGloo\strtotime($key = $arguments[0]))) {
+				// if our first argument is indeed an expire, then we
+				// default key to lambda
+				$key = $lambda;
+			}
+
+
+		// a single argument can be either a key or 
+		// a lambda value
+		} else {
+			$key = $arguments[0];
+		}
+
+
+
+
+		// make sure to keep track of initial key value as 
+		// this will be passed back to our lambda
+		$initialKey = $key;			
+
+
+		// check if mixed is an object, or callable; because php implements
+		// callable as an instance of type Closure, the second condition will
+		// never be called - it is simply there for idiomatic reasons alone.
+		// If we have passed an object, or a lambda, a signature can be generated
+		// that uniquely identifies the instance, thus creating a key for cached
+		// value
+		if (is_object($key) || is_callable($key)) {
+			$key = spl_object_hash(
+				$object = $key
+			);
 			
-				$methods = &static::$_smethods;
-	
-				do {
-					if (isset($methods[$current][$method])) {
-				
-						return $methods[$current][$method];
-					}
-						
-				} while (($current = get_parent_class($current)));
-			
+			// now we check if mixed is indeed a closure, in which case
+			// we set lambda to mixed
+			if (is_callable($object)) {
+				$lambda = $object;
 			}
 			
-			throw new \Exception(
-				"Failed to return closure of '$method' because it does not exist"
-			);
-			
-		});		
-
-		// returns a closure representing a member method
-		static::defineMethod('method', function($method) { 
-			$class = get_called_class();
-
-			// first we check statically linked methods 
-			if (method_exists($class, $method)) {
-				
-			// 	otherwise, we check up method hierarchy chain
-			// for dynamic method
-			} else { 
-			
-				$methods = &static::$_smethods;
-				$current = $class;
-	
-				do {
-					if (isset($methods[$current][$method])) {
-				
-						return $methods[$current][$method];
-					}
-						
-				} while (($current = get_parent_class($current)));
-			
-			}
-			
-			throw new \Exception(
-				"Failed to return closure of '$method' because it does not exist"
-			);
-			
-		});				
-				
 		
-		static::defineMethod('namespacename', function($class) {
+		// otherwise, lets check the first character of key, which
+		// if a star indicates that we want to employ a "one-way"
+		// cache, which means this value will not be uncached at anypoint
+		} else if (isset($key[0]) && $key[0] == '*') {
+			$trace = debug_backtrace(2)[1];
+			$key   = $trace['file'] . $trace['line'] . $key;			
+		}		
 			
-			return $class::cache('namespace', function($class) {
-				$reflection = new \ReflectionClass($class);
-				return $reflection->getNamespaceName();
-			});
-		});
-		
-		static::defineMethod('send', function($name, $arguments) use ($class) {
-			return call_user_func_array(
-				'staticStatic', func_get_args()
-			);
-		});
-		
-		
-		static::defineMethod('cache', function($__mixed) {
-			$expiration = null;
-			$lambda     = null;
 
-			// if three arguments have been passed, then key, expire
-			// and code block have all been explicitly passed, and
-			// in proper order
-			// @TODO explicitly check against proper order?
-			if (count($arguments = func_get_args()) === 3) {
-				list($key, $expiration, $lambda) = func_get_args();
+		// finally lets check if value is contained in
+		// cache, set if not and then return
+		$cache = $instance
+			? &$this->_cache
+			: &static::domain('_scache'); 
+			
 
-			// two arguments may be a comination of all
-			// possible
-			} else if (count($arguments) == 2) {
-				
-				// default our second value as lambda/block
-				$lambda = $arguments[1];
+		if (!isset($cache[$key])) {			
 
-				// default key to first argument, but check if key passes
-				// as valid strtotime argument; we use eGloo\strtotime
-				// to allow for wider or more idiomatic time expressions
-				// @TOOD condition expression may be a bit hard to read
-				if (($expiration = \eGloo\strtotime($key = $arguments[0]))) {
-					// if our first argument is indeed an expire, then we
-					// default key to lambda
-					$key = $lambda;
-				}
+			if (is_callable($lambda)) {
+				$cache[$key] = [
+					'expiration' => $expiration ?: null,
+					'value'      => $lambda($initialKey)
+				];	
 
-
-			// a single argument can be either a key or 
-			// a lambda value
 			} else {
-				$key = $arguments[0];
-			}
-
-
-
-
-			// make sure to keep track of initial key value as 
-			// this will be passed back to our lambda
-			$initialKey = $key;			
-
-
-			// check if mixed is an object, or callable; because php implements
-			// callable as an instance of type Closure, the second condition will
-			// never be called - it is simply there for idiomatic reasons alone.
-			// If we have passed an object, or a lambda, a signature can be generated
-			// that uniquely identifies the instance, thus creating a key for cached
-			// value
-			if (is_object($key) || is_callable($key)) {
-				$key = spl_object_hash(
-					$object = $key
-				);
-				
-				// now we check if mixed is indeed a closure, in which case
-				// we set lambda to mixed
-				if (is_callable($object)) {
-					$lambda = $object;
-				}
-				
-			
-			// otherwise, lets check the first character of key, which
-			// if a star indicates that we want to employ a "one-way"
-			// cache, which means this value will not be uncached at anypoint
-			} else if (isset($key[0]) && $key[0] == '*') {
-				$trace = debug_backtrace(2)[1];
-				$key   = $trace['file'] . $trace['line'] . $key;			
-			}		
-				
-
-			// finally lets check if value is contained in
-			// cache, set if not and then return
-			$cache = &static::domain('_scache'); 
-			
-			if (!isset($cache[$key])) {			
-
-				if (is_callable($lambda)) {
-					$cache[$key] = [
-						'expiration' => $expiration ?: null,
-						'value'      => $lambda($initialKey)
-					];	
-
-				} else {
-					throw new \Exception(
-						'Failed to set cache because lambda (callable block) ' . 
-						'is unavailable'
-					);
-				}
-	
-			
-			// otherwise check cache to determine if valid - a null
-			// cache is never time expired
-			} else if ($cache[$key]['expiration'] !== null   && 
-				         $cache[$key]['expiration'] <= time()) {
-
-				return forward_static_call_array(
-					static::method('cache'), func_get_args()
-				);	
-			}
-					
-							
-			return $cache[$key]['value'];
-					
-		});
-		
-		static::defineMethod('clear_cache', function($key) {
-			$cache = &$class::referenceStatic('_scache');
-			unset($cache[$class][$key]);
-		});
-		
-	
-		
-		static::defineMethod('aliasMethod', function($alias, $from, $class) {
-			if (($nativeMethod = \method_exists($class, $from))) {
-					
-				if (!\method_exists($class, $alias)) {
-					
-					// @TODO temporary measure - recursive aliases are failing miserably 
-					// at the moment
-					$nativeMethod = true;
-					
-					// use lambda/block to place method alias method definition into
-					// this instance "singleton" or eigenclass
-					$class::defineMethod($alias, function($__mixed = nulll) use ($from, $class, $nativeMethod) {
-						
-						// @TODO this is an ugly hack for now
-						if (!is_array($__mixed)) {
-							$__mixed = array($__mixed);
-						}
-
-						// call original method - we need to check if running
-						// a native method or dynamic
-						if ( $nativeMethod ) {
-							
-							return call_user_func_array(array(
-									$class, $from
-							),  $__mixed);
-							
-						
-						// otherwise run from dynamic lookup
-						// @TODO we need to add closure() method
-						} else {
-							
-							throw new \Exception ('not implemented');
-							return call_user_func_array(
-								$class::closure($from), $param_arr
-							);
-						}
-						
-						
-						
-					});
-				}
-				
-				else {
-					throw new \Exception(
-							"Attempted alias '$alias' on method '$from' failed because it already exists in receiver $class" 
-					);
-				}
-			}
-			
-			else { 
-				
 				throw new \Exception(
-						"Failed attempting a static alias on method '$from' because it does not exist on receiver $class"
+					'Failed to set cache because lambda (callable block) ' . 
+					'is unavailable'
 				);
-				
 			}
+
+		
+		// otherwise check cache to determine if valid - a null
+		// cache is never time expired
+		} else if ($cache[$key]['expiration'] !== null   && 
+			         $cache[$key]['expiration'] <= time()) {
+
+			return forward_static_call_array(
+				static::method('cache'), func_get_args()
+			);	
+		}
 				
-		});
-		
-		static::defineMethod('constant', function($name, $class) { 
-			if (defined("$class::$name")) {
-				return constant($class . '::' . $name);
-			}
-		});
-		
-		
-		
-		
-		static::defineMethod('memberExists', function($member, $class) {
-			return property_exists($class, $member) || method_exists($class, $member);
-		});
-				
-	}
-	
-	protected static function __methodsStatic() {
-		static::aliasMethodsStatic();			
+						
+		return $cache[$key]['value'];		
 	}
 
+	/** Attempts to clear a particular cache token on variable receiver */
+	public function clearCache($key) {
+		$cache = is_object(static::receiver())
+			? &$this->_cache
+			: &static::domain('_scache');
+
+		unset($cache[$key]);
+	}
+
+	/** Makes alias $alias from $form */
+	public function aliasMethod($alias, $from) {
+
+
+		// if it doesn't, check that our
+		if (!static::send('respondTo',  $alias)) {
+
+			try {
+				static::domain('_smethods')[$alias] = static::send(
+					'method', $from
+				);
+			
+			} catch(\Exception $ignore) {
+				$type = is_object($receiver)
+					? 'instance<' . spl_object_hash($this) . '>'
+					: 'class';
+
+				throw new \Exception(
+					"Attempted alias '$alias' on method '$from' failed because method " .
+					"'$from' does not exists in $type receiver " . get_called_class() 
+				);
+			}
+
+
+		// otherise lets throw an exception explaining that
+		// alias method already exists
+		} else {
+			$type = is_object($receiver)
+				? 'instance<' . spl_object_hash($this) . '>'
+				: 'class';
+
+			throw new \Exception(
+				"Attempted alias '$alias' on method '$from' failed because it ".
+				"already exists in $type receiver " . get_called_class() 
+			);
+		}
+
+	}
+
+	/** Determines if member name $name exists in current
+	 ** context 
+	 **/
+	public function memberExists($name) {
+		return property_exists($r = static::receiver(), $name) ||
+		       method_exists  ($r, $name);
+	}
+	
 	/** Retrieves static property that falls in current
 	 ** class domain 
 	 ** @TODO I dont know if I like this idea yet..
@@ -680,45 +390,50 @@ abstract class Object {
 	 */
 	public function send($method, $__mixed = null) {
 		
-		
-		if (\method_exists($this, $method)) {
-			// another success story in phpwtf history - reflection method
-			// invokes method successfully, but static context is that of 
-			// where the method was defined IF the send message was sent
-			// from a lambda - for now, access modifier protected will have
-			// to be used
-			/*
-			$reflection = new \ReflectionMethod(get_class($this), $method);
-			$reflection->setAccessible(true);
-			
-			$tmp = $reflection->isStatic()
-				? null 
-				: $this;
-				
-			return $reflection->invokeArgs($tmp, array_slice(
-				func_get_args(), 1
-			));
-			*/ 			
-			return call_user_func_array(
-				array($this, $method), array_slice(func_get_args(), 1)	
-			);			
-		}
-		
-		else if (isset($this->_methods[$method])) {			
-			return call_user_func_array(
-				$this->method($name), array_slice(func_get_args(), 1)	
-			);			 
-		} 
+		// send can be invoked from both static and instance
+		// contexts; because of this we need to do a backtrace
+		// to determine our correct receiver (an instance or
+		// the class context)
+		$receiver = static::receiver();
+		$instance = is_object($receiver);
 
-		// if we have reached this point, we know method does
-		// not exist, either as concrete or as dynamically
-		// defined
+		// retrieve the messages arguments, if any.. since we
+		// allow for array passing to we do an explicit
+		// check to see if an array was passed as second
+		// argument and flattan
+		$arguments = array_slice(func_get_args(), 1); 
+
+		if (count($arguments) == 1 && is_array($arguments[0])) {
+			$arguments = Utilities\Collection::flatten($arguments);
+		}
+
+		// first we attempt to get method, wrapped within a
+		// lambda; if we cannot find method, we know it doesnt
+		// exist and throw an exception
+		try { 
+			$lambda = call_user_func_array(
+				($receiver, 'method'), array($method)
+			);
 		
-		throw new \Exception(
-			"Failed to send method '$method' to receiver '{$this->ident()}' because method does not exist"
-		);
+		} catch(\Exception $e) { 
+
+			// if we have reached this point, we know method does
+			// not exist, either as concrete or as dynamically
+			// defined
+			if ($instance) {
+				$type     = 'instance'
+				$receiver = get_called_class(); 
+			
+			} else {
+				$type = 'class'
+			}
+			
+			throw new \Exception(
+				"Failed to send method '$method' to '$type' receiver '$receiver' " . 
+				"because method does not exist"
+			);
 		
-		
+		}
 
 	}
 	
@@ -728,12 +443,7 @@ abstract class Object {
 		);
 	}
 	
-	/**
-	 * Alias to aliasProperties
-	 */
-	protected function __properties() {
-		$this->aliasProperties();
-	}
+
 	
 
 	/**
@@ -1078,14 +788,7 @@ abstract class Object {
 		return $this->ident();
 	}
 	
-	/**
-	 * Experiment - the purpose is provide one interface for accessing __call &
-	 * __callstatic, but I don;t know how to at the moment
-	 */
-	public function methodMissing($name, $arguments, $static = false) {
-		
-	}
-	
+
 	/**
 	 * Returns fully qualified class name with instance hash
 	 */
@@ -1119,6 +822,8 @@ abstract class Object {
 		// implement method hooks for dynamically defined methods;
 		// this allows for intercepting method calls and then
 		// providing pre/post hooks on those methods
+		// @TODO I don't think that this has been tested and
+		// should probably be reimplemented using AOP extension
 		if (preg_match('/^(before|after)_?([a-z])+/i', $name, $match)  && 
 		    isset($this->_methods[ strtolower($method = $match[2]) ])) {
 			
@@ -1135,6 +840,12 @@ abstract class Object {
 					"because the first argument is not a lambda"
 				);
 			}
+		}
+
+		// first check methods defined in static context
+		// and see if we can find a match
+		if () {
+
 		}
 
 		// first check dynamically defined methods and fire if match
@@ -1178,7 +889,107 @@ abstract class Object {
 		);
 		
 	}
-	
+
+	/**
+	 * Returns a lambda, which in effect wraps a class method;
+	 * if called from instance context, then lambda will be bound
+	 * to context before being returned
+	 */
+	public function method($name) {
+		$class    = get_called_class();
+		$instance = isset($this) && is_object($this);
+
+		// first we check for a "concrete" static/instance
+		// method
+		return static::cache("*$class", function($class)
+			use ($instance) {
+
+			if (method_exists($class, $method)) {
+
+				$lambda = function($__mixed = null) use ($name, $instance) {
+					$receiver = $instance
+						? array($this, $name)
+						: array(get_called_class(), $name);
+
+					call_user_func_array(
+						$receiver, func_get_args()
+					);
+				};
+				
+			// 	otherwise, we check up method hierarchy chain
+			// for dynamic method
+			} else { 
+			
+				$methods = &static::$_smethods;
+				$current = $class;
+
+				do {
+					if (isset($methods[$current][$method])) {
+				
+						$lambda = $methods[$current][$method];
+					}
+						
+				} while (($current = get_parent_class($current)));
+			
+			}
+
+			// check if lambda has been set, either as wrapper on 
+			// concrete method, or as a dynamically defined method
+			if (isset($lambda)) {
+
+				// check if within instance context, in which case
+				// bind instance context to lambda
+				if ($instance) {
+					$lambda = $lambda->bindTo($this);
+				}
+
+				return $lambda;
+			}
+			
+			throw new \Exception(
+				"Failed to return closure of '$method' because it does not exist"
+			);
+		}
+	}
+
+	/**
+	 * Determines correct receiver (class or instance)
+	 */	
+	protected function receiver() {
+		return debug_backtrace()[1]['type']) == '->'
+			? $this
+			: get_called_class();
+	}
+
+	/** Convenience method to identify current self/receiver */
+	protected function receiver_id() {
+		return is_object(static::receiver())
+			? 'instance<' . spl_object_hash($this) . '>'
+			: get_called_class();
+	}
+
+	/**
+	 * Determines if a class/instance receiver responds to 
+	 * message/method 
+	 */
+	public function respondTo($name) {
+		try {		
+			// send method/message to appropriate receiver
+			// @TODO may rewrite this as its not very efficient
+			// too call method just to check for existence of
+			// method
+			call_user_func(array(
+				static::receiver(), $name
+			));
+
+		} catch(\Exception $ignore) {
+			return false;
+		}
+
+		return true;
+	}
+
+
 	public static function __callstatic($name, $arguments) { 
 		// check against dynamically defined methods - since we
 		// are working class scope, we want to mimic the idea of
@@ -1379,6 +1190,7 @@ abstract class Object {
 		return get_called_class();
 	}
 
+	/** @Deprecated */
 	public static function klass() {
 		return static::cache(get_called_class(), function($class)  {
 			return new Klass($class);
@@ -1387,6 +1199,7 @@ abstract class Object {
 	
 
 	
+	protected static $class;
 	protected static $_singleton;
 	protected static $_scache            = array();
 	protected static $_smethods          = [ ];
@@ -1400,7 +1213,7 @@ abstract class Object {
 	protected        $_hooks             = array();
 	
 	// @TODO return to protected and set as attr_reader
-	public           $class;
+
 	
 	
 	
