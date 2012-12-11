@@ -56,7 +56,6 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * Uses information schema to retrieve entity primary keys
 	 */
 	public static function primaryKeys($table) {
-		$class = get_called_class();
 		
 		return static::cache("*$table", function($table) {
 			$keys    = [ ];	

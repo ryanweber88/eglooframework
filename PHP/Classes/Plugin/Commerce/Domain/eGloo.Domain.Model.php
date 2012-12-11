@@ -2186,7 +2186,8 @@ abstract class Model extends Delegator
 	 * If a composite model, specify model primary keys
 	 * @return boolean
 	 */
-	protected function primaryKeys($__mixed = null) {		
+	protected static function primaryKeys($__mixed = null) {		
+		/*
 		if (count($arguments = func_get_args())) {
 			$this->primaryKeys = Collection::flatten($arguments);
 		}
@@ -2194,6 +2195,10 @@ abstract class Model extends Delegator
 		else {
 			return $this->primaryKeys;
 		}
+		*/
+
+		// @TOOD we may still need to specify primary keys
+		return Data::primaryKeys(static::entity());
 	}
 	
 	/**
@@ -2202,15 +2207,20 @@ abstract class Model extends Delegator
 	 * @return boolean
 	 */
 	public function hasCompositeKeys() {
-		return is_array($this->primaryKeys) && 
-		       count($this->primaryKeys);
+		//return is_array($this->primaryKeys) && 
+		//       count($this->primaryKeys);
+
+		// @TODO cache?
+		return count(static::primaryKeys()) > 1;
 	}
 	
 	public function hasPrimaryKey() {
-		$field = $this->primaryKeyName();
+		//$field = $this->primaryKeyName();
 		
-		return isset($this->$field) &&
-		       !is_null($this->$field);
+		//return isset($this->$field) &&
+		//      !is_null($this->$field);
+		return count(static::primaryKeys())  == 1;
+
 	}
 	
 	/**
@@ -2801,18 +2811,38 @@ abstract class Model extends Delegator
 	 */
 	public static function primaryKeyName() {
 		
-		if (is_null(static::$primaryKeyName)) {
-			return static::entity() . '_id';
+		// @TODO should we be determining key name or throwing
+		// an exception
+		//if (is_null(static::$primaryKeyName)) {
+		//	return static::entity() . '_id';
 		
-		} else { 
-			return static::$primaryKeyName;
+		//} else { 
+		//	return static::$primaryKeyName;
+
+		//}
+
+		if (static::hasPrimaryKey()) {
+			return static::primaryKeys()[0];
+		
+		} else if (static::hasCompositeKeys()) {
+			throw new \Exception(
+				"Failed to determine primary key name because receiver " . 
+				"'" . static::$class  . "' defines composite key set"
+			);
+		
+		} else {
+			throw new \Exception(
+				"Failed to determine primary key name because receiver " . 
+				"'" . static::$class  . "' does not have a primary key"
+			)
 		}
+
 		
 
 		
-		throw new \Exception(
-			"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"
-		);
+		//throw new \Exception(
+		//	"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"
+		//);
 	}
 
 	/**
@@ -2850,7 +2880,7 @@ abstract class Model extends Delegator
 	 * @deprecated
 	 */
 	public static function primaryKey() {
-		return static::signature() . '_id';
+		return static::primaryKeyName();
 	}
 	
 	/**
@@ -3074,16 +3104,6 @@ abstract class Model extends Delegator
 	}
 	
 	
-	private function guessPrimaryKey() {
-		// attempt to get primary key based on strlower(classname)_id pattern
-		$tokens       = explode('\\', static::classNameFull());
-		$primary_key  = strtolower(array_pop($tokens)) . '_id';
-		
-		return property_exists($this, $primary_key)
-			? $primary_key
-			: false;
-		
-	}
 	
 	static protected function factory($name) {
 		/*
@@ -3103,7 +3123,6 @@ abstract class Model extends Delegator
 	}	
 
 
-	protected $primaryKeys    = null;
 	protected $attributes     = array();
 	protected $validates      = array();
 	protected $callbacks      = array();
@@ -3115,7 +3134,6 @@ abstract class Model extends Delegator
 	protected $cached         = false;
 	protected $association;
 
-	protected static $primaryKeyName;
 	protected static $sassociations = [ ];
 	protected static $scallbacks    = [ ];
 	protected static $svalidates    = [ ];
