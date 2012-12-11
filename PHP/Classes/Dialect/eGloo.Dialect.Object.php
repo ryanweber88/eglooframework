@@ -82,10 +82,18 @@ abstract class Object {
 
 		// determine if adding method to instance/class context,
 		// in which case create reference to correct member property
+		try {
 		$methods =& is_object(static::receiver())
 			? $this->_methods
 			: static::domain('_smethods');
+		}
+		catch(\Exception $e) {
+			$m =& is_integer('df')
+				? static::domain('_smethods')
+				: $variable;
 
+			exit('asdf');
+		}
 		// add method definition
 		$methods[$name] = $lambda;
 
