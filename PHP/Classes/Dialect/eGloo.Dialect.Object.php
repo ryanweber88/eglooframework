@@ -25,7 +25,7 @@ abstract class Object {
 	static function __static() {
 		// create instance of eigenclass class and
 		// set to static class property
-		static::$class     = new Klass(get_called_class());
+		static::$class = new Klass(get_called_class());
 
 		// call our class methods method
 		static::__smethods();
@@ -58,9 +58,7 @@ abstract class Object {
 	 * Alias to aliasMethods - thought it fits more into the idea of
 	 * constructor/meta call
 	 */
-	protected function __methods() {
-		$this->aliasMethods();
-	}
+	protected function __methods() { }
 
 	// DUAL CONTEXT METHODS //////////////////////////////////////////////////
 	// Dual context methods simply means method in which current receiver
@@ -208,9 +206,9 @@ abstract class Object {
 
 		// finally lets check if value is contained in
 		// cache, set if not and then return
-		$cache = $instance
-			? &$this->_cache
-			: &static::domain('_scache'); 
+		$cache =& $instance
+			? $this->_cache
+			: static::domain('_scache'); 
 			
 
 		if (!isset($cache[$key])) {			
@@ -247,9 +245,9 @@ abstract class Object {
 	 ** @DualContext
 	 */
 	public function clearCache($key) {
-		$cache = is_object(static::receiver())
-			? &$this->_cache
-			: &static::domain('_scache');
+		$cache =& is_object(static::receiver())
+			? $this->_cache
+			: static::domain('_scache');
 
 		unset($cache[$key]);
 	}
@@ -302,7 +300,7 @@ abstract class Object {
 	public function memberExists($name) {
 		try {
 			return property_exists(static::receiver(), $name) ||
-			       is_callable(static::method($name))
+			       is_callable(static::method($name));
 		
 		} catch (\Exception $ignore) {
 			return false;
@@ -821,6 +819,7 @@ abstract class Object {
 		// providing pre/post hooks on those methods
 		// @TODO I don't think that this has been tested and
 		// should probably be reimplemented using AOP extension
+		/*
 		if (preg_match('/^(before|after)_?([a-z])+/i', $name, $match)  && 
 		    isset($this->_methods[ strtolower($method = $match[2]) ])) {
 			
@@ -839,13 +838,10 @@ abstract class Object {
 			}
 		}
 
-		// first check methods defined in static context
-		// and see if we can find a match
-		if () {
-
-		}
-
 		// next check instance defined methods and call if matched
+		// @TODO check once determine safe to remove; I don't believe
+		// hooks have ever been used
+		/*
 		if (isset($this->_methods[$name])) {
 			
 			// check pre hooks
@@ -863,28 +859,35 @@ abstract class Object {
 				call_user_func($this->_hooks[$hook]);
 			}				
 		}
+		*/
+
+		// first check methods defined in static context
+		// and see if we can find a match
+		try {
+			return call_user_func_array(
+				static::method($name), $arguments
+			);
+
+		} catch(\Exception $ignore) { }		
 		
 		// lets provide conversion to underscored and camel case
 		// so George can be happy - check which case this is and
 		// perform a conversion based on that case, and see if it
 		// exists as a method; we are intentionally not providing
 		// the inverse to this, as that is simply crazy
+		// @TODO i don't know if this should be done, and after
+		// looking at it, apears to be a mistake
 		if ( \eGlooString::isCamelCase($name) &&
 		     method_exists($this, $underscored = \eGlooString::toUnderscores($name))) {
 		     	
 			return call_user_func_array(array($this, $underscored), $arguments);
 		}
 
-		// this will die UNGRACEFULLY if method does not exist
-		// (intended behavior)
-		$class = $this->classNameFull();
-		
-		
-		
+		$recever = static::receiver_id();
 		throw new \Exception (
-			"Call to undefined instance method '$name' on receiver '{$this->ident()}'"
+			"Call to undefined instance method '$name' on receiver '$receiver'"
 		);
-		
+		 
 	}
 
 	/**
@@ -965,9 +968,14 @@ abstract class Object {
 
 	/**
 	 * Determines correct receiver (class or instance)
+	 * @DualContext
 	 */	
 	protected function receiver() {
-		return debug_backtrace()[1]['type']) == '->'
+		//return debug_backtrace()[1]['type']) == '->'
+		//	? $this
+		//	: get_called_class();
+
+		return isset($this) 
 			? $this
 			: get_called_class();
 	}
@@ -979,7 +987,7 @@ abstract class Object {
 		$id = get_called_class();
 
 		if (isset($this)) {
-			$id .= '#instance<' . spl_object_hash($this) . '>'
+			$id .= '#instance<' . spl_object_hash($this) . '>';
 		}
 
 		return $id;

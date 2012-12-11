@@ -2834,15 +2834,9 @@ abstract class Model extends Delegator
 			throw new \Exception(
 				"Failed to determine primary key name because receiver " . 
 				"'" . static::$class  . "' does not have a primary key"
-			)
+			);
 		}
 
-		
-
-		
-		//throw new \Exception(
-		//	"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"
-		//);
 	}
 
 	/**

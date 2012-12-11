@@ -48,7 +48,7 @@
  * @package Utilities
  * @subpackage Logging
  */
-final class eGlooLogger {
+final class eGlooLogger  {
 	// Class Constants
 	const EMERGENCY		= 0x80;		// 1000 0000
 	const ALERT			= 0x40;		// 0100 0000
@@ -591,6 +591,22 @@ final class eGlooLogger {
 	}
 
 	public static function global_error_handler( $severity, $message, $filename, $linenum, $context ) {
+		
+		// provide a white list check on message; we unforunately cannot check
+		// against a specific error number because they are not provided
+		// @TODO define statically/cache
+		$allowed = [
+			'non-static method'
+		];
+
+		// @TODO change to something more flexible as to allow
+		// differing types of checks; perhaps callbacks..
+		foreach ($allowed as $check) {
+			if (stripos($message, $check) !== false) {
+				return false;
+			}
+		}
+
 		// @TODO this is for debug only
 		echo "$filename @ #$linenum\n";
 		throw new ErrorException($message, 0, $severity, $filename, $linenum);
