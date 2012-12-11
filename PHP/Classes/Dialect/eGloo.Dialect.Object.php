@@ -70,6 +70,7 @@ abstract class Object {
 
 	/**
 	 *  Stubbed here; this can be used an handler for defineMethod events
+	 *  @DualContext
 	 */
 	protected function methodAdded($name, $lambda) { }
 
@@ -77,6 +78,7 @@ abstract class Object {
 	/**
 	 *  Defines a method on current context/self receiver (this
 	 *  may be class or instance)
+	 *  @DualContext
 	 */
 	public function &defineMethod($name, callable $lambda) {
 
@@ -113,7 +115,7 @@ abstract class Object {
 	/**
 	 * Retrieves current self namespace name
 	 */
-	public function namespacename() {
+	public static function namespacename() {
 		// @TODO is it worth adding cache here? May
 		// be just as much work to do lookup as it 
 		// is to do a string split
@@ -129,6 +131,7 @@ abstract class Object {
 
 	/**
 	 * Provides an instance/static level cache
+	 * @DualContext
 	 */
 	public function cache($__mixed) {
 		$expiration = null;
@@ -240,7 +243,9 @@ abstract class Object {
 		return $cache[$key]['value'];		
 	}
 
-	/** Attempts to clear a particular cache token on variable receiver */
+	/** Attempts to clear a particular cache token on variable receiver 
+	 ** @DualContext
+	 */
 	public function clearCache($key) {
 		$cache = is_object(static::receiver())
 			? &$this->_cache
@@ -249,7 +254,9 @@ abstract class Object {
 		unset($cache[$key]);
 	}
 
-	/** Makes alias $alias from $form */
+	/** Makes alias $alias from $form 
+	 ** @DualContext
+	 */
 	public function aliasMethod($alias, $from) {
 
 
@@ -290,10 +297,17 @@ abstract class Object {
 
 	/** Determines if member name $name exists in current
 	 ** context 
+	 ** @DualContext
 	 **/
 	public function memberExists($name) {
-		return property_exists($r = static::receiver(), $name) ||
-		       method_exists  ($r, $name);
+		try {
+			return property_exists(static::receiver(), $name) ||
+			       is_callable(static::method($name))
+		
+		} catch (\Exception $ignore) {
+			return false;
+		}
+
 	}
 	
 	/** Retrieves static property that falls in current
@@ -404,39 +418,25 @@ abstract class Object {
 		// lambda; if we cannot find method, we know it doesnt
 		// exist and throw an exception
 		try { 
-			$lambda = call_user_func_array(
-				($receiver, 'method'), array($method)
-			);
-		
-		} catch(\Exception $e) { 
+			//$lambda = call_user_func_array(
+			//	($receiver, 'method'), array($method)
+			//);
 
-			// if we have reached this point, we know method does
-			// not exist, either as concrete or as dynamically
-			// defined
-			if ($instance) {
-				$type     = 'instance'
-				$receiver = get_called_class(); 
-			
-			} else {
-				$type = 'class'
-			}
-			
+			$lambda = static::method($method);
+		
+		// if an exception is thrown, then we can safely determine
+		// that the method does not exist
+		} catch(\Exception $e) { 
+			$receiver = static::receiver_id();
+
 			throw new \Exception(
-				"Failed to send method '$method' to '$type' receiver '$receiver' " . 
+				"Failed to send method '$method' receiver '$receiver' " . 
 				"because method does not exist"
 			);
 		
 		}
 
 	}
-	
-	public static function sendStatic($method, $__mixed = null) {
-		return call_user_func_array(
-			array(get_called_class(), $method), array_slice(func_get_args(), 1)	
-		);
-	}
-	
-
 	
 
 	/**
@@ -809,6 +809,10 @@ abstract class Object {
 		// receiver when called from an instance context, we have
 		// to manually pass call to our callstatic dump
 		if ($caller->isReceivedStatically()) {
+
+			// @TODO resolve this as it needs to be removed
+			echo "still checking if received statically";
+			exit;
 			return static::__callstatic($name, $arguments);
 		}
 		
@@ -841,7 +845,7 @@ abstract class Object {
 
 		}
 
-		// first check dynamically defined methods and fire if match
+		// next check instance defined methods and call if matched
 		if (isset($this->_methods[$name])) {
 			
 			// check pre hooks
@@ -887,10 +891,11 @@ abstract class Object {
 	 * Returns a lambda, which in effect wraps a class method;
 	 * if called from instance context, then lambda will be bound
 	 * to context before being returned
+	 * @DualContext
 	 */
 	public function method($name) {
 		$class    = get_called_class();
-		$instance = isset($this) && is_object($this);
+		$instance = isset($this);
 
 		// first we check for a "concrete" static/instance
 		// method
@@ -900,19 +905,28 @@ abstract class Object {
 			if (method_exists($class, $method)) {
 
 				$lambda = function($__mixed = null) use ($name, $instance) {
-					$receiver = $instance
-						? array($this, $name)
-						: array(get_called_class(), $name);
 
-					call_user_func_array(
-						$receiver, func_get_args()
-					);
+					//$receiver = $instance
+					//	? array($this, $name)
+					//	: array(get_called_class(), $name);
+
+					//call_user_func_array(
+					//	$receiver, func_get_args()
+					//);
+
+					//call_user_func_array(
+					//	array(static::receiver(), $name), func_get_args()
+					//);
+
+					return static::send($name, func_get_args());
+
 				};
 				
 			// 	otherwise, we check up method hierarchy chain
 			// for dynamic method
 			} else { 
 			
+				// first check static method definitions
 				$methods = &static::$_smethods;
 				$current = $class;
 
@@ -924,6 +938,10 @@ abstract class Object {
 						
 				} while (($current = get_parent_class($current)));
 			
+				// next check instance method definitions
+				if (isset($this->$_methods[$name])) {
+					$lambda = $this->$_methods[$name];
+				}
 			}
 
 			// check if lambda has been set, either as wrapper on 
@@ -942,7 +960,7 @@ abstract class Object {
 			throw new \Exception(
 				"Failed to return closure of '$method' because it does not exist"
 			);
-		}
+		});
 	}
 
 	/**
@@ -954,16 +972,23 @@ abstract class Object {
 			: get_called_class();
 	}
 
-	/** Convenience method to identify current self/receiver */
+	/** Convenience method to identify current self/receiver 
+	 ** @DualContext
+	 */
 	protected function receiver_id() {
-		return is_object(static::receiver())
-			? 'instance<' . spl_object_hash($this) . '>'
-			: get_called_class();
+		$id = get_called_class();
+
+		if (isset($this)) {
+			$id .= '#instance<' . spl_object_hash($this) . '>'
+		}
+
+		return $id;
 	}
 
 	/**
 	 * Determines if a class/instance receiver responds to 
 	 * message/method 
+	 * @DualContext
 	 */
 	public function respondTo($name) {
 		try {		
@@ -971,9 +996,7 @@ abstract class Object {
 			// @TODO may rewrite this as its not very efficient
 			// too call method just to check for existence of
 			// method
-			call_user_func(array(
-				static::receiver(), $name
-			));
+			static::send($name);
 
 		} catch(\Exception $ignore) {
 			return false;
