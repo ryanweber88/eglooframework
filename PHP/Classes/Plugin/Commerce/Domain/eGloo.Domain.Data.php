@@ -30,13 +30,18 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	/**
 	 * Uses information schema to retrieve column names
 	 */
-	public static function columns($table) {
-		$class = get_called_class();
+	public static function columns($table, $comprehensive = false) {
 
-		return static::cache("*$table", function() use ($class, $table) {
-			return $class::statement('
+		return static::cache("*$table$comprehensive", function() 
+			use ($table, $comprehensive) {
+
+			$columns = $comprehensive 
+				? '*'
+				: 'column_name';
+
+			return static::statement('
 				SELECT
-					column_name
+					$columns
 				FROM
 					information_schema.columns
 				WHERE
@@ -45,17 +50,17 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 			', $table);	
 		});
 	}
+
 	
 	/**
 	 * Uses information schema to retrieve entity primary keys
 	 */
 	public static function primaryKeys($table) {
 		$class = get_called_class();
-		$key   = __FUNCTION__ . "/$table";
 		
-		return static::cache($key, function() use ($class, $table) {
+		return static::cache("*$table", function($table) {
 			$keys    = [ ];	
-			$records = $class::statement("
+			$records = static::statement('
 				SELECT               
 				  pg_attribute.attname, 
 				  format_type(pg_attribute.atttypid, pg_attribute.atttypmod) 
@@ -67,7 +72,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				  pg_attribute.attnum = any(pg_index.indkey)
 				  AND indisprimary
 						
-			", $table);	
+			', $table);	
 			
 			// retrieve key names only
 			// @TODO modify query so that filter does

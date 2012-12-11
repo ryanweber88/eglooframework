@@ -2799,13 +2799,16 @@ abstract class Model extends Delegator
 	 * by which primary key is obtained will change in the future
 	 * @TODO this method needs to be rethought
 	 */
-	public function primaryKeyName() {
+	public static function primaryKeyName() {
 		
-		if (!is_null($this->primaryKeyName)) {
-			return $this->primaryKeyName;
+		if (is_null(static::$primaryKeyName)) {
+			return static::entity() . '_id';
+		
+		} else { 
+			return static::$primaryKeyName;
 		}
 		
-		return static::entity() . '_id';
+
 		
 		throw new \Exception(
 			"Failed to determine primary key name on receiver '{$this->ident()}'; it can be explicitly set using Model#aliasPrimaryKey"

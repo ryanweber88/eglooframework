@@ -25,7 +25,7 @@ abstract class Object {
 	static function __static() {
 		// create instance of eigenclass class and
 		// set to static class property
-		static::$class = new Klass(get_called_class());
+		static::$class     = new Klass(get_called_class());
 
 		// call our class methods method
 		static::__smethods();
@@ -82,9 +82,9 @@ abstract class Object {
 
 		// determine if adding method to instance/class context,
 		// in which case create reference to correct member property
-		$methods = is_object(static::receiver())
-			? &$this->_methods
-			: &static::domain('_smethods');
+		$methods =& is_object(static::receiver())
+			? $this->_methods
+			: static::domain('_smethods');
 
 		// add method definition
 		$methods[$name] = $lambda;
@@ -103,18 +103,11 @@ abstract class Object {
 	 *  intsance/class context
 	 */
 	public function defer($name, callable $lambda) {
-		$defers = is_object(static::receiver())
-			? &$this->_defers;
-			: &static::domain('_sdefers');
+		$defers =& is_object(static::receiver())
+			? $this->_defers
+			: static::domain('_sdefers');
 
-		$defers[static::classnamefull()][$name] = $lambda;
-	}
-
-	/**
-	 *  Retrieves current self namespace
-	 */
-	public function namespace() {
-		return static::$class->namespace;
+		$defers[$name] = $lambda;
 	}
 
 	/**
@@ -1200,6 +1193,7 @@ abstract class Object {
 
 	
 	protected static $class;
+	protected static $namespace;
 	protected static $_singleton;
 	protected static $_scache            = array();
 	protected static $_smethods          = [ ];
