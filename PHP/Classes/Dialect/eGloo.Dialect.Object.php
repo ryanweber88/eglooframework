@@ -207,8 +207,9 @@ abstract class Object {
 		// if a star indicates that we want to employ a "one-way"
 		// cache, which means this value will not be uncached at anypoint
 		} else if (isset($key[0]) && $key[0] == '*') {
-			$trace = debug_backtrace(2)[1];
-			$key   = $trace['file'] . $trace['line'] . $key;			
+			$trace      = debug_backtrace(2)[1];
+			$key        = $trace['file'] . $trace['line'] . $key;	
+			$initialKey = substr($initialKey, 1); 		
 		}		
 			
 
