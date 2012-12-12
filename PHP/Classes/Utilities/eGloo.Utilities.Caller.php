@@ -104,7 +104,7 @@ class Caller extends Object {
 		return $this->trace[self::CALLER_INDEX]['function'];
 	}
 	
-	public function method() {
+	public function asdf() {
 		return $this->trace[self::CALLER_INDEX]['function'];
 	}
 	

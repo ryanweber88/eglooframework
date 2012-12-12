@@ -75,30 +75,35 @@ abstract class Model extends Delegator
 	/** @Polymorphic */ 
 	public static function __static() {
 		
+		// create reflection instance as we need to determine
+		// if current context is within abstract class, which
+		// wouldnt/shouldnt have an entity counterpart
+		$reflection = new \ReflectionClass(get_called_class());
+
+		if (!$reflection->isAbstract()) { 
+			// assign static delegation 
+			Delegator::delegate(
+				$class = \get_called_class(), get_class(static::data())
+			);
+
+			// call static model construct methods
+
+			// call our validates method, which provides validation definitions
+			// for Model attributes
+			static::__validates();
+
+			// call our relationships method, which provides callbacks attached
+			// to the names of our relationships
+			static::__relationships();
+
+			// call __callbacks method, which defines behaviors during life cycle
+			// of instance
+			static::__callbacks();
 			
-		// assign static delegation 
-		
-		Delegator::delegate(
-			$class = \get_called_class(), get_class(static::data())
-		);
-
-		// call static model construct methods
-
-		// call our validates method, which provides validation definitions
-		// for Model attributes
-		static::__validates();
-
-		// call our relationships method, which provides callbacks attached
-		// to the names of our relationships
-		static::__relationships();
-
-		// call __callbacks method, which defines behaviors during life cycle
-		// of instance
-		static::__callbacks();
-		
-		// finally call attributes, which sets up convience attributes for
-		// instance		
-		static::__attributes();
+			// finally call attributes, which sets up convience attributes for
+			// instance		
+			static::__attributes();
+	}
 		
 
 
@@ -242,7 +247,7 @@ abstract class Model extends Delegator
 		// delegate our query building methods to Relation
 		// @TODO we should delegate to scoped which should handle
 		// the rest
-		$reflection = new \ReflectionClass(static::classNameFull());
+		//$reflection = new \ReflectionClass(static::classNameFull());
 			
 		// @TODO user is causing all kinds of fucking problem when not
 		// receiving an initializing hash; so i am taking the bitch out
@@ -387,6 +392,7 @@ abstract class Model extends Delegator
 	 * Retrieves the name of underlying entity; entity is used as lcd term 
 	 * to describe table, document, etc.
 	 * @return string
+	 * @deprecated
 	 */
 	protected static function entityName() {
 		return static::signature(static::classnamefull());
@@ -398,7 +404,7 @@ abstract class Model extends Delegator
 	 * @return string
 	 */
 	protected static function entity() {
-		return static::entityName();
+		return static::signature(static::classnamefull());
 	}
 
 
@@ -988,9 +994,10 @@ abstract class Model extends Delegator
 	 * 
 	 */
 	protected function methodAdded($name, $lambda) {
-		if (isset($this->_attributes[$name])) {
-			$this->attrAccessor($name);
-		}
+
+		//if (isset($this->_attributes[$name])) {
+		//	$this->attrAccessor($name);
+		//}
 	}
 	 
 	/**
@@ -1199,14 +1206,14 @@ abstract class Model extends Delegator
 	/**
 	 * Unserializes model
 	 * @TODO currently we are only caching attribute values; this should be expanded
-	 * to cover the many areas of Model, including callbacks (not currently possible in 5.3,
-	 * dont know in 5.4)
+	 * to cover the many areas of Model, including callbacks 
+	 * (not currently possible in 5.3, dont know in 5.4)
 	 */
 	public function unserialize($serialized) {
 		$this->__construct(unserialize($serialized));
 	}
 	
-	/** Model Constructors *****************************************************/
+	/** Static Model Constructors ************************************************/
 	
 
 	/**
@@ -1242,6 +1249,7 @@ abstract class Model extends Delegator
 	protected static function __attributes() {
 		// alias our primary key, using convention of tablename_id - this
 		// is important as primary keys can now be accessed via instance->id
+		var_export(static::primaryKeys()); exit;
 		static::aliasPrimaryKey(
 			static::signature() . '_id'
 		);
@@ -2178,7 +2186,7 @@ abstract class Model extends Delegator
 		
 		} catch(\Exception $ignore) { }
 
-		static::$primaryKeyName = $from;
+		//static::$primaryKeyName = $from;
 		
 	}
 	
@@ -2196,6 +2204,7 @@ abstract class Model extends Delegator
 			return $this->primaryKeys;
 		}
 		*/
+		echo static::entity(); exit;
 
 		// @TOOD we may still need to specify primary keys
 		return Data::primaryKeys(static::entity());

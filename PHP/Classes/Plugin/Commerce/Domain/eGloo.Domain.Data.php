@@ -39,7 +39,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				? '*'
 				: 'column_name';
 
-			return static::statement('
+			return static::statement("
 				SELECT
 					$columns
 				FROM
@@ -47,7 +47,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				WHERE
 						table_name = ?
 						
-			', $table);	
+			", $table);	
 		});
 	}
 
@@ -56,7 +56,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	 * Uses information schema to retrieve entity primary keys
 	 */
 	public static function primaryKeys($table) {
-		
+		var_export(debug_backtrace()); exit;
 		return static::cache("*$table", function($table) {
 			$keys    = [ ];	
 			$records = static::statement('

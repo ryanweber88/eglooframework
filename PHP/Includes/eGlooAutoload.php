@@ -1021,6 +1021,16 @@ function log($message) {
 }
 
 /**
+ * Motherfucking ternary operator doesnt allow for
+ * assigning motherfucking references.. this one does
+ */
+function &ternary($condition, &$passed, &$failed) { 
+	return $condition
+		? $passed
+		: $failed;
+}
+
+/**
  * An extension to \strtotime; allows for wider range of idiomatic
  * expressions to be used
  */
