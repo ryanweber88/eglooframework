@@ -74,7 +74,7 @@ TIMESTAMP=$(date +%s)
 ###########################################################
 
 # Get our platform
-PLATFORM=$(./shtool platform -v -F "%sc (%ac) %st (%at) %sp (%ap)")
+PLATFORM=$(cat /etc/issue)
 
 # Temporarily disable errexit check because grep returns non-true on a result we need
 set +o errexit
@@ -189,7 +189,7 @@ then
         echo "****************************"
         echo
 
-        apt-get --assume-yes install curl apache2 memcached \
+        apt-get --assume-yes install git git-flow curl apache2 memcached \
 		php5 php-apc \
                 php5-imagick php5-mcrypt php5-memcache php5-memcached \
                 php5-common php5-dev php5-mysql php5-pgsql php5-sqlite \

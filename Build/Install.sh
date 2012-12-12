@@ -829,14 +829,14 @@ then
 		echo "PHP Symlink exists"
 	fi
 
-	if [ ! -e "$PARENT_DIRECTORY/DocRoot/PHP" ] && [  ! -L "$PARENT_DIRECTORY/DocRoot/PHP" ] && [ $DETECTED_PLATFORM -eq $OS_UBUNTU ]
-	then
-		echo "Creating PHP symlink shim for Ubuntu because getcwd() is broken"
+#	if [ ! -e "$PARENT_DIRECTORY/DocRoot/PHP" ] && [  ! -L "$PARENT_DIRECTORY/DocRoot/PHP" ] && [ $DETECTED_PLATFORM -eq $OS_UBUNTU ]
+#	then
+#		echo "Creating PHP symlink shim for Ubuntu because getcwd() is broken"
 		# Only do this next bit on Ubuntu... getcwd() is broken
-		ln -s "$PARENT_DIRECTORY/PHP" "$PARENT_DIRECTORY/DocRoot/PHP"
-	else
-		echo "PHP Symlink shim for getcwd() exists"
-	fi
+#		ln -s "$PARENT_DIRECTORY/PHP" "$PARENT_DIRECTORY/DocRoot/PHP"
+#	else
+#		echo "PHP Symlink shim for getcwd() exists"
+#	fi
 else
 	cp "$PARENT_DIRECTORY/DocRoot/index.php" "$DOCUMENT_ROOT/index.php"
 
