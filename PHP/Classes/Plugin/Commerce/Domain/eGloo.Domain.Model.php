@@ -1249,11 +1249,9 @@ abstract class Model extends Delegator
 	protected static function __attributes() {
 		// alias our primary key, using convention of tablename_id - this
 		// is important as primary keys can now be accessed via instance->id
-		var_export(static::primaryKeys()); exit;
-		static::aliasPrimaryKey(
-			static::signature() . '_id'
-		);
-			
+		if (static::hasPrimaryKey()) {
+			static::aliasPrimaryKey(static::primaryKeys()[0]);
+		}
 			
 	}
 
