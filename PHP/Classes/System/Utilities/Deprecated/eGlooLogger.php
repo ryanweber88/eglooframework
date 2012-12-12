@@ -608,7 +608,7 @@ final class eGlooLogger  {
 		}
 
 		// @TODO this is for debug only
-		echo "$filename @ #$linenum\n";
+		echo "$filename => $message #$linenum\n";
 		throw new ErrorException($message, 0, $severity, $filename, $linenum);
 	}
 

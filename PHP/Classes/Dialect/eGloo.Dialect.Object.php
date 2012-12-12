@@ -904,18 +904,18 @@ abstract class Object {
 	 * to context before being returned
 	 * @DualContext
 	 */
-	public function method($name) {
+	public function method($method) {
 		$class    = get_called_class();
 		$instance = isset($this);
 
 		// first we check for a "concrete" static/instance
 		// method
-		return static::cache("*$class", function($class)
-			use ($instance) {
+		return static::cache("*$class$method", function()
+			use ($class, $instance, $method) {
 
 			if (method_exists($class, $method)) {
 
-				$lambda = function($__mixed = null) use ($name, $instance) {
+				$lambda = function($__mixed = null) use ($method) {
 
 					//$receiver = $instance
 					//	? array($this, $name)
@@ -929,7 +929,7 @@ abstract class Object {
 					//	array(static::receiver(), $name), func_get_args()
 					//);
 
-					return static::send($name, func_get_args());
+					return static::send($method, func_get_args());
 
 				};
 				
@@ -949,9 +949,10 @@ abstract class Object {
 						
 				} while (($current = get_parent_class($current)));
 			
-				// next check instance method definitions
-				if (isset($this->$_methods[$name])) {
-					$lambda = $this->$_methods[$name];
+				// next check instance method definitions if this
+				// is instance context
+				if (isset($this) && isset($this->$_methods[$method])) {
+					$lambda = $this->$_methods[$method];
 				}
 			}
 
@@ -961,7 +962,7 @@ abstract class Object {
 
 				// check if within instance context, in which case
 				// bind instance context to lambda
-				if ($instance) {
+				if (isset($this)) {
 					$lambda = $lambda->bindTo($this);
 				}
 

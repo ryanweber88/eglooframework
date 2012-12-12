@@ -2204,7 +2204,6 @@ abstract class Model extends Delegator
 			return $this->primaryKeys;
 		}
 		*/
-		echo static::entity(); exit;
 
 		// @TOOD we may still need to specify primary keys
 		return Data::primaryKeys(static::entity());
