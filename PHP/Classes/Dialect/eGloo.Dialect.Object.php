@@ -198,8 +198,8 @@ abstract class Object {
 
 				if (is_callable($lambda)) {
 					$cache[$key] = [
-						'expiration' => $expiration
-						'value'      => $lambda($key);
+						'expiration' => $expiration,
+						'value'      => $lambda($key)
 					];
 
 				} else {
@@ -217,7 +217,7 @@ abstract class Object {
 				return call_user_func_array(array(
 					$this, 'cache'
 
-				), func_get_args())	
+				), func_get_args());	
 			}
 						
 			return $cache[$key]['value'];
@@ -436,8 +436,8 @@ abstract class Object {
 
 				if (is_callable($lambda)) {
 					$cache[$key] = [
-						'expiration' => $expiration
-						'value'      => $lambda($key);
+						'expiration' => $expiration,
+						'value'      => $lambda($key)
 					];
 
 				} else {
@@ -455,7 +455,7 @@ abstract class Object {
 				return forward_static_call_array(array(
 					$this, 'cache'
 
-				), func_get_args())	
+				), func_get_args());
 			}
 						
 			return $cache[$key]['value'];
