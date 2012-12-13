@@ -1,14 +1,14 @@
 <?php
 namespace eGloo\Domain;
-
-use \eGloo\Utilities\Delegator;
-use \eGloo\Utilities\InflectionsSafe;
-use \eGloo\Utilities\Collection;
-use \eGloo\Domain\Model\Callback;
-use \eGloo\Domain\Cache;
-use \eGloo\Performance\Caching;
-use \eGloo\Domain\Model;
-use \eGloo\Utilities;
+use       \eGloo\Utilities\Delegator;
+use       \eGloo\Utilities\InflectionsSafe;
+use       \eGloo\Utilities\Collection;
+use       \eGloo\Domain\Model\Callback;
+use       \eGloo\Domain\Cache;
+use       \eGloo\Performance\Caching;
+use       \eGloo\Domain\Model;
+use       \eGloo\Utilities;
+use       \eGloo\Primitives;
 
 /**
  * Superclass for all domain models; provides generic functionality
@@ -1129,15 +1129,12 @@ abstract class Model extends Delegator
 		
 		// create a callback/lambda to pass arguments to 
 		// Domain\Data handler method 'statement
-		$class     = get_called_class();
-		$model     = $class::instance();
+		$model     = static::singleton();
 		$arguments = func_get_args();
-		$handler   = function() use ($arguments, $class) {
-			//echo "in handler for $class<br />";
-			$data = $class::sendStatic('data');
-			return call_user_func_array(
-				array($data, 'statement'), $arguments
-			);
+		$handler   = function() use ($arguments) {
+			$data = static::data();
+			return $data::send('statement', $arguments);
+
 		};
 		
 
@@ -1156,13 +1153,14 @@ abstract class Model extends Delegator
 			// @TODO change this to query/cache as opposed to jammin
 			// into relation
 			$cache    = new Cache\Relation;
-			$relation = new Model\Relation($class);
+			$relation = new Model\Relation(get_called_class());
 			$relation->sql($statement);
 			$relation->arguments(Collection::flatten($arguments));
 			
 			
 			// attempt to find the cache, or set if it has not yet been
 			// established
+			// @TODO why the fuck is caching turned off (commented out) here?
 			//return $cache->find($relation, $handler);
 					
 		}
@@ -2450,15 +2448,16 @@ abstract class Model extends Delegator
 		// if unable to find matching meta call within
 		// __call chain, determine if a dynamic finder
 		if (preg_match('/^delete_by_(.+)$/', $name, $match)) {
-			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
+			$class   = get_called_class(); 
 			$fields  = explode('_and_', $match[1]);
 			
 									
 			// now lets define out dynamic finder function
 			// @TODO most of the funcitonality here should be moved
 			// to Relation
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $name) {
-				//$disguisedClass = $class::classFullName();
+			return call_user_func_array(static::defineMethod($name, function($__mixed) 
+				use ($fields, $name) {
+
 				$conditions = array();
 				$arguments  = Collection::flatten(func_get_args());
 				
@@ -2467,7 +2466,7 @@ abstract class Model extends Delegator
 				}
 				
 				$conditions = implode(' AND ', $conditions);
-				$table = $class::sendStatic('signature');
+				$table      = static::entity();
 				
 				// @TODO arguments is appended with classname, sometimes??; for now,
 				// removing appended value
@@ -2481,33 +2480,30 @@ abstract class Model extends Delegator
 						WHERE
 								( $conditions )		
 						
-						
 					", $arguments);
 					
 									
+				} catch(\Exception $up) {
+					throw $up;
 				}
-				
-
-				catch(\Exception $pass) {
-					throw $pass;
-				}
-			});
+			}), $arguments);
 			
 			
 			
-			return call_user_func_array(
-				$block, $arguments
-			);
+	
 			
 		}		
 
+
+		// @TODO find_link and find_one need to be refactored; there
+		// ius too much code duplication here
 		if (preg_match('/^find_like_(.+)$/', $name, $match)) {
-			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
 			$fields  = explode('_and_', $match[2]);
 			$findOne = !empty($match[1]); 
 	
 			// now lets define out dynamic finder function
-			return call_user_func_array(static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+			return call_user_func_array(static::defineMethod($name, function($__mixed) 
+				use ($fields, $findOne, $name) {
 				
 				
 				// build string representation of query coinditionals
@@ -2528,12 +2524,13 @@ abstract class Model extends Delegator
 				} 
 				
 				try {	
-					$result = $class::sendStatic('process', $class::where(
+					$result = static::where(
 						$conditions, $arguments
-					));
-				}
-				catch(\Exception $pass) {
-					throw $pass;
+					)
+					->build();
+
+				} catch(\Exception $up) {
+					throw $up;
 				} 
 				
 				
@@ -2551,14 +2548,14 @@ abstract class Model extends Delegator
 
 		}
 		
-		
+		// @TODO needs refactoring with other find_xxx methods
 		if (preg_match('/^find_(one_)?by_(.+)$/', $name, $match)) {
-			$class   = get_called_class(); //static::classNameFull(); // we don't need generic fake here
-			$fields  = explode('_and_', $match[2]);
+			$fields  =  explode('_and_', $match[2]);
 			$findOne = !empty($match[1]); 
 	
 			// now lets define out dynamic finder function
-			return call_user_func_array(static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+			return call_user_func_array(static::defineMethod($name, function($__mixed) use 
+				($fields, $findOne, $name) {
 				
 				
 				// build string representation of query coinditionals
@@ -2579,12 +2576,13 @@ abstract class Model extends Delegator
 				} 
 				
 				try {	
-					$result = $class::sendStatic('process', $class::where(
+					$result = static::where(
 						$conditions, $arguments
-					));
-				}
-				catch(\Exception $pass) {
-					throw $pass;
+					)
+					->build();
+
+				} catch(\Exception $up) {
+					throw $up;
 				} 
 				
 				
@@ -2605,22 +2603,27 @@ abstract class Model extends Delegator
 		}
 
 		// dynamic range finders
+		// @TODO needs refactoring with other find_xxx methods
+		// @TODO deprecate this; this should performed at set
+		// level and not evaluated until
 		if (preg_match('/^find_(one_)?range_(.+)$/', $name, $match)) {
-			$class   = static::classNameFull();
-			$fields  = explode('_and_', $match[2]);
+			$fields  =  explode('_and_', $match[2]);
 			$findOne = !empty($match[1]);
 			
 			
 			// now lets define out dynamic finder function
-			$block = static::defineMethod($name, function($__mixed) use ($class, $fields, $findOne, $name) {
+			call_user_func_array(static::defineMethod($name, function($__mixed) 
+				use ($fields, $findOne, $name) {
 				
 				$validRanges = true;
 				$ranges      = array();
-				$arguments   = \eGloo\Utilities\Collection::flatten(func_get_args());
+				$arguments   = Utilities\Collection::flatten(
+					func_get_args()
+				);
 				
 				// test whether we are passing range values like '4..10'
 				foreach($arguments as $range) {
-					if (!\eGloo\Primitives\Range::valid($range)) {
+					if (!Primitives\Range::valid($range)) {
 						$validRanges = false;
 						break;
 					}		
@@ -2629,7 +2632,7 @@ abstract class Model extends Delegator
 
 				if ($validRanges) {
 					foreach ($arguments as $range) {
-						$range  = new \eGloo\Primitives\Range($range);
+						$range  = new Primitives\Range($range);
 						$ranges[] = array($range->min(), $range->max()); 
 					}
 				}
@@ -2646,7 +2649,8 @@ abstract class Model extends Delegator
 				
 				else {
 					throw new \Exception(
-						"Failed executing dynamic finder '$name' because argument list does present valid ranges: " . print_r(
+						"Failed executing dynamic finder '$name' because " .
+						"argument list does present valid ranges: " . print_r(
 							$arguments
 					));
 				}
@@ -2662,9 +2666,11 @@ abstract class Model extends Delegator
 				$conditions = implode(' and ', $conditions); 
 				
 				
-				$result = $class::sendStatic('process', $class::where(
+				$result = static::where(
 					$conditions, \eGloo\Utilities\Collection::flatten($ranges)
-				)); 
+				)
+				->build();
+
 				
 				// if we have specified find_one_by then we return the first
 				// instance - in most cases, this will be used when we know
@@ -2676,7 +2682,7 @@ abstract class Model extends Delegator
 				return $result;
 				
 				
-			});
+			}), $arguments);
 			 
 		}
 				

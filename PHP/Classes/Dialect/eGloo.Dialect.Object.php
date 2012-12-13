@@ -111,9 +111,13 @@ abstract class Object {
 	 *  intsance/class context
 	 */
 	public function defer($name, callable $lambda) {
-		$defers =& is_object(static::receiver())
-			? $this->_defers
-			: static::domain('_sdefers');
+
+		if (is_object(static::receiver())) {
+			$defers = &$this->_defers;
+
+		} else {
+			$defers = &static::domain('_sdefers');
+		}
 
 		$defers[$name] = $lambda;
 	}
@@ -403,6 +407,8 @@ abstract class Object {
 	 * presented 
 	 */
 	public function send($method, $__mixed = null) {
+
+
 		
 		// send can be invoked from both static and instance
 		// contexts; because of this we need to do a backtrace
@@ -410,6 +416,12 @@ abstract class Object {
 		// the class context)
 		$receiver = static::receiver();
 		$instance = is_object($receiver);
+
+		if ($method == 'entity') {
+			echo get_class($this); exit;
+			//var_export(static::singleton());
+			//exit;
+		}
 
 		// retrieve the messages arguments, if any.. since we
 		// allow for array passing to we do an explicit
@@ -437,7 +449,7 @@ abstract class Object {
 			$receiver = static::receiver_id();
 
 			throw new \Exception(
-				"Failed to send method '$method' receiver '$receiver' " . 
+				"Failed to send method '$method' to receiver '$receiver' " . 
 				"because method does not exist"
 			);
 		
@@ -952,8 +964,9 @@ abstract class Object {
 			
 				// next check instance method definitions if this
 				// is instance context
-				if (isset($this) && isset($this->$_methods[$method])) {
-					$lambda = $this->$_methods[$method];
+
+				if (isset($this) && isset($this->_methods[$method])) {
+					$lambda = $this->_methods[$method];
 				}
 			}
 
@@ -1240,7 +1253,7 @@ abstract class Object {
 	protected static $_smethods          = [ ];
 	protected static $ns;
 	protected static $_sdefers           = [ ];
-	protected        $_methods           = array();
+	protected        $_methods           = [ ];
 	protected        $_cache             = array();
 	protected        $_defers            = array();
 	protected        $_aliasedProperties = array(); 

@@ -1,9 +1,10 @@
 <?php
 namespace eGloo\Domain\Model;
 
-use \eGloo\Domain,
-    \eGloo\Utilities\Collection,
-    \eGloo\Performance\Caching;
+use       \eGloo\Domain,
+          \eGloo\Dialect\Object,
+          \eGloo\Utilities\Collection,
+          \eGloo\Performance\Caching;
 		
 		
 /**
@@ -14,7 +15,7 @@ use \eGloo\Domain,
  * @TODO this->chain = $this->chain needs to scoped to a handler method
  * 
  */		
-class Relation extends \eGloo\Dialect\Object 
+class Relation extends Object 
 	implements \eGloo\Utilities\ToArrayInterface, Caching\CacheKeyInterface  {
 	
 	function __construct($model) {
@@ -23,6 +24,7 @@ class Relation extends \eGloo\Dialect\Object
 		// @TODO model should be passed as instance as opposed to
 		// string; for the time being, to ensure compatibility, we
 		// change to instance
+		// @TODO why has this been commented out?
 		if (is_string($model)) {
 			if (\class_exists($model)) {
 				try { 
@@ -34,14 +36,17 @@ class Relation extends \eGloo\Dialect\Object
 			
 			else {
 				throw new \Exception (
-					"Failed to create instance 'Relation' because model '{$model->ident()}' does not exist"
+					"Failed to create instance 'Relation' because " . 
+					"model '{$model::receiver_id()}' does not exist"
 				);
 			}
 		}
 		
 		
 		// set instance properties and create sql AREL/Bella builder
-		$this->builder = new \Bella\Table($model::sendStatic('entity'));
+		$model::send('entity'); exit;
+
+		$this->builder = new \Bella\Table($model::send('entity'));
 		$this->model   = $model; 
 		$this->chain   = $this->builder;
 		
