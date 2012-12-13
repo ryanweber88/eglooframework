@@ -43,10 +43,11 @@ abstract class RequestProcessor {
 	public static $calledClass = null;
 
 	/* Protected Data Members */
-	protected $requestInfoBean   = null;
 	protected $decoratorInfoBean = null;
 	protected $bean              = null;
 	protected $request;
+
+	protected $decorators = array();
 
 	public function __construct() {
 		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
@@ -73,6 +74,22 @@ abstract class RequestProcessor {
 		return $retVal;
 	}
 
+	public function getAppliedDecorators() {
+		return $this->decorators;
+	}
+
+	public function setAppliedDecorators( $decorators ) {
+		$this->decorators = $decorators;
+	}
+
+	public function setAppliedDecorator( $decorator ) {
+		$this->decorators[] = $decorator;
+	}
+
+	public static function getRequiredDecorators() {
+		return array();
+	}
+
 	abstract public function processRequest();
 
 	public function processErrorRequest() {
@@ -85,11 +102,11 @@ abstract class RequestProcessor {
     // and other prerequisites correctly
 
  	public function setRequestInfoBean( $requestInfoBean ) {
- 		$this->requestInfoBean = $requestInfoBean;
+ 		$this->bean = $requestInfoBean;
  	}
 
  	public function getRequestInfoBean() {
- 		return $this->requestInfoBean;
+ 		return $this->bean;
  	}
 
 	public function setDecoratorInfoBean( $decoratorInfoBean ) {

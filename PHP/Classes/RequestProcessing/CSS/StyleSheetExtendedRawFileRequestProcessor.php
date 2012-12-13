@@ -4,21 +4,21 @@
  *
  * Contains the class definition for the StyleSheetExtendedRawFileRequestProcessor, a
  * subclass of the RequestProcessor abstract class.
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *		  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *	
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -28,9 +28,9 @@
 
 /**
  * StyleSheetExtendedRawFileRequestProcessor
- * 
+ *
  * Handles client requests to retrieve image files from the server
- * 
+ *
  * @package RequestProcessing
  * @subpackage RequestProcessors
  */
@@ -39,17 +39,17 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
 	 * processRequest().
-	 * 
+	 *
 	 * This method handles processing of the incoming client request.  Its
 	 * primary function is to establish the deployment environment (dev, test,
 	 * production) and the current localization, and to then parse the correct
 	 * template(s) in order to output the requested image file.
-	 * 
+	 *
 	 * Caching headers are formed to indicate the length of time the cache of
 	 * the image file is valid, as well as setting the vary on user-agent in
 	 * order to inform Squid of how it should be issuing cached output to
 	 * clients when short-circuiting Apache and the eGloo PHP framework.
-	 * 
+	 *
 	 * @access public
 	 */
 	public function processRequest() {
@@ -59,12 +59,12 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 		$cache_to_webroot = false;
 
 		// TODO this may be need to be removed, especially if stylesheet and javascript files
-		// dynamically pull content outside of what is explicitly passed	
-		//$output = $application->context()->retrieve($this->requestInfoBean->getGET('css_name'), function(&$context) { 
+		// dynamically pull content outside of what is explicitly passed
+		//$output = $application->context()->retrieve($this->bean->getGET('css_name'), function(&$context) {
 
-			$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+			$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
 			$templateBuilder = new CSSBuilder();
-			$original_file_name = $file_name = $this->requestInfoBean->getGET( 'css_name' );
+			$original_file_name = $file_name = $this->bean->getGET( 'css_name' );
 			$templateVariables = array();
 			$cache_to_webroot = false;
 
@@ -97,8 +97,8 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 
 			$file_name = preg_replace('~([0-9a-zA-Z_ -]+):([0-9a-zA-Z_ -]+)/~', '', $file_name);
 
-			if ( $this->requestInfoBean->issetGET( 'xvars' ) ) {
-				$xvars = $this->requestInfoBean->getGET( 'xvars' );
+			if ( $this->bean->issetGET( 'xvars' ) ) {
+				$xvars = $this->bean->getGET( 'xvars' );
 				$templateVariables = array_merge($xvars, $templateVariables);
 			}
 
@@ -128,13 +128,13 @@ class StyleSheetExtendedRawFileRequestProcessor extends RequestProcessor {
 			try {
 				$templateDirector->preProcessTemplate();
 			} catch (ErrorException $e) {
-			
+
 				if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
 					 eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
 					throw $e;
 				} else {
 					eGlooLogger::writeLog( eGlooLogger::WARN, 'StyleSheetExtendedRawFileRequestProcessor: Template requested but not found: "' .
-						$this->requestInfoBean->getGET( 'css_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
+						$this->bean->getGET( 'css_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
 					eGlooHTTPResponse::issueCustom404Response();
 				}
 			}

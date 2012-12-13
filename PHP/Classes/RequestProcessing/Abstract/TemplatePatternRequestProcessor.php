@@ -3,21 +3,21 @@
  * XHTMLTemplatePatternRequestProcessor Class File
  *
  * $file_block_description
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -48,13 +48,13 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
     /**
      * Concrete implementation of the abstract RequestProcessor method
      * processRequest().
-     * 
+     *
      * This method handles processing of the incoming client request.  Its
      * primary function is to establish the deployment environment (dev, test,
      * production) and the current localization, and to then parse the correct
      * template(s) in order to construct and output the appropriate external
      * main page (the domain root; e.g. www.egloo.com).
-     * 
+     *
      * @access public
      */
 	public function processRequest() {
@@ -67,17 +67,17 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		// end
 
 		//$application = &\eGloo\System\Server\Application::instance();
-		//$requestInfoBean = &$this->requestInfoBean;
-		
+		//$requestInfoBean = &$this->bean;
+
 		// save an instance of templateDirector per requestInfoBean 'type'
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );	 
-		//$templateDirector = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) { 
-		//	return TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );	
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
+		//$templateDirector = $application->context()->retrieve($requestInfoBean->signature(), function() use ($requestInfoBean) {
+		//	return TemplateDirectorFactory::getTemplateDirector( $requestInfoBean );
 		//});
-				
+
 		// -40 t/s after refactor (from -100)
 		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder(), $this->_requestIDOverride, $this->_requestClassOverride );
-				
+
 
 		try {
 			$templateDirector->preProcessTemplate();
@@ -89,7 +89,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 				throw $e;
 			} else {
 				eGlooLogger::writeLog( eGlooLogger::WARN, 'TemplatePatternRequestProcessor: Template requested for RequestClass/RequestID "' .
-					$this->requestInfoBean->getRequestClass() . '/' . $this->requestInfoBean->getRequestID() . '" but not found.' );
+					$this->bean->getRequestClass() . '/' . $this->bean->getRequestID() . '" but not found.' );
 
 				try {
 					// Let's make sure we clean up the output buffer so the custom 404 comes out clean
@@ -101,7 +101,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 					eGlooHTTPResponse::issueCustom404Response();
 				} catch (Exception $e) {
 					eGlooLogger::writeLog( eGlooLogger::WARN, 'TemplatePatternRequestProcessor: Custom 404 template requested for RequestClass/RequestID "' .
-						$this->requestInfoBean->getRequestClass() . '/' . $this->requestInfoBean->getRequestID() . '" but not found.' );
+						$this->bean->getRequestClass() . '/' . $this->bean->getRequestID() . '" but not found.' );
 
 					// Let's make sure we clean up the output buffer so the raw 404 comes out clean
 					if ( ob_get_level() ) {
@@ -113,15 +113,15 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 				}
 			}
 		}
-		
+
 		// begin -200 t/s
 		$this->populateTemplateVariables();
 		// end
 
 		// add nil value to all templates as empty placeholder
 		$this->setTemplateVariable('nil', '');
-		
-		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
+
+		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );
 		$output = $templateDirector->processTemplate();
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, static::getClass() . ": Echoing Response" );
@@ -145,7 +145,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 		$this->setTemplateBuilder();
 		$this->setCustomDispatch();
 
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
 		$templateDirector->setTemplateBuilder( $this->getTemplateBuilder() );
 
 		try {
@@ -156,14 +156,14 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 				throw $e;
 			} else {
 				eGlooLogger::writeLog( eGlooLogger::WARN, 'TemplatePatternRequestProcessor: Template requested for RequestClass/RequestID "' .
-					$this->requestInfoBean->getRequestClass() . '/' . $this->requestInfoBean->getRequestID() . '" but not found.' );
+					$this->bean->getRequestClass() . '/' . $this->bean->getRequestID() . '" but not found.' );
 				eGlooHTTPResponse::issueCustom404Response();
 			}
 		}
 
 		$this->populateErrorTemplateVariables();
 
-		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );            
+		$templateDirector->setTemplateVariables( $this->getTemplateVariables(), $this->useSystemVariables() );
 
 		$output = $templateDirector->processTemplate();
 
@@ -173,7 +173,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {
 			$this->setOutputHeaders();
-			echo $output;        
+			echo $output;
 		}
 
 		$this->postProcessing();
@@ -220,14 +220,14 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 			}
 		} else {
 			// TODO replace test case with dynamic di load from app context
-			//$application = &\eGloo\System\Server\Application::instance(); 
+			//$application = &\eGloo\System\Server\Application::instance();
 
 			// preinstatiation proves useless in this instance and a memory succubus
 			// TODO profile with larger seige
-			//$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() { 
+			//$this->_templateBuilder = clone $application->context()->retrieve('mongrel.test._templateBuilder', function() {
 			//	return new \XHTMLBuilder();
 			//});
-			
+
 			$this->_templateBuilder = new XHTMLBuilder();
 		}
 
@@ -244,7 +244,7 @@ abstract class TemplatePatternRequestProcessor extends RequestProcessor {
 
 	protected function setTemplateVariable( $key, $value ) {
 		$this->_templateVariables[$key] = $value instanceof \eGloo\Utilities\ToArrayInterface
-			? $value->__toArray() 
+			? $value->__toArray()
 			: $value;
 	}
 

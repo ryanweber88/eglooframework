@@ -3,21 +3,21 @@
  * CommentBlogFormRequestProcessor Class File
  *
  * Needs to be commented
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author <UNKNOWN>
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -30,37 +30,37 @@
  * CommentBlogFormRequestProcessor
  *
  * Needs to be commented
- * 
+ *
  * @package RequestProcessing
  * @subpackage Blog
  */
 class CommentBlogFormRequestProcessor extends RequestProcessor {
-    
+
     public function processRequest() {
-        $templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+        $templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
         $templateBuilder = new XHTMLBuilder();
         $templateDirector->setTemplateBuilder( $templateBuilder );
-        
-		
+
+
 		$mainProfileID = $_SESSION['MAIN_PROFILE_ID'];
 		$viewingProfileID = $_SESSION['MAIN_PROFILE_ID'];
 		$viewingUserProfileName = $_SESSION['USER_USERNAME'];
-		
+
 		$loggedInUser = true;
-		
-		if( $this->requestInfoBean->issetGET('profileID') ) {
-			$viewingProfileID = $this->requestInfoBean->getGET( 'profileID' );
+
+		if( $this->bean->issetGET('profileID') ) {
+			$viewingProfileID = $this->bean->getGET( 'profileID' );
 		} else {
 			$userCacheID = $_SESSION['USER_ID'] . '|' . $_SESSION['MAIN_PROFILE_ID'];
 		}
 
 		if( $viewingProfileID !==  $mainProfileID ) {
 			$loggedInUser = false;
-			
+
 			$daoFunction = 'getProfileName';
 			$inputValues = array();
  	    	$inputValues[ 'profileID' ] = $viewingProfileID;
- 	    	 	    	
+
  	    	$daoFactory = AbstractDAOFactory::getInstance();
 			$genericPLFunctionDAO = $daoFactory->getGenericPLFunctionDAO();
 			$gqDTO = $genericPLFunctionDAO->selectGenericData( $daoFunction,  $inputValues );
@@ -73,45 +73,45 @@ class CommentBlogFormRequestProcessor extends RequestProcessor {
 
         $templateVariables['eas_MainProfileID'] = $mainProfileID;
         $templateVariables['eas_ViewingProfileID'] = $viewingProfileID;
-        $templateVariables['fullBlogID'] = $this->requestInfoBean->getGET( 'blogID' );
+        $templateVariables['fullBlogID'] = $this->bean->getGET( 'blogID' );
 
 
         $daoFunction = 'getBlog';
 		$inputValues = array();
- 	    $inputValues[ 'inputBlogID' ] = $this->requestInfoBean->getGET( 'blogID' );
- 	    	 	    	
+ 	    $inputValues[ 'inputBlogID' ] = $this->bean->getGET( 'blogID' );
+
  	    $daoFactory = AbstractDAOFactory::getInstance();
 		$genericPLFunctionDAO = $daoFactory->getGenericPLFunctionDAO();
 		$individualBlogDTO = $genericPLFunctionDAO->selectGenericData( $daoFunction,  $inputValues );
-			
+
 		$templateVariables['fullBlogTitle'] = $individualBlogDTO->get_output_blogtitle();
         $templateVariables['fullBlogContent'] = nl2br( $individualBlogDTO->get_output_blogcontent() );
-        
+
         $templateVariables['fullBlogDateCreated'] = $individualBlogDTO->get_output_dateblogcreated();
 		$templateVariables['username'] = $viewingUserProfileName;
-		
-        $templateDirector->setTemplateVariables( $templateVariables );            
-        
+
+        $templateDirector->setTemplateVariables( $templateVariables );
+
         $globalMenuBarContent = new GlobalMenuBarContentProcessor();
-        
-        
+
+
         $templateDirector->setContentProcessors( array( $globalMenuBarContent ) );
 
         $output = $templateDirector->processTemplate();
-        
+
         header("Content-type: text/html; charset=UTF-8");
 
         echo $output;
     }
-    
+
     private function getDay( $date ){
     	return substr($date, 8, 2);
     }
-    
+
     private function getYear( $date ){
     	return substr($date, 0, 4);
     }
-    
+
     private function getMonth( $date ){
     	$monthNum = substr($date, 5, 2);
     	$monthString = "";

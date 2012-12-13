@@ -4,21 +4,21 @@
  *
  * Contains the class definition for the ConfigureApplicationCacheCoreeGlooRequestProcessor, a
  * subclass of the RequestProcessor abstract class.
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -28,10 +28,10 @@
 
 /**
  * Configure Application Cache Core eGloo Request Processor
- * 
+ *
  * Handles client requests to retrieve the external main page (the domain root;
  * e.g. www.egloo.com).
- * 
+ *
  * @package RequestProcessing
  * @subpackage RequestProcessors
  */
@@ -40,13 +40,13 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
     /**
      * Concrete implementation of the abstract RequestProcessor method
      * processRequest().
-     * 
+     *
      * This method handles processing of the incoming client request.  Its
      * primary function is to establish the deployment environment (dev, test,
      * production) and the current localization, and to then parse the correct
      * template(s) in order to construct and output the appropriate external
      * main page (the domain root; e.g. www.egloo.com).
-     * 
+     *
      * @access public
      */
     public function processRequest() {
@@ -56,8 +56,8 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 
 		$templateVariables = array();
 
-		if ($this->requestInfoBean->issetPOST('application_group_selected')) {
-			$templateVariables['application_group_selected'] = $this->requestInfoBean->getPOST('application_group_selected');
+		if ($this->bean->issetPOST('application_group_selected')) {
+			$templateVariables['application_group_selected'] = $this->bean->getPOST('application_group_selected');
 		} else {
 			$application_groups = array();
 
@@ -68,23 +68,23 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 			$templateVariables['application_groups'] = $application_groups;
 		}
 
-		if ($this->requestInfoBean->issetPOST('applications_selected_serialized')) {
-			$templateVariables['applications_selected'] = unserialize(urldecode($this->requestInfoBean->getPOST('applications_selected_serialized')));
-			$templateVariables['applications_selected_serialized'] = $this->requestInfoBean->getPOST('applications_selected_serialized');
-		} else if ($this->requestInfoBean->issetPOST('applications_selected')) {
-			$templateVariables['applications_selected'] = $this->requestInfoBean->getPOST('applications_selected');
-			$templateVariables['applications_selected_serialized'] = urlencode(serialize($this->requestInfoBean->getPOST('applications_selected')));
+		if ($this->bean->issetPOST('applications_selected_serialized')) {
+			$templateVariables['applications_selected'] = unserialize(urldecode($this->bean->getPOST('applications_selected_serialized')));
+			$templateVariables['applications_selected_serialized'] = $this->bean->getPOST('applications_selected_serialized');
+		} else if ($this->bean->issetPOST('applications_selected')) {
+			$templateVariables['applications_selected'] = $this->bean->getPOST('applications_selected');
+			$templateVariables['applications_selected_serialized'] = urlencode(serialize($this->bean->getPOST('applications_selected')));
 		} else {
 			$templateVariables['applications'] = $applications_info;
 		}
 
-		if ($this->requestInfoBean->issetPOST('applications_selected_serialized') &&
-			$this->requestInfoBean->issetPOST('applications_selected') &&
-			$this->requestInfoBean->issetPOST('application_bundle_selected')) {
+		if ($this->bean->issetPOST('applications_selected_serialized') &&
+			$this->bean->issetPOST('applications_selected') &&
+			$this->bean->issetPOST('application_bundle_selected')) {
 
-			$templateVariables['application_bundle_selected'] = $this->requestInfoBean->getPOST('application_bundle_selected');
-		} else if ($this->requestInfoBean->issetPOST('applications_selected_serialized') ||
-				   $this->requestInfoBean->issetPOST('applications_selected')) {
+			$templateVariables['application_bundle_selected'] = $this->bean->getPOST('application_bundle_selected');
+		} else if ($this->bean->issetPOST('applications_selected_serialized') ||
+				   $this->bean->issetPOST('applications_selected')) {
 
 			$applications_selected = $templateVariables['applications_selected'];
 
@@ -99,15 +99,15 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 			$templateVariables['bundles'] = $bundles;
 		}
 
-		if ($this->requestInfoBean->issetPOST('submit')) {
-			if ($this->requestInfoBean->issetPOST('countries_selected')) {
-				$countries_selected = $this->requestInfoBean->getPOST('countries_selected');
+		if ($this->bean->issetPOST('submit')) {
+			if ($this->bean->issetPOST('countries_selected')) {
+				$countries_selected = $this->bean->getPOST('countries_selected');
 			} else {
 				$countries_selected = array();
 			}
 
-			if ($this->requestInfoBean->issetPOST('languages_selected')) {
-				$languages_selected = $this->requestInfoBean->getPOST('languages_selected');
+			if ($this->bean->issetPOST('languages_selected')) {
+				$languages_selected = $this->bean->getPOST('languages_selected');
 			} else {
 				$languages_selected = array();
 			}
@@ -157,10 +157,10 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 					}
 				}
 			}
-			
+
 		}
 
-		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->requestInfoBean );
+		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
 		$templateBuilder = new XHTMLBuilder();
 
 		$templateDirector->setTemplateBuilder( $templateBuilder );
@@ -179,11 +179,11 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 
 		$templateVariables['countries'] = $countries;
 		$templateVariables['languages'] = $languages;
-		
+
 		$templateVariables['countries_selected'] = $countries_selected;
 		$templateVariables['languages_selected'] = $languages_selected;
 
-		$templateDirector->setTemplateVariables( $templateVariables );            
+		$templateDirector->setTemplateVariables( $templateVariables );
 		$output = $templateDirector->processTemplate();
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "ConfigureApplicationCacheCoreeGlooRequestProcessor: Echoing Response" );
@@ -226,7 +226,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 
 						}
 
-						$paths[$application_name] = array( 'application_name' => $application_name, 
+						$paths[$application_name] = array( 'application_name' => $application_name,
 														   'application_path' => $i->getRealPath(),
 														   'application_group' => $application_group,
 														   'application_interface_bundles' => $interface_bundles);
@@ -240,7 +240,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 						$application_group = '-None-';
 					} else {
 						$application_group = preg_replace('~' . eGlooConfiguration::getApplicationsPath() . '/~', '', $i->getPath());
-						
+
 						if (trim($application_group) === '' || $application_group === $i->getPath()) {
 							$application_group = '-None-';
 						}
@@ -251,7 +251,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 					try {
 						$interface_bundles = $this->getInterfaceBundles($i->getRealPath());
 					} catch (Exception $e) {
-						
+
 					}
 
 					$paths[$application_name] = array( 'application_name' => $application_name,
@@ -411,7 +411,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 					if ( !in_array($i->getFilename(), array('.', '..', '.DS_Store')) ) {
 						// $retVal[$i->getFilename()] = $i->getFilename();
 						$retVal[$bundle][$i->getFilename()] = array();
-						
+
 						$languages = new DirectoryIterator( $i->getRealPath() );
 
 						foreach ($languages as $language) {
@@ -435,7 +435,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 
 			try {
 				// $it = new DirectoryIterator( $smarty_cache_path );
-				// 
+				//
 				// foreach ($it as $i) {
 				// 	if ( !in_array($i->getFilename(), array('.', '..', '.DS_Store')) ) {
 				// 		$retVal[$i->getFilename()] = $i->getFilename();
@@ -447,7 +447,7 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 					if ( !in_array($i->getFilename(), array('.', '..', '.DS_Store')) ) {
 						// $retVal[$i->getFilename()] = $i->getFilename();
 						$retVal[$bundle][$i->getFilename()] = array();
-						
+
 						$languages = new DirectoryIterator( $i->getRealPath() );
 
 						foreach ($languages as $language) {
