@@ -1065,4 +1065,16 @@ function strtotime($symbol) {
 	return \strtotime($symbol);
 }
 
+/** Convenience method to call_user_func_array; this was
+ ** meant to be abstracted within object context, but
+ ** this has proven to be a failure as PHP does not
+ ** provide true static scope resolution */
+function send($receiver, $message, $__mixed = null) {
+	$arguments = array_slice(
+		func_get_args(), 2	
+	);
+
+	return $receiver::send($message, $arguments);
+}
+
 }

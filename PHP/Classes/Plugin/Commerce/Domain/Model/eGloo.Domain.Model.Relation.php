@@ -1,10 +1,12 @@
 <?php
 namespace eGloo\Domain\Model;
 
-use       \eGloo\Domain,
+use       \eGloo,
+          \eGloo\Domain,
           \eGloo\Dialect\Object,
           \eGloo\Utilities\Collection,
           \eGloo\Performance\Caching;
+
 		
 		
 /**
@@ -36,7 +38,7 @@ class Relation extends Object
 			
 			else {
 				throw new \Exception (
-					"Failed to create instance 'Relation' because " . 
+					"Failed to create instance 'Relation' because "  . 
 					"model '{$model::receiver_id()}' does not exist"
 				);
 			}
@@ -44,9 +46,11 @@ class Relation extends Object
 		
 		
 		// set instance properties and create sql AREL/Bella builder
-		$model::send('entity'); exit;
+		//echo $model; exit;
 
-		$this->builder = new \Bella\Table($model::send('entity'));
+		$this->builder = new \Bella\Table(egloo\send(
+			$model, 'entity'
+		));
 		$this->model   = $model; 
 		$this->chain   = $this->builder;
 		

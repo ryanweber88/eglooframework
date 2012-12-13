@@ -417,11 +417,6 @@ abstract class Object {
 		$receiver = static::receiver();
 		$instance = is_object($receiver);
 
-		if ($method == 'entity') {
-			echo get_class($this); exit;
-			//var_export(static::singleton());
-			//exit;
-		}
 
 		// retrieve the messages arguments, if any.. since we
 		// allow for array passing to we do an explicit

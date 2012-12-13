@@ -58,7 +58,7 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
-exit;
+exit('adsf');
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
