@@ -55,7 +55,7 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 	/**
 	 * Uses information schema to retrieve entity primary keys
 	 */
-	public static function primaryKeys($table) {
+	public static function primaryKey($table, $comprehensive = false) {
 		return static::cache("*$table", function($table) {
 			$keys    = [ ];	
 			$records = static::statement('
@@ -71,19 +71,21 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 				  AND indisprimary
 						
 			', $table);	
-			
-			// retrieve key names only
-			// @TODO modify query so that filter does
-			// not have to be applied
-			if (Collection::isHash($records)) {
-				$records = [ $records ];
-			}
-			
-			foreach($records as $associative) {
-				$keys[] = $associative['attname'];
-			}
 
-			return $keys;
+			if (is_array($records)) {
+
+
+				// retrieve key names only
+				// @TODO modify query so that filter does
+				// not have to be applied
+				//Collection::isHash($records)) && $records = array_keys
+
+				foreach($records as $associative) {
+					$keys[] = $associative['attname'];
+				}
+
+				return $keys;
+			}
 		});		
 		
 	}

@@ -291,18 +291,6 @@ abstract class Model extends Delegator
 		
 	}
 	
-	protected static function __methodsStatic() {
-		
-		$class = static::classNameFull();
-		
-		static::defineMethod('transaction', function($lambda) {
-			throw new \Exception(
-				"Class-level transaction support not implemented"
-			);
-		});
-		
-		
-	}
 	
 	/**
 	 * A "method space" to provide cache/index definitions
@@ -1210,6 +1198,8 @@ abstract class Model extends Delegator
 	public function unserialize($serialized) {
 		$this->__construct(unserialize($serialized));
 	}
+
+
 	
 	/** Static Model Constructors ************************************************/
 	
@@ -1248,7 +1238,7 @@ abstract class Model extends Delegator
 		// alias our primary key, using convention of tablename_id - this
 		// is important as primary keys can now be accessed via instance->id
 		if (static::hasPrimaryKey()) {
-			static::aliasPrimaryKey(static::primaryKeys()[0]);
+			static::aliasPrimaryKey(static::primaryKey());
 		}
 			
 	}
@@ -1600,7 +1590,7 @@ abstract class Model extends Delegator
 	
 
 	
-	
+	// CRUD methods //////////////////////////////////////////////////////////
 	
 	/**
 	 * Create method is a really wrapper to instantiate model, and then
@@ -1673,26 +1663,103 @@ abstract class Model extends Delegator
 		return $model;
 	}
 
-	/*
+	/**
+	 * Create method is a really wrapper to instantiate model, and then
+	 * call save
+	 * @return Model
+	 * @param  variable-length[] $__mixed
+	 */
 	public static function find($__mixed) {
-		if (isset($arguments[0]) && ($self = $arguments[0]) instanceof Model) {
-		 
+				
+				
+		// expand on parameter matching, but for, just match on primary
+		// and tablename_id pattern
+		$arguments = Collection::flatten(func_get_args());
+		$table     = static::entity();
+		$field     = static::primaryK
+		$key       = $arguments[0]; 
+		$set       = array();
+		$manager   = Model\Manager::instance();
+						
+		
+		// we're GAURENTEED to throw an exception here if our by-conventions guess
+		// does not pan out; so callers will be explicitly aware
+		try {
 			
-		} else {
 			
-			// flatten arguments - this will always return an array
-			$arguments = \eGloo\Utilities\Collection::flatten($__mixed);
-			$models    = array
-			// iterate through arguments, 
 			foreach($arguments as $key) {
 				
+				if (is_numeric($key)) {
+					
+					// check if model has already been persisted
+					// @TODO this needs to be converted to single statement ASAP  
+					$result = $manager->find($class, $key, function($class, $key) use ($field) {
+						
+						// check model cache to determine if exists in cache already; we use our
+						// static instance so we DON'T have to reinstantiate everytime we call find
+						// as it is an expensive operation and the model in this instance only serves
+						// as template of sorts (see todo)
+						// @TODO since model is really only a template, this should be replaced with
+						// Virtual Proxy concept
+						$cache  = new Cache\Model;
+						$model  = $class::instance();
+						$model->id = $key;
+						
+							
+						// @TODO model caching is breaking references on callbacks and following
+						// trace is nearly impossible - for the time being, we are removing this
+						// functionality								
+						//$result = $cache->find($model, function() use ($class, $field, $key) {
+							$result = $class::sendStatic('process', $class::where(array(
+								$field => $key
+							)));
+							
+																
+							// we know that if result is not absolute false, it will be returned
+							// as a set from our process method									
+							if ($result) {
+								$result = $result[0];
+							}
+							
+							//return $result;
+						//});
+														
+			
+																					
+						return $result;
+					});
+					
+					
+					if ($result !== false) {
+						$set[] = $result;
+					}
+					
+				}
+
 			}
+			
+			// @TODO place our afterFind in background task
+			if (count($set)) {
+				foreach($set as $model) {
+					$model->send('runCallbacks', 'find', 'after');
+				}
+
 				
-		}
-		
+				// if a set consisting of a single element; return element, as the likely
+				// intended purpose was to retrieve a single record; otherwise return set
+				// instance
+				return count($set) == 1
+					? $set[0]
+					: new Model\Set($set);
+			}
+			
+			return false;
+		}	
+			
+		catch(\Exception $passthrough) {
+			throw $passthrough;
+		}				
 	}
-	 * 
-	 */
 	
 	public function save($cascade = false) {
 				
@@ -2186,24 +2253,6 @@ abstract class Model extends Delegator
 		
 	}
 	
-	/**
-	 * If a composite model, specify model primary keys
-	 * @return boolean
-	 */
-	protected static function primaryKeys($__mixed = null) {		
-		/*
-		if (count($arguments = func_get_args())) {
-			$this->primaryKeys = Collection::flatten($arguments);
-		}
-		
-		else {
-			return $this->primaryKeys;
-		}
-		*/
-
-		// @TOOD we may still need to specify primary keys
-		return Data::primaryKeys(static::entity());
-	}
 	
 	/**
 	 * Check to determine if model has been specified as having
@@ -2223,7 +2272,7 @@ abstract class Model extends Delegator
 		
 		//return isset($this->$field) &&
 		//      !is_null($this->$field);
-		return count(static::primaryKeys())  == 1;
+		return count(static::primaryKeys())  > 0;
 
 	}
 	
@@ -2820,27 +2869,26 @@ abstract class Model extends Delegator
 	 * explicit understanding of underlying data structure; the methodology
 	 * by which primary key is obtained will change in the future
 	 * @TODO this method needs to be rethought
+	 * @Deprecated
 	 */
 	public static function primaryKeyName() {
-		
-		// @TODO should we be determining key name or throwing
-		// an exception
-		//if (is_null(static::$primaryKeyName)) {
-		//	return static::entity() . '_id';
-		
-		//} else { 
-		//	return static::$primaryKeyName;
+		return static::primarykey();
+	}
 
-		//}
+	/**
+	 * Uses convention to determine primary key name - this is not a 
+	 * a gaurentee that is valid primary key name
+	 */
+	public static function primaryKey() {
 
-		if (static::hasPrimaryKey()) {
-			return static::primaryKeys()[0];
-		
-		} else if (static::hasCompositeKeys()) {
-			throw new \Exception(
-				"Failed to determine primary key name because receiver " . 
-				"'" . static::$class  . "' defines composite key set"
-			);
+		// attempt to retrieve primary key from data source
+		if (($keys = Data::primaryKey(static::entity()))) {
+			
+			// if a composite, then return as array; if not, return
+			// scalar value
+			return count($keys) > 1 
+				? $keys
+				: $keys[0]; 	
 		
 		} else {
 			throw new \Exception(
@@ -2848,8 +2896,7 @@ abstract class Model extends Delegator
 				"'" . static::$class  . "' does not have a primary key"
 			);
 		}
-
-	}
+	}	
 
 	/**
 	 * Determines if model instance has changed since initialization
@@ -2880,14 +2927,7 @@ abstract class Model extends Delegator
 		});
 	}
 	
-	/**
-	 * Uses convention to determine primary key name - this is not a 
-	 * a gaurentee that is valid primary key name
-	 * @deprecated
-	 */
-	public static function primaryKey() {
-		return static::primaryKeyName();
-	}
+
 	
 	/**
 	 * Explicitly lists changes 
