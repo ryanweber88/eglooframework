@@ -50,11 +50,11 @@ class Manager extends Object {
 		
 		// our mixed parameter may be of either type Model or a string
 		// representing a valid, fully qualified class name
-		$class = (is_object($instance = $mixed) && $mixed instanceof Object)  
-			? $mixed->class->qualified_name
+		$class = (is_object($instance = $mixed) && $instance instanceof Object)  
+			? $instance::classnamefull()
 			: $mixed;
 
-					
+	
 		if (class_exists($class)) { 
 			if (isset($this->pool[$class][$key])) {
 				return $this->pool[$class][$key];
@@ -64,7 +64,7 @@ class Manager extends Object {
 			// model from lambda
 			else if (is_callable($lambda)) {
 				if (($model = $lambda($class, $key))) {
-	
+
 					// persist found model and return to caller
 					if ($model->exists()) {
 						$this->persist($model);

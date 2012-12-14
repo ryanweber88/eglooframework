@@ -48,7 +48,7 @@ class Relation extends Object
 		// set instance properties and create sql AREL/Bella builder
 		//echo $model; exit;
 
-		$this->builder = new \Bella\Table(egloo\send(
+		$this->builder = new \Bella\Table(eGloo\send(
 			$model, 'entity'
 		));
 		$this->model   = $model; 
@@ -273,12 +273,12 @@ class Relation extends Object
 		$result = null;
 							
 		try {
-			$result = $model::sendStatic('process', $model::statement(
+			$result = eGloo\send($model, 'process', Domain\Data::statement(
 				$this->to_sql(), $this->arguments
 			));
-		}
-		
-		catch(\Exception $deferred) { }
+
+
+		} catch(\Exception $deferred) { }
 		
 		
 		// our query method should always return set, so we

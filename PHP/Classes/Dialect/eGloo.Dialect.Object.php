@@ -410,7 +410,7 @@ abstract class Object {
 	public function send($method, $__mixed = null) {
 
 
-		
+
 		// send can be invoked from both static and instance
 		// contexts; because of this we need to do a backtrace
 		// to determine our correct receiver (an instance or
@@ -423,6 +423,7 @@ abstract class Object {
 		// allow for array passing to we do an explicit
 		// check to see if an array was passed as second
 		// argument and flattan
+
 		$arguments = array_slice(func_get_args(), 1); 
 
 		if (count($arguments) == 1 && is_array($arguments[0])) {
@@ -433,12 +434,27 @@ abstract class Object {
 		// lambda; if we cannot find method, we know it doesnt
 		// exist and throw an exception
 		try { 
-			//$lambda = call_user_func_array(
-			//	($receiver, 'method'), array($method)
-			//);
 
-			$lambda = static::method($method);
-		
+			// create instance of reflection method, 
+			// and change visibility to true so that it
+			// may be called externally if needed
+			$method = new \ReflectionMethod(
+				$receiver, $method
+			);
+			$method->setAccessible(true);
+
+
+
+			// finally invoke method with passed arguments and
+			// return to caller; i don't understand why an invoke
+			// requires listing the explicit receiver when it is
+			// ALREADY passed went instantiating, but what the fuck
+			// ever. Also, if method happens to be static, then
+			// passed receiver must be null @wtfphp
+			return $method->invokeArgs(
+				is_object($receiver) ? $receiver : null, [ $arguments ] 
+			);
+
 		// if an exception is thrown, then we can safely determine
 		// that the method does not exist
 		} catch(\Exception $e) { 

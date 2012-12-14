@@ -8,7 +8,7 @@ class Memcache extends Caching\Store {
 	
 	public function read($name, array $options = null) {
 		return $this
-			->cache()
+			->gateway()
 			->getObject($name, $this->server($options));
 			
 		
@@ -16,7 +16,7 @@ class Memcache extends Caching\Store {
 	
 	public function write($name, $value, array $options = null) {
 		return $this
-			->cache()
+			->gateway()
 			->storeObject($name, $value, $this->server($options));		
 	}
 	
@@ -57,13 +57,13 @@ class Memcache extends Caching\Store {
 	
 	public function delete($name, array $options = null) {
 		$this
-			->cache()
+			->gateway()
 			->deleteObject($name, $this->server($options));
 	}
 	
 	public function exists($name, array $options = null) {
 		$value = $this
-			->cache()
+			->gateway()
 			->exists($name, $this->server($options));
 			
 
@@ -71,7 +71,7 @@ class Memcache extends Caching\Store {
 		return $value !== false;	
 	}
 	
-	private function cache() {
+	private function gateway() {
 		return Caching\Gateway::getCacheGateway();
 	}
 	

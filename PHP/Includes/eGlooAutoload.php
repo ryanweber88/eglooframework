@@ -1074,6 +1074,7 @@ function send($receiver, $message, $__mixed = null) {
 		func_get_args(), 2	
 	);
 
+
 	return $receiver::send($message, $arguments);
 }
 

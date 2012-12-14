@@ -268,7 +268,7 @@ abstract class Model extends Delegator
 					'order', 
 					'group'
 				),
-				'to'      => new Model\Relation(static::classnamefull())
+				'to' => new Model\Relation(static::classnamefull())
 			));
 		}
 	}
@@ -383,7 +383,9 @@ abstract class Model extends Delegator
 	 * @deprecated
 	 */
 	protected static function entityName() {
-		return static::signature(static::classnamefull());
+		throw new \Exception(
+			"Model#entityName is deprecated"
+		);
 	}
 	
 	/**
@@ -1702,7 +1704,7 @@ abstract class Model extends Delegator
 						// @TODO this needs to be converted to single statement ASAP  
 						$result = $manager->find(static::classnamefull(), $key, 
 							function($class, $key) use ($field) {
-							
+
 								// check model cache to determine if exists in cache already; we use our
 								// static instance so we DON'T have to reinstantiate everytime we call find
 								// as it is an expensive operation and the model in this instance only serves
@@ -1719,7 +1721,7 @@ abstract class Model extends Delegator
 									$field => $key
 								])
 								->build();
-								
+
 																	
 								// we know that if result is not absolute false, it will be returned
 								// as a set from our process method									
@@ -2144,29 +2146,32 @@ abstract class Model extends Delegator
 	 * @return Model | Model\Set
 	 */
 	protected static function shape($result) {
-		
 		if (($relation = $result) instanceof Model\Relation) {
 			// cache based on query
 			$result = $relation->build();	
 		}
 		
 		else if (is_array($result) && count($result)) {
-			$manager = Model\Manager::instance();
-			
+			$manager = Model\Manager::singleton();
 	
 			// guess key for manager, and get class
 			$signature = static::signature();
-			$key       = "{$signature}_id";
+			$key       = static::hasCompositeKeys()
+				? implode('', static::primaryKey())
+				: static::primaryKey();
 			$class     = static::classnamefull();
-			
-			$tmp       = get_called_class();
-			$instance  = $tmp::instance();
-								
+
+
+
 			if (\eGloo\Utilities\Collection::isHash($result)) {
-				$result = $manager->find($instance, $key, function($class) use ($result) {					
+				$result = $manager->find(static::singleton(), $key, function($class) 
+					use ($result) {					
+
 					return new $class($result);
-				});				
-								
+				});	
+
+				var_export($result); exit;	
+
 				
 				$result->send('runCallbacks', 'find', 'after');
 				
