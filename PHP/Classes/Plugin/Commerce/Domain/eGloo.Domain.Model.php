@@ -350,8 +350,8 @@ abstract class Model extends Delegator
 	public function exists() {
 		// @TODO this clearly needs to change - for right now, just check if id has been
 		// set
-		if ($this->hasCompositeKeys()) {
-			foreach($this->primaryKeys as $key) {
+		if (static::hasCompositeKeys()) {
+			foreach(static::primaryKey() as $key) {
 				if (!isset($this->$key) || is_null($this->$key)) {
 					return false;
 				}
@@ -361,8 +361,8 @@ abstract class Model extends Delegator
 		}
 		
 		else {
-			return isset($this->id)     && 
-						 (!empty($this->id)   ||
+			return  isset($this->id)      && 
+						 (!empty($this->id)     ||
 						  !is_null($this->id));
 		}					 
 	}
@@ -1674,91 +1674,91 @@ abstract class Model extends Delegator
 				
 		// expand on parameter matching, but for, just match on primary
 		// and tablename_id pattern
-		$arguments = Collection::flatten(func_get_args());
-		$table     = static::entity();
-		$field     = static::primaryK
-		$key       = $arguments[0]; 
-		$set       = array();
-		$manager   = Model\Manager::instance();
-						
-		
-		// we're GAURENTEED to throw an exception here if our by-conventions guess
-		// does not pan out; so callers will be explicitly aware
-		try {
+		if (static::hasCompositeKeys()) {
+			throw new \Exception(
+				"Find on composite keys not yet supported"
+			);
+
+
+		} else {
+			$arguments = Collection::flatten(func_get_args());
+			$table     = static::entity();
+			$field     = static::primaryKey();
+			$key       = $arguments[0]; 
+			$set       = array();
+			$manager   = Model\Manager::instance();
+							
 			
-			
-			foreach($arguments as $key) {
+			// we're GAURENTEED to throw an exception here if our by-conventions guess
+			// does not pan out; so callers will be explicitly aware
+			try {
 				
-				if (is_numeric($key)) {
+				
+				foreach($arguments as $key) {
 					
-					// check if model has already been persisted
-					// @TODO this needs to be converted to single statement ASAP  
-					$result = $manager->find($class, $key, function($class, $key) use ($field) {
+					if (is_numeric($key)) {
 						
-						// check model cache to determine if exists in cache already; we use our
-						// static instance so we DON'T have to reinstantiate everytime we call find
-						// as it is an expensive operation and the model in this instance only serves
-						// as template of sorts (see todo)
-						// @TODO since model is really only a template, this should be replaced with
-						// Virtual Proxy concept
-						$cache  = new Cache\Model;
-						$model  = $class::instance();
-						$model->id = $key;
-						
+						// check if model has already been persisted
+						// @TODO this needs to be converted to single statement ASAP  
+						$result = $manager->find(static::classnamefull(), $key, 
+							function($class, $key) use ($field) {
 							
-						// @TODO model caching is breaking references on callbacks and following
-						// trace is nearly impossible - for the time being, we are removing this
-						// functionality								
-						//$result = $cache->find($model, function() use ($class, $field, $key) {
-							$result = $class::sendStatic('process', $class::where(array(
-								$field => $key
-							)));
+								// check model cache to determine if exists in cache already; we use our
+								// static instance so we DON'T have to reinstantiate everytime we call find
+								// as it is an expensive operation and the model in this instance only serves
+								// as template of sorts (see todo)
+								// @TODO since model is really only a template, this should be replaced with
+								// Virtual Proxy concept
+								$cache  = new Cache\Model;
+									
+								// @TODO model caching is breaking references on callbacks and following
+								// trace is nearly impossible - for the time being, we are removing this
+								// functionality								
+								//$result = $cache->find($model, function() use ($class, $field, $key) {
+								$result = $class::where([
+									$field => $key
+								])
+								->build();
+								
+																	
+								// we know that if result is not absolute false, it will be returned
+								// as a set from our process method									
+								if ($result) {
+									$result = $result[0];
+								}
+												
+								return $result;
+						});
 							
-																
-							// we know that if result is not absolute false, it will be returned
-							// as a set from our process method									
-							if ($result) {
-								$result = $result[0];
-							}
 							
-							//return $result;
-						//});
-														
-			
-																					
-						return $result;
-					});
-					
-					
-					if ($result !== false) {
-						$set[] = $result;
+						if ($result !== false) {
+							$set[] = $result;
+						}	
 					}
-					
 				}
-
-			}
-			
-			// @TODO place our afterFind in background task
-			if (count($set)) {
-				foreach($set as $model) {
-					$model->send('runCallbacks', 'find', 'after');
-				}
-
 				
-				// if a set consisting of a single element; return element, as the likely
-				// intended purpose was to retrieve a single record; otherwise return set
-				// instance
-				return count($set) == 1
-					? $set[0]
-					: new Model\Set($set);
-			}
-			
-			return false;
-		}	
-			
-		catch(\Exception $passthrough) {
-			throw $passthrough;
-		}				
+				// @TODO place our afterFind in background task
+				if (count($set)) {
+					foreach($set as $model) {
+						//$model->send('runCallbacks', 'find', 'after');
+					}
+
+					
+					// if a set consisting of a single element; return element, as the likely
+					// intended purpose was to retrieve a single record; otherwise return set
+					// instance
+					return count($set) == 1
+						? $set[0]
+						: new Model\Set($set);
+				}
+				
+				return false;
+			}	
+				
+			catch(\Exception $passthrough) {
+				throw $passthrough;
+			}	
+		}			
 	}
 	
 	public function save($cascade = false) {
@@ -2112,7 +2112,6 @@ abstract class Model extends Delegator
 		}
 		
 		
-		
 		// run our before/around callbacks
 		foreach($points as $point) {
 			if (static::hasCallbacks($event, $point)) {
@@ -2264,15 +2263,15 @@ abstract class Model extends Delegator
 		//       count($this->primaryKeys);
 
 		// @TODO cache?
-		return count(static::primaryKeys()) > 1;
+		return count(static::primaryKey()) > 1;
 	}
 	
-	public function hasPrimaryKey() {
+	public static function hasPrimaryKey() {
 		//$field = $this->primaryKeyName();
 		
 		//return isset($this->$field) &&
 		//      !is_null($this->$field);
-		return count(static::primaryKeys())  > 0;
+		return count(static::primaryKey())  > 0;
 
 	}
 	
@@ -2454,8 +2453,26 @@ abstract class Model extends Delegator
 		}
 		catch (\Exception $deferred) { }
 		
-		// if unable to find matching meta call within
-		// __call chain, determine if 
+		// check for callback shortcut methods; instead of running 
+		// defineCallback, we can run this->before_create 
+		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
+			return call_user_func_array(
+				static::defineMethod($name, function($mixed) use ($match) {
+
+					if (func_num_args()) {				
+						static::defineCallback(
+							$event = $match[2], $match[1], $mixed
+						);
+
+					// otherwise we are executing/firing(?) the callback stack
+					} else {
+						static::runCallbacks($match[2], $match[1]);
+
+					}
+
+			}), $arguments);
+			
+		}	
 
 		
 		throw $deferred; 
@@ -2471,14 +2488,12 @@ abstract class Model extends Delegator
 		catch(\Exception $deferred) { }
 
 
-				// check for callback shortcut methods; instead of running 
+		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
 			return call_user_func_array(
 				static::defineMethod($name, function($mixed) use ($match) {
 
-					// if arguments have been passed, then we are defining
-					// a callback
 					if (func_num_args()) {				
 						static::defineCallback(
 							$event = $match[2], $match[1], $mixed

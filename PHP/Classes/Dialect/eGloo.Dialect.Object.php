@@ -112,6 +112,7 @@ abstract class Object {
 	 */
 	public function defer($name, callable $lambda) {
 
+
 		if (is_object(static::receiver())) {
 			$defers = &$this->_defers;
 

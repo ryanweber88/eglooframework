@@ -11,8 +11,8 @@ use \eGloo\Dialect\Object;
  *   - crud operations between data and entity layers
  *   
  * @author Christian Calloway
- * @TODO this is slimmed down version of persistence api, while it will have same interface, it will eventually
- * be replaced
+ * @TODO this is slimmed down version of persistence api, while it will have 
+ * same interface, it will eventually be replaced
  *
  */
 class Manager extends Object {

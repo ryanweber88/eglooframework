@@ -72,14 +72,14 @@ class Data extends \eGloo\DataProcessing\Connection\PostgreSQLDBConnection {
 						
 			', $table);	
 
-			if (is_array($records)) {
+			Collection::isHash($records) && $records = [ $records ];
 
+			if (is_array($records)) {
 
 				// retrieve key names only
 				// @TODO modify query so that filter does
 				// not have to be applied
 				//Collection::isHash($records)) && $records = array_keys
-
 				foreach($records as $associative) {
 					$keys[] = $associative['attname'];
 				}
