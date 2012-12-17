@@ -12,7 +12,7 @@ It serves as the foundation for rapid scaling ecommerce solutions that deliver
 lightning-fast performance, and even an entire line of touchscreen solutions
 in multiple nations around the world.
 
-eGloo can be used to develop websites, SaaS solutions, IaaS solutions and 
+eGloo can be used to develop websites, SaaS solutions, IaaS solutions and
 provides built-in support for data source and format agnostic ETL solutions.
 
 Requirements
@@ -81,3 +81,4 @@ Documentation
 -------------
 
 Coming soon.  No, seriously.
+
