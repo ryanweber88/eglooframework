@@ -11,21 +11,21 @@ use \RecursiveIteratorIterator as RecursiveIteratorIterator;
  * Class and Interface Autoloader
  *
  * This file contains the function definition for the __autoload runtime handler.
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *		  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *	
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -80,7 +80,7 @@ if ( Configuration::getUseHaanga() ) {
 
 // Load Smarty
 if ( Configuration::getUseSmarty() ) {
-	include( Configuration::getSmartyIncludePath() );	
+	include( Configuration::getSmartyIncludePath() );
 }
 
 // Load Swift
@@ -100,21 +100,21 @@ if ( Configuration::getUseS3() ) {
 }
 
 // Load Doctrine
-if ( Configuration::getUseDoctrine() ) {
-	include( Configuration::getDoctrineIncludePath() );
-	spl_autoload_register(array('Doctrine', 'autoload'));
-}
+// if ( Configuration::getUseDoctrine() ) {
+// 	include( Configuration::getDoctrineIncludePath() );
+// 	spl_autoload_register(array('Doctrine', 'autoload'));
+// }
 
 
 /**
  * Defines the class and interface autoload runtime handler.
- * 
- * When PHP encounters a class or interface that has not yet been loaded or defined, __autoload 
+ *
+ * When PHP encounters a class or interface that has not yet been loaded or defined, __autoload
  * is invoked with the class or interface name as its only parameter.  __autoload searches
  * the defined classpaths for possible matches.	 If a match is found, the file containing the
  * requested definition is included.  If __autoload exits without successfully matching and
  * loading the requested class or interface, the runtime will abort with an error.
- * 
+ *
  * The only permitted class or interface filename format is {CLASS_OR_INTERFACE_NAME}.php and is
  * case sensitive.	The only classpath checked is "../PHP/Classes", relative to the project root
  * and inclusive of all subdirectories.
@@ -126,16 +126,16 @@ function autoload( $class_name ) {
 	if ( strpos($class_name, '\\') === 0 ) {
 		$class_name = substr( $class_name, 1 );
 	}
-	
+
 	$cacheGateway = CacheGateway::getCacheGateway();
-	
+
 	if ( ( $autoload_hash = $cacheGateway->getObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
 				include( $autoload_hash[$class_name] );
 			}
-	
+
 			return;
 		}
 	} else {
@@ -148,7 +148,7 @@ function autoload( $class_name ) {
 	static $cli_paths = null;
 
 	// List here whatever formats you use for your file names. Note that, if you autoload
-	// a class that implements a non-loaded interface, you will also need to autoload that 
+	// a class that implements a non-loaded interface, you will also need to autoload that
 	// interface. Put the &CLASS wherever the $class_name might appear
 	static $permitted_formats = array("&CLASS.php");
 
@@ -176,7 +176,7 @@ function autoload( $class_name ) {
 		$possible_path = array_flip( $class_paths );
 
 		// Merge the flipped arrays to get rid of duplicate "keys" (which are really the
-		// valid include paths) then strip out the keys leaving only uniques. This is 
+		// valid include paths) then strip out the keys leaving only uniques. This is
 		// marginally faster than using array_combine and array_unique and much more elegant.
 		$possible_path = array_keys( array_merge( $possible_path,
 			array_flip( explode( ini_get( "include_path" ), ";" ) ) ) );
@@ -204,7 +204,7 @@ function autoload( $class_name ) {
 	if ($sanityCheckClassLoading) {
 		$instances = array();
 	}
-	
+
 	foreach ( $possible_path as $directory ) {
 		if ($sanityCheckClassLoading) {
 			$instances[$directory] = array();
@@ -258,11 +258,11 @@ function autoload( $class_name ) {
 				if ($sanityCheckClassLoading) {
 					foreach( $instances as $directory => $instancePathSet) {
 						$noConflicts = true;
-				
+
 						if (count($instancePathSet) > 1) {
 							$noConflicts = false;
 							$errorMessage = 'Duplicate class "' . $class_name . '" found.';
-				
+
 							foreach($instances as $classPath => $classPathInstances) {
 								foreach($classPathInstances as $instance) {
 									$errorMessage .= "\n\tClass Path: " . $classPath . "\n\tInstance: " . $instance . "\n";

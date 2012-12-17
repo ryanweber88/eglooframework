@@ -6,19 +6,19 @@
 # using the command ./Install.sh
 #
 # Copyright 2011 eGloo, LLC
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #        http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#  
+#
 # @author George Cooper
 # @copyright 2011 eGloo, LLC
 # @license http://www.apache.org/licenses/LICENSE-2.0
@@ -91,7 +91,7 @@ while getopts "d" opt; do
 			DEFAULT_EVERYTHING=1
 			echo "Running in non-interactive mode with all defaults"
 		;;
-		
+
 		\?)
 			exit 1
 		;;
@@ -164,7 +164,6 @@ then
 	DEFAULT_CONFIG="/Library/Application Support/eGloo/Framework/Configuration"
 	DEFAULT_CUBES="/Library/Application Support/eGloo/Cubes"
 	DEFAULT_DATA_STORE="/Library/Application Support/eGloo/Data"
-	DEFAULT_DOCTRINE=`locate /opt/*lib/Doctrine.php | head -n 1`
 	DEFAULT_DOCUMENTATION="/Library/Documentation/eGlooFramework"
 	DEFAULT_DOCUMENTROOT="/Library/WebServer/eGloo"
 	DEFAULT_FRAMEWORKROOT="/Library/Frameworks/eGloo.framework"
@@ -190,7 +189,6 @@ then
 	DEFAULT_CONFIG="/etc/egloo/"
 	DEFAULT_CUBES="/usr/lib/egloo/cubes"
 	DEFAULT_DATA_STORE="/var/egloo"
-	DEFAULT_DOCTRINE=`locate /usr/*/Doctrine.php | head -n 1`
 	DEFAULT_DOCUMENTATION="/usr/share/doc/egloo"
 	DEFAULT_DOCUMENTROOT="/var/www/egloo"
 	DEFAULT_FRAMEWORKROOT="/usr/lib/eglooframework"
@@ -215,7 +213,6 @@ then
 	DEFAULT_CONFIG="/etc/egloo/"
 	DEFAULT_CUBES="/lib/egloo/cubes"
 	DEFAULT_DATA_STORE="/var/egloo"
-	DEFAULT_DOCTRINE="/usr/share/php/doctrine/Doctrine.php"
 	DEFAULT_DOCUMENTATION="/usr/share/doc/egloo"
 	DEFAULT_DOCUMENTROOT="/cygdrive/c/wamp/www/egloo"
 	DEFAULT_FRAMEWORKROOT="/lib/eglooframework"
@@ -272,7 +269,7 @@ then
 	echo "* eGloo Framework Installation *"
 	echo "********************************"
 	echo
-	echo "This installation script is interactive to give the user as much control" 
+	echo "This installation script is interactive to give the user as much control"
 	echo "as possible. If you would like to install non-interactively, with default"
 	echo "settings, use the '-d' flag."
 	echo
@@ -356,7 +353,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own configuration path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -365,10 +362,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$CONFIG_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -379,7 +376,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -434,7 +431,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own cache path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -443,10 +440,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$CACHE_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -506,7 +503,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own documentation path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -515,10 +512,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$DOCUMENTATION_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -529,7 +526,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -568,7 +565,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own log path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -577,10 +574,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$LOGPATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -591,7 +588,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -640,7 +637,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own documentation path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -649,10 +646,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$FRAMEWORK_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -663,7 +660,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -680,7 +677,7 @@ then
 	if [ ! -e "$FRAMEWORK_PATH/Images" ] && [  ! -L "$FRAMEWORK_PATH/Images" ]
 	then
 		# mkdir -p "$FRAMEWORK_PATH"
-	
+
 		# Even if we're using Windows, NTFS does not allow hardlinks to directories
 		ln -s "$PARENT_DIRECTORY/Images" "$FRAMEWORK_PATH/Images"
 	else
@@ -690,7 +687,7 @@ then
 	if [ ! -e "$FRAMEWORK_PATH/Library" ] && [  ! -L "$FRAMEWORK_PATH/Library" ]
 	then
 		# mkdir -p "$FRAMEWORK_PATH"
-	
+
 		# Even if we're using Windows, NTFS does not allow hardlinks to directories
 		ln -s "$PARENT_DIRECTORY/Library" "$FRAMEWORK_PATH/Library"
 	else
@@ -700,7 +697,7 @@ then
 	if [ ! -e "$FRAMEWORK_PATH/PHP" ] && [  ! -L "$FRAMEWORK_PATH/PHP" ]
 	then
 		# mkdir -p "$FRAMEWORK_PATH"
-		
+
 		# Even if we're using Windows, NTFS does not allow hardlinks to directories
 		ln -s "$PARENT_DIRECTORY/PHP" "$FRAMEWORK_PATH/PHP"
 	else
@@ -720,7 +717,7 @@ then
 	if [ ! -e "$FRAMEWORK_PATH/XML" ] && [  ! -L "$FRAMEWORK_PATH/XML" ]
 	then
 		# mkdir -p "$DOCUMENT_ROOT"
-	
+
 		# Even if we're using Windows, NTFS does not allow hardlinks to directories
 		ln -s "$PARENT_DIRECTORY/XML" "$FRAMEWORK_PATH/XML"
 		# Only do this next bit on Ubuntu... getcwd() is broken
@@ -776,7 +773,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own documentation path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -785,10 +782,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$DOCUMENT_ROOT\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -799,7 +796,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -894,7 +891,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own documentation path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -903,10 +900,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$APPLICATIONS_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -917,7 +914,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -992,7 +989,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own documentation path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -1001,10 +998,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$CUBES_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -1015,7 +1012,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -1088,7 +1085,7 @@ case "$CONFIRM_CONTINUE" in
 	# User chose to specify own data store path
 	"N" | "n" | "No" | "NO" | "no" )
 		NEW_PATH_SET=0
-		
+
 		# Loop until we have a new path and the user has confirmed the location
 		while [ "$NEW_PATH_SET" -ne 1 ]
 		do
@@ -1097,10 +1094,10 @@ case "$CONFIRM_CONTINUE" in
 			echo
 			echo "Location: \"$DATA_STORE_PATH\""
 			echo
-		
+
 			echo -n "Use this location? [y/N]: "
 			read -e CONFIRM_CONTINUE
-		
+
 			# Make sure user entered right path
 			case "$CONFIRM_CONTINUE" in
 				# New path is good, break the loop
@@ -1111,7 +1108,7 @@ case "$CONFIRM_CONTINUE" in
 				* )
 				;;
 			esac
-		done		
+		done
 	;;
 
 	# User chose the default path
@@ -1160,7 +1157,7 @@ if [ -f "$DEFAULT_SMARTY" ]
 then
 	echo "Smarty was found at the following location."
 	echo "\"$DEFAULT_SMARTY\""
-	echo 
+	echo
 
 	if [ $DEFAULT_EVERYTHING -eq 0 ]
 	then
@@ -1245,7 +1242,7 @@ else
 					* )
 					;;
 				esac
-			done		
+			done
 		;;
 
 		# User chose the default path
@@ -1266,126 +1263,9 @@ else
 fi
 
 ###########################################################
-########## Doctrine
-###########################################################
-echo
-echo "***********************"
-echo "* Doctrine ORM Engine *"
-echo "***********************"
-echo
-
-if [ -f "$DEFAULT_DOCTRINE" ]
-then
-	echo "Doctrine was found at the following location."
-	echo "\"$DEFAULT_DOCTRINE\""
-	echo 
-	
-	if [ $DEFAULT_EVERYTHING -eq 0 ]
-	then
-		echo -n "Use this Doctrine package? [Y/n]: "
-		read -e CONFIRM_CONTINUE
-	else
-		CONFIRM_CONTINUE="YES"
-	fi
-
-	# Check if the user wants to use the default or specify their own Doctrine path
-	case "$CONFIRM_CONTINUE" in
-		# User chose to specify own Doctrine path
-		"N" | "n" | "No" | "NO" | "no" )
-			NEW_PATH_SET=0
-
-			# Loop until we have a new path and the user has confirmed the location
-			while [ "$NEW_PATH_SET" -ne 1 ]
-			do
-				echo -n "Enter New Location: "
-				read -e DOCTRINE_PATH
-				echo
-				echo "Location: \"$DOCTRINE_PATH\""
-				echo
-
-				echo -n "Use this location? [y/N]: "
-				read -e CONFIRM_CONTINUE
-
-				# Make sure user entered right path
-				case "$CONFIRM_CONTINUE" in
-					# New path is good, break the loop
-					"Y" | "y" | "Yes" | "YES" | "yes" )
-						NEW_PATH_SET=1
-					;;
-					# New path is no good, loop back
-					* )
-					;;
-				esac
-			done		
-		;;
-
-		# User chose the default path
-		* ) DOCTRINE_PATH=$DEFAULT_DOCTRINE
-		;;
-	esac
-else
-	echo "Doctrine was not found at the default location."
-	echo 
-	
-	if [ $DEFAULT_EVERYTHING -eq 0 ]
-	then
-		echo -n "Use Doctrine package provided in eGloo Framework library? (If no, you will be prompted for an existing Doctrine install) [Y/n]: "
-		read -e CONFIRM_CONTINUE
-	else
-		CONFIRM_CONTINUE="YES"
-	fi
-	
-	# Check if the user wants to use the default or specify their own Doctrine path
-	case "$CONFIRM_CONTINUE" in
-		# User chose to specify own Doctrine path
-		"N" | "n" | "No" | "NO" | "no" )
-			NEW_PATH_SET=0
-
-			# Loop until we have a new path and the user has confirmed the location
-			while [ "$NEW_PATH_SET" -ne 1 ]
-			do
-				echo -n "Enter New Location: "
-				read -e DOCTRINE_PATH
-				echo
-				echo "Location: \"$DOCTRINE_PATH\""
-				echo
-
-				echo -n "Use this location? [y/N]: "
-				read -e CONFIRM_CONTINUE
-
-				# Make sure user entered right path
-				case "$CONFIRM_CONTINUE" in
-					# New path is good, break the loop
-					"Y" | "y" | "Yes" | "YES" | "yes" )
-						NEW_PATH_SET=1
-					;;
-					# New path is no good, loop back
-					* )
-					;;
-				esac
-			done		
-		;;
-
-		# User chose the default path
-		* )
-			# TODO install Doctrine
-			DOCTRINE_PATH="$FRAMEWORK_PATH/Library/Doctrine/lib/Doctrine.php"
-		;;
-	esac
-
-fi
-
-if [ $DETECTED_PLATFORM -ne $OS_WINDOWS ]
-then
-	checkUserCanRead "$WEB_USER" "$DOCTRINE_PATH"
-else
-	echo "Ignoring ownership and permissions of Doctrine Path for Windows"
-fi
-
-###########################################################
 ########## Write Configuration Files
 ###########################################################
-echo 
+echo
 printf "Writing configuration files... "
 
 if [ $DETECTED_PLATFORM -eq $OS_WINDOWS ]
@@ -1397,13 +1277,11 @@ then
 		--ConfigurationPath="c:/cygwin$CONFIG_PATH" \
 		--CubesPath="c:/cygwin$CUBES_PATH" \
 		--DataStorePath="c:/cygwin$DATA_STORE_PATH" \
-		--DoctrinePath="c:/cygwin$DOCTRINE_PATH" \
 		--DocumentationPath="c:/cygwin$DOCUMENTATION_PATH" \
 		--DocumentRoot="c:$DOCUMENT_ROOT" \
 		--FrameworkRootPath="c:/cygwin$FRAMEWORK_PATH" \
 		--LoggingPath="c:/cygwin$LOGPATH" \
 		--SmartyPath="c:/cygwin$SMARTY_PATH" \
-		--UseDoctrine="true" \
 		--UseSmarty="true" \
 		--WriteLocalizationPaths="true"
 	chmod -R 755 "$CACHE_PATH"
@@ -1417,13 +1295,11 @@ then
 		--ConfigurationPath="$CONFIG_PATH" \
 		--CubesPath="$CUBES_PATH" \
 		--DataStorePath="$DATA_STORE_PATH" \
-		--DoctrinePath="$DOCTRINE_PATH" \
 		--DocumentationPath="$DOCUMENTATION_PATH" \
 		--DocumentRoot="$DOCUMENT_ROOT" \
 		--FrameworkRootPath="$FRAMEWORK_PATH" \
 		--LoggingPath="$LOGPATH" \
 		--SmartyPath="$SMARTY_PATH" \
-		--UseDoctrine="false" \
 		--UseSmarty="true" \
 		--WriteLocalizationPaths="true"
 else
@@ -1433,13 +1309,11 @@ else
 		--ConfigurationPath="$CONFIG_PATH" \
 		--CubesPath="$CUBES_PATH" \
 		--DataStorePath="$DATA_STORE_PATH" \
-		--DoctrinePath="$DOCTRINE_PATH" \
 		--DocumentationPath="$DOCUMENTATION_PATH" \
 		--DocumentRoot="$DOCUMENT_ROOT" \
 		--FrameworkRootPath="$FRAMEWORK_PATH" \
 		--LoggingPath="$LOGPATH" \
 		--SmartyPath="$SMARTY_PATH" \
-		--UseDoctrine="false" \
 		--UseSmarty="true" \
 		--WriteLocalizationPaths="true"
 fi
@@ -1449,7 +1323,7 @@ if [ $DETECTED_PLATFORM -ne $OS_WINDOWS ]
 then
 	chown -R $WEB_USER:$WEB_GROUP "$CACHE_PATH"
 	chmod -R 755 "$CACHE_PATH"
-	
+
 	checkUserCanRead "$WEB_USER" "$CACHE_PATH"
 else
 	chmod -R 777 "$CACHE_PATH"
@@ -1507,7 +1381,7 @@ then
 
 	chmod 664 "$DOCUMENT_ROOT/Config.xml"
 	chown $WEB_USER:$WEB_GROUP "$DOCUMENT_ROOT/Config.xml"
-	
+
 	chmod 640 "$DOCUMENT_ROOT/System.xml"
 	chown $WEB_USER:$WEB_GROUP "$DOCUMENT_ROOT/System.xml"
 else

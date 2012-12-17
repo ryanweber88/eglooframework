@@ -59,7 +59,6 @@ class UninstallApplicationCoreeGlooRequestProcessor extends RequestProcessor {
 
 		$templateDirector->preProcessTemplate();
 
-		$templateVariables['svnVersion'] = '∞';
 		$templateVariables['app'] = eGlooConfiguration::getApplicationName();
 		$templateVariables['bundle'] = eGlooConfiguration::getUIBundleName();
 

@@ -72,10 +72,9 @@ spl_autoload_register('eglooAutoload');
 // Load Bella
 // @Temporary
 //if ( eGlooConfiguration::getUseBella() ) {
-if ( true ) {
-	include( eGlooConfiguration::getBellaIncludePath() );
-}
-
+// if ( true ) {
+// 	include( eGlooConfiguration::getBellaIncludePath() );
+// }
 
 // Load Haanga
 if ( eGlooConfiguration::getUseHaanga() ) {
@@ -104,14 +103,14 @@ if ( eGlooConfiguration::getUseS3() ) {
 }
 
 // Load Doctrine: 4% Hit
-if ( eGlooConfiguration::getUseDoctrine() ) {
-	include( eGlooConfiguration::getDoctrineIncludePath() );
-	spl_autoload_register(array('Doctrine', 'autoload'));
-}
+// if ( eGlooConfiguration::getUseDoctrine() ) {
+// 	include( eGlooConfiguration::getDoctrineIncludePath() );
+// 	spl_autoload_register(array('Doctrine', 'autoload'));
+// }
 
 // Load Pimple DIC
 // TODO place into configuration
-include( eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
+// include( eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
 
 // Let's override some built-in functions in profiling mode
 if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDProfile() ) {

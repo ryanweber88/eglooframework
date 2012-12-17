@@ -7,19 +7,19 @@
  * the installation settings chosen.
  *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -37,19 +37,16 @@ $configuration_options = array(
 		'ConfigurationPath'		=> '',
 		'CubesPath'				=> '',
 		'DataStorePath'			=> '',
-		'DoctrinePath'			=> '',
 		'DocumentationPath'		=> '',
 		'DocumentRoot'			=> '',
 		'FrameworkRootPath'		=> '',
 		'LoggingPath'			=> '',
 		'SmartyPath'			=> '',
-		'UseDoctrine'			=> true,
 		'UseSmarty'				=> true,
 		'egBuild'				=> '',
 		'egMaintenanceVersion'	=> '0',
 		'egMajorVersion'		=> '1',
 		'egMinorVersion'		=> '0',
-		'egUseDoctrine'			=> 'false',
 		'egUseDoctrine2DBAL'	=> 'false',
 		'egUseDoctrine2ORM'		=> 'false',
 		'egUseS3'				=> 'false',
@@ -76,9 +73,6 @@ $xml_config_options = array(
 				'value' => ''
 				),
 			'DataStorePath' => array(
-				'value' => ''
-				),
-			'DoctrinePath' => array(
 				'value' => ''
 				),
 			'DocumentationPath' => array(
@@ -108,9 +102,6 @@ $xml_config_options = array(
 				'value' => 'true'
 				),
 			'egMinorVersion' => array(
-				'value' => 'true'
-				),
-			'egUseDoctrine' => array(
 				'value' => 'true'
 				),
 			'egUseSmarty' => array(
