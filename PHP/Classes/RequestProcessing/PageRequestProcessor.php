@@ -92,9 +92,11 @@ class PageRequestProcessor extends RequestProcessor {
 
 			$uri_args = explode('/', trim($uri_args));
 
-			$uri_pairs = [];
+			$uri_pairs = $matches = [];
 
-			$matches = $this->routes[$action]['matches'];
+			if ( isset($this->routes[$action]['matches']) ) {
+				$matches = $this->routes[$action]['matches'];
+			}
 
 			foreach( $matches as $match ) {
 				if ( is_array($match) ) {
@@ -106,6 +108,7 @@ class PageRequestProcessor extends RequestProcessor {
 				}
 
 				$match_regex = preg_replace('~:[a-zA-Z0-9]+~', '[a-zA-Z0-9]+', $match_string);
+				$match_regex = str_replace( '@controller', $request_class, $match_regex );
 
 				if ( preg_match( '~' . $match_regex . '~', $uri) ) {
 					$match_list = [];

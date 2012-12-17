@@ -40,15 +40,41 @@
  */
 class CRUDPageRequestProcessor extends PageRequestProcessor {
 
-	protected $routes = array(
-		'index' => 'GET',
-		'new' => 'GET',
-		'create' => 'POST',
-		'edit' => 'GET',
-		'update' => 'PUT',
-		'show' => 'GET',
-		'destroy' => 'DELETE'
-	);
+	protected $routes = [
+		'index' => [
+			'methods' => ['GET'],
+			'matches' => [
+				'@controller/?',
+				'@controller/index'
+			],
+		],
+		'new' => [
+			'methods' => ['GET'],
+		],
+		'create' => [
+			'methods' => ['POST'],
+		],
+		'edit' => [
+			'methods' => ['GET'],
+			'matches' => [
+				'@controller/:id/edit',
+				'@controller/edit/:id',
+				// ['@controller/edit/:id' => '@controller#index'], example reroute
+			],
+		],
+		'update' => [
+			'methods' => ['POST'],
+			'matches' => ['@controller/:id'],
+		],
+		'show' => [
+			'methods' => ['GET'],
+			'matches' => ['@controller/:id'],
+		],
+		'destroy' => [
+			'methods' => ['DELETE'],
+			'matches' => ['@controller/:id'],
+		],
+	];
 
 	// new /controller/new action GET
 	protected function _new( $uri_pairs = null, $validation_result = null )  { }
