@@ -41,7 +41,9 @@ use \eGloo\RequestProcessing\Route;
 class PageRequestProcessor extends RequestProcessor {
 
 	protected $routes = array(
-		'index' => 'GET',
+		'index' => [
+			'methods' => ['GET'],
+		]
 	);
 
 	/**
@@ -82,6 +84,15 @@ class PageRequestProcessor extends RequestProcessor {
 				$action = $slug;
 				$invoke_action = true;
 			}
+
+		}
+
+		// If that whole slug thing didn't pan out...
+		if ( !$invoke_action && in_array('egDefault', array_keys($this->routes)) &&
+			 in_array($method, $this->routes['egDefault']['methods']) ) {
+
+			$action = 'egDefault';
+			$invoke_action = true;
 		}
 
 		if ( $invoke_action ) {
@@ -107,12 +118,12 @@ class PageRequestProcessor extends RequestProcessor {
 					$final_action = $action;
 				}
 
-				$match_regex = preg_replace('~:[a-zA-Z0-9]+~', '[a-zA-Z0-9]+', $match_string);
+				$match_regex = preg_replace('~:[a-zA-Z0-9_ -]+~', '[a-zA-Z0-9_ -]+', $match_string);
 				$match_regex = str_replace( '@controller', $request_class, $match_regex );
 
 				if ( preg_match( '~' . $match_regex . '~', $uri) ) {
 					$match_list = [];
-					preg_match_all('~:[a-zA-Z0-9]+~', $match_string, $match_list);
+					preg_match_all('~:[a-zA-Z0-9_ -]+~', $match_string, $match_list);
 
 					foreach( $match_list[0] as $match_var ) {
 						$var_name = str_replace(':', '', $match_var);
@@ -138,6 +149,8 @@ class PageRequestProcessor extends RequestProcessor {
 
 				$action = isset($validation_result['action']) ? $validation_result['action'] : $action;
 				$uri_pairs = isset($validation_result['uri_pairs']) ? $validation_result['uri_pairs'] : $uri_pairs;
+			} else {
+				$validation_result = null;
 			}
 
 			$retVal = $this->$action( $uri_pairs, $validation_result );

@@ -815,6 +815,18 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			if ( isset($this->requestNodes[ $requestLookup ]) ) {
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node found in XML: ' . $requestLookup, 'Security' );
 				$requestNode = $this->requestNodes[ $requestLookup ];
+			} else if ( class_exists($requestClass . $requestID . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $requestClass . $requestID . 'RequestProcessor' );
+			} else if ( class_exists( $requestClass . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $requestClass . 'RequestProcessor' );
+			} else if ( class_exists( ucfirst(strtolower($requestClass)) . ucfirst(strtolower($requestID)) . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, ucfirst(strtolower($requestClass)) . ucfirst(strtolower($requestID)) . 'RequestProcessor' );
+			} else if ( class_exists( ucfirst(strtolower($requestClass)) . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, ucfirst(strtolower($requestClass)) . 'RequestProcessor' );
 			} else if ( $useRequestIDDefaultHandler && isset($this->requestNodes[ $requestClass . self::REQUEST_ID_WILDCARD_KEY ]) ) {
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in XML, using requestID wildcard: ' . $requestClass . self::REQUEST_ID_WILDCARD_KEY, 'Security' );
 				$requestNode = $this->requestNodes[ $requestClass . self::REQUEST_ID_WILDCARD_KEY ];

@@ -77,7 +77,7 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 	];
 
 	// new /controller/new action GET
-	protected function _new( $uri_pairs = null, $validation_result = null )  { }
+	protected function _new( $uri_pairs = null, $validation_result = null )  {}
 
 	// create /controller/ action POST
 	protected function create( $uri_pairs = null, $validation_result = null )  { }
@@ -93,5 +93,9 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 
 	// destroy /controller/:id action DELETE
 	protected function destroy( $uri_pairs = null, $validation_result = null ) { }
+
+	protected function limitTo( $routes_allowed ) {
+		// TODO
+	}
 
 }
