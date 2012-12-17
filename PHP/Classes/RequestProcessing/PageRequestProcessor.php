@@ -3,6 +3,8 @@
 use \eGloo\HTTP\Request;
 use \eGloo\RequestProcessing\Route;
 
+define('DS', DIRECTORY_SEPARATOR);
+
 /**
  * PageRequestProcessor Class File
  *
@@ -45,6 +47,8 @@ class PageRequestProcessor extends RequestProcessor {
 			'methods' => ['GET'],
 		]
 	);
+
+	protected $_templateVariables = array();
 
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
@@ -162,6 +166,39 @@ class PageRequestProcessor extends RequestProcessor {
 	// index /controller/ action GET
 	protected function index( $uri_pairs = null, $validation_result = null ) {}
 
+	protected function render( $action = 'index' ) {
+		// Autoload Composer vendors
+		$app_path = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
+		// require_once $app_path . DS . 'vendor' . DS . 'autoload.php';
+
+		// Get view paths
+	    $view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
+	    $controller_name      = explode('RequestProcessor', get_called_class())[0];
+	    $controller_view_path = $view_path . DS . $controller_name;
+
+	    // Set up default layout
+	    $this->setTemplateVariable('layout', 'application');
+
+		// Setup Twig and set directories to look for views
+	    $loader = new Twig_Loader_Filesystem([$view_path, $controller_view_path]);
+	    $twig   = new Twig_Environment($loader, ['debug' => true]);
+	    // $twig->addExtension(new Twig_Extension_Debug());
+	    $rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
+
+	    // Send rendered layout as variable to view
+	    $this->setTemplateVariable('rendered_layout', $rendered_layout);
+
+	    $output = $twig->render( $action . '.html.twig', $this->getTemplateVariables() );
+
+	    // Display the output from the view
+		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
+			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
+		} else {
+			$this->setOutputHeaders();
+			echo $output;
+		}
+	}
+
 	// invoked in the event someone wants to draw routes rather than define on member variable
 	protected function drawRoutes() {}
 
@@ -191,6 +228,33 @@ class PageRequestProcessor extends RequestProcessor {
 
 	public static function getRequestType() {
 		return 'page';
+	}
+
+	protected function getTemplateVariable( $key ) {
+		return $this->_templateVariables[$key];
+	}
+
+
+	protected function getTemplateVariables() {
+		return $this->_templateVariables;
+	}
+
+	protected function setTemplateVariable( $key, $value ) {
+		$this->_templateVariables[$key] = $value instanceof \eGloo\Utilities\ToArrayInterface
+			? $value->__toArray()
+			: $value;
+	}
+
+	protected function setTemplateVariables( $templateVariables ) {
+		$this->_templateVariables = $templateVariables;
+	}
+
+	protected function setTemplateVariablesByMerge( $templateVariables ) {
+		$this->_templateVariables = array_merge($this->_templateVariables, $templateVariables);
+	}
+
+	protected function useSystemVariables() {
+		return $this->_useSystemVariables;
 	}
 
 }

@@ -93,7 +93,7 @@ if ( eGlooConfiguration::getUseSwift() ) {
 }
 
 // Load Twig: 0% Hit
-if ( eGlooConfiguration::getUseTwig() ) {
+if ( true || eGlooConfiguration::getUseTwig() ) {
 	include( eGlooConfiguration::getTwigIncludePath() );
 	spl_autoload_register(array('Twig_Autoloader', 'autoload'));
 }
@@ -977,7 +977,7 @@ function __constructStatic($name) {
 function __($mixed) {
 	if (is_integer($mixed)) {
 		return new \eGloo\Utilities\ActiveSupport\Number($mixed);
-	
+
 	} else if (is_array($mixed)) {
 		//return new \eGloo\Utilities\ActiveSupport\Array($mixed);
 
@@ -993,8 +993,8 @@ function log($message) {
 
 	// add class#method to message using backtrace
 	$trace = debug_backtrace();
-	$trace = $trace[1]; 
-	$head  = $trace['function']; 
+	$trace = $trace[1];
+	$head  = $trace['function'];
 
 	// determine if caller was within the context
 	// of a class, and then update message with
@@ -1002,10 +1002,10 @@ function log($message) {
 	isset($trace['class']) && $head = "{$trace['class']}.$head";
 
 
-	\eGlooLogger::writeLog( 
+	\eGlooLogger::writeLog(
 		\eGlooLogger::DEBUG, "$head : $message"
-	);		
-	
+	);
+
 }
 
 }
