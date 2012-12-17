@@ -38,7 +38,6 @@ abstract class RequestProcessor {
 	const RESPONSE_CODE_ERROR_REQUEST  = 400;
 	const RESPONSE_CODE_ERROR_INTERNAL = 500;
 
-
 	/* Public Static Members */
 	public static $calledClass = null;
 
@@ -47,7 +46,10 @@ abstract class RequestProcessor {
 	protected $bean              = null;
 	protected $request;
 
-	protected $decorators = array();
+	protected $param_filter_policy = 'whitelist';
+
+	protected $actions = array(
+	);
 
 	public function __construct() {
 		$this->decoratorInfoBean = DecoratorInfoBean::getInstance();
@@ -74,27 +76,12 @@ abstract class RequestProcessor {
 		return $retVal;
 	}
 
-	public function getAppliedDecorators() {
-		return $this->decorators;
-	}
-
-	public function setAppliedDecorators( $decorators ) {
-		$this->decorators = $decorators;
-	}
-
-	public function setAppliedDecorator( $decorator ) {
-		$this->decorators[] = $decorator;
-	}
-
-	public static function getRequiredDecorators() {
-		return array();
-	}
-
 	abstract public function processRequest();
 
 	public function processErrorRequest() {
 		echo "Please implement processErrorRequest()";
 	}
+
 
     // TODO we need to make a templated method for processing
     // both the header information and then the content information
@@ -147,6 +134,109 @@ abstract class RequestProcessor {
 		// we are purposefully using past date to force cache
 		header('Expires: Fri, 30 Oct 1998 14:19:41 GMT');
 
+	}
+
+	public function __call($name, $arguments) {
+		// allow for calling error methods with response
+		// codes as part of method name
+		if (preg_match('/^error_([0-9]+)$/', $name, $match)) {
+			// @TODO check if message has been passed?
+			return $this->error($match[1], $arguments[0]);
+		}
+
+		// allow for calling respond method with response
+		// type as part of method name
+		// @PASS
+	}
+
+	/**
+	 * Attached error response code and message to response header
+	 * @TODO place is RequestProcessor
+	 */
+	protected function error($code, $message) {
+		// @TODO generate response header with error code and
+		// response message
+		// @TODO this is new to 5.4; it may be better to be backword
+		// compatible at the framework
+		header(
+			"HTTP/1.0 $code $message", true, $code
+		);
+
+		// generate error response body
+		// @TODO decouple/encapsulate
+		// @TODO create application specific error code handler
+	  $this->respond(array(
+	  	'codes'   => array($code),
+	  	'message' => $message
+	  ));
+	}
+
+	public static function getRequestType() {
+		return '';
+	}
+
+	public static function getRoutes() {
+		return array();
+	}
+
+	public static function getActions() {
+		return array();
+	}
+
+	public static function getCRUDActions() {
+		return array();
+	}
+
+	public function setCRUDActions() {
+		return array();
+	}
+
+	public static function getWhitelistArgs() {
+		return array();
+	}
+
+	public static function getBlacklistArgs() {
+		return array();
+	}
+
+	public static function getValidators() {
+		return array();
+	}
+
+	public static function getBoolArgs() {
+		return array();
+	}
+
+	public static function getSelectArgs() {
+		return array();
+	}
+
+	public static function getVariableArgs() {
+		return array();
+	}
+
+	public static function getFormArgs() {
+		return array();
+	}
+
+	public static function getComplexArgs() {
+		return array();
+	}
+
+	public static function getDependencies() {
+		return array();
+	}
+
+	public static function getInitRoutines() {
+		return array();
+	}
+
+	public static function getDecorators() {
+		return array();
+	}
+
+	public static function getAttributeSets() {
+		return array();
 	}
 
 }

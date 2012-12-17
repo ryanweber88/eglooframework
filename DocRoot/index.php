@@ -1,6 +1,6 @@
 <?php
 /***
- * eGloo Framework Bootstrap File 
+ * eGloo Framework Bootstrap File
  *
  * This file contains the bootstrap for the eGloo framework
  *
@@ -44,11 +44,17 @@ if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
 // Build a request info bean
 $requestInfoBean = RequestInfoBean::getInstance();
 
+if ( true || $init_convenience_globals ) {
+	global $bean;
+	global $rib;
+
+	$bean = $rib = &$requestInfoBean;
+}
+
 // Get a request validator based on the current application and UI bundle
 $requestValidator =
 	RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
 
-	
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
@@ -60,11 +66,26 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
 	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
+
+	if ( true || $init_convenience_globals ) {
+		global $controller;
+		global $rp;
+
+		$controller = $rp = &$requestProcessor;
+	}
+
 	$requestProcessor->processRequest();
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
-	
+
 	if ($errorRequestProcessor) {
+		if ( true || $init_convenience_globals ) {
+			global $controller;
+			global $rp;
+
+			$controller = $rp = &$errorRequestProcessor;
+		}
+
 		$errorRequestProcessor->processErrorRequest();
 	} else {
 		// We probably want to do something a bit more... elegant here.  Eventually

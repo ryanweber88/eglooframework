@@ -3,21 +3,21 @@
  * XHTMLXML2ArrayDispatcher Class File
  *
  * $file_block_description
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *		  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *	
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -70,7 +70,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "XHTMLXML2ArrayDispatcher: Processing XML" );
 
 		//read the xml onces... global location to do this... it looks like it does this once per request.
-		$requestXMLObject = simplexml_load_file( $this->DISPATCH_XML_LOCATION . 
+		$requestXMLObject = simplexml_load_file( $this->DISPATCH_XML_LOCATION .
 			$this->application . '/InterfaceBundles/' . $this->interfaceBundle . '/XHTML/Dispatch.xml'	);
 
 		$dispatches = array();
@@ -115,7 +115,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 									} else {
 										$defaultDispatchMap = (string) $map;
 									}
-									
+
 									$newClient['defaultDispatchMap'] = trim( $defaultDispatchMap );
 								}
 							}
@@ -148,7 +148,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 	}
 
 	/**
-	 * Only functional method available to the public.	
+	 * Only functional method available to the public.
 	 */
 	public function dispatch( $requestInfoBean, $userRequestIDOverride = null, $userRequestClassOverride = null ) {
 		$userRequestClass = $userRequestClassOverride !== null ? $userRequestClassOverride : $requestInfoBean->getRequestClass();
@@ -158,7 +158,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 		// TODO only if not cache
 		$dispatchCacheRegionHandler = CacheManagementDirector::getCacheRegionHandler('Dispatches');
 		$nodeCacheID = eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'XHTMLXML2ArrayDispatcherNodes';
-		
+
 		if ( ($this->dispatchNodes = $dispatchCacheRegionHandler->getObject( $nodeCacheID, 'Dispatching', true ) ) == null ) {
 			eGlooLogger::writeLog( eGlooLogger::DEBUG, "XHTMLXML2ArrayDispatcher: Dispatch Nodes pulled from cache" );
 			$this->loadDispatchNodes();
@@ -168,6 +168,15 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 		}
 
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'XHTMLXML2ArrayDispatcher: Request lookup "' . $requestLookup . '"');
+
+		// die_r($this->dispatchNodes);
+
+		/**
+		 * Let's look for the requested template by convention
+		 */
+		// if ( !isset( $this->dispatchNodes[ $requestLookup ]) ) {
+		// 	 file_exists( $file_path ) && is_file( $file_path ) && is_readable( $file_path );
+		// }
 
 		/**
 		 * Ensure that there is a request that corresponds to this request class
@@ -188,7 +197,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 		$userAgent = eGlooHTTPRequest::getUserAgent();
 
 		/**
-		 * If this is a valid request class/id, get the request denoted 
+		 * If this is a valid request class/id, get the request denoted
 		 * by this request class and id.
 		 */
 		$requestNode = $this->dispatchNodes[ $requestLookup ];
@@ -222,8 +231,8 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 
 				foreach( $localizationNode['Clients'] as $client ) {
 					$matchFormat = $client['matches'];
-					$match = preg_match ( $matchFormat, $userAgent ); 
-		
+					$match = preg_match ( $matchFormat, $userAgent );
+
 					if( $match ) {
 						$userClient = $client;
 						break;
@@ -256,7 +265,7 @@ class XHTMLXML2ArrayDispatcher extends TemplateDispatcher {
 
 			throw new ErrorException($error_message);
 		} else {
-			$dispatchPath = eGlooConfiguration::getApplicationsPath() . '/' . $this->application . '/InterfaceBundles/' . 
+			$dispatchPath = eGlooConfiguration::getApplicationsPath() . '/' . $this->application . '/InterfaceBundles/' .
 				$this->interfaceBundle . '/XHTML/' . $dispatchPath;
 		}
 
