@@ -152,19 +152,18 @@ class PageRequestProcessor extends RequestProcessor {
 				$validation_result = $validator_class::validate( $this->bean, $action, $uri_pairs, $this );
 
 				$action = isset($validation_result['action']) ? $validation_result['action'] : $action;
-				$uri_pairs = isset($validation_result['uri_pairs']) ? $validation_result['uri_pairs'] : $uri_pairs;
 			} else {
 				$validation_result = null;
 			}
 
-			$retVal = $this->$action( $uri_pairs, $validation_result );
+			$retVal = $this->$action( $validation_result );
 		}
 
 		return $retVal;
 	}
 
 	// index /controller/ action GET
-	protected function index( $uri_pairs = null, $validation_result = null ) {}
+	protected function index( $validation_result = null ) {}
 
 	protected function render( $action = 'index' ) {
 		// Autoload Composer vendors

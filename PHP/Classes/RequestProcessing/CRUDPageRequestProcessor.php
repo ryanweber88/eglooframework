@@ -77,22 +77,22 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 	];
 
 	// new /controller/new action GET
-	protected function _new( $uri_pairs = null, $validation_result = null )  {}
+	protected function _new( $validation_result = null )  {}
 
 	// create /controller/ action POST
-	protected function create( $uri_pairs = null, $validation_result = null )  { }
+	protected function create( $validation_result = null )  { }
 
 	// edit /controller/edit/:id action GET
-	protected function edit( $uri_pairs = null, $validation_result = null )    { }
+	protected function edit( $validation_result = null )    { }
 
 	// update /controller/:id action PUT
-	protected function update( $uri_pairs = null, $validation_result = null )    { }
+	protected function update( $validation_result = null )    { }
 
 	// show /controller/:id action GET
-	protected function show( $uri_pairs = null, $validation_result = null )    { }
+	protected function show( $validation_result = null )    { }
 
 	// destroy /controller/:id action DELETE
-	protected function destroy( $uri_pairs = null, $validation_result = null ) { }
+	protected function destroy( $validation_result = null ) { }
 
 	protected function limitTo( $routes_allowed ) {
 		// TODO
