@@ -43,6 +43,7 @@ class RequestInfoBean implements \ArrayAccess {
 	private $arguments = null;
 	private $requestProcessorID = null;
 	private $errorRequestProcessorID = null;
+	private $requestValidator = null;
 	private $requestClass = null;
 	private $requestID = null;
 	private $_wildCardRequest = false;
@@ -57,7 +58,6 @@ class RequestInfoBean implements \ArrayAccess {
 	private $GET     = null;
 	private $POST    = null;
 	private $PUT     = array();
-
 	private $forms = null;
 
 	// Unset Required
@@ -65,7 +65,6 @@ class RequestInfoBean implements \ArrayAccess {
 	private $UNSET_FILES = null;
 	private $UNSET_GET = null;
 	private $UNSET_POST = null;
-
 	private $unsetForms = null;
 
 	// Invalid provided
@@ -73,8 +72,14 @@ class RequestInfoBean implements \ArrayAccess {
 	private $INVALID_FILES = null;
 	private $INVALID_GET = null;
 	private $INVALID_POST = null;
-
 	private $invalidForms = null;
+
+	// Unvalidated
+	private $UNVALIDATED_COOKIES = null;
+	private $UNVALIDATED_FILES = null;
+	private $UNVALIDATED_GET = null;
+	private $UNVALIDATED_POST = null;
+	private $unvalidatedForms = null;
 
 	private $decoratorArray = array();
 
@@ -114,22 +119,25 @@ class RequestInfoBean implements \ArrayAccess {
 		$this->FILES = array();
 		$this->GET = array();
 		$this->POST = array();
-
 		$this->forms = array();
 
 		$this->UNSET_COOKIES = array();
 		$this->UNSET_FILES = array();
 		$this->UNSET_GET = array();
 		$this->UNSET_POST = array();
-
 		$this->unsetForms = array();
 
 		$this->INVALID_COOKIES = array();
 		$this->INVALID_FILES = array();
 		$this->INVALID_GET = array();
 		$this->INVALID_POST = array();
-
 		$this->invalidForms = array();
+
+		$this->UNVALIDATED_COOKIES = array();
+		$this->UNVALIDATED_FILES = array();
+		$this->UNVALIDATED_GET = array();
+		$this->UNVALIDATED_POST = array();
+		$this->unvalidatedForms = array();
 	}
 
 	/**
@@ -186,17 +194,17 @@ class RequestInfoBean implements \ArrayAccess {
 				}
 			}
 		}
-		
+
 		// check for set_httpmethod, which will set a key value pair
 		// on instance property with corresponding name
 		else if (preg_match('/^set_?(a-z)+$/i', $name, $match)) {
 			list($key, $value) = $arguments;
-			
+
 			// make sure instance property exist
 			if (\property_exists($this, $httpMethod = strtoupper($match[1]))) {
 				$this->$httpMethod[$key] = $value;
 			}
-			
+
 			// otherwise we throw an exception to the fact
 			else {
 				throw new \Exception(
@@ -207,7 +215,7 @@ class RequestInfoBean implements \ArrayAccess {
 	}
 
 	/**
-	 * 
+	 *
 	 * Returns http method of request; this is really just an abstraction of
 	 * $_SERVER.REQUEST_METHOD
 	 * @returns string
@@ -242,15 +250,15 @@ class RequestInfoBean implements \ArrayAccess {
 	 * @see ArrayAccess::offsetExists()
 	 */
 	public function offsetExists($offset) {
-		
+
 		if (method_exists($this, $method = "get" . ucfirst($offset))) {
 			$result = call_user_func(array(
 				$this, $method
 			));
-			
+
 			return !empty($result);
 		}
-		
+
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
 			// have to assign into holder prior to 5.4
 			$property = &$this->$method;
@@ -276,12 +284,12 @@ class RequestInfoBean implements \ArrayAccess {
 	 * Uses array notation to access request parameter values
 	 */
 	public function offsetGet($offset) {
-		
+
 		// speicific cases
 		if ($offset == 'slug') {
-			return $this->getSlug();	
+			return $this->getSlug();
 		}
-		
+
 		// otherwise we look at "super global" representatives/class properties
 
 		foreach(array('GET', 'POST', 'COOKIES', 'DELETE', 'PUT', 'FILES') as $method) {
@@ -409,6 +417,16 @@ class RequestInfoBean implements \ArrayAccess {
 		return $retVal;
 	}
 
+	public function issetUnvalidatedGET( $key ) {
+		$retVal = false;
+
+		if ( isset( $this->UNVALIDATED_GET[$key] ) ) {
+			$retVal = true;
+		}
+
+		return $retVal;
+	}
+
 	public function isRequiredGETUnset( $key ) {
 		$retVal = false;
 
@@ -439,8 +457,20 @@ class RequestInfoBean implements \ArrayAccess {
 		return $this->INVALID_GET[$key];
 	}
 
+	public function getUnvalidatedGET( $key ) {
+		if ( !isset( $this->UNVALIDATED_GET[$key] ) ) {
+			trigger_error( 'Programmer Error: Requested GET key \'' . $key . '\' not found in unvalidated GET list', E_USER_ERROR );
+		}
+
+		return $this->UNVALIDATED_GET[$key];
+	}
+
 	public function getInvalidGETArray() {
 		return $this->INVALID_GET;
+	}
+
+	public function getUnvalidatedGETArray() {
+		return $this->UNVALIDATED_GET;
 	}
 
 	public function getUnsetGETArray() {
@@ -458,6 +488,10 @@ class RequestInfoBean implements \ArrayAccess {
 
 	public function setInvalidGET( $key, $value ) {
 		$this->INVALID_GET[$key] = $value;
+	}
+
+	public function setUnvalidatedGET( $key, $value ) {
+		$this->UNVALIDATED_GET[$key] = $value;
 	}
 
 	public function setUnsetRequiredGET( $key ) {
@@ -495,6 +529,16 @@ class RequestInfoBean implements \ArrayAccess {
 		return $retVal;
 	}
 
+	public function issetUnvalidatedPOST( $key ) {
+		$retVal = false;
+
+		if ( isset( $this->UNVALIDATED_POST[$key] ) ) {
+			$retVal = true;
+		}
+
+		return $retVal;
+	}
+
 	public function isRequiredPOSTUnset( $key ) {
 		$retVal = false;
 
@@ -525,8 +569,21 @@ class RequestInfoBean implements \ArrayAccess {
 		return $this->INVALID_POST[$key];
 	}
 
+	public function getUnvalidatedPOST( $key ) {
+		if ( !isset( $this->UNVALIDATED_POST[$key] ) ) {
+			trigger_error( 'Programmer Error: Requested POST key \'' . $key . '\' not found in unvalidated POST list', E_USER_ERROR );
+		}
+
+		return $this->UNVALIDATED_POST[$key];
+	}
+
+
 	public function getInvalidPOSTArray() {
 		return $this->INVALID_POST;
+	}
+
+	public function getUnvalidatedPOSTArray() {
+		return $this->UNVALIDATED_POST;
 	}
 
 	public function getUnsetPOSTArray() {
@@ -544,6 +601,10 @@ class RequestInfoBean implements \ArrayAccess {
 
 	public function setInvalidPOST( $key, $value ) {
 		$this->INVALID_POST[$key] = $value;
+	}
+
+	public function setUnvalidatedPOST( $key, $value ) {
+		$this->UNVALIDATED_POST[$key] = $value;
 	}
 
 	public function setUnsetRequiredPOST( $key ) {
@@ -680,6 +741,15 @@ class RequestInfoBean implements \ArrayAccess {
 	public function getErrorRequestProcessorID() {
 		return $this->errorRequestProcessorID;
 	}
+
+	public function setRequestValidator( $requestValidator ) {
+		$this->requestValidator = $requestValidator;
+	}
+
+	public function getRequestValidator() {
+		return $this->requestValidator;
+	}
+
 
 	/**
 	 * A convenience method for getting a fully qualified URI based on validated GET parameters

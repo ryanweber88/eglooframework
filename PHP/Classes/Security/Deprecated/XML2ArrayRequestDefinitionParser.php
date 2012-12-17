@@ -970,6 +970,28 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 		// Build decorator array and set it in the requestInfoBean
 		$this->buildDecoratorArray( $requestNode, $requestInfoBean );
 
+		// Keep record of all other crap passed in via GET
+		foreach( $_GET as $key => $value ) {
+			if ( !in_array($key, $requestInfoBean->getGETArray()) &&
+				 !in_array($key, $requestInfoBean->getInvalidGETArray() ) ) {
+
+				$requestInfoBean->setUnvalidatedGET( $key, $value );
+			}
+		}
+
+		// Keep record of all other crap passed in via POST
+		foreach( $_POST as $key => $value ) {
+			if ( !in_array($key, $requestInfoBean->getPOSTArray()) &&
+				 !in_array($key, $requestInfoBean->getInvalidPOSTArray() ) ) {
+
+				$requestInfoBean->setUnvalidatedPOST( $key, $value );
+			}
+		}
+
+		if ( isset($requestNode['requestValidator']) ) {
+			$requestInfoBean->setRequestValidator( $requestNode['requestValidator'] );
+		}
+
 		/**
 		 * If have gotten here with out returning... we're golden.
 		 * unset post and get and return
@@ -1002,6 +1024,12 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 					'requestAttributeSetIncludes' => $rp_class_name::getAttributeSets(),
 					'byConvention' => true
 		);
+
+		$request_validator = str_replace('RequestProcessor', 'RequestValidator', $rp_class_name);
+
+		if ( class_exists($request_validator) ) {
+			$retVal['requestValidator'] = $request_validator;
+		}
 
 		return $retVal;
 	}

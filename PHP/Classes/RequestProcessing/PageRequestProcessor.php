@@ -1,4 +1,8 @@
 <?php
+
+use \eGloo\HTTP\Request;
+use \eGloo\RequestProcessing\Route;
+
 /**
  * PageRequestProcessor Class File
  *
@@ -36,7 +40,7 @@
  */
 class PageRequestProcessor extends RequestProcessor {
 
-	protected $actions = array(
+	protected $routes = array(
 		'index' => 'GET',
 	);
 
@@ -50,47 +54,124 @@ class PageRequestProcessor extends RequestProcessor {
 	 * @access public
 	 */
 	public function processRequest() {
+		$retVal = null;
+
+		$this->drawRoutes();
+
 		// determine http method, request parameters, and call appropriate method
 		$method = strtoupper( $this->bean->requestMethod() );
+		$request_class = $this->bean->getRequestClass();
+		$action = $this->bean->getRequestID();
+		$uri = str_replace( eGlooConfiguration::getRewriteBase(), '', Request::getRequestURI() );
 
-		eGloo\log( "Entered processRequest() on $method Request" );
+		$invoke_action = false;
 
-		// a get request will invoke either index  or show, based upon
-		// request parameters
-		if ($this->bean->request_is_get()) {
-			// we leave determination of whether GET request is
-			// for collection resource to overrideable method in
-			// which we define a generic convention for determining
-			// collection routes (in this case, the presence of :id
-			// parameter)
-			if ($this->isCollectionRoute()) {
-				// determin
-				eGloo\log("Invoking #index");
-				$this->index();
-			} else {
-				eGloo\log("Invoking #show");
-				$this->show();
+		// If this RP has a route for this action on this request method, invoke
+		if ( in_array($action, array_keys($this->routes)) &&
+			 in_array($method, $this->routes[$action]['methods']) ) {
+
+			$invoke_action = true;
+		} else if ( $this->bean->issetGET('eg_slug') || $this->bean->issetUnvalidatedGET('eg_slug') ) {
+			$slug = $this->bean->issetGET('eg_slug') ?
+						$this->bean->GET['eg_slug'] :
+						$this->bean->getUnvalidatedGET('eg_slug');
+
+			if ( in_array($slug, array_keys($this->routes)) &&
+			 	 in_array($method, $this->routes[$slug]['methods']) ) {
+
+				$action = $slug;
+				$invoke_action = true;
 			}
-		} else if ( $this->bean->request_is_post() ) {
-			// a post request will invoke create
-			eGloo\log("Invoking #create");
-			$this->create();
-		} else if ( $this->bean->request_is_put() ) {
-			// a put request will invoke edit
-			eGloo\log("Invoking #edit");
-			$this->edit();
-		} else if ( $this->bean->request_is_delete() ) {
-			// a delete request will invoke destroy
-			eGloo\log("Invoking #destroy");
-			$this->destroy();
 		}
 
-		//eGlooResponse::outputXHTML( $templateVariables );
-		eGloo\log( "Exiting processRequest() on $method Request" );
+		if ( $invoke_action ) {
+			$uri_args = preg_replace('~/?' . $request_class . '/~', '/', $uri);
+			$uri_args = preg_replace('~/' . $action . '/?~', '/', $uri_args);
+			$uri_args = preg_replace('~^/~', '', $uri_args);
+			$uri_args = preg_replace('~/$~', '', $uri_args);
+
+			$uri_args = explode('/', trim($uri_args));
+
+			$uri_pairs = [];
+
+			$matches = $this->routes[$action]['matches'];
+
+			foreach( $matches as $match ) {
+				if ( is_array($match) ) {
+					$match_string = array_keys($match)[0];
+					$final_action = $match[array_keys($match)[0]];
+				} else {
+					$match_string = $match;
+					$final_action = $action;
+				}
+
+				$match_regex = preg_replace('~:[a-zA-Z0-9]+~', '[a-zA-Z0-9]+', $match_string);
+
+				if ( preg_match( '~' . $match_regex . '~', $uri) ) {
+					$match_list = [];
+					preg_match_all('~:[a-zA-Z0-9]+~', $match_string, $match_list);
+
+					foreach( $match_list[0] as $match_var ) {
+						$var_name = str_replace(':', '', $match_var);
+						$uri_pairs[$var_name] = array_shift($uri_args);
+						$this->bean->setGET( $var_name, $uri_pairs[$var_name] );
+					}
+
+					$action = $final_action;
+					$action_matches = [];
+
+					preg_match('~#([a-zA-Z0-9]+)~', $action, $action_matches);
+
+					if ( !empty($action_matches) ) {
+						$action = $action_matches[1];
+					}
+
+					break;
+				}
+			}
+
+			if ( ($validator_class = $this->bean->getRequestValidator()) !== null ) {
+				$validation_result = $validator_class::validate( $this->bean, $action, $uri_pairs, $this );
+
+				$action = isset($validation_result['action']) ? $validation_result['action'] : $action;
+				$uri_pairs = isset($validation_result['uri_pairs']) ? $validation_result['uri_pairs'] : $uri_pairs;
+			}
+
+			$retVal = $this->$action( $uri_pairs, $validation_result );
+		}
+
+		return $retVal;
 	}
 
 	// index /controller/ action GET
-	protected function index() {}
+	protected function index( $uri_pairs = null, $validation_result = null ) {}
+
+	// invoked in the event someone wants to draw routes rather than define on member variable
+	protected function drawRoutes() {}
+
+	protected function route( $mixed ) {
+		$retVal = null;
+
+		if ( is_array($mixed) ) {
+			$route = array_keys($mixed)[0];
+			$this->routes[$route] = $mixed[$route];
+			$retVal = &$this->routes[$route];
+		} else if ( is_string($mixed) ) {
+			$this->routes[$mixed] = [];
+			$retVal = &$this->routes[$mixed];
+		}
+
+		return $retVal;
+	}
+
+	protected function unroute( $route ) {
+		unset($this->routes[$route]);
+	}
+
+	protected function match( $route, $match ) {
+		$this->routes[$route]['matches'][] = $match;
+		$this->routes[$route]['matches'] = array_unique($this->routes[$route]['matches']);
+	}
 
 	public static function getRequestType() {
 		return 'page';

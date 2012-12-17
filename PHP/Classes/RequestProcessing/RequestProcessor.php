@@ -48,7 +48,7 @@ abstract class RequestProcessor {
 
 	protected $param_filter_policy = 'whitelist';
 
-	protected $actions = array(
+	protected $routes = array(
 	);
 
 	public function __construct() {

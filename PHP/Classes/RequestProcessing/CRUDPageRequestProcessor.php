@@ -40,7 +40,7 @@
  */
 class CRUDPageRequestProcessor extends PageRequestProcessor {
 
-	protected $actions = array(
+	protected $routes = array(
 		'index' => 'GET',
 		'new' => 'GET',
 		'create' => 'POST',
@@ -50,82 +50,22 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 		'destroy' => 'DELETE'
 	);
 
-	/**
-	 * Concrete implementation of the abstract RequestProcessor method
-	 * processRequest().
-	 *
-	 * This methods responsibility is to determine HTTP method type
-	 * and call appropriate method
-	 *
-	 * @access public
-	 */
-	public function processRequest() {
-		// determine http method, request parameters, and call appropriate method
-		$method = strtoupper( $this->bean->requestMethod() );
-
-		eGloo\log( "Entered processRequest() on $method Request" );
-
-		// a get request will invoke either index  or show, based upon
-		// request parameters
-		if ($this->bean->request_is_get()) {
-			// we leave determination of whether GET request is
-			// for collection resource to overrideable method in
-			// which we define a generic convention for determining
-			// collection routes (in this case, the presence of :id
-			// parameter)
-			if ($this->isCollectionRoute()) {
-				// determin
-				eGloo\log("Invoking #index");
-				$this->index();
-			} else {
-				eGloo\log("Invoking #show");
-				$this->show();
-			}
-		} else if ( $this->bean->request_is_post() ) {
-			// a post request will invoke create
-			eGloo\log("Invoking #create");
-			$this->create();
-		} else if ( $this->bean->request_is_put() ) {
-			// a put request will invoke edit
-			eGloo\log("Invoking #edit");
-			$this->edit();
-		} else if ( $this->bean->request_is_delete() ) {
-			// a delete request will invoke destroy
-			eGloo\log("Invoking #destroy");
-			$this->destroy();
-		}
-
-		//eGlooResponse::outputXHTML( $templateVariables );
-		eGloo\log( "Exiting processRequest() on $method Request" );
-	}
-
-	protected function isCollectionRoute() {
-		// determines if requested resource/uri is for a
-		// collection
-
-		// @wtfphp empty(variable_is_0) === true
-		return isset($this->bean['ids'])  ||
-		       (!isset($this->bean['id']) ||
-		       	!is_numeric($this->bean['id']));
-
-	}
-
 	// new /controller/new action GET
-	protected function _new()  { }
+	protected function _new( $uri_pairs = null, $validation_result = null )  { }
 
 	// create /controller/ action POST
-	protected function create()  { }
+	protected function create( $uri_pairs = null, $validation_result = null )  { }
 
 	// edit /controller/edit/:id action GET
-	protected function edit()    { }
+	protected function edit( $uri_pairs = null, $validation_result = null )    { }
 
 	// update /controller/:id action PUT
-	protected function update()    { }
+	protected function update( $uri_pairs = null, $validation_result = null )    { }
 
 	// show /controller/:id action GET
-	protected function show()    { }
+	protected function show( $uri_pairs = null, $validation_result = null )    { }
 
 	// destroy /controller/:id action DELETE
-	protected function destroy() { }
+	protected function destroy( $uri_pairs = null, $validation_result = null ) { }
 
 }
