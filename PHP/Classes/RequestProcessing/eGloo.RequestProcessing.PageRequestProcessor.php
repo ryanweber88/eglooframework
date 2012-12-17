@@ -1,11 +1,13 @@
 <?php
+
 namespace eGloo\RequestProcessing;
 
 use \RequestProcessor;
+use \eGlooConfiguration;
 use \eGloo\HTTP\Request;
 use \eGloo\RequestProcessing\Route;
 
-// define('DS', DIRECTORY_SEPARATOR);
+define('DS', DIRECTORY_SEPARATOR);
 
 /**
  * PageRequestProcessor Class File
@@ -140,7 +142,7 @@ class PageRequestProcessor extends RequestProcessor {
 					$action = $final_action;
 					$action_matches = [];
 
-					preg_match('~#([a-zA-Z0-9]+)~', $action, $action_matches);
+					preg_match('~#([a-zA-Z0-9_]+)~', $action, $action_matches);
 
 					if ( !empty($action_matches) ) {
 						$action = $action_matches[1];
@@ -181,8 +183,8 @@ class PageRequestProcessor extends RequestProcessor {
 	    $this->setTemplateVariable('layout', 'application');
 
 		// Setup Twig and set directories to look for views
-	    $loader = new Twig_Loader_Filesystem([$view_path, $controller_view_path]);
-	    $twig   = new Twig_Environment($loader, ['debug' => true]);
+	    $loader = new \Twig_Loader_Filesystem([$view_path, $controller_view_path]);
+	    $twig   = new \Twig_Environment($loader, ['debug' => true]);
 	    // $twig->addExtension(new Twig_Extension_Debug());
 	    $rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
 

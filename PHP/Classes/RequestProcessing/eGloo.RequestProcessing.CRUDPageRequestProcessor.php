@@ -55,6 +55,9 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 		],
 		'new' => [
 			'methods' => ['GET'],
+			'matches' => [
+				['@controller/new' => '@controller#_new'],
+			],
 		],
 		'create' => [
 			'methods' => ['POST'],
