@@ -596,7 +596,8 @@ final class eGlooLogger  {
 		// against a specific error number because they are not provided
 		// @TODO define statically/cache
 		$allowed = [
-			'non-static method'
+			'non-static method',
+			'cannot bind an instance'
 		];
 
 		// @TODO change to something more flexible as to allow

@@ -361,6 +361,7 @@ abstract class Model extends Delegator
 		}
 		
 		else {
+			$this->id;
 			return  isset($this->id)      && 
 						 (!empty($this->id)     ||
 						  !is_null($this->id));
@@ -778,7 +779,7 @@ abstract class Model extends Delegator
 					
 					//$result = $cache->find($relation, function() use ($model, $lambda) {
 					// first bind lambda to this context
-					$lambda = $lambda->bindTo($this, $this);
+					$lambda = @$lambda->bindTo($this, $this);
 
 					try {
 						$result = $lambda($model);
@@ -2118,7 +2119,7 @@ abstract class Model extends Delegator
 		foreach($points as $point) {
 			if (static::hasCallbacks($event, $point)) {
 				foreach(static::callbacks($event, $point) as $callback) {
-					$callback = $callback->bindTo($this);
+					$callback = @$callback->bindTo($this, $this);
 					try { 
 						if (($callback()) === false) {
 							return ;
@@ -2165,16 +2166,15 @@ abstract class Model extends Delegator
 
 			if (\eGloo\Utilities\Collection::isHash($result)) {
 				$result = $manager->find(static::singleton(), $key, function($class) 
-					use ($result) {					
+					use ($result) {		
 
 					return new $class($result);
 				});	
 
-				var_export($result); exit;	
 
 				
-				$result->send('runCallbacks', 'find', 'after');
-				
+				//$result->send('runCallbacks', 'find', 'after');
+				$result->after_find();
 			}
 					
 			// otherwise, we manually build set with model instances
@@ -2223,7 +2223,7 @@ abstract class Model extends Delegator
 				$result = new Model\Set($set);
 			}				
 		}
-		
+
 		return $result;
 	}
 	
@@ -2368,16 +2368,14 @@ abstract class Model extends Delegator
 					"Failed to create alias '$alias' because lambda does not return-by-reference"
 				);
 			}
-		}
 		
-		else {
+		} else {
 			// @TODO why aren't we iterating through aliases here?
 			// Ahh because it doesn't make sense otherwise, or at 
 			// least isnt very readable
 			list($alias, $from) = $arguments;
-
 			static::attribute($alias, function & () use ($alias, $from) {
-				return $this->$alias = &$this->$from;
+				return $this->$from;
 			});
 
 			//foreach($aliases as $alias) {
@@ -2451,7 +2449,7 @@ abstract class Model extends Delegator
 
 
 	public function __call($name, $arguments) {
-		$self = $this;		
+		
 
 		try { 
 			return parent::__call($name, $arguments);
@@ -2461,6 +2459,7 @@ abstract class Model extends Delegator
 		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
+
 			return call_user_func_array(
 				static::defineMethod($name, function($mixed) use ($match) {
 
@@ -2496,19 +2495,20 @@ abstract class Model extends Delegator
 		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
-			return call_user_func_array(
-				static::defineMethod($name, function($mixed) use ($match) {
+			return call_user_func_array(static::defineMethod($name, function($mixed = null) 
+				use ($match) {
 
-					if (func_num_args()) {				
-						static::defineCallback(
-							$event = $match[2], $match[1], $mixed
-						);
+				if (func_num_args()) {				
+					static::defineCallback(
+						$event = $match[2], $match[1], $mixed
+					);
 
-					// otherwise we are executing/firing(?) the callback stack
-					} else {
-						static::runCallbacks($match[2], $match[1]);
+				// otherwise we are executing/firing(?) the callback stack
+				} else {
+					//var_export(debug_backtrace()); exit;
+					static::runCallbacks($match[2], $match[1]);
 
-					}
+				}
 
 			}), $arguments);
 			
@@ -2988,7 +2988,7 @@ abstract class Model extends Delegator
 			// association and subseqently, bind that
 			// association to the current instance context
 			$lambda = static::association($name)['lambda'];
-			$lambda->bindTo($this, $this);
+			$lambda = @$lambda->bindTo($this, $this);
 
 			// now execute/call block and pass Model reference
 			// that represents the association and pass value
@@ -3017,12 +3017,12 @@ abstract class Model extends Delegator
 		if (isset(static::domain('_sdefers')[$name])) {
 			// we need to replace lambda with bound version
 			$lambda = &static::domain('_sdefers')[$name];
-			$lambda = $lambda->bindTo($this);
-
+			$lambda = @$lambda->bindTo($this, $this);
+			echo $lambda(); exit;
 			// now we call as static method, which will take care
 			// of running deffered method and then popping from
 			// deferred stack
-			$this->$name = static::{$name}();
+			$this->$name = &static::{$name}();
 		}
 
 		// @TODO this should be replaced at some point

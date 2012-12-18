@@ -287,6 +287,8 @@ class Relation extends Object
 		if (isset($result) && $result instanceof Domain\Model) {
 			$result = new Domain\Model\Set($result);
 		}
+
+
 		
 							
 		// now lets flush our chain and arguments to prepare

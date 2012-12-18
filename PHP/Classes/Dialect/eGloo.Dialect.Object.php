@@ -220,13 +220,14 @@ abstract class Object {
 
 		// finally lets check if value is contained in
 		// cache, set if not and then return
-		$cache =& $instance
-			? $this->_cache
-			: static::domain('_scache'); 
+		if ($instance) {
+
+		} else {
+			$cache = &static::domain('_scache'); 
+		}
 			
 
 		if (!isset($cache[$key])) {			
-
 			if (is_callable($lambda)) {
 				$cache[$key] = [
 					'expiration' => $expiration ?: null,
@@ -556,6 +557,7 @@ abstract class Object {
 	
 	/**
 	 * Instantiates a new object
+	 * @deprecated
 	 */
 	public static function instantiate($__mixed = null) {
 		$reflection = new \ReflectionClass(get_called_class());
@@ -568,7 +570,10 @@ abstract class Object {
 	 */
 	public static function singleton($arguments = null) {
 	
-		return static::cache($class = get_called_class(), function() use ($arguments, $class) {
+
+		return static::cache("*" . get_called_class(), function($class) 
+			use ($arguments) {
+			
 			$reflection = new \ReflectionClass($class);
 			
 			try {
@@ -579,6 +584,10 @@ abstract class Object {
 			}
 		});
 	} 
+
+	public static function defined($constant) {
+		return defined ("static::$constant");
+	}
 	
 	public function hash() {
 		return spl_object_hash($this);
@@ -916,7 +925,7 @@ abstract class Object {
 			return call_user_func_array(array($this, $underscored), $arguments);
 		}
 
-		$recever = static::receiver_id();
+		$receiver = static::receiver_id();
 		throw new \Exception (
 			"Call to undefined instance method '$name' on receiver '$receiver'"
 		);
@@ -961,25 +970,29 @@ abstract class Object {
 			// 	otherwise, we check up method hierarchy chain
 			// for dynamic method
 			} else { 
-			
-				// first check static method definitions
-				$methods = &static::$_smethods;
-				$current = $class;
-
-				do {
-					if (isset($methods[$current][$method])) {
-				
-						$lambda = $methods[$current][$method];
-					}
-						
-				} while (($current = get_parent_class($current)));
-			
-				// next check instance method definitions if this
-				// is instance context
-
+		
+				// check instance method definitions if this
+				// is instance context; 
 				if (isset($this) && isset($this->_methods[$method])) {
 					$lambda = $this->_methods[$method];
+
+				// now we check against statically defined methods
+				// and see if can find a matching method name
+				} else { 
+
+					// first check static method definitions
+					$methods = &static::$_smethods;
+					$current = $class;
+
+					do {
+						if (isset($methods[$current][$method])) {
+					
+							$lambda = $methods[$current][$method];
+						}
+							
+					} while (($current = get_parent_class($current)));
 				}
+		
 			}
 
 			// check if lambda has been set, either as wrapper on 
@@ -989,7 +1002,13 @@ abstract class Object {
 				// check if within instance context, in which case
 				// bind instance context to lambda
 				if (isset($this)) {
-					$lambda = $lambda->bindTo($this);
+					try { 
+						$lambda = @$lambda->bindTo($this, $this);
+					
+					} catch(\Exception $e) {
+
+					}
+
 				}
 
 				return $lambda;

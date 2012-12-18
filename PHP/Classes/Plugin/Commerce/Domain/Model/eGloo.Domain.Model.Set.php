@@ -33,8 +33,8 @@ class Set extends \eGloo\Dialect\Object
 		// in c++, where array values may only be of passed
 		// in type
 		$instance = null;
-		
-		if ($mixed instanceof Domain\Model) {
+
+		if (($model = $mixed) instanceof Domain\Model) {
 			$this->model = get_class(
 				$instance = $mixed
 			);
@@ -43,7 +43,17 @@ class Set extends \eGloo\Dialect\Object
 			// if passed in model exists, then add as first element to set
 			if ($mixed->exists()) {
 				$this->collection[] = $mixed;  
+			
+			// otherwise throw exception because model should
+			// @TODO maybe should throw a warning here as this
+			// happens quite a bit
+			} else {
+
+
 			}
+
+			var_export($this->collection);
+			exit;
 			
 		}
 		

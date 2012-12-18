@@ -59,6 +59,8 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
 $test = \Common\Domain\Model\TestMeSilly::find(15);
+var_export($test);
+exit;
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
