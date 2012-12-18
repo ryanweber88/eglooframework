@@ -7,7 +7,9 @@ use \eGlooConfiguration;
 use \eGloo\HTTP\Request;
 use \eGloo\RequestProcessing\Route;
 
-define('DS', DIRECTORY_SEPARATOR);
+if (!defined('DS')) {
+	define('DS', DIRECTORY_SEPARATOR);
+}
 
 /**
  * PageRequestProcessor Class File
