@@ -1,0 +1,29 @@
+{
+    "name": "egloo/eglooframework",
+    "authors": [
+        {
+            "name": "George Cooper",
+            "email": "egd0000@egloo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "description": "REST API SaaS Framework Built on Polyglot Stack (PHP, Ruby, Python, NodeJS, etc.)",
+    "keywords": [
+        "php",
+        "rest",
+        "api",
+        "polyglot",
+        "framework",
+        "saas"
+    ],
+    "type": "library",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=5.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "classmap": "PHP/Classes"
+        }
+    }
+}
