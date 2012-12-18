@@ -751,6 +751,22 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			$useRequestIDDefaultHandler = eGlooConfiguration::getUseDefaultRequestIDHandler();
 			$useRequestClassDefaultHandler = eGlooConfiguration::getUseDefaultRequestClassHandler();
 
+			$request_class_pieces = explode('_', $requestClass);
+
+			foreach( $request_class_pieces as $index => $rc_piece ) {
+				$request_class_pieces[$index] = ucfirst($rc_piece);
+			}
+
+			$formatted_request_class = implode('', $request_class_pieces);
+
+			$request_id_pieces = explode('_', $requestID);
+
+			foreach( $request_id_pieces as $index => $ri_piece ) {
+				$request_id_pieces[$index] = ucfirst($ri_piece);
+			}
+
+			$formatted_request_id = implode('', $request_id_pieces);
+
 			// We have already parsed the XML once, so let's check down our wildcard options.
 			// Need to refactor later.  This is ugly, but needs to be working now
 			if ( class_exists($requestClass . $requestID . 'RequestProcessor') ) {
@@ -765,6 +781,12 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			} else if ( class_exists( ucfirst(strtolower($requestClass)) . 'RequestProcessor') ) {
 				$requestNode = $this->buildCustomRequestNode(
 						$requestClass, $requestID, ucfirst(strtolower($requestClass)) . 'RequestProcessor' );
+			} else if ( class_exists( $formatted_request_class . $formatted_request_id . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $formatted_request_class . $formatted_request_id . 'RequestProcessor' );
+			} else if ( class_exists( $formatted_request_class . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $formatted_request_class . 'RequestProcessor' );
 			} else if ( $allNodesCached && ($useRequestIDDefaultHandler || $useRequestClassDefaultHandler) ) {
 				// We didn't find the request node and we are cached, so let's see if this request class has a request ID default cached
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in cache, but cache was populated: ' . $requestLookup, 'Security' );
@@ -811,6 +833,22 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			$useRequestClassDefaultHandler = eGlooConfiguration::getUseDefaultRequestClassHandler();
 			$this->loadRequestNodes();
 
+			$request_class_pieces = explode('_', $requestClass);
+
+			foreach( $request_class_pieces as $index => $rc_piece ) {
+				$request_class_pieces[$index] = ucfirst($rc_piece);
+			}
+
+			$formatted_request_class = implode('', $request_class_pieces);
+
+			$request_id_pieces = explode('_', $requestID);
+
+			foreach( $request_id_pieces as $index => $ri_piece ) {
+				$request_id_pieces[$index] = ucfirst($ri_piece);
+			}
+
+			$formatted_request_id = implode('', $request_id_pieces);
+
 			// Same logic as above, except we're checking what we loaded from XML
 			if ( isset($this->requestNodes[ $requestLookup ]) ) {
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node found in XML: ' . $requestLookup, 'Security' );
@@ -827,6 +865,12 @@ final class XML2ArrayRequestDefinitionParser extends eGlooRequestDefinitionParse
 			} else if ( class_exists( ucfirst(strtolower($requestClass)) . 'RequestProcessor') ) {
 				$requestNode = $this->buildCustomRequestNode(
 						$requestClass, $requestID, ucfirst(strtolower($requestClass)) . 'RequestProcessor' );
+			} else if ( class_exists( $formatted_request_class . $formatted_request_id . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $formatted_request_class . $formatted_request_id . 'RequestProcessor' );
+			} else if ( class_exists( $formatted_request_class . 'RequestProcessor') ) {
+				$requestNode = $this->buildCustomRequestNode(
+						$requestClass, $requestID, $formatted_request_class . 'RequestProcessor' );
 			} else if ( $useRequestIDDefaultHandler && isset($this->requestNodes[ $requestClass . self::REQUEST_ID_WILDCARD_KEY ]) ) {
 				eGlooLogger::writeLog( eGlooLogger::DEBUG, 'Request node not found in XML, using requestID wildcard: ' . $requestClass . self::REQUEST_ID_WILDCARD_KEY, 'Security' );
 				$requestNode = $this->requestNodes[ $requestClass . self::REQUEST_ID_WILDCARD_KEY ];
