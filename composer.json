@@ -1,0 +1,20 @@
+{
+    "name": "egloo/eglooframework",
+    "description": "eGloo is a modern, extensible, scalable and stable PHP 5.4+ framework proven in multiple production environments. It is geared towards rapid development, maximum code reuse and minimal developer overhead.",
+    "authors": [
+        {
+            "name": "George Cooper",
+            "email": "george@petflow.com"
+        },
+        {
+            "name": "Andrew Weir",
+            "email": "andrew@petflow.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+      "twig/twig": "1.*",
+      "egloo/asset_manager": "dev-master",
+      "egloo/view_helpers": "dev-master"
+    }
+}

@@ -11,6 +11,10 @@ if (!defined('DS')) {
 	define('DS', DIRECTORY_SEPARATOR);
 }
 
+if (!defined('ENV_ENGLISH')) {
+	define('ENV_ENGLISH', $_SERVER['EG_ENV']);
+}
+
 /**
  * PageRequestProcessor Class File
  *
@@ -172,30 +176,61 @@ class PageRequestProcessor extends RequestProcessor {
 	protected function index( $validation_result = null ) {}
 
 	protected function render( $action = 'index' ) {
-		// Autoload Composer vendors
-		$app_path = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
-		// require_once $app_path . DS . 'vendor' . DS . 'autoload.php';
+
+    $app_path   = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
+    $assets_dir = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName();
+
+    // Asset Helper config
+		$asset_config = [
+		  'compile_file' => $app_path . DS . 'asset_manager.json',
+		  'environment' => ENV_ENGLISH,
+		  'cdn' => [
+		    'DEVELOPMENT' => '/',
+		    'STAGING' => '/',
+		    'PRODUCTION' => '/',
+		  ],
+		  'order_of_importance' => [
+		    'css' => ['css', 'less', 'scss', 'sass'],
+		    'js'  => ['js', 'coffee']
+		  ],
+		  'assets' => [
+		    'css' => $assets_dir . DS . 'CSS',
+		    'js'  => $assets_dir . DS . 'Javascript'
+		  ],
+		  'public' => [
+		    'css' => eGlooConfiguration::getWebRoot() . 'css',
+		    'js'  => eGlooConfiguration::getWebRoot() . 'js'
+		  ],
+		  'web' => [
+		    'css' => 'css',
+		    'js'  => 'js'
+		  ]
+		];
 
 		// Get view paths
-	    $view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
-	    $controller_name      = explode('RequestProcessor', get_called_class())[0];
-	    $controller_view_path = $view_path . DS . $controller_name;
+		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
+		$controller_name      = explode('RequestProcessor', get_called_class())[0];
+		$controller_view_path = $view_path . DS . $controller_name;
 
-	    // Set up default layout
-	    $this->setTemplateVariable('layout', 'application');
+		// Set up default layout
+		$this->setTemplateVariable('layout', 'application');
 
 		// Setup Twig and set directories to look for views
-	    $loader = new \Twig_Loader_Filesystem([$view_path, $controller_view_path]);
-	    $twig   = new \Twig_Environment($loader, ['debug' => true]);
-	    // $twig->addExtension(new Twig_Extension_Debug());
-	    $rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
+		$loader = new \Twig_Loader_Filesystem([$view_path, $controller_view_path]);
+		$twig   = new \Twig_Environment($loader, ['debug' => true]);
+		$twig->addExtension(new \Twig_Extension_Debug());
+		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper($asset_config));
+    $twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
+    $twig->addGlobal('text', new \ViewHelpers\TextHelper());
 
-	    // Send rendered layout as variable to view
-	    $this->setTemplateVariable('rendered_layout', $rendered_layout);
+		$rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
 
-	    $output = $twig->render( $action . '.html.twig', $this->getTemplateVariables() );
+		// Send rendered layout as variable to view
+		$this->setTemplateVariable('rendered_layout', $rendered_layout);
 
-	    // Display the output from the view
+		$output = $twig->render( $action . '.html.twig', $this->getTemplateVariables() );
+
+		// Display the output from the view
 		if ($this->decoratorInfoBean->issetNamespace('ManagedOutput')) {
 			$this->decoratorInfoBean->setValue('Output', $output, 'ManagedOutput');
 		} else {

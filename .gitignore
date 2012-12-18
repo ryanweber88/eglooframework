@@ -2,3 +2,5 @@
 mongrel2/logs/*.log
 mongrel2/run/*.pid
 
+
+vendor

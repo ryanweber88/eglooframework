@@ -3,6 +3,9 @@ namespace {
 use       \eGloo\Utility\Logger     as Logger;
 use       \eGloo\Dialect\ObjectSafe as Object;
 
+// Composer autoloader
+require __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
+
 /**
  * Class and Interface Autoloader
  *
@@ -31,6 +34,7 @@ use       \eGloo\Dialect\ObjectSafe as Object;
 
 // namespace context
 use eGloo\Utilities\ClassBuilder;
+
 
 // Bring up the eGlooConfiguration: 12% Hit
 if ( !class_exists( 'eGlooConfiguration', false ) ) {
@@ -92,10 +96,10 @@ if ( eGlooConfiguration::getUseSwift() ) {
 }
 
 // Load Twig: 0% Hit
-if ( true || eGlooConfiguration::getUseTwig() ) {
-	include( eGlooConfiguration::getTwigIncludePath() );
-	spl_autoload_register(array('Twig_Autoloader', 'autoload'));
-}
+// if ( true || eGlooConfiguration::getUseTwig() ) {
+// 	include( eGlooConfiguration::getTwigIncludePath() );
+// 	spl_autoload_register(array('Twig_Autoloader', 'autoload'));
+// }
 
 // Load S3/CloudFront: 0% Hit
 if ( eGlooConfiguration::getUseS3() ) {

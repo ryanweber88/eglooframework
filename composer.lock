@@ -1,0 +1,412 @@
+{
+    "hash": "137a9caacd358a9300916b15b5b08d9c",
+    "packages": [
+        {
+            "name": "coffeescript/coffeescript",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alxlit/coffeescript-php",
+                "reference": "30c22332f0514f466638eb71e3219526790c1b93"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/alxlit/coffeescript-php/archive/30c22332f0514f466638eb71e3219526790c1b93.zip",
+                "reference": "30c22332f0514f466638eb71e3219526790c1b93",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "time": "2012-12-18 03:52:51",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "CoffeeScript": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Little",
+                    "email": "alxlit@gmail.com",
+                    "homepage": "http://alxlit.name"
+                }
+            ],
+            "description": "A port of the CoffeeScript compiler to PHP.",
+            "homepage": "http://github.com/alxlit/coffeescript-php",
+            "keywords": [
+                "javascript",
+                "JS",
+                "coffee",
+                "coffeescript"
+            ]
+        },
+        {
+            "name": "egloo/asset_manager",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:egloo/AssetManager.git",
+                "reference": "a7ca2c73b4fe962692945e853b10c3e2a33f8ed1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/egloo/AssetManager/archive/a7ca2c73b4fe962692945e853b10c3e2a33f8ed1.zip",
+                "reference": "a7ca2c73b4fe962692945e853b10c3e2a33f8ed1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4",
+                "coffeescript/coffeescript": "dev-master",
+                "richthegeek/phpsass": "dev-master",
+                "leafo/lessphp": "dev-master",
+                "natxet/cssmin": "dev-master",
+                "nick4fake/jsmin": "dev-master"
+            },
+            "time": "2012-12-18 02:58:34",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "AssetManager": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "andruu",
+                    "email": "andru.weir@gmail.com"
+                }
+            ],
+            "description": "Compiles Less, Sass, SCSS and CoffeeScript into CSS/JS and concatenates and minifies files.",
+            "keywords": [
+                "sass",
+                "less",
+                "coffeescript",
+                "Sprockets"
+            ]
+        },
+        {
+            "name": "egloo/view_helpers",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/egloo/ViewHelpers",
+                "reference": "e51a3cd817fc9ac0194023911a42ba18e6541a16"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/egloo/ViewHelpers/archive/e51a3cd817fc9ac0194023911a42ba18e6541a16.zip",
+                "reference": "e51a3cd817fc9ac0194023911a42ba18e6541a16",
+                "shasum": ""
+            },
+            "require": {
+                "webignition/json-pretty-print": "dev-master"
+            },
+            "time": "2012-12-18 15:47:33",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "ViewHelpers": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "andruu",
+                    "email": "andru.weir@gmail.com"
+                }
+            ],
+            "description": "View helpers for eGloo framework",
+            "keywords": [
+                "assets",
+                "Sprockets",
+                "pre compile"
+            ]
+        },
+        {
+            "name": "leafo/lessphp",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "http://github.com/leafo/lessphp",
+                "reference": "da15f54506ce5023eaeb9ad9cae83470ffe018a1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/leafo/lessphp/archive/da15f54506ce5023eaeb9ad9cae83470ffe018a1.zip",
+                "reference": "da15f54506ce5023eaeb9ad9cae83470ffe018a1",
+                "shasum": ""
+            },
+            "time": "2012-11-03 17:50:34",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "classmap": [
+                    "lessc.inc.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT",
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Leaf Corcoran",
+                    "email": "leafot@gmail.com",
+                    "homepage": "http://leafo.net"
+                }
+            ],
+            "description": "lessphp is a compiler for LESS written in PHP.",
+            "homepage": "http://leafo.net/lessphp/"
+        },
+        {
+            "name": "natxet/CssMin",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git://github.com/natxet/CssMin.git",
+                "reference": "ef023b701821e73858f6af457f5fdef96cf9cd4d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/natxet/CssMin/archive/ef023b701821e73858f6af457f5fdef96cf9cd4d.zip",
+                "reference": "ef023b701821e73858f6af457f5fdef96cf9cd4d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.0"
+            },
+            "time": "2012-02-22 09:15:20",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "CssMin": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Joe Scylla",
+                    "email": "joe.scylla@gmail.com",
+                    "homepage": "https://profiles.google.com/joe.scylla"
+                }
+            ],
+            "description": "Minifying CSS",
+            "homepage": "http://code.google.com/p/cssmin/",
+            "keywords": [
+                "css",
+                "minify"
+            ]
+        },
+        {
+            "name": "nick4fake/jsmin",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nick4fake/JsMin.git",
+                "reference": "5136ef1e1e56ffb14622bb9d93362d930ff61690"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/nick4fake/JsMin/archive/5136ef1e1e56ffb14622bb9d93362d930ff61690.zip",
+                "reference": "5136ef1e1e56ffb14622bb9d93362d930ff61690",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "time": "2012-12-17 09:42:00",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "JsMin": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Douglas Crockford",
+                    "homepage": "http://www.crockford.com"
+                },
+                {
+                    "name": "Bogdan Yurov",
+                    "email": "bogdan@yurov.me"
+                }
+            ],
+            "description": "Library for minifying JavaScript files"
+        },
+        {
+            "name": "richthegeek/phpsass",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/richthegeek/phpsass",
+                "reference": "b07422c5fdae25dae1c93bb95d423a40ff250f8b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/richthegeek/phpsass/archive/b07422c5fdae25dae1c93bb95d423a40ff250f8b.zip",
+                "reference": "b07422c5fdae25dae1c93bb95d423a40ff250f8b",
+                "shasum": ""
+            },
+            "time": "2012-12-15 22:18:35",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "classmap": [
+                    "script/",
+                    "renderers/",
+                    "tree/",
+                    "SassException.php",
+                    "SassFile.php",
+                    "SassParser.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Richard Lyon",
+                    "homepage": "https://github.com/richthegeek"
+                },
+                {
+                    "name": "Sebastian Siemssen",
+                    "homepage": "https://twitter.com/thefubhy"
+                },
+                {
+                    "name": "Steve Jones",
+                    "homepage": "https://github.com/darthsteven"
+                },
+                {
+                    "name": "Sam Richard",
+                    "homepage": "https://github.com/snugug"
+                }
+            ],
+            "description": "PHPSass is a PHP compiler for SASS, a popular CSS pre-processor language.",
+            "homepage": "http://phpsass.com"
+        },
+        {
+            "name": "twig/twig",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git://github.com/fabpot/Twig.git",
+                "reference": "f095f3a1777431412954e478f92e8a10cb7b6495"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/fabpot/Twig/archive/f095f3a1777431412954e478f92e8a10cb7b6495.zip",
+                "reference": "f095f3a1777431412954e478f92e8a10cb7b6495",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.4"
+            },
+            "time": "2012-12-18 10:01:32",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.12-dev"
+                }
+            },
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "Twig_": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Armin Ronacher",
+                    "email": "armin.ronacher@active-4.com"
+                }
+            ],
+            "description": "Twig, the flexible, fast, and secure template language for PHP",
+            "homepage": "http://twig.sensiolabs.org",
+            "keywords": [
+                "templating"
+            ]
+        },
+        {
+            "name": "webignition/json-pretty-print",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webignition/json-pretty-print.git",
+                "reference": "72831627c3264374766f100145ca11fee3581729"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/webignition/json-pretty-print/archive/72831627c3264374766f100145ca11fee3581729.zip",
+                "reference": "72831627c3264374766f100145ca11fee3581729",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "time": "2012-07-23 23:22:31",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "psr-0": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jon Cram",
+                    "email": "jon@webignition.net"
+                }
+            ],
+            "description": "Prettifies a JSON string for human readability",
+            "homepage": "https://github.com/webignition/json-pretty-print",
+            "keywords": [
+                "json",
+                "formatter",
+                "pretty-print"
+            ]
+        }
+    ],
+    "packages-dev": null,
+    "aliases": [
+
+    ],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "egloo/asset_manager": 20,
+        "egloo/view_helpers": 20
+    }
+}
