@@ -74,7 +74,20 @@ if ( $isValidRequest ) {
 		$controller = $rp = &$requestProcessor;
 	}
 
+
+	if ( !($requestProcessor instanceof RequestProcessorDecorator) &&
+		 method_exists($requestProcessor, 'before' )) {
+
+		$requestProcessor->before();
+	}
+
 	$requestProcessor->processRequest();
+
+	if ( !($requestProcessor instanceof RequestProcessorDecorator) &&
+		 method_exists($requestProcessor, 'after' )) {
+
+		$requestProcessor->after();
+	}
 } else {
 	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 

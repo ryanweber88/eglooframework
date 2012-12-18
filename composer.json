@@ -1,20 +1,32 @@
 {
     "name": "egloo/eglooframework",
-    "description": "eGloo is a modern, extensible, scalable and stable PHP 5.4+ framework proven in multiple production environments. It is geared towards rapid development, maximum code reuse and minimal developer overhead.",
     "authors": [
         {
             "name": "George Cooper",
-            "email": "george@petflow.com"
-        },
-        {
-            "name": "Andrew Weir",
-            "email": "andrew@petflow.com"
+            "email": "egd0000@egloo.com"
         }
     ],
     "minimum-stability": "dev",
+    "description": "REST API SaaS Framework Built on Polyglot Stack (PHP, Ruby, Python, NodeJS, etc.)",
+    "keywords": [
+        "php",
+        "rest",
+        "api",
+        "polyglot",
+        "framework",
+        "saas"
+    ],
+    "type": "library",
+    "license": "Apache-2.0",
     "require": {
-      "twig/twig": "1.*",
-      "egloo/asset_manager": "dev-master",
-      "egloo/view_helpers": "dev-master"
+        "php": ">=5.4",
+        "twig/twig": "1.*",
+        "egloo/asset_manager": "dev-master",
+        "egloo/view_helpers": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "classmap": "PHP/Classes"
+        }
     }
 }
