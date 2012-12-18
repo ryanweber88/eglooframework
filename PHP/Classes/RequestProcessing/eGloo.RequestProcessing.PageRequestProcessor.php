@@ -180,7 +180,7 @@ class PageRequestProcessor extends RequestProcessor {
     $app_path   = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
     $assets_dir = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName();
 
-    // Asset Helper config
+    // Asset Helper config needs to be refactored into the app level
 		$asset_config = [
 		  'compile_file' => $app_path . DS . 'asset_manager.json',
 		  'environment' => ENV_ENGLISH,
