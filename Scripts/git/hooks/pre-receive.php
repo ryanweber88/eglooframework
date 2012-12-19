@@ -1,12 +1,14 @@
 #!/usr/bin/php
 <?php
+namespace eGloo\Script\Git\Hook;
+
 /**
  * Git server pre-receive hook: fires on push, and is responsible for enforcing
  * process and coding standards; rules can be added via lambda in pre-recieve/rules
  * directory
  * @author Christian Calloway callowaylc@gmail.com christian@petflow.com
  */
-namespace eGloo\Script\Git\Hook;
+
 
 use \eGloo\Configuration;
 use \eGloo\Performance\Caching\Gateway as CacheGateway;
