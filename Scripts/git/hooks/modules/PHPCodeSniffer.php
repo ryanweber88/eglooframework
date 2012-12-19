@@ -60,20 +60,21 @@ class PHPCodeSniffer extends Hook\Module {
 
 			// now log all summarized results
 			if (count($file_matches)) {
-				$counter = 0;
+				$counter = 1;
 
-				foreach($file_matches as $file_match) {
+				foreach($file_matches as $file_index => $file_match) {
 					if ( isset($error_matches[$counter]) ) {
 						$error_match = $error_matches[$counter];
-						$counter++;
 					} else {
 						continue;
 					}
 
 					$this->log(
-						"File '{$file_match[1]}' had the following errors:\n" .
-						"{$error_match[0]}"
+						"File '{$file_match[$file_index]}' had the following errors:\n" .
+						"{$error_match[$counter]}"
 					);
+
+					$counter++;
 				}
 			}
 
