@@ -28,7 +28,7 @@ SetEnv EG_CDN_CONNECTION_PRIMARY_SECRET_ACCESS_KEY primary_connection_secret_acc
 # Primary Database Engine
 SetEnv EG_DB_CONNECTION_PRIMARY_NAME primary_connection_name
 SetEnv EG_DB_CONNECTION_PRIMARY_HOST primary_connection_host
-SetEnv EG_DB_CONNECTION_PRIMARY_PORT 3306 
+SetEnv EG_DB_CONNECTION_PRIMARY_PORT 3306
 SetEnv EG_DB_CONNECTION_PRIMARY_DATABASE primary_connection_db
 SetEnv EG_DB_CONNECTION_PRIMARY_USER primary_connection_user
 SetEnv EG_DB_CONNECTION_PRIMARY_PASSWORD primary_connection_password
@@ -59,7 +59,7 @@ SetEnv EG_LOG_FORMAT LOG
 SetEnv EG_SANITY_CHECK_CLASS_LOADING ON
 
 # Rewrite Rules
-<IfModule rewrite_module> 
+<IfModule rewrite_module>
 RewriteEngine on
 
 # Modify the RewriteBase if you are using eGloo in a subdirectory
@@ -162,7 +162,7 @@ RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)$ index.php?eg_requestC
 RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/([a-zA-Z0-9\.\-_&\ ]+=[a-zA-Z0-9\.\-=_&\ ]*)$ index.php?eg_requestClass=$1&eg_requestID=$2&$3%{QUERY_STRING} [L]
 RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)$ index.php?eg_requestClass=$1&eg_requestID=$2&eg_slug=$3&%{QUERY_STRING} [L]
 RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/?$ index.php?eg_requestClass=$1&eg_requestID=index&%{QUERY_STRING} [L]
-RewriteRule ^$ index.php?eg_requestClass=externalMainPage&eg_requestID=extMainViewBase&%{QUERY_STRING} [L]
+RewriteRule ^$ index.php?eg_requestClass=egDefault&eg_requestID=index&%{QUERY_STRING} [L]
 
 # Forbid anything that doesn't fit one of the preceding patterns
 # Should redirect to 404.  Currently redirects to /

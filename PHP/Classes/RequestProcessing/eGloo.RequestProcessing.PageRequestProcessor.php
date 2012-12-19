@@ -53,6 +53,7 @@ class PageRequestProcessor extends RequestProcessor {
 	);
 
 	protected $_templateVariables = array();
+	protected $action = 'index';
 
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
@@ -165,6 +166,7 @@ class PageRequestProcessor extends RequestProcessor {
 				$validation_result = null;
 			}
 
+			$this->action = $action;
 			$retVal = $this->$action( $validation_result );
 		}
 
@@ -174,7 +176,11 @@ class PageRequestProcessor extends RequestProcessor {
 	// index /controller/ action GET
 	protected function index( $validation_result = null ) {}
 
-	protected function render( $action = 'index' ) {
+	protected function render( $action = null ) {
+		if ( $action == null ) {
+			$action = $this->action;
+		}
+
 		// Autoload Composer vendors
 		$app_path = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
 		// require_once $app_path . DS . 'vendor' . DS . 'autoload.php';
