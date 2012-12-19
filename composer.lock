@@ -1,5 +1,5 @@
 {
-    "hash": "137a9caacd358a9300916b15b5b08d9c",
+    "hash": "a675c644258545ef08356a67b39771bd",
     "packages": [
         {
             "name": "coffeescript/coffeescript",
@@ -52,23 +52,22 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:egloo/AssetManager.git",
-                "reference": "a7ca2c73b4fe962692945e853b10c3e2a33f8ed1"
+                "reference": "05401a00d0075102f59c7a070edb224eee5639a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/egloo/AssetManager/archive/a7ca2c73b4fe962692945e853b10c3e2a33f8ed1.zip",
-                "reference": "a7ca2c73b4fe962692945e853b10c3e2a33f8ed1",
+                "url": "https://github.com/egloo/AssetManager/archive/05401a00d0075102f59c7a070edb224eee5639a2.zip",
+                "reference": "05401a00d0075102f59c7a070edb224eee5639a2",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4",
                 "coffeescript/coffeescript": "dev-master",
-                "richthegeek/phpsass": "dev-master",
                 "leafo/lessphp": "dev-master",
                 "natxet/cssmin": "dev-master",
                 "nick4fake/jsmin": "dev-master"
             },
-            "time": "2012-12-18 02:58:34",
+            "time": "2012-12-19 14:13:15",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -82,7 +81,7 @@
             ],
             "authors": [
                 {
-                    "name": "andruu",
+                    "name": "Andrew Weir",
                     "email": "andru.weir@gmail.com"
                 }
             ],
@@ -255,58 +254,6 @@
             "description": "Library for minifying JavaScript files"
         },
         {
-            "name": "richthegeek/phpsass",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/richthegeek/phpsass",
-                "reference": "b07422c5fdae25dae1c93bb95d423a40ff250f8b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/richthegeek/phpsass/archive/b07422c5fdae25dae1c93bb95d423a40ff250f8b.zip",
-                "reference": "b07422c5fdae25dae1c93bb95d423a40ff250f8b",
-                "shasum": ""
-            },
-            "time": "2012-12-15 22:18:35",
-            "type": "library",
-            "installation-source": "source",
-            "autoload": {
-                "classmap": [
-                    "script/",
-                    "renderers/",
-                    "tree/",
-                    "SassException.php",
-                    "SassFile.php",
-                    "SassParser.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Richard Lyon",
-                    "homepage": "https://github.com/richthegeek"
-                },
-                {
-                    "name": "Sebastian Siemssen",
-                    "homepage": "https://twitter.com/thefubhy"
-                },
-                {
-                    "name": "Steve Jones",
-                    "homepage": "https://github.com/darthsteven"
-                },
-                {
-                    "name": "Sam Richard",
-                    "homepage": "https://github.com/snugug"
-                }
-            ],
-            "description": "PHPSass is a PHP compiler for SASS, a popular CSS pre-processor language.",
-            "homepage": "http://phpsass.com"
-        },
-        {
             "name": "twig/twig",
             "version": "dev-master",
             "source": {
@@ -354,6 +301,43 @@
             "homepage": "http://twig.sensiolabs.org",
             "keywords": [
                 "templating"
+            ]
+        },
+        {
+            "name": "underscore/Underscore.php",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ActiveObject/Underscore.php",
+                "reference": "v1.3.1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/ActiveObject/Underscore.php/archive/v1.3.1.zip",
+                "reference": "v1.3.1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "time": "2012-05-08 22:12:27",
+            "type": "library",
+            "installation-source": "source",
+            "autoload": {
+                "classmap": [
+                    "underscore.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Underscore.php is a PHP port of Underscore.js.",
+            "homepage": "http://brianhaveri.github.com/Underscore.php",
+            "keywords": [
+                "util",
+                "underscore",
+                "functional"
             ]
         },
         {
@@ -407,6 +391,7 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "egloo/asset_manager": 20,
-        "egloo/view_helpers": 20
+        "egloo/view_helpers": 20,
+        "underscore/underscore.php": 20
     }
 }

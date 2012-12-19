@@ -183,6 +183,8 @@ class PageRequestProcessor extends RequestProcessor {
     // Asset Helper config needs to be refactored into the app level
 		$asset_config = [
 		  'compile_file' => $app_path . DS . 'asset_manager.json',
+		  'ruby_path' => '/Users/andrew/.rvm/rubies/ruby-1.9.3-p327/bin',
+		  'gems_path' => '/Users/andrew/.rvm/gems/ruby-1.9.3-p327/bin',
 		  'environment' => ENV_ENGLISH,
 		  'cdn' => [
 		    'DEVELOPMENT' => '/',
@@ -207,6 +209,10 @@ class PageRequestProcessor extends RequestProcessor {
 		  ]
 		];
 
+		// \AssetManager\AssetManager::init($asset_config);
+		// \AssetManager\AssetManager::clearCache();
+		// \AssetManager\AssetManager::preCompile();
+
 		// Get view paths
 		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
 		$controller_name      = explode('RequestProcessor', get_called_class())[0];
@@ -217,7 +223,7 @@ class PageRequestProcessor extends RequestProcessor {
 
 		// Setup Twig and set directories to look for views
 		$loader = new \Twig_Loader_Filesystem([$view_path, $controller_view_path]);
-		$twig   = new \Twig_Environment($loader, ['debug' => true]);
+		$twig   = new \Twig_Environment($loader, ['debug' => true, 'autoescape' => false]);
 		$twig->addExtension(new \Twig_Extension_Debug());
 		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper($asset_config));
     $twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
