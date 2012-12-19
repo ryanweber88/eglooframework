@@ -25,6 +25,7 @@ class PHPMessDetector extends Hook\Module {
 
 			// make temporary directory in which to place files
 			// to be sniffed
+			static::rmdir(self::DIRECTORY);
 			@mkdir(self::DIRECTORY_DUMP);
 
 			// iterate through modified files and write to
