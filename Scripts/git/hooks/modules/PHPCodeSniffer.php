@@ -58,7 +58,7 @@ class PHPCodeSniffer extends Hook\Module {
 			preg_match_all('/FILE:\s+?(.+)/', $results, $file_matches,  PREG_SET_ORDER);
 			preg_match_all('/FOUND:?\s+?(.+)/', $results, $error_matches, PREG_SET_ORDER);
 
-  // 2 | ERROR   | Missing file doc comment
+			$errors_found = false;
 
 			// now log all summarized results
 			if (count($file_matches)) {
@@ -67,6 +67,7 @@ class PHPCodeSniffer extends Hook\Module {
 				foreach($file_matches as $file_index => $file_match) {
 					if ( isset($error_matches[$counter]) ) {
 						$error_match = $error_matches[$counter][0];
+						$errors_found = true;
 					} else {
 						continue;
 					}
@@ -80,9 +81,12 @@ class PHPCodeSniffer extends Hook\Module {
 				}
 			}
 
+			if ( $errors_found ) {
+				$this->log( var_export($results, true) );
+			}
+
 			// finally we drop the godamn dump directory
 			// static::rmdir(self::DIRECTORY);
-
 		}
 
 		else {
