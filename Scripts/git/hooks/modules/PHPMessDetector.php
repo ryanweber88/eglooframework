@@ -71,7 +71,7 @@ class PHPMessDetector extends Hook\Module {
 			}
 
 			// finally we drop the godamn dump directory
-			static::rmdir(self::DIRECTORY_DUMP);
+			// static::rmdir(self::DIRECTORY_DUMP);
 
 		}
 
