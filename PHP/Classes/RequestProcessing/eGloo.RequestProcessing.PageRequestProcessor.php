@@ -72,7 +72,12 @@ class PageRequestProcessor extends RequestProcessor {
 		$method = strtoupper( $this->bean->requestMethod() );
 		$request_class = $this->bean->getRequestClass();
 		$action = $this->bean->getRequestID();
-		$uri = str_replace( eGlooConfiguration::getRewriteBase(), '', Request::getRequestURI() );
+
+		if ( eGlooConfiguration::getRewriteBase() !== '/' ) {
+			$uri = str_replace( eGlooConfiguration::getRewriteBase(), '', Request::getRequestURI() );
+		} else {
+			$uri = Request::getRequestURI();
+		}
 
 		$invoke_action = false;
 
