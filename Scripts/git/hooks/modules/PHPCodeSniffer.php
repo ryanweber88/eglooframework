@@ -54,7 +54,7 @@ class PHPCodeSniffer extends Hook\Module {
 
 			// parse results to determine errors
 			preg_match_all('/FILE:\s+?(.+)/', $results, $file_matches,  PREG_SET_ORDER);
-			preg_match_all('/FOUND:.+/', $results, $error_matches, PREG_SET_ORDER);
+			preg_match_all('/FOUND:\s+?(.+)/', $results, $error_matches, PREG_SET_ORDER);
 
 			// now log all summarized results
 			if (count($file_matches)) {
