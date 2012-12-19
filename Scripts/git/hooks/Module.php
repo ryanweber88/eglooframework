@@ -65,8 +65,10 @@
 	 * cleanly separated
 	 */
 	protected function log($message) {
+		$class_name = str_replace( 'eGloo\Script\Git\Hook\Module\\', '', get_class($this) );
+
 		$this->log[] =
-			"Module::" . get_class($this) . " >> $message";
+			"Module::" . $class_name . " >> $message";
 	}
 
 	private $log = array();
