@@ -108,7 +108,8 @@ class PHPMessDetector extends Hook\Module {
 		$command = self::COMMAND_PMD;
 		$path    = self::DIRECTORY_DUMP;
 
-		$rules_path = \eGloo\Configuration::getFrameworkRootPath() . '/Build/phpmd.xml';
+		// $rules_path = \eGloo\Configuration::getFrameworkRootPath() . '/Build/phpmd.xml';
+		$rules_path = '/data/code/eglooframework/Build/phpmd.xml';
 
 		static::rmdir('/tmp/phpmd_log');
 		@mkdir('/tmp/phpmd_log');
