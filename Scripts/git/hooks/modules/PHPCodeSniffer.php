@@ -52,6 +52,8 @@ class PHPCodeSniffer extends Hook\Module {
 			// issue command on dump directory and retrieve results
 			$results = static::execute();
 
+			var_export($results);
+
 			// parse results to determine errors
 			preg_match_all('/FILE:\s+?(.+)/', $results, $file_matches,  PREG_SET_ORDER);
 			preg_match_all('/FOUND:\s+?(.+)/', $results, $error_matches, PREG_SET_ORDER);
