@@ -46,9 +46,6 @@
 		return $this->log;
 	}
 
-
-
-
 	/**
 	 * A pre-invoke hook
 	 */

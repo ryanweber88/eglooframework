@@ -40,7 +40,9 @@ class PHPCodeSniffer extends Hook\Module {
 			foreach($files as $file) {
 				// create directory for file, relative to
 				// dump path
-				@mkdir(static::directory($file), 0755, true);
+				if ( !file_exists(static::directory($file)) ) {
+					@mkdir(static::directory($file), 0755, true);
+				}
 
 				// write file content
 				$resource = fopen(static::file($file), 'w');
@@ -55,6 +57,8 @@ class PHPCodeSniffer extends Hook\Module {
 			// parse results to determine errors
 			preg_match_all('/FILE:\s+?(.+)/', $results, $file_matches,  PREG_SET_ORDER);
 			preg_match_all('/FOUND:?\s+?(.+)/', $results, $error_matches, PREG_SET_ORDER);
+
+  // 2 | ERROR   | Missing file doc comment
 
 			// now log all summarized results
 			if (count($file_matches)) {
