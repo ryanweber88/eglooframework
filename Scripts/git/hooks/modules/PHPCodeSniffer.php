@@ -82,7 +82,7 @@ class PHPCodeSniffer extends Hook\Module {
 			}
 
 			if ( $errors_found ) {
-				$this->log( var_export($results, true) );
+				$this->log( "Full PHP CS output:\n" . var_export($results, true) );
 			}
 
 			// finally we drop the godamn dump directory
