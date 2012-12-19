@@ -75,7 +75,7 @@ class PHPCodeSniffer extends Hook\Module {
 			}
 
 			// finally we drop the godamn dump directory
-			static::rmdir(self::DIRECTORY);
+			// static::rmdir(self::DIRECTORY);
 
 		}
 
