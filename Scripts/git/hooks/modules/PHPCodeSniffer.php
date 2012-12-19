@@ -95,8 +95,11 @@ class PHPCodeSniffer extends Hook\Module {
 	protected static function execute() {
 		$command = self::COMMAND;
 		$path    = self::DIRECTORY;
+		$output_path = self::DIRECTORY . '/checkstyle.xml';
 
-		return `$command $path`;
+		$rules_path = '/data/code/eglooframework/Build/phpcs.xml';
+
+		return `$command --report=checkstyle --report-file=$output_path --standard=$rules_path $path`;
 	}
 	/**
 	 * Because this module is dependent
