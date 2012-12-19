@@ -72,10 +72,10 @@ var_export($error_matches);
 					}
 
 					echo "fffFile '{$file_match[1]}' had the following errors:\n" .
-						"{$error_match[0]}";
+						"{$error_match}";
 					$this->log(
 						"File '{$file_match[1]}' had the following errors:\n" .
-						"{$error_match[0]}"
+						"{$error_match}"
 					);
 
 					$counter++;
