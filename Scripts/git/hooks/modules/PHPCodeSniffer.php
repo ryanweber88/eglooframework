@@ -63,8 +63,9 @@ class PHPCodeSniffer extends Hook\Module {
 				$counter = 0;
 
 				foreach($file_matches as $file_match) {
-					if ( isset($error_matches[$counter++]) ) {
-						$error_match = $error_matches[$counter++];
+					if ( isset($error_matches[$counter]) ) {
+						$error_match = $error_matches[$counter];
+						$counter++;
 					} else {
 						continue;
 					}
