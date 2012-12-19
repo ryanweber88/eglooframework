@@ -89,7 +89,7 @@ var_export($error_matches);
 
 		else {
 			$this->log(
-				"Failed to run {$this->class} because PHP Code Sniffer is not installed"
+				"Failed to run {$this->_class} because PHP Code Sniffer is not installed"
 			);
 
 		}
