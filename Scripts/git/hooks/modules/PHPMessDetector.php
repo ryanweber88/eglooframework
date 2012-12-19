@@ -116,7 +116,7 @@ class PHPMessDetector extends Hook\Module {
 
    // <!-- <arg value="codesize,unusedcode,naming,design" /> -->
 
-		return `$command $path xml "$rules_path" --reportfile /tmp/phpmd_log/pmd.xml`;
+		return `$command $path xml "$rules_path" "naming" --reportfile /tmp/phpmd_log/pmd.xml`;
 	}
 	/**
 	 * Because this module is dependent
