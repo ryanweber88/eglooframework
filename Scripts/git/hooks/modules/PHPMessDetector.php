@@ -108,7 +108,15 @@ class PHPMessDetector extends Hook\Module {
 		$command = self::COMMAND_PMD;
 		$path    = self::DIRECTORY_DUMP;
 
-		return `$command $path`;
+		static::rmdir('/tmp/phpmd_out');
+		@mkdir('/tmp/phpmd_out');
+
+		static::rmdir('/tmp/phpmd_log');
+		@mkdir('/tmp/phpmd_log');
+
+   // <!-- <arg value="codesize,unusedcode,naming,design" /> -->
+
+		return `$command $path xml "/tmp/phpmd_out/phpmd.xml" --reportfile /tmp/phpmd_log/pmd.xml`;
 	}
 	/**
 	 * Because this module is dependent
