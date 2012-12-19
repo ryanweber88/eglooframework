@@ -66,14 +66,16 @@ var_export($error_matches);
 
 				foreach($file_matches as $file_index => $file_match) {
 					if ( isset($error_matches[$counter]) ) {
-						$error_match = $error_matches[$counter];
+						$error_match = $error_matches[$counter][0];
 					} else {
 						continue;
 					}
 
+					echo "fffFile '{$file_match[1]}' had the following errors:\n" .
+						"{$error_match[0]}";
 					$this->log(
-						"File '{$file_match[$file_index]}' had the following errors:\n" .
-						"{$error_match[$counter]}"
+						"File '{$file_match[1]}' had the following errors:\n" .
+						"{$error_match[0]}"
 					);
 
 					$counter++;
