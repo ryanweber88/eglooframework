@@ -77,7 +77,7 @@ class PHPMessDetector extends Hook\Module {
 
 		else {
 			$this->log(
-				"Failed to run {$this->_class} because PHP Mess Detector is not installed"
+				"Failed to run {$this->class} because PHP Mess Detector is not installed"
 			);
 
 		}

@@ -66,7 +66,7 @@
 	 */
 	protected function log($message) {
 		$this->log[] =
-			"Module::{$this->_class->name} >> $message";
+			"Module::{$this->class} >> $message";
 	}
 
 	private $log = array();
