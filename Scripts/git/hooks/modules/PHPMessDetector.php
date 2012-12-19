@@ -39,7 +39,9 @@ class PHPMessDetector extends Hook\Module {
 				foreach($files as $file) {
 					// create directory for file, relative to
 					// dump path
-					@mkdir(static::directory($file), 0755, true);
+					if ( !file_exists(static::directory($file)) ) {
+						@mkdir(static::directory($file), 0755, true);
+					}
 
 					// write file content
 					$resource = fopen(static::file($file), 'w');
