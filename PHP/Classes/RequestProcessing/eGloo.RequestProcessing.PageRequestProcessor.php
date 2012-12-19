@@ -59,6 +59,7 @@ class PageRequestProcessor extends RequestProcessor {
 	);
 
 	protected $_templateVariables = array();
+	protected $action = 'index';
 
 	/**
 	 * Concrete implementation of the abstract RequestProcessor method
@@ -165,7 +166,7 @@ class PageRequestProcessor extends RequestProcessor {
 			} else {
 				$validation_result = null;
 			}
-
+			$this->action = $action;
 			$retVal = $this->$action( $validation_result );
 		}
 
@@ -175,7 +176,11 @@ class PageRequestProcessor extends RequestProcessor {
 	// index /controller/ action GET
 	protected function index( $validation_result = null ) {}
 
-	protected function render( $action = 'index' ) {
+	protected function render( $action = null ) {
+
+		if ($action == null) {
+			$action = $this->action;
+		}
 
     $app_path   = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
     $assets_dir = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName();
@@ -185,7 +190,9 @@ class PageRequestProcessor extends RequestProcessor {
 		  'compile_file' => $app_path . DS . 'asset_manager.json',
 		  'ruby_path' => '/Users/andrew/.rvm/rubies/ruby-1.9.3-p327/bin',
 		  'gems_path' => '/Users/andrew/.rvm/gems/ruby-1.9.3-p327/bin',
-		  'environment' => ENV_ENGLISH,
+		  'npm_path' => '/usr/local/bin',
+		  // 'environment' => ENV_ENGLISH,
+		  'environment' => 'PRODUCTION',
 		  'cdn' => [
 		    'DEVELOPMENT' => '/',
 		    'STAGING' => '/',
@@ -209,9 +216,9 @@ class PageRequestProcessor extends RequestProcessor {
 		  ]
 		];
 
-		// \AssetManager\AssetManager::init($asset_config);
-		// \AssetManager\AssetManager::clearCache();
-		// \AssetManager\AssetManager::preCompile();
+		\AssetManager\AssetManager::init($asset_config);
+		\AssetManager\AssetManager::clearCache();
+		\AssetManager\AssetManager::preCompile();
 
 		// Get view paths
 		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
