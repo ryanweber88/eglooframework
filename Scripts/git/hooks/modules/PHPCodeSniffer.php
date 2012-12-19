@@ -59,7 +59,7 @@ class PHPCodeSniffer extends Hook\Module {
 			// now log all summarized results
 			if (count($file_matches)) {
 				$counter = 0;
-
+print_r($file_matches);
 				foreach($file_matches as $file_match) {
 					$error_match = $error_matches[$counter++];
 
