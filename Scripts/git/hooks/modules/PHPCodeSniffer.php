@@ -62,7 +62,7 @@ var_export($file_matches);
 var_export($error_matches);
 			// now log all summarized results
 			if (count($file_matches)) {
-				$counter = 1;
+				$counter = 0;
 
 				foreach($file_matches as $file_index => $file_match) {
 					if ( isset($error_matches[$counter]) ) {
