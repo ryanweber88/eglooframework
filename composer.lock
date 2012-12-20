@@ -51,13 +51,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "git@github.com:egloo/AssetManager.git",
-                "reference": "bcde451e0525d471e3bb889b98b3c44e5c9548d9"
+                "url": "git://github.com/egloo/AssetManager.git",
+                "reference": "5b478daf911fe0f4a42976c454e877fcef04d92c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/egloo/AssetManager/archive/bcde451e0525d471e3bb889b98b3c44e5c9548d9.zip",
-                "reference": "bcde451e0525d471e3bb889b98b3c44e5c9548d9",
+                "url": "https://github.com/egloo/AssetManager/archive/5b478daf911fe0f4a42976c454e877fcef04d92c.zip",
+                "reference": "5b478daf911fe0f4a42976c454e877fcef04d92c",
                 "shasum": ""
             },
             "require": {
@@ -66,7 +66,7 @@
                 "leafo/lessphp": "dev-master",
                 "natxet/cssmin": "dev-master"
             },
-            "time": "2012-12-19 23:33:27",
+            "time": "2012-12-20 20:43:10",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -97,20 +97,20 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/egloo/ViewHelpers",
-                "reference": "9d33a96982950bd5179142f92a0fc6ce8922aed4"
+                "url": "git://github.com/egloo/ViewHelpers.git",
+                "reference": "54400abfeb67ce2c3bbd9bdcdb1e67651a99808b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/egloo/ViewHelpers/archive/9d33a96982950bd5179142f92a0fc6ce8922aed4.zip",
-                "reference": "9d33a96982950bd5179142f92a0fc6ce8922aed4",
+                "url": "https://github.com/egloo/ViewHelpers/archive/54400abfeb67ce2c3bbd9bdcdb1e67651a99808b.zip",
+                "reference": "54400abfeb67ce2c3bbd9bdcdb1e67651a99808b",
                 "shasum": ""
             },
             "require": {
                 "webignition/json-pretty-print": "dev-master",
                 "jasonlewis/expressive-date": "1.*"
             },
-            "time": "2012-12-19 17:42:37",
+            "time": "2012-12-20 20:42:51",
             "type": "library",
             "installation-source": "source",
             "autoload": {
@@ -121,7 +121,7 @@
             "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
-                    "name": "andruu",
+                    "name": "Andrew Weir",
                     "email": "andru.weir@gmail.com"
                 }
             ],
