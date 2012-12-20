@@ -3,8 +3,6 @@ namespace {
 use       \eGloo\Utility\Logger     as Logger;
 use       \eGloo\Dialect\ObjectSafe as Object;
 
-// Composer autoloader
-require __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
 
 /**
  * Class and Interface Autoloader
@@ -68,6 +66,8 @@ if ( !class_exists( 'CacheGateway', false ) ) {
 // Register eGloo Autoloader: 0%
 spl_autoload_register('eglooAutoload');
 
+// Composer autoloader
+require __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
 /**
  * These conditional includes are ordered for speed; do not reorganize without benchmarking and serious testing
  */
