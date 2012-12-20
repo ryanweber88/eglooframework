@@ -191,8 +191,8 @@ class PageRequestProcessor extends RequestProcessor {
 		  'ruby_path' => '/Users/andrew/.rvm/rubies/ruby-1.9.3-p327/bin',
 		  'gems_path' => '/Users/andrew/.rvm/gems/ruby-1.9.3-p327/bin',
 		  'npm_path' => '/usr/local/bin',
-		  // 'environment' => ENV_ENGLISH,
-		  'environment' => 'PRODUCTION',
+		  'environment' => ENV_ENGLISH,
+		  // 'environment' => 'PRODUCTION',
 		  'cdn' => [
 		    'DEVELOPMENT' => '/',
 		    'STAGING' => '/',
@@ -216,9 +216,9 @@ class PageRequestProcessor extends RequestProcessor {
 		  ]
 		];
 
-		\AssetManager\AssetManager::init($asset_config);
-		\AssetManager\AssetManager::clearCache();
-		\AssetManager\AssetManager::preCompile();
+		// \AssetManager\AssetManager::init($asset_config);
+		// \AssetManager\AssetManager::clearCache();
+		// \AssetManager\AssetManager::preCompile();
 
 		// Get view paths
 		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
