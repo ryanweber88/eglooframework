@@ -71,10 +71,10 @@ spl_autoload_register('eglooAutoload');
 
 // Load Bella
 // @Temporary
-//if ( eGlooConfiguration::getUseBella() ) {
-// if ( true ) {
-// 	include( eGlooConfiguration::getBellaIncludePath() );
-// }
+// if ( eGlooConfiguration::getUseBella() ) {
+if ( true ) {
+	include( eGlooConfiguration::getBellaIncludePath() );
+}
 
 // Load Haanga
 if ( eGlooConfiguration::getUseHaanga() ) {

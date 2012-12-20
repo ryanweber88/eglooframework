@@ -1897,6 +1897,9 @@ final class eGlooConfiguration {
 		if (isset(self::$configuration_options['DataConnections']['RDBMS'][$connection_name])) {
 			$connection_info = self::$configuration_options['DataConnections']['RDBMS'][$connection_name];
 
+			$schema = isset($connection_info['options']['schema']['value']) ?
+				$connection_info['options']['schema']['value'] : 'public';
+
 			$retVal = array(
 				'name'		=> $connection_info['options']['name']['value'],
 				'host'		=> $connection_info['options']['host']['value'],
@@ -1905,6 +1908,7 @@ final class eGlooConfiguration {
 				'user'		=> $connection_info['options']['user']['value'],
 				'password'	=> $connection_info['options']['password']['value'],
 				'engine'	=> $connection_info['options']['engine']['value'],
+				'schema'	=> $schema
 			);
 		} else if (isset(self::$configuration_options['egDatabaseConnections'][$connection_name])) {
 			$retVal = self::$configuration_options['egDatabaseConnections'][$connection_name];

@@ -405,6 +405,10 @@ final class DBConnectionManager extends ConnectionManager {
 			throw new Exception($exception_message);
 		}
 
+		if ( $connection_info['schema'] !== 'public' ) {
+			pg_exec( $db_handle, 'set search_path to \'' . $connection_info['schema'] . '\'' );
+		}
+
 		// return $db_handle;
 		$retVal = new eGloo\DataProcessing\Connection\PostgreSQLDBConnection( $db_handle );
 
