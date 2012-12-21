@@ -72,6 +72,11 @@ abstract class Model extends Delegator
 					
 	}
 
+	/** Static Model Constructors ************************************************/
+	// These methods are intended to run on class constant (class name) 
+	// determination (wrong word, but i am struggling at the moment); they 
+	// define constructs necessary for model function and realization
+
 	/** @Polymorphic */ 
 	public static function __static() {
 		
@@ -81,180 +86,12 @@ abstract class Model extends Delegator
 		$reflection = new \ReflectionClass(get_called_class());
 
 		if (!$reflection->isAbstract()) { 
+
 			// assign static delegation 
 			Delegator::delegate(
 				$class = \get_called_class(), get_class(static::data())
 			);
 
-			// call static model construct methods
-
-			// call our validates method, which provides validation definitions
-			// for Model attributes
-			static::__validates();
-
-			// call our relationships method, which provides callbacks attached
-			// to the names of our relationships
-			static::__relationships();
-
-			// call __callbacks method, which defines behaviors during life cycle
-			// of instance
-			static::__callbacks();
-			
-			// finally call attributes, which sets up convience attributes for
-			// instance		
-			static::__attributes();
-	}
-		
-
-
-		// @TODO below shouldnt be needed anymore as we are following
-		// heirarchy strain to Domain::Model
-		// explicitly define find if we haven't found a suitable alias;
-		// we can't explicitly define this method because it would interfere
-		// with aliases, which for the time being are more correct (specific)
-		// @TODO these need to be moved to __methodStatic
-		
-		/*
-		if ( !static::respondTo('find') ) {
-			
-			static::defineMethod('find', function($__mixed, $class) {
-				
-				
-				// expand on parameter matching, but for, just match on primary
-				// and tablename_id pattern
-				$arguments = Collection::flatten(func_get_args());
-				$table     = $class::sendStatic('entity');
-				$field     = Data::primaryKeys($table)[0];
-				$key       = $arguments[0]; 
-				$set       = array();
-				$manager   = Model\Manager::instance();
-								
-				
-				// we're GAURENTEED to throw an exception here if our by-conventions guess
-				// does not pan out; so callers will be explicitly aware
-				try {
-					
-					
-					foreach($arguments as $key) {
-						
-						if (is_numeric($key)) {
-							
-							// check if model has already been persisted
-							// @TODO this needs to be converted to single statement ASAP  
-							$result = $manager->find($class, $key, function($class, $key) use ($field) {
-								
-								// check model cache to determine if exists in cache already; we use our
-								// static instance so we DON'T have to reinstantiate everytime we call find
-								// as it is an expensive operation and the model in this instance only serves
-								// as template of sorts (see todo)
-								// @TODO since model is really only a template, this should be replaced with
-								// Virtual Proxy concept
-								$cache  = new Cache\Model;
-								$model  = $class::instance();
-								$model->id = $key;
-								
-									
-								// @TODO model caching is breaking references on callbacks and following
-								// trace is nearly impossible - for the time being, we are removing this
-								// functionality								
-								//$result = $cache->find($model, function() use ($class, $field, $key) {
-									$result = $class::sendStatic('process', $class::where(array(
-										$field => $key
-									)));
-									
-																		
-									// we know that if result is not absolute false, it will be returned
-									// as a set from our process method									
-									if ($result) {
-										$result = $result[0];
-									}
-									
-									//return $result;
-								//});
-																
-					
-																							
-								return $result;
-							});
-							
-							
-							if ($result !== false) {
-								$set[] = $result;
-							}
-							
-						}
-
-					}
-					
-					// @TODO place our afterFind in background task
-					if (count($set)) {
-						foreach($set as $model) {
-							$model->send('runCallbacks', 'find', 'after');
-						}
-	
-						
-						// if a set consisting of a single element; return element, as the likely
-						// intended purpose was to retrieve a single record; otherwise return set
-						// instance
-						return count($set) == 1
-							? $set[0]
-							: new Model\Set($set);
-					}
-					
-					return false;
-				}	
-					
-				catch(\Exception $passthrough) {
-					throw $passthrough;
-				}				
-			});
-			
-		}
-		*/
-		
-		
-		if ( !static::respondTo('all') ) {
-			static::defineMethod('all', function() {
-					
-				// expand on parameter matching, but for, just match on primary
-				// and tablename_id pattern
-				$arguments = func_get_args();
-				$table     = static::signature();
-				$field     = "{$table}_id";
-				$key       = $arguments[0]; 
-				
-				// we're GAURENTEED to throw an exception here if our by-conventions guess
-				// does not pan out; so callers will be explicitly aware
-				try {
-					
-					$result = static::selects('*')
-					                ->build();
-					
-					// our 'all' method should return an empty set if failed to return
-					// result
-					return $result !== false ?: new Model\Set(\get_called_class());
-					
-				}
-				
-				catch(\Exception $passthrough) {
-					throw $passthrough;
-				}
-				
-				
-			});
-		}
-				
-		// delegate our query building methods to Relation
-		// @TODO we should delegate to scoped which should handle
-		// the rest
-		//$reflection = new \ReflectionClass(static::classNameFull());
-			
-		// @TODO user is causing all kinds of fucking problem when not
-		// receiving an initializing hash; so i am taking the bitch out
-		// for the moment
-		if (!$reflection->isAbstract() ) {
-			
-			
 			static::delegates(array(
 				'methods' => array(
 					'selects', 
@@ -269,9 +106,207 @@ abstract class Model extends Delegator
 					'group'
 				),
 				'to' => new Model\Relation(static::classnamefull())
-			));
+			));			
+
+			// call "static" model construct methods; because of a serious
+			// flaw in how PHP handles closure scope and context when a closure
+			// is defined in a static context - in this case, the closure
+			// CANNOT be bound to to an instance context, so thus we must
+			// create a singleton of current class/context, and call instance
+			// context methods when defining closures. 
+			$instance = static::singleton();
+
+			// call our validates method, which provides validation definitions
+			// for Model attributes
+			$instance->__validates();
+
+			// call our relationships method, which provides callbacks attached
+			// to the names of our relationships
+			$instance->__relationships();
+
+			// call __callbacks method, which defines behaviors during life cycle
+			// of instance
+			$instance->__callbacks();
+			
+			// finally call attributes, which sets up convience attributes for
+			// instance		
+			$instance->__attributes();
+
+			
 		}
+		
+
+		
 	}
+	
+
+	/**
+	 * A "method space" to provide validation definitions
+	 */
+	protected function __validates() { }
+
+	/**
+	 * A stubb method here to be used by concrete model classes
+	 */
+	protected function __relationships() {
+		
+		$class     = static::classname();
+		$namespace = static::klass()->namespace;
+		
+		// check for status relationship and draw if exists, we could
+		// explicitly do this in a try/catch, but would present a serious
+		// issue were someone to write a generic Common.Domain.Model.Status
+		// class; so here, our convention is "if there is a Status class
+		// in Comon.Domain.Model.$ClassName namespace, then define status
+		// relationship"
+
+		if (class_exists($model = "$namespace\\$class\\Status")) {
+			static::hasOne('Status', function($model) {
+				return $model::find($this->status_id);
+			});
+			
+						
+		}
+		
+	}
+
+	protected function __attributes() {
+		// alias our primary key, using convention of tablename_id - this
+		// is important as primary keys can now be accessed via instance->id
+		if (static::hasPrimaryKey()) {
+			static::aliasPrimaryKey(static::primaryKey());
+		}
+			
+	}
+
+	
+	/**
+	 * Alias to relationships; want to replace with association terminology
+	 */
+	protected function __associations() {
+		static::__relationships();
+	}
+
+	protected function __callbacks() {
+		
+		$class     = static::classnamefull();
+		$signature = static::signature(); 
+		
+		static::defineCallback('transaction', 'before', function() {
+			
+		});
+		
+		static::defineCallback('transaction', 'after', function()  {
+
+		});	
+		
+		static::after_initialize(function() use ($class, $signature) {
+
+			// assign left-over columns to model
+			// @TODO delegate this to overrideable method, or place into
+			// 'after' initialize
+			// @TODO I don't remember why user entity was removed
+			// from column assignment
+			if (!in_array($signature = static::entity(), array('user')) && 
+			    is_array ($columns   = Data::columns($signature))) {
+			    	
+				foreach($columns as $attribute) {
+					if (!\property_exists($this, $attribute)) {
+						$this->$attribute = null;
+					}
+				}
+			}				
+
+			$attributes = $class::cache($signature, function() {
+				return $this->attributes;
+			});
+			
+
+			foreach($attributes as $name) {
+				
+				
+				// in some instances, for sub model types, like coupon\type, 
+				// our convention doesn't work for fields with the same 
+				// name as the class (ie, coupon_type.coupon_type); in these 
+				// cases we look for a field matching the exact name
+				$match = array();
+				
+				if (preg_match("/^{$signature}_(.+)/", $name, $match) || 
+					  $name == $signature) {
+					
+					
+					// first lets alias 'name' to 'signature'
+					if ($name == $signature) {
+						
+						try { 
+							// @TODO whi is this not alias attribute?
+							$this->aliasProperty('value', $name);
+						
+						// the only reason an exception would be thrown, is if 
+						// 'name' attribute already exists
+						} catch(\Exception $ignore) { }
+					}
+					
+					else {
+						$alias = $match[1];
+					}
+					
+					
+					$alias = $name == $signature
+						? preg_replace('/^.+_/', null, $name)
+						: $match[1];
+						
+					
+						
+
+					try { 
+						// @TODO aliasAttribute?
+						$this->aliasProperty(strtolower($alias), $name);
+	
+					} catch(\Exception $ignore) { }
+				}
+			}
+		
+			// check if model has status relationship
+			// @TODO this may be a bit too specific for this instance
+			if (isset($this->status_id) &&
+			    static::hasAssociation('Status')) {
+			    	
+				$field = "{$signature}_status";
+				$this->aliasAttribute('status', function & () use ($field) {
+					return $this->Status->$field;
+				});
+			}
+						
+					
+		});
+
+		
+		// redefine our create/update callback to automatically
+		// account for meta fields (last_action, last_action_taken, action_by)
+		$counter = 0;
+
+		foreach(array('create', 'update', 'delete') as $name) {
+			static::setCallback($name, Callback\CRUD::instance());
+		}	
+
+		static::after_find( Callback\CRUD::instance() );
+
+		// finally lets add cache callback; test that
+		// instance is cacheable before adding callback
+		// instance
+
+		// @TODO comeback for review as I dont know whether to
+		// have cacheable at instance/class level
+		//if ($this->cacheable()) {
+			//$this->after_find( Callback\Cache::instance() );
+		//	$this->after_save( Callback\Cache::instance() );
+		//	$this->after_delete( Callback\Cache::instance() );
+		//}
+		
+
+				
+	}	
 	
 	protected function __methods() {
 		parent::__methods();
@@ -290,6 +325,8 @@ abstract class Model extends Delegator
 		});
 		
 	}
+
+
 	
 	
 	/**
@@ -395,6 +432,10 @@ abstract class Model extends Delegator
 	 * @return string
 	 */
 	protected static function entity() {
+		//echo static::classnamefull();
+		var_export(debug_backtrace()); exit;
+		echo get_called_class();
+		echo static::klass();exit;
 		return static::signature(static::classnamefull());
 	}
 
@@ -1204,176 +1245,7 @@ abstract class Model extends Delegator
 
 
 	
-	/** Static Model Constructors ************************************************/
-	
 
-	/**
-	 * A "method space" to provide validation definitions
-	 */
-	protected static function __validates() { }
-
-	/**
-	 * A stubb method here to be used by concrete model classes
-	 */
-	protected static function __relationships() {
-		
-		$class     = static::classname();
-		$namespace = static::klass()->namespace;
-		
-		// check for status relationship and draw if exists, we could
-		// explicitly do this in a try/catch, but would present a serious
-		// issue were someone to write a generic Common.Domain.Model.Status
-		// class; so here, our convention is "if there is a Status class
-		// in Comon.Domain.Model.$ClassName namespace, then define status
-		// relationship"
-
-		if (class_exists($model = "$namespace\\$class\\Status")) {
-			static::hasOne('Status', function($model) {
-				return $model::find($this->status_id);
-			});
-			
-						
-		}
-		
-	}
-
-	protected static function __attributes() {
-		// alias our primary key, using convention of tablename_id - this
-		// is important as primary keys can now be accessed via instance->id
-		if (static::hasPrimaryKey()) {
-			static::aliasPrimaryKey(static::primaryKey());
-		}
-			
-	}
-
-	
-	/**
-	 * Alias to relationships; want to replace with association terminology
-	 */
-	protected static function __associations() {
-		static::__relationships();
-	}
-
-	protected static function __callbacks() {
-		
-		$class     = static::classnamefull();
-		$signature = static::signature(); 
-		
-		static::defineCallback('transaction', 'before', function() {
-			
-		});
-		
-		static::defineCallback('transaction', 'after', function()  {
-
-		});	
-		
-		static::after_initialize(function() use ($class, $signature) {
-
-			// assign left-over columns to model
-			// @TODO delegate this to overrideable method, or place into
-			// 'after' initialize
-			// @TODO I don't remember why user entity was removed
-			// from column assignment
-			if (!in_array($signature = static::entity(), array('user')) && 
-			    is_array ($columns   = Data::columns($signature))) {
-			    	
-				foreach($columns as $attribute) {
-					if (!\property_exists($this, $attribute)) {
-						$this->$attribute = null;
-					}
-				}
-			}				
-
-			$attributes = $class::cache($signature, function() {
-				return $this->attributes;
-			});
-			
-
-			foreach($attributes as $name) {
-				
-				
-				// in some instances, for sub model types, like coupon\type, 
-				// our convention doesn't work for fields with the same 
-				// name as the class (ie, coupon_type.coupon_type); in these 
-				// cases we look for a field matching the exact name
-				$match = array();
-				
-				if (preg_match("/^{$signature}_(.+)/", $name, $match) || 
-					  $name == $signature) {
-					
-					
-					// first lets alias 'name' to 'signature'
-					if ($name == $signature) {
-						
-						try { 
-							// @TODO whi is this not alias attribute?
-							$this->aliasProperty('value', $name);
-						
-						// the only reason an exception would be thrown, is if 
-						// 'name' attribute already exists
-						} catch(\Exception $ignore) { }
-					}
-					
-					else {
-						$alias = $match[1];
-					}
-					
-					
-					$alias = $name == $signature
-						? preg_replace('/^.+_/', null, $name)
-						: $match[1];
-						
-					
-						
-
-					try { 
-						// @TODO aliasAttribute?
-						$this->aliasProperty(strtolower($alias), $name);
-	
-					} catch(\Exception $ignore) { }
-				}
-			}
-		
-			// check if model has status relationship
-			// @TODO this may be a bit too specific for this instance
-			if (isset($this->status_id) &&
-			    static::hasAssociation('Status')) {
-			    	
-				$field = "{$signature}_status";
-				$this->aliasAttribute('status', function & () use ($field) {
-					return $this->Status->$field;
-				});
-			}
-						
-					
-		});
-
-		
-		// redefine our create/update callback to automatically
-		// account for meta fields (last_action, last_action_taken, action_by)
-		$counter = 0;
-
-		foreach(array('create', 'update', 'delete') as $name) {
-			static::setCallback($name, Callback\CRUD::instance());
-		}	
-
-		static::after_find( Callback\CRUD::instance() );
-
-		// finally lets add cache callback; test that
-		// instance is cacheable before adding callback
-		// instance
-
-		// @TODO comeback for review as I dont know whether to
-		// have cacheable at instance/class level
-		//if ($this->cacheable()) {
-			//$this->after_find( Callback\Cache::instance() );
-		//	$this->after_save( Callback\Cache::instance() );
-		//	$this->after_delete( Callback\Cache::instance() );
-		//}
-		
-
-				
-	}
 
 	public function __toString() {
 		if ($this->exists()) {
@@ -1763,6 +1635,36 @@ abstract class Model extends Delegator
 			}	
 		}			
 	}
+
+	/** */
+	public static function all() {
+
+			// expand on parameter matching, but for, just match on primary
+			// and tablename_id pattern
+			$arguments = func_get_args();
+			$table     = static::signature();
+			$field     = "{$table}_id";
+			$key       = $arguments[0]; 
+			
+			// we're GAURENTEED to throw an exception here if our by-conventions guess
+			// does not pan out; so callers will be explicitly aware
+			try {
+				
+				$result = static::selects('*')
+				                ->build();
+				
+				// our 'all' method should return an empty set if failed to return
+				// result
+				return $result !== false ?: new Model\Set(\get_called_class());
+				
+			}
+			
+			catch(\Exception $passthrough) {
+				throw $passthrough;
+			}
+			
+
+	}	
 	
 	public function save($cascade = false) {
 				
@@ -2244,8 +2146,9 @@ abstract class Model extends Delegator
 	
 	/**
 	 * Aliases our primary key to 'id'
+	 * @DualContext
 	 */
-	protected static function aliasPrimaryKey($from) {
+	protected function aliasPrimaryKey($from) {
 		// for now we ignore our exception as primary
 		// has already been aliased	
 		try {
@@ -2263,7 +2166,7 @@ abstract class Model extends Delegator
 	 * composite primary keys
 	 * @return boolean
 	 */
-	public function hasCompositeKeys() {
+	public static function hasCompositeKeys() {
 		//return is_array($this->primaryKeys) && 
 		//       count($this->primaryKeys);
 
@@ -2284,8 +2187,9 @@ abstract class Model extends Delegator
 	 * This is an alias of ObjectSafe#aliasProperty - since dynamically bound
 	 * properties on a model are termed "attributes", "aliasAttribute" is
 	 * moreso fitting
+	 * @DualContext
 	 */
-	protected static function aliasAttribute($__mixed) {
+	protected function aliasAttribute($__mixed) {
 		
 		// flatten arguments and check if last argument is a lambda
 		// and determine our aliases
@@ -2374,6 +2278,7 @@ abstract class Model extends Delegator
 			// Ahh because it doesn't make sense otherwise, or at 
 			// least isnt very readable
 			list($alias, $from) = $arguments;
+
 			static::attribute($alias, function & () use ($alias, $from) {
 				return $this->$from;
 			});
@@ -2913,7 +2818,7 @@ abstract class Model extends Delegator
 		} else {
 			throw new \Exception(
 				"Failed to determine primary key name because receiver " . 
-				"'" . static::$class  . "' does not have a primary key"
+				"'" . static::klass() . "' does not have a primary key"
 			);
 		}
 	}	
@@ -3018,7 +2923,7 @@ abstract class Model extends Delegator
 			// we need to replace lambda with bound version
 			$lambda = &static::domain('_sdefers')[$name];
 			$lambda = @$lambda->bindTo($this, $this);
-			echo $lambda(); exit;
+
 			// now we call as static method, which will take care
 			// of running deffered method and then popping from
 			// deferred stack

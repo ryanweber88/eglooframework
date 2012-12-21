@@ -1070,6 +1070,7 @@ function strtotime($symbol) {
  ** this has proven to be a failure as PHP does not
  ** provide true static scope resolution */
 function send($receiver, $message, $__mixed = null) {
+	var_export(func_get_args()); exit;
 	$arguments = array_slice(
 		func_get_args(), 2	
 	);

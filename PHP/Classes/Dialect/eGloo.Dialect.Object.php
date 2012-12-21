@@ -25,7 +25,7 @@ abstract class Object {
 	static function __static() {
 		// create instance of eigenclass class and
 		// set to static class property
-		static::$class = new Klass(get_called_class());
+		//static::$class = new Klass(get_called_class());
 
 		// call our class methods method
 		static::__smethods();
@@ -436,15 +436,7 @@ abstract class Object {
 		// exist and throw an exception
 		try { 
 
-			// create instance of reflection method, 
-			// and change visibility to true so that it
-			// may be called externally if needed
-			$method = new \ReflectionMethod(
-				$receiver, $method
-			);
-			$method->setAccessible(true);
-
-
+			$lambda = static::method($method);
 
 			// finally invoke method with passed arguments and
 			// return to caller; i don't understand why an invoke
@@ -452,13 +444,11 @@ abstract class Object {
 			// ALREADY passed went instantiating, but what the fuck
 			// ever. Also, if method happens to be static, then
 			// passed receiver must be null @wtfphp
-			return $method->invokeArgs(
-				is_object($receiver) ? $receiver : null, [ $arguments ] 
-			);
+			return call_user_func_array($lambda, $arguments);
 
 		// if an exception is thrown, then we can safely determine
 		// that the method does not exist
-		} catch(\Exception $e) { 
+		} catch(\Exception $refine) { 
 			$receiver = static::receiver_id();
 
 			throw new \Exception(
@@ -949,23 +939,14 @@ abstract class Object {
 
 			if (method_exists($class, $method)) {
 
-				$lambda = function($__mixed = null) use ($method) {
+				// create a reflection instance of existing method
+				// bypass visibility, and retrieve closure
+				$method = new \ReflectionMethod(
+					$class, $method
+				);
+				$method->setAccessible(true);
 
-					//$receiver = $instance
-					//	? array($this, $name)
-					//	: array(get_called_class(), $name);
-
-					//call_user_func_array(
-					//	$receiver, func_get_args()
-					//);
-
-					//call_user_func_array(
-					//	array(static::receiver(), $name), func_get_args()
-					//);
-
-					return static::send($method, func_get_args());
-
-				};
+				$lambda = $method->getClosure();
 				
 			// 	otherwise, we check up method hierarchy chain
 			// for dynamic method
@@ -1002,14 +983,10 @@ abstract class Object {
 				// check if within instance context, in which case
 				// bind instance context to lambda
 				if (isset($this)) {
-					try { 
-						$lambda = @$lambda->bindTo($this, $this);
-					
-					} catch(\Exception $e) {
-
-					}
-
+					$lambda = @$lambda->bindTo($this, $this);
 				}
+
+				
 
 				return $lambda;
 			}

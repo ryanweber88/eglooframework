@@ -46,8 +46,6 @@ class Relation extends Object
 		
 		
 		// set instance properties and create sql AREL/Bella builder
-		//echo $model; exit;
-
 		$this->builder = new \Bella\Table(eGloo\send(
 			$model, 'entity'
 		));
