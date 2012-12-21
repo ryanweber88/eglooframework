@@ -161,13 +161,21 @@ then
 	apt-get --assume-yes install python-software-properties
 
         add-apt-repository --yes ppa:ondrej/php5
+	add-apt-repository --yes ppa:chris-lea/node.js
 
         apt-get update
 
         apt-get --assume-yes install git git-flow curl apache2 memcached \
                 php5 php5-dev php5-memcache php5-mysql php5-pgsql php5-mcrypt \
                 php-apc php5-imagick php5-memcached php5-common \
-                php-soap php5-gd
+                php-soap php5-gd ruby1.9.3 npm avahi-daemon
+
+	gem install sass
+	npm install -g uglify-js
+	npm install -g less
+
+	curl -s https://getcomposer.org/installer | php
+	mv composer.phar /usr/local/bin/composer
 
         echo
         echo "* DONE: installing dependencies *"
