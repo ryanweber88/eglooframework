@@ -6,6 +6,8 @@ use \eGloo\Utility\Logger as Logger;
 use \ErrorException as ErrorException;
 use \Exception as Exception;
 
+
+
 /**
  * eGlooConfiguration Class File
  *
@@ -1824,6 +1826,14 @@ final class eGlooConfiguration {
 		return $retVal;
 	}
 
+	public static function get( $key ) {
+		return self::getConfigurationOption( $key );
+	}
+
+	public static function set( $key, $value ) {
+		return self::setConfigurationOption( $key, $value );
+	}
+
 	public static function getConfigurationOption( $key ) {
 		return isset(self::$configuration_options[$key]) ? self::$configuration_options[$key] : null;
 	}
@@ -2500,6 +2510,31 @@ final class eGlooConfiguration {
 		$retVal = false;
 
 		if (isset(self::$configuration_options['CustomVariables'][$index])) {
+			$retVal = true;
+		}
+
+		return $retVal;
+	}
+
+	public static function loadConfig( $key, $type = null ) {
+		$retVal = false;
+
+		$app_config_path = self::getApplicationsPath() . '/' . self::getApplicationPath() .
+			'/Configuration/' . $key . '.php';
+
+		$common_config_path = self::getApplicationsPath() . '/' . self::getApplicationPath() .
+			'/' . self::$configuration_options['ExtraConfigurationPath'];
+
+		$framework_config_path =  self::getConfigurationPath();
+
+		if ( file_exists($app_config_path) && is_file($app_config_path) && is_readable($app_config_path) ) {
+			include_once($app_config_path);
+			$retVal = true;
+		} else if ( file_exists($common_config_path) && is_file($common_config_path) && is_readable($common_config_path) ) {
+			include_once($common_config_path);
+			$retVal = true;
+		} else if ( file_exists($framework_config_path) && is_file($framework_config_path) && is_readable($framework_config_path) ) {
+			include_once($framework_config_path);
 			$retVal = true;
 		}
 
