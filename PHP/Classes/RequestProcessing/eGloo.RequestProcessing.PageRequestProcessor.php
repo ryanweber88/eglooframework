@@ -184,55 +184,11 @@ class PageRequestProcessor extends RequestProcessor {
 
 	protected function render( $action = null ) {
 
-		if ($action == null) {
-			$action = $this->action;
-		}
-
-    $app_path   = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
-    $assets_dir = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName();
-
-    // Asset Helper config needs to be refactored into the app level
-		$asset_config = [
-		  'compile_file' => $app_path . DS . 'asset_manager.json',
-		  'ruby_path' => '/Users/andrew/.rvm/rubies/ruby-1.9.3-p327/bin',
-		  'gems_path' => '/Users/andrew/.rvm/gems/ruby-1.9.3-p327/bin',
-		  'npm_path' => '/usr/local/bin',
-		  'environment' => ENV_ENGLISH,
-		  // 'environment' => 'PRODUCTION',
-		  'cdn' => [
-		    'DEVELOPMENT' => '/',
-		    'STAGING' => '/',
-		    'PRODUCTION' => '/',
-		  ],
-		  'order_of_importance' => [
-		    'css' => ['css', 'less', 'scss', 'sass'],
-		    'js'  => ['js', 'coffee']
-		  ],
-		  'assets' => [
-		    'css' => $assets_dir . DS . 'CSS',
-		    'js'  => $assets_dir . DS . 'Javascript'
-		  ],
-		  'public' => [
-		    'css' => eGlooConfiguration::getWebRoot() . 'css',
-		    'js'  => eGlooConfiguration::getWebRoot() . 'js'
-		  ],
-		  'web' => [
-		    'css' => 'css',
-		    'js'  => 'js'
-		  ]
-		];
-
-		// \AssetManager\AssetManager::init($asset_config);
-		// \AssetManager\AssetManager::clearCache();
-		// \AssetManager\AssetManager::preCompile();
-
 		if ( $action == null ) {
 			$action = $this->action;
 		}
 
-		// Autoload Composer vendors
 		$app_path = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
-		// require_once $app_path . DS . 'vendor' . DS . 'autoload.php';
 
 		// Get view paths
 		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
@@ -246,7 +202,9 @@ class PageRequestProcessor extends RequestProcessor {
 		$loader = new \Twig_Loader_Filesystem([$view_path, $controller_view_path]);
 		$twig   = new \Twig_Environment($loader, ['debug' => true, 'autoescape' => false]);
 		$twig->addExtension(new \Twig_Extension_Debug());
-		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper($asset_config));
+
+		eGlooConfiguration::loadConfig('AssetManager');
+		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper(eGlooConfiguration::get('Asset')));
     $twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
     $twig->addGlobal('text', new \ViewHelpers\TextHelper());
 
