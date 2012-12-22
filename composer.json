@@ -19,7 +19,11 @@
     "type": "library",
     "license": "Apache-2.0",
     "require": {
-        "php": ">=5.4"
+        "php": ">=5.4",
+        "twig/twig": "1.*",
+        "egloo/asset_manager": "dev-master",
+        "egloo/view_helpers": "dev-master",
+        "underscore/Underscore.php": "dev-master"
     },
     "autoload": {
         "psr-0": {

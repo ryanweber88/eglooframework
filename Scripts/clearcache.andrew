@@ -1,0 +1,29 @@
+#!/bin/bash
+rm -rf /var/tmp/com.egloo.cache
+restartmemcache
+sudo rm -rf /Library/Caches/com.egloo.templates/*
+
+# Example
+# rm -rf /Library/WebServer/eGloo/css/
+# rm -rf /Library/WebServer/eGloo/js/
+# rm -rf /Library/WebServer/eGloo/xcss/
+# rm -rf /Library/WebServer/eGloo/xjs/
+# rm -rf /Library/WebServer/eGloo/images/
+
+rm -rf /Users/andrew/Development/petflow/client/css/
+rm -rf /Users/andrew/Development/petflow/client/js/
+rm -rf /Users/andrew/Development/petflow/client/xcss/
+rm -rf /Users/andrew/Development/petflow/client/xjs/
+rm -rf /Users/andrew/Development/petflow/client/images/
+
+if [ -f "/Library/Application Support/eGloo/Framework/Configuration/clearcache" ]; then
+  source "/Library/Application Support/eGloo/Framework/Configuration/clearcache"
+fi
+
+# Apache Management (MacPorts)
+# launchctl unload /Library/LaunchDaemons/org.macports.apache2.plist
+
+# sleep 3
+
+# launchctl load /Library/LaunchDaemons/org.macports.apache2.plist
+apachectl -k graceful

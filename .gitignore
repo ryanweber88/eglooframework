@@ -1,4 +1,6 @@
 /nbproject/private/
 mongrel2/logs/*.log
 mongrel2/run/*.pid
+*.DS_Store
 
+vendor
