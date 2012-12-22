@@ -6,16 +6,16 @@ use \Zend\EventManager\Event;
 use \Zend\EVentManager\EventCollection;
 
 /**
- * 
- * Provides abstract functionality for monitoring 
+ *
+ * Provides abstract functionality for monitoring
  * @author Christian Calloway
  *
  */
-class Stat extends Listener {
-	
+abstract class Stat extends Listener {
+
 	use \eGloo\Utilities\EventManager\ListenerAggregateTrait;
-	
+
 	abstract public function eventAccessed(Event $event);
 	abstract public function eventModified(Event $event);
-	
+
 }

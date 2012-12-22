@@ -75,10 +75,10 @@ require __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
 
 // Load Bella
 // @Temporary
-//if ( eGlooConfiguration::getUseBella() ) {
-// if ( true ) {
-// 	include( eGlooConfiguration::getBellaIncludePath() );
-// }
+// if ( eGlooConfiguration::getUseBella() ) {
+if ( true ) {
+	include( eGlooConfiguration::getBellaIncludePath() );
+}
 
 // Load Haanga
 if ( eGlooConfiguration::getUseHaanga() ) {
