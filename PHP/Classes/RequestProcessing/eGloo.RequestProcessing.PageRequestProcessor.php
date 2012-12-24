@@ -205,8 +205,9 @@ class PageRequestProcessor extends RequestProcessor {
 
 		eGlooConfiguration::loadConfig('AssetManager');
 		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper(eGlooConfiguration::get('Asset')));
-    $twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
-    $twig->addGlobal('text', new \ViewHelpers\TextHelper());
+		$twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
+		$twig->addGlobal('text', new \ViewHelpers\TextHelper());
+	    $twig->addGlobal('rwbase', eGlooConfiguration::getRewriteBase());
 
 		$rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
 
