@@ -17,24 +17,6 @@ SetEnv EG_CACHE_FILE OFF
 SetEnv EG_CACHE_MEMCACHE ON
 SetEnv EG_CACHE_RUNTIME OFF
 
-# Primary CDN
-SetEnv EG_CDN_CONNECTION_PRIMARY_NAME primary_connection_name
-SetEnv EG_CDN_CONNECTION_PRIMARY_PROVIDER primary_connection_provider
-SetEnv EG_CDN_CONNECTION_PRIMARY_BUCKET primary_connection_bucket
-SetEnv EG_CDN_CONNECTION_PRIMARY_DISTRIBUTION_URL primary_connection_distribution_url
-SetEnv EG_CDN_CONNECTION_PRIMARY_ACCESS_KEY_ID primary_connection_access_key_id
-SetEnv EG_CDN_CONNECTION_PRIMARY_SECRET_ACCESS_KEY primary_connection_secret_access_key
-
-# Primary Database Engine
-SetEnv EG_DB_CONNECTION_PRIMARY_NAME primary_connection_name
-SetEnv EG_DB_CONNECTION_PRIMARY_HOST primary_connection_host
-SetEnv EG_DB_CONNECTION_PRIMARY_PORT 3306
-SetEnv EG_DB_CONNECTION_PRIMARY_DATABASE primary_connection_db
-SetEnv EG_DB_CONNECTION_PRIMARY_USER primary_connection_user
-SetEnv EG_DB_CONNECTION_PRIMARY_PASSWORD primary_connection_password
-SetEnv EG_DB_CONNECTION_PRIMARY_ENGINE MYSQL
-# SetEnv EG_DB_CONNECTION_PRIMARY_ENGINE POSTGRESQL
-
 # Errors
 SetEnv EG_DISPLAY_ERRORS ON
 SetEnv EG_DISPLAY_TRACES ON
@@ -158,9 +140,9 @@ RewriteRule ^media/(.*(.aac|.dcr|.flv|.mov|.mpg|.mp3|.mp4|.ogg|.swf|.wma|.wmv))$
 # Make sure the argument list is clean -- allow alphanumerics, dot (.), dash (-)
 # underscore (_) and ampersand (&).  Anything else should cascade down to the
 # last rule
-RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)$ index.php?eg_requestClass=$1&eg_requestID=$2&%{QUERY_STRING} [L]
+RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/?$ index.php?eg_requestClass=$1&eg_requestID=$2&%{QUERY_STRING} [L]
 RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/([a-zA-Z0-9\.\-_&\ ]+=[a-zA-Z0-9\.\-=_&\ ]*)$ index.php?eg_requestClass=$1&eg_requestID=$2&$3%{QUERY_STRING} [L]
-RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)$ index.php?eg_requestClass=$1&eg_requestID=$2&eg_slug=$3&%{QUERY_STRING} [L]
+RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/([a-zA-Z0-9\.\-_&\ ]+)/?$ index.php?eg_requestClass=$1&eg_requestID=$2&eg_slug=$3&%{QUERY_STRING} [L]
 RewriteRule ^([a-zA-Z0-9\.\-_\ ]+)/?$ index.php?eg_requestClass=$1&eg_requestID=index&%{QUERY_STRING} [L]
 RewriteRule ^$ index.php?eg_requestClass=egDefault&eg_requestID=index&%{QUERY_STRING} [L]
 

@@ -6,8 +6,6 @@ use \eGloo\Utility\Logger as Logger;
 use \ErrorException as ErrorException;
 use \Exception as Exception;
 
-
-
 /**
  * eGlooConfiguration Class File
  *
