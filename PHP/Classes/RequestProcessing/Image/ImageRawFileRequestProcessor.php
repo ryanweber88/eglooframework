@@ -1,4 +1,8 @@
 <?php
+
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * ImageRawFileRequestProcessor Class File
  *
@@ -53,15 +57,15 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
      * @access public
      */
     public function processRequest() {
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'ImageRawFileRequestProcessor: Entered processRequest()' );
+		Logger::writeLog( Logger::DEBUG, 'ImageRawFileRequestProcessor: Entered processRequest()' );
 
 		$file_name = $this->bean->getGET( 'image_name' );
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'ImageRawFileRequestProcessor: Looking up image ' . $file_name );
+		Logger::writeLog( Logger::DEBUG, 'ImageRawFileRequestProcessor: Looking up image ' . $file_name );
 
-		$app_path = eGlooConfiguration::getApplicationsPath() . '/' . eGlooConfiguration::getApplicationPath() .
-			'/InterfaceBundles/' . eGlooConfiguration::getUIBundleName() . '/Images';
+		$app_path = Configuration::getApplicationsPath() . '/' . Configuration::getApplicationPath() .
+			'/InterfaceBundles/' . Configuration::getUIBundleName() . '/Images';
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'ImageRawFileRequestProcessor: Checking path ' . $app_path . '/' . $file_name );
+		Logger::writeLog( Logger::DEBUG, 'ImageRawFileRequestProcessor: Checking path ' . $app_path . '/' . $file_name );
 
 		if ( file_exists( $app_path . '/' . $file_name ) ) {
 			$imageMIMEType = '';
@@ -87,7 +91,7 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
 				eGlooHTTPResponse::issueRaw404Response();
 			}
 
-			if (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION || eGlooConfiguration::getUseHotFileImageClustering() ) {
+			if (Configuration::getDeployment() == Configuration::PRODUCTION || Configuration::getUseHotFileImageClustering() ) {
 				$matches = array();
 				preg_match('~^(.*)?/([^/]*)$~', $file_name, $matches);
 
@@ -97,20 +101,20 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
 					$cached_file_path = '';
 				}
 
-				if ( !is_writable( eGlooConfiguration::getWebRoot() . 'images/' . $cached_file_path ) ) {
+				if ( !is_writable( Configuration::getWebRoot() . 'images/' . $cached_file_path ) ) {
 					try {
 						$mode = 0777;
 						$recursive = true;
 
-						mkdir( eGlooConfiguration::getWebRoot() . 'images/' . $cached_file_path, $mode, $recursive );
+						mkdir( Configuration::getWebRoot() . 'images/' . $cached_file_path, $mode, $recursive );
 					} catch (Exception $e){
 						// TODO figure out what to do here
 					}
 				}
 
-				if ( !copy($app_path . '/' . $file_name, eGlooConfiguration::getWebRoot() . 'images/' . $file_name ) ) {
+				if ( !copy($app_path . '/' . $file_name, Configuration::getWebRoot() . 'images/' . $file_name ) ) {
 					throw new Exception( 'File copy failed from ' . $app_path . '/' . $file_name . ' to ' .
-						eGlooConfiguration::getWebRoot() . 'images/' . $file_name );
+						Configuration::getWebRoot() . 'images/' . $file_name );
 				}
 			}
 		} else if ( ( $data_store_path = $this->getDataStorePath( $file_name ) ) !== null ) {
@@ -137,7 +141,7 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
 				eGlooHTTPResponse::issueRaw404Response();
 			}
 
-			if (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION || eGlooConfiguration::getUseHotFileImageClustering() ) {
+			if (Configuration::getDeployment() == Configuration::PRODUCTION || Configuration::getUseHotFileImageClustering() ) {
 				$matches = array();
 				preg_match('~^(.*)?/([^/]*)$~', $file_name, $matches);
 
@@ -147,27 +151,27 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
 					$cached_file_path = '';
 				}
 
-				if ( !is_writable( eGlooConfiguration::getWebRoot() . 'images/' . $cached_file_path ) ) {
+				if ( !is_writable( Configuration::getWebRoot() . 'images/' . $cached_file_path ) ) {
 					try {
 						$mode = 0777;
 						$recursive = true;
 
-						mkdir( eGlooConfiguration::getWebRoot() . 'images/' . $cached_file_path, $mode, $recursive );
+						mkdir( Configuration::getWebRoot() . 'images/' . $cached_file_path, $mode, $recursive );
 					} catch (Exception $e){
 						// TODO figure out what to do here
 					}
 				}
 
-				if ( !copy($data_store_path, eGlooConfiguration::getWebRoot() . 'images/' . $file_name ) ) {
+				if ( !copy($data_store_path, Configuration::getWebRoot() . 'images/' . $file_name ) ) {
 					throw new Exception( 'File copy failed from ' . $data_store_path . ' to ' .
-						eGlooConfiguration::getWebRoot() . 'images/' . $file_name );
+						Configuration::getWebRoot() . 'images/' . $file_name );
 				}
 			}
 		} else {
 			header( eGlooHTTPRequest::getServerProtocol() . ' 404 Not Found ' );
 		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'ImageRawFileRequestProcessor: Exiting processRequest()' );
+		Logger::writeLog( Logger::DEBUG, 'ImageRawFileRequestProcessor: Exiting processRequest()' );
     }
 
 	protected function getDataStorePath( $file_name ) {
@@ -235,7 +239,7 @@ class ImageRawFileRequestProcessor extends RequestProcessor {
 		$data_store_image_url = $imageContentDBDAO->getImageStorePath( $imageContentDTO );
 
 		if ( $data_store_image_url !== null && is_string($data_store_image_url) && trim($data_store_image_url) !== '' ) {
-			$retVal = eGlooConfiguration::getDataStorePath() . '/' .  $data_store_image_url;
+			$retVal = Configuration::getDataStorePath() . '/' .  $data_store_image_url;
 		}
 
 		return $retVal;

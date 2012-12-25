@@ -3,9 +3,10 @@
 namespace eGloo\RequestProcessing;
 
 use \RequestProcessor;
-use \eGlooConfiguration;
 use \eGloo\HTTP\Request;
-use \eGloo\RequestProcessing\Route;
+
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
 
 if (!defined('DS')) {
 	define('DS', DIRECTORY_SEPARATOR);
@@ -80,8 +81,8 @@ class PageRequestProcessor extends RequestProcessor {
 		$request_class = $this->bean->getRequestClass();
 		$action = $this->bean->getRequestID();
 
-		if ( eGlooConfiguration::getRewriteBase() !== '/' ) {
-			$uri = str_replace( eGlooConfiguration::getRewriteBase(), '', Request::getRequestURI() );
+		if ( Configuration::getRewriteBase() !== '/' ) {
+			$uri = str_replace( Configuration::getRewriteBase(), '', Request::getRequestURI() );
 		} else {
 			$uri = Request::getRequestURI();
 		}
@@ -188,10 +189,10 @@ class PageRequestProcessor extends RequestProcessor {
 			$action = $this->action;
 		}
 
-		$app_path = eGlooConfiguration::getApplicationsPath() . DS . eGlooConfiguration::getApplicationPath();
+		$app_path = Configuration::getApplicationsPath() . DS . Configuration::getApplicationPath();
 
 		// Get view paths
-		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . eGlooConfiguration::getUIBundleName() . DS . 'XHTML';
+		$view_path            = $app_path . DS . 'InterfaceBundles' . DS . Configuration::getUIBundleName() . DS . 'XHTML';
 		$controller_name      = explode('RequestProcessor', get_called_class())[0];
 		$controller_view_path = $view_path . DS . $controller_name;
 
@@ -203,11 +204,11 @@ class PageRequestProcessor extends RequestProcessor {
 		$twig   = new \Twig_Environment($loader, ['debug' => true, 'autoescape' => false]);
 		$twig->addExtension(new \Twig_Extension_Debug());
 
-		eGlooConfiguration::loadConfig('AssetManager');
-		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper(eGlooConfiguration::get('Asset')));
+		Configuration::loadConfig('AssetManager');
+		$twig->addGlobal('asset', new \ViewHelpers\AssetHelper(Configuration::get('Asset')));
 		$twig->addGlobal('html', new \ViewHelpers\HtmlHelper());
 		$twig->addGlobal('text', new \ViewHelpers\TextHelper());
-	    $twig->addGlobal('rwbase', eGlooConfiguration::getRewriteBase());
+	    $twig->addGlobal('rwbase', Configuration::getRewriteBase());
 
 		$rendered_layout = $twig->loadTemplate('Layouts' . DS . $this->getTemplateVariable('layout') . '.html.twig');
 

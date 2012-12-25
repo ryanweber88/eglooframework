@@ -1,4 +1,8 @@
 <?php
+
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * JavascriptRawFileRequestProcessor Class File
  *
@@ -53,7 +57,7 @@ class JavascriptRawFileRequestProcessor extends RequestProcessor {
 	 * @access public
 	 */
 	public function processRequest() {
-	   eGlooLogger::writeLog( eGlooLogger::DEBUG, "JavascriptRawFileRequestProcessor: Entered processRequest()" );
+	   Logger::writeLog( Logger::DEBUG, "JavascriptRawFileRequestProcessor: Entered processRequest()" );
 
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
 		$templateBuilder = new JavascriptBuilder();
@@ -78,18 +82,18 @@ class JavascriptRawFileRequestProcessor extends RequestProcessor {
 			}
 		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'JavascriptRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
+		Logger::writeLog( Logger::DEBUG, 'JavascriptRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
 
 		$templateDirector->setTemplateBuilder( $templateBuilder, $file_name ); // <=-- custom request ID
 
 		try {
 			$templateDirector->preProcessTemplate();
 		} catch (ErrorException $e) {
-			if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
-				 eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
+			if ( Configuration::getDeployment() === Configuration::DEVELOPMENT &&
+				 Logger::getLoggingLevel() === Logger::DEVELOPMENT) {
 				throw $e;
 			} else {
-				eGlooLogger::writeLog( eGlooLogger::WARN, 'JavascriptRawFileRequestProcessor: Template requested but not found: "' .
+				Logger::writeLog( Logger::WARN, 'JavascriptRawFileRequestProcessor: Template requested but not found: "' .
 					$this->bean->getGET( 'javascript_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
 				eGlooHTTPResponse::issueRaw404Response();
 			}
@@ -99,21 +103,21 @@ class JavascriptRawFileRequestProcessor extends RequestProcessor {
 
 		$output = $templateDirector->processTemplate();
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "JavascriptRawFileRequestProcessor: Echoing Response" );
+		Logger::writeLog( Logger::DEBUG, "JavascriptRawFileRequestProcessor: Echoing Response" );
 
 		header('Content-type: text/javascript');
 
 		// TODO buffer output
 		echo $output;
 
-		if ( $cache_to_webroot && (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION ||
-			eGlooConfiguration::getUseHotFileJavascriptClustering()) ) {
+		if ( $cache_to_webroot && (Configuration::getDeployment() == Configuration::PRODUCTION ||
+			Configuration::getUseHotFileJavascriptClustering()) ) {
 			// Depending on the requests.xml rules, this could be a security hole
 
 			StaticContentCacheManager::buildStaticContentCache('js', $user_agent_hash, $file_name . '.js', $output );
 		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'JavascriptRawFileRequestProcessor: Exiting processRequest()' );
+		Logger::writeLog( Logger::DEBUG, 'JavascriptRawFileRequestProcessor: Exiting processRequest()' );
 	}
 
 }

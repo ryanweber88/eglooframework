@@ -1,5 +1,7 @@
 <?php
 namespace {
+use       \eGloo\Configuration      as Configuration;
+use       \eGloo\Performance\Caching\Gateway as CacheGateway;
 use       \eGloo\Utility\Logger     as Logger;
 use       \eGloo\Dialect\ObjectSafe as Object;
 
@@ -33,34 +35,25 @@ use       \eGloo\Dialect\ObjectSafe as Object;
 // namespace context
 use eGloo\Utilities\ClassBuilder;
 
-
-// Bring up the eGlooConfiguration: 12% Hit
-if ( !class_exists( 'eGlooConfiguration', false ) ) {
-	include( 'PHP/Classes/System/Configuration/Deprecated/eGlooConfiguration.php' );
+// Bring up the eGloo\Configuration
+if ( !class_exists( '\eGloo\Configuration', false ) ) {
+	include( 'PHP/Classes/System/Configuration/eGloo.Configuration.php' );
 }
 
 // Load the install configuration: 15% Hit
-eGlooConfiguration::loadConfigurationOptions();
+Configuration::loadConfigurationOptions();
 
-// Bring up the eGlooLogger: 6% Hit
-if ( !class_exists( 'eGlooLogger', false ) ) {
-	include( 'PHP/Classes/System/Utilities/Deprecated/eGlooLogger.php' );
+// Bring up the eGloo\Utility\Logger
+if ( !class_exists( '\eGloo\Utility\Logger', false ) ) {
+	include( 'PHP/Classes/System/Utilities/eGloo.Utility.Logger.php' );
 }
 
-// Initialize the eGlooLogger: 1% Hit
-eGlooLogger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfiguration::getLogFormat() );
+// Initialize the Logger: 1% Hit
+Logger::initialize( Configuration::getLoggingLevel(), Configuration::getLogFormat() );
 
-// // Bring up the eGloo\Utility\Logger
-// if ( !class_exists( '\eGloo\Utility\Logger', false ) ) {
-// 	include( 'PHP/Classes/System/Utilities/eGloo.Utility.Logger.php' );
-// }
-//
-// // Initialize the eGlooLogger: 1% Hit
-// Logger::initialize( eGlooConfiguration::getLoggingLevel(), eGlooConfiguration::getLogFormat() );
-
-// Bring up the caching system (needed for the autoloader): 2.5% Hit
-if ( !class_exists( 'CacheGateway', false ) ) {
-	include( 'PHP/Classes/Performance/Caching/Deprecated/CacheGateway.php' );
+// Bring up the caching system (needed for the autoloader)
+if ( !class_exists( '\eGloo\Performance\Caching\Gateway', false ) ) {
+	include( 'PHP/Classes/Performance/Caching/eGloo.Performance.Caching.Gateway.php' );
 }
 
 // Register eGloo Autoloader: 0%
@@ -75,61 +68,61 @@ require __DIR__ . DIRECTORY_SEPARATOR . '../../vendor/autoload.php';
 
 // Load Bella
 // @Temporary
-// if ( eGlooConfiguration::getUseBella() ) {
+// if ( Configuration::getUseBella() ) {
 if ( true ) {
-	include( eGlooConfiguration::getBellaIncludePath() );
+	include( Configuration::getBellaIncludePath() );
 }
 
 // Load Haanga
-if ( eGlooConfiguration::getUseHaanga() ) {
-	include( eGlooConfiguration::getHaangaIncludePath() );
+if ( Configuration::getUseHaanga() ) {
+	include( Configuration::getHaangaIncludePath() );
 }
 
 // Load Smarty: 19.2% Hit
-if ( eGlooConfiguration::getUseSmarty() ) {
-	include( eGlooConfiguration::getSmartyIncludePath() );
+if ( Configuration::getUseSmarty() ) {
+	include( Configuration::getSmartyIncludePath() );
 }
 
 // Load Swift: 14% Hit
-if ( eGlooConfiguration::getUseSwift() ) {
-	include( eGlooConfiguration::getSwiftIncludePath() );
+if ( Configuration::getUseSwift() ) {
+	include( Configuration::getSwiftIncludePath() );
 }
 
 // Load Twig: 0% Hit
-// if ( true || eGlooConfiguration::getUseTwig() ) {
-// 	include( eGlooConfiguration::getTwigIncludePath() );
+// if ( true || Configuration::getUseTwig() ) {
+// 	include( Configuration::getTwigIncludePath() );
 // 	spl_autoload_register(array('Twig_Autoloader', 'autoload'));
 // }
 
 // Load S3/CloudFront: 0% Hit
-if ( eGlooConfiguration::getUseS3() ) {
-	include( eGlooConfiguration::getS3IncludePath() );
+if ( Configuration::getUseS3() ) {
+	include( Configuration::getS3IncludePath() );
 }
 
 // Load Doctrine: 4% Hit
-// if ( eGlooConfiguration::getUseDoctrine() ) {
-// 	include( eGlooConfiguration::getDoctrineIncludePath() );
+// if ( Configuration::getUseDoctrine() ) {
+// 	include( Configuration::getDoctrineIncludePath() );
 // 	spl_autoload_register(array('Doctrine', 'autoload'));
 // }
 
 // Load Pimple DIC
 // TODO place into configuration
-// include( eGlooConfiguration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
+// include( Configuration::getFrameworkRootPath() . '/Library/Pimple/Pimple.php' );
 
 // Let's override some built-in functions in profiling mode
-if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDProfile() ) {
+if ( extension_loaded('apd') && Configuration::getUseAPDProfile() ) {
 	apd_set_pprof_trace();
 	register_shutdown_function( 'apd_profile_exit' );
 }
 
 // Let's override some built-in functions in ADP debug mode
-if ( extension_loaded('apd') && eGlooConfiguration::getUseAPDTrace() ) {
+if ( extension_loaded('apd') && Configuration::getUseAPDTrace() ) {
 	apd_set_pprof_trace();
 	register_shutdown_function( 'apd_trace_exit' );
 }
 
 // Let's override some built-in functions in xdebug mode
-if ( extension_loaded('xdebug') && eGlooConfiguration::getUseXdebugTrace() ) {
+if ( extension_loaded('xdebug') && Configuration::getUseXdebugTrace() ) {
 	register_shutdown_function( 'xdebug_exit' );
 }
 
@@ -156,7 +149,7 @@ function eglooAutoload( $class_name ) {
 
 	$cacheGateway = CacheGateway::getCacheGateway();
 
-	if ( ( $autoload_hash = $cacheGateway->getObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {
+	if ( ( $autoload_hash = $cacheGateway->getObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', 'Runtime', true ) ) != null ) {
 		if ( isset( $autoload_hash[$class_name] ) ) {
 			// Make sure we didn't just mark this as "not found"
 			if ( $autoload_hash[$class_name] !== false ) {
@@ -177,7 +170,7 @@ function eglooAutoload( $class_name ) {
 					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
 					// to the global exception handler, just as if it was thrown.  Voila!
 					$errorException = new ErrorException( $errorMessage );
-					eGlooLogger::global_exception_handler( $errorException );
+					Logger::global_exception_handler( $errorException );
 				}
 			}
 
@@ -194,17 +187,17 @@ function eglooAutoload( $class_name ) {
 	// interface. Put the &CLASS wherever the $class_name might appear
 	static $permitted_formats = array( '&CLASS.php' );
 
-	$sanityCheckClassLoading = eGlooConfiguration::getPerformSanityCheckClassLoading();
+	$sanityCheckClassLoading = Configuration::getPerformSanityCheckClassLoading();
 
 	// Set the first time autoload is called
 	if ( null === $possible_path ) {
 		// These are the default paths for this application
-		$framework_classes = eGlooConfiguration::getFrameworkRootPath() . '/PHP';
-		$application_classes = eGlooConfiguration::getApplicationsPath() . '/' .
-			eGlooConfiguration::getApplicationPath() . '/PHP';
+		$framework_classes = Configuration::getFrameworkRootPath() . '/PHP';
+		$application_classes = Configuration::getApplicationsPath() . '/' .
+			Configuration::getApplicationPath() . '/PHP';
 
-		$extra_class_path = eGlooConfiguration::getApplicationsPath() . '/' .
-			eGlooConfiguration::getApplicationPath() . '/' . eGlooConfiguration::getExtraClassPath();
+		$extra_class_path = Configuration::getApplicationsPath() . '/' .
+			Configuration::getApplicationPath() . '/' . Configuration::getExtraClassPath();
 
 		// Customize this yourself, but leave the array_flip alone. We will use this to
 		// get rid of duplicate entries from the include_path .ini list.  By default,
@@ -304,7 +297,7 @@ function eglooAutoload( $class_name ) {
 							// to the global exception handler, just as if it was thrown.  Voila!
 							$errorException = new ErrorException($errorMessage);
 
-							eGlooLogger::global_exception_handler($errorException);
+							Logger::global_exception_handler($errorException);
 							exit;
 						}
 					}
@@ -331,11 +324,11 @@ function eglooAutoload( $class_name ) {
 					// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
 					// to the global exception handler, just as if it was thrown.  Voila!
 					$errorException = new ErrorException( $errorMessage );
-					eGlooLogger::global_exception_handler( $errorException );
+					Logger::global_exception_handler( $errorException );
 				}
 
 				$autoload_hash[$class_name] = realpath( $realPath );
-				$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+				$cacheGateway->storeObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 				break;
 			}
 		}
@@ -404,7 +397,7 @@ function eglooAutoload( $class_name ) {
 					// We did.  Let's cache it and leave
 					include_once( $realPath );
 					$autoload_hash[$class_name] = realpath( $realPath );
-					$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+					$cacheGateway->storeObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 					break;
 				} else if ( !empty($bad_fuzzy_matches_found) ) {
 					$errorMessage = 'Invalid fuzzy matches for namespaced class "' . $class_name . '" found.' . "\n";
@@ -419,7 +412,7 @@ function eglooAutoload( $class_name ) {
 					// to the global exception handler, just as if it was thrown.  Voila!
 					$errorException = new ErrorException($errorMessage);
 
-					eGlooLogger::global_exception_handler($errorException);
+					Logger::global_exception_handler($errorException);
 					exit;
 				}
 			}
@@ -438,7 +431,7 @@ function eglooAutoload( $class_name ) {
 		if ( $realPath !== null ) {
 			include_once( $realPath );
 			$autoload_hash[$class_name] = realpath( $realPath );
-			$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+			$cacheGateway->storeObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 
 			// attempt a construct static; this will be ignored if class
 			// does not fall in \eGloo\Dialect\Object class
@@ -453,7 +446,7 @@ function eglooAutoload( $class_name ) {
 				// blow up the stack when thrown.  So instead of throwing, we create it and pass it by hand
 				// to the global exception handler, just as if it was thrown.  Voila!
 				$errorException = new ErrorException( $errorMessage );
-				eGlooLogger::global_exception_handler( $errorException );
+				Logger::global_exception_handler( $errorException );
 			}
 		}
 	}
@@ -462,7 +455,7 @@ function eglooAutoload( $class_name ) {
 	// TODO In the future, we should branch on this depending on deployment type
 	if ( $realPath === null ) {
 		$autoload_hash[$class_name] = false;
-		$cacheGateway->storeObject( eGlooConfiguration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
+		$cacheGateway->storeObject( Configuration::getUniqueInstanceIdentifier() . '::' . 'autoload_hash', $autoload_hash, 'Runtime', 0, true );
 	}
 
 }
@@ -498,7 +491,7 @@ function getRealPathForDDPNSClassFromTokens( $class_name, $package, $subpackage_
 
 	$ns_class_name = implode( $subpackage_and_class_name_tokens, '.' ) . '.php';
 
-	$dpClassIncludePath = eGlooConfiguration::getRuntimeConfigurationCachePath() . 'ddpns/';
+	$dpClassIncludePath = Configuration::getRuntimeConfigurationCachePath() . 'ddpns/';
 	$dpClassFilePath = $dpClassIncludePath . $ns_class_name;
 
 	if ( file_exists($dpClassFilePath) && is_file($dpClassFilePath) && is_readable($dpClassFilePath) ) {
@@ -710,7 +703,7 @@ function throws( $mixed ) {
 }
 
 function print_backtrace_header( $backtrace ) {
-	$app_name_index = strpos( $backtrace[0]['file'], eGlooConfiguration::getApplicationName() );
+	$app_name_index = strpos( $backtrace[0]['file'], Configuration::getApplicationName() );
 
 	if ( $app_name_index !== false ) {
 		$pretty_path = substr( $backtrace[0]['file'], $app_name_index );
@@ -890,7 +883,7 @@ function deprecate( $deprecated, $replacement = null ) {
 	if ( class_exists('\eGloo\Utility\Logger', false) ) {
 		Logger::writeLog( Logger::DEBUG, $alert_string, 'Deprecated' );
 	} else {
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, $alert_string, 'Deprecated' );
+		Logger::writeLog( Logger::DEBUG, $alert_string, 'Deprecated' );
 	}
 }
 
@@ -1005,8 +998,8 @@ function log($message) {
 	isset($trace['class']) && $head = "{$trace['class']}.$head";
 
 
-	\eGlooLogger::writeLog(
-		\eGlooLogger::DEBUG, "$head : $message"
+	\Logger::writeLog(
+		\Logger::DEBUG, "$head : $message"
 	);
 
 }

@@ -1,5 +1,8 @@
 <?php
 
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * DBConnectionManager Class File
  *
@@ -51,36 +54,36 @@ final class DBConnectionManager extends ConnectionManager {
 	public static function getConnection( $connection_name = 'egPrimary', $engine_mode = null ) {
 		$retVal          = null;
 
-		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo( $connection_name );
+		$connection_info = Configuration::getDatabaseConnectionInfo( $connection_name );
 
 		if ($connection_info['password']) {
 
 			if ($engine_mode !== null) {
-				if ( $engine_mode === eGlooConfiguration::DOCTRINE ) {
+				if ( $engine_mode === Configuration::DOCTRINE ) {
 					if (!isset(self::$connections['Doctrine'])){
 						self::$connections['Doctrine'] = array();
 					}
 
 					$retVal = self::getDoctrineConnection( $connection_name );
-				} else if ( $engine_mode === eGlooConfiguration::MYSQL ) {
+				} else if ( $engine_mode === Configuration::MYSQL ) {
 					if (!isset(self::$connections['MySQL'])){
 						self::$connections['MySQL'] = array();
 					}
 
 					$retVal = self::getMySQLConnection( $connection_name );
-				} else if ( $engine_mode === eGlooConfiguration::MYSQLI ) {
+				} else if ( $engine_mode === Configuration::MYSQLI ) {
 					if (!isset(self::$connections['MySQLi'])){
 						self::$connections['MySQLi'] = array();
 					}
 
 					$retVal = self::getMySQLiConnection( $connection_name );
-				} else if ( $engine_mode === eGlooConfiguration::MYSQLIOOP ) {
+				} else if ( $engine_mode === Configuration::MYSQLIOOP ) {
 					if (!isset(self::$connections['MySQLiOOP'])){
 						self::$connections['MySQLiOOP'] = array();
 					}
 
 					$retVal = self::getMySQLiOOPConnection( $connection_name );
-				} else if ( $engine_mode === eGlooConfiguration::POSTGRESQL ) {
+				} else if ( $engine_mode === Configuration::POSTGRESQL ) {
 					if (!isset(self::$connections['PostgreSQL'])){
 						self::$connections['PostgreSQL'] = array();
 					}
@@ -90,31 +93,31 @@ final class DBConnectionManager extends ConnectionManager {
 					// No DB engine specified in config or no engine available
 				}
 			} else {
-				if ( $connection_info['engine'] === eGlooConfiguration::DOCTRINE ) {
+				if ( $connection_info['engine'] === Configuration::DOCTRINE ) {
 					if (!isset(self::$connections['Doctrine'])){
 						self::$connections['Doctrine'] = array();
 					}
 
 					$retVal = self::getDoctrineConnection( $connection_name );
-				} else if ( $connection_info['engine'] === eGlooConfiguration::MYSQL ) {
+				} else if ( $connection_info['engine'] === Configuration::MYSQL ) {
 					if (!isset(self::$connections['MySQL'])){
 						self::$connections['MySQL'] = array();
 					}
 
 					$retVal = self::getMySQLConnection( $connection_name );
-				} else if ( $connection_info['engine'] === eGlooConfiguration::MYSQLI ) {
+				} else if ( $connection_info['engine'] === Configuration::MYSQLI ) {
 					if (!isset(self::$connections['MySQLi'])){
 						self::$connections['MySQLi'] = array();
 					}
 
 					$retVal = self::getMySQLiConnection( $connection_name );
-				} else if ( $connection_info['engine'] === eGlooConfiguration::MYSQLIOOP ) {
+				} else if ( $connection_info['engine'] === Configuration::MYSQLIOOP ) {
 					if (!isset(self::$connections['MySQLiOOP'])){
 						self::$connections['MySQLiOOP'] = array();
 					}
 
 					$retVal = self::getMySQLiOOPConnection( $connection_name );
-				} else if ( $connection_info['engine'] === eGlooConfiguration::POSTGRESQL ) {
+				} else if ( $connection_info['engine'] === Configuration::POSTGRESQL ) {
 					if (!isset(self::$connections['PostgreSQL'])){
 						self::$connections['PostgreSQL'] = array();
 					}
@@ -147,31 +150,31 @@ final class DBConnectionManager extends ConnectionManager {
 		$retVal = null;
 
 		if ($engine_mode !== null) {
-			if ( $engine_mode === eGlooConfiguration::DOCTRINE ) {
+			if ( $engine_mode === Configuration::DOCTRINE ) {
 				if (!isset(self::$connections['egCustomConnections']['Doctrine'])){
 					self::$connections['egCustomConnections']['Doctrine'] = array();
 				}
 
 				$retVal = self::getCustomDoctrineConnectionWithOptions( $connection_name, $connection_options );
-			} else if ( $engine_mode === eGlooConfiguration::MYSQL ) {
+			} else if ( $engine_mode === Configuration::MYSQL ) {
 				if (!isset(self::$connections['egCustomConnections']['MySQL'])){
 					self::$connections['egCustomConnections']['MySQL'] = array();
 				}
 
 				$retVal = self::getCustomMySQLConnectionWithOptions( $connection_name, $connection_options );
-			} else if ( $engine_mode === eGlooConfiguration::MYSQLI ) {
+			} else if ( $engine_mode === Configuration::MYSQLI ) {
 				if (!isset(self::$connections['egCustomConnections']['MySQLi'])){
 					self::$connections['egCustomConnections']['MySQLi'] = array();
 				}
 
 				$retVal = self::getCustomMySQLiConnectionWithOptions( $connection_name, $connection_options );
-			} else if ( $engine_mode === eGlooConfiguration::MYSQLIOOP ) {
+			} else if ( $engine_mode === Configuration::MYSQLIOOP ) {
 				if (!isset(self::$connections['egCustomConnections']['MySQLiOOP'])){
 					self::$connections['egCustomConnections']['MySQLiOOP'] = array();
 				}
 
 				$retVal = self::getCustomMySQLiOOPConnectionWithOptions( $connection_name, $connection_options );
-			} else if ( $engine_mode === eGlooConfiguration::POSTGRESQL ) {
+			} else if ( $engine_mode === Configuration::POSTGRESQL ) {
 				if (!isset(self::$connections['egCustomConnections']['PostgreSQL'])){
 					self::$connections['egCustomConnections']['PostgreSQL'] = array();
 				}
@@ -253,7 +256,7 @@ final class DBConnectionManager extends ConnectionManager {
 		if (isset(self::$connections['Doctrine'][$connection_name])) {
 			$retVal = self::$connections['Doctrine'][$connection_name];
 		} else {
-			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+			$connection_info = Configuration::getDatabaseConnectionInfo($connection_name);
 
 			$dsn = 'pgsql://' . $connection_info['user'] . ':' . $connection_info['password'] .
 				'@' . $connection_info['host'] .':' . $connection_info['port'] . '/' . $connection_info['database'];
@@ -283,7 +286,7 @@ final class DBConnectionManager extends ConnectionManager {
 		if (isset(self::$connections['MySQL'][$connection_name])) {
 			$retVal = self::$connections['MySQL'][$connection_name];
 		} else {
-			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+			$connection_info = Configuration::getDatabaseConnectionInfo($connection_name);
 
 			$host 			= $connection_info['host'];
 			$port 			= $connection_info['port'];
@@ -316,7 +319,7 @@ final class DBConnectionManager extends ConnectionManager {
 		if (isset(self::$connections['MySQLi'][$connection_name])) {
 			$retVal = self::$connections['MySQLi'][$connection_name];
 		} else {
-			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+			$connection_info = Configuration::getDatabaseConnectionInfo($connection_name);
 
 			$host 			= $connection_info['host'];
 			$port 			= $connection_info['port'];
@@ -346,7 +349,7 @@ final class DBConnectionManager extends ConnectionManager {
 		if (isset(self::$connections['MySQLiOOP'][$connection_name])) {
 			$retVal = self::$connections['MySQLiOOP'][$connection_name];
 		} else {
-			$connection_info = eGlooConfiguration::getDatabaseConnectionInfo( $connection_name );
+			$connection_info = Configuration::getDatabaseConnectionInfo( $connection_name );
 
 			$host 			= $connection_info['host'];
 			$port 			= $connection_info['port'];
@@ -389,7 +392,7 @@ final class DBConnectionManager extends ConnectionManager {
 	}
 
 	private static function getPostgreSQLConnection( $connection_name = 'egPrimary' ) {
-		$connection_info = eGlooConfiguration::getDatabaseConnectionInfo($connection_name);
+		$connection_info = Configuration::getDatabaseConnectionInfo($connection_name);
 
 		$connection_string = 'host=' . $connection_info['host'] .
 							' user=' . $connection_info['user'] .

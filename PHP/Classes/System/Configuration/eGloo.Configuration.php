@@ -3,6 +3,8 @@ namespace eGloo;
 
 use \eGloo\Utility\Logger as Logger;
 
+use \eGlooRuntimeCacheClass as eGlooRuntimeCacheClass;
+
 use \Exception as Exception;
 use \ErrorException as ErrorException;
 
@@ -1823,6 +1825,14 @@ final class Configuration {
 		return $retVal;
 	}
 
+	public static function get( $key ) {
+		return self::getConfigurationOption( $key );
+	}
+
+	public static function set( $key, $value ) {
+		return self::setConfigurationOption( $key, $value );
+	}
+
 	public static function getConfigurationOption( $key ) {
 		return isset(self::$configuration_options[$key]) ? self::$configuration_options[$key] : null;
 	}
@@ -1896,6 +1906,9 @@ final class Configuration {
 		if (isset(self::$configuration_options['DataConnections']['RDBMS'][$connection_name])) {
 			$connection_info = self::$configuration_options['DataConnections']['RDBMS'][$connection_name];
 
+			$schema = isset($connection_info['options']['schema']['value']) ?
+						$connection_info['options']['schema']['value'] : 'public';
+
 			$retVal = array(
 				'name'		=> $connection_info['options']['name']['value'],
 				'host'		=> $connection_info['options']['host']['value'],
@@ -1904,6 +1917,7 @@ final class Configuration {
 				'user'		=> $connection_info['options']['user']['value'],
 				'password'	=> $connection_info['options']['password']['value'],
 				'engine'	=> $connection_info['options']['engine']['value'],
+				'schema'	=> $schema,
 			);
 		} else if (isset(self::$configuration_options['egDatabaseConnections'][$connection_name])) {
 			$retVal = self::$configuration_options['egDatabaseConnections'][$connection_name];
@@ -2329,6 +2343,10 @@ final class Configuration {
 		return self::$system_configuration;
 	}
 
+	public static function getBellaIncludePath() {
+		return self::$configuration_options['FrameworkRootPath'] . '/Library/bella/bella.php';
+	}
+
 	public static function getTwigIncludePath() {
 		// TODO make this customizable
 		// return self::$configuration_options['TwigPath'];
@@ -2499,6 +2517,31 @@ final class Configuration {
 		$retVal = false;
 
 		if (isset(self::$configuration_options['CustomVariables'][$index])) {
+			$retVal = true;
+		}
+
+		return $retVal;
+	}
+
+	public static function loadConfig( $key, $type = null ) {
+		$retVal = false;
+
+		$app_config_path = self::getApplicationsPath() . '/' . self::getApplicationPath() .
+			'/Configuration/' . $key . '.php';
+
+		$common_config_path = self::getApplicationsPath() . '/' . self::getApplicationPath() .
+			'/' . self::$configuration_options['ExtraConfigurationPath'];
+
+		$framework_config_path = self::getConfigurationPath();
+
+		if ( file_exists($app_config_path) && is_file($app_config_path) && is_readable($app_config_path) ) {
+			include_once($app_config_path);
+			$retVal = true;
+		} else if ( file_exists($common_config_path) && is_file($common_config_path) && is_readable($common_config_path) ) {
+			include_once($common_config_path);
+			$retVal = true;
+		} else if ( file_exists($framework_config_path) && is_file($framework_config_path) && is_readable($framework_config_path) ) {
+			include_once($framework_config_path);
 			$retVal = true;
 		}
 

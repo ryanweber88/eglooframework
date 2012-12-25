@@ -1,4 +1,9 @@
 <?php
+namespace eGloo;
+
+use \eGloo\Configuration;
+use \eGloo\Utility\Logger;
+
 /***
  * eGloo Framework Bootstrap File
  *
@@ -26,9 +31,9 @@
  */
 
 // Check for the minimum PHP version to run the framework
-if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+if (version_compare(PHP_VERSION, '5.4.0', '<')) {
 	echo 'You are using PHP version ' . PHP_VERSION . '.  ' .
-		'eGloo requires PHP version 5.3.0 or higher.';
+		'eGloo requires PHP version 5.4.0 or higher.';
 	exit;
 } else {
 	// Setup the OOP autoloader
@@ -42,7 +47,7 @@ if (!extension_loaded('memcache') && !extension_loaded('memcached')) {
 }
 
 // Build a request info bean
-$requestInfoBean = RequestInfoBean::getInstance();
+$requestInfoBean = \RequestInfoBean::getInstance();
 
 if ( true || $init_convenience_globals ) {
 	global $bean;
@@ -53,10 +58,10 @@ if ( true || $init_convenience_globals ) {
 
 // Get a request validator based on the current application and UI bundle
 $requestValidator =
-	RequestValidator::getInstance( eGlooConfiguration::getApplicationPath(), eGlooConfiguration::getUIBundleName() );
+	\RequestValidator::getInstance( Configuration::getApplicationPath(), Configuration::getUIBundleName() );
 
 if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
-	eGlooLogger::writeLog( eGlooLogger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
+	Logger::writeLog( Logger::EMERGENCY, 'Could not initialize request info bean', 'Security' );
 	exit;
 }
 
@@ -65,7 +70,7 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
-	$requestProcessor = RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
+	$requestProcessor = \RequestProcessorFactory::getRequestProcessor( $requestInfoBean );
 
 	if ( true || $init_convenience_globals ) {
 		global $controller;
@@ -75,7 +80,7 @@ if ( $isValidRequest ) {
 	}
 
 
-	if ( !($requestProcessor instanceof RequestProcessorDecorator) &&
+	if ( !($requestProcessor instanceof \RequestProcessorDecorator) &&
 		 method_exists($requestProcessor, 'before' )) {
 
 		$requestProcessor->before();
@@ -83,13 +88,13 @@ if ( $isValidRequest ) {
 
 	$requestProcessor->processRequest();
 
-	if ( !($requestProcessor instanceof RequestProcessorDecorator) &&
+	if ( !($requestProcessor instanceof \RequestProcessorDecorator) &&
 		 method_exists($requestProcessor, 'after' )) {
 
 		$requestProcessor->after();
 	}
 } else {
-	$errorRequestProcessor = RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
+	$errorRequestProcessor = \RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 
 	if ($errorRequestProcessor) {
 		if ( true || $init_convenience_globals ) {
@@ -102,7 +107,7 @@ if ( $isValidRequest ) {
 		$errorRequestProcessor->processErrorRequest();
 	} else {
 		// We probably want to do something a bit more... elegant here.  Eventually
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'INVALID request!', 'RequestValidation', 'Security' );
+		Logger::writeLog( Logger::DEBUG, 'INVALID request!', 'RequestValidation', 'Security' );
 	}
 }
 

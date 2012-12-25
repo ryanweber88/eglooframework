@@ -1,4 +1,8 @@
 <?php
+
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * StyleSheetRawFileRequestProcessor Class File
  *
@@ -53,7 +57,7 @@ class StyleSheetRawFileRequestProcessor extends RequestProcessor {
 	 * @access public
 	 */
 	public function processRequest() {
-	   eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetRawFileRequestProcessor: Entered processRequest()" );
+	   Logger::writeLog( Logger::DEBUG, "StyleSheetRawFileRequestProcessor: Entered processRequest()" );
 
 		$templateDirector = TemplateDirectorFactory::getTemplateDirector( $this->bean );
 		$templateBuilder = new CSSBuilder();
@@ -79,18 +83,18 @@ class StyleSheetRawFileRequestProcessor extends RequestProcessor {
 			}
 		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'StyleSheetRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
+		Logger::writeLog( Logger::DEBUG, 'StyleSheetRawFileRequestProcessor: Looking up stylesheet ' . $file_name );
 
 		$templateDirector->setTemplateBuilder( $templateBuilder, $file_name ); // <=-- custom request ID
 
 		try {
 			$templateDirector->preProcessTemplate();
 		} catch (ErrorException $e) {
-			if ( eGlooConfiguration::getDeployment() === eGlooConfiguration::DEVELOPMENT &&
-				 eGlooLogger::getLoggingLevel() === eGlooLogger::DEVELOPMENT) {
+			if ( Configuration::getDeployment() === Configuration::DEVELOPMENT &&
+				 Logger::getLoggingLevel() === Logger::DEVELOPMENT) {
 				throw $e;
 			} else {
-				eGlooLogger::writeLog( eGlooLogger::WARN, 'StyleSheetRawFileRequestProcessor: Template requested but not found: "' .
+				Logger::writeLog( Logger::WARN, 'StyleSheetRawFileRequestProcessor: Template requested but not found: "' .
 				 	$this->bean->getGET( 'css_name' ) . '" from user-agent "' . eGlooHTTPRequest::getUserAgent() . '"' );
 				eGlooHTTPResponse::issueRaw404Response();
 			}
@@ -100,20 +104,20 @@ class StyleSheetRawFileRequestProcessor extends RequestProcessor {
 
 		$output = $templateDirector->processTemplate();
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, "StyleSheetRawFileRequestProcessor: Echoing Response" );
+		Logger::writeLog( Logger::DEBUG, "StyleSheetRawFileRequestProcessor: Echoing Response" );
 
 		header('Content-type: text/css');
 
 		// TODO buffer output
 		echo $output;
 
-		if ( $cache_to_webroot && (eGlooConfiguration::getDeployment() == eGlooConfiguration::PRODUCTION ||
-			eGlooConfiguration::getUseHotFileCSSClustering()) ) {
+		if ( $cache_to_webroot && (Configuration::getDeployment() == Configuration::PRODUCTION ||
+			Configuration::getUseHotFileCSSClustering()) ) {
 
 			StaticContentCacheManager::buildStaticContentCache('css', $user_agent_hash, $file_name . '.css', $output );
 		}
 
-		eGlooLogger::writeLog( eGlooLogger::DEBUG, 'StyleSheetRawFileRequestProcessor: Exiting processRequest()' );
+		Logger::writeLog( Logger::DEBUG, 'StyleSheetRawFileRequestProcessor: Exiting processRequest()' );
 	}
 
 }
