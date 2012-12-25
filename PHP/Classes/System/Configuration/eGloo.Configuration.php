@@ -185,14 +185,14 @@ final class Configuration {
 		if ( ($useRuntimeCache && !self::loadRuntimeCacheClass()) || !$useRuntimeCache ) {
 			$success = self::loadFrameworkSystemCache();
 
-			if (!$success) {
+			if (!$success || !$useRuntimeCache) {
 				self::loadFrameworkSystemXML();
 				self::writeFrameworkSystemCache();
 			}
 
 			$success = self::loadFrameworkConfigurationCache($overwrite, $config_cache);
 
-			if (!$success) {
+			if (!$success || !$useRuntimeCache) {
 				self::loadFrameworkConfigurationXML($overwrite, $config_xml);
 				self::writeFrameworkConfigurationCache($config_cache);
 			}
@@ -201,12 +201,12 @@ final class Configuration {
 
 			$success = self::loadApplicationConfigurationCache($application_path, $overwrite, $config_cache);
 
-			if (!$success) {
+			if (!$success || !$useRuntimeCache) {
 				self::loadApplicationConfigurationXML($application_path, $overwrite);
 				self::writeApplicationConfigurationCache($application_path);
 			}
 
-			if ($prefer_htaccess) {
+			if ($prefer_htaccess || !$useRuntimeCache) {
 				self::loadWebRootConfig($overwrite);
 			}
 

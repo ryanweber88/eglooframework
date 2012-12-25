@@ -3,21 +3,21 @@
  * eGlooString Class File
  *
  * Contains the class definition for the eGlooString
- * 
+ *
  * Copyright 2011 eGloo, LLC
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *        http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *  
+ *
  * @author George Cooper
  * @copyright 2011 eGloo, LLC
  * @license http://www.apache.org/licenses/LICENSE-2.0
@@ -29,7 +29,7 @@
 
 /**
  * eGlooString Class
- * 
+ *
  * @package Core
  * @subpackage Utilities
  */
@@ -60,7 +60,7 @@ class eGlooString extends Object {
 	public function getString() {
 		return $this->string_as_UTF8;
 	}
-	
+
 	public static function reverseTokens($delimiter, $string) {
 		return implode($delimiter, array_reverse(
 			explode($delimiter, $string)
@@ -139,26 +139,26 @@ class eGlooString extends Object {
 
 		return implode( '', $chunks );
 	}
-	
+
 	/**
 	 * Determines if string is "camel-cased"
 	 */
 	public static function isCamelCase($string) {
-		
-		// @TODO this is a lazy/inefficient method to do 
+
+		// @TODO this is a lazy/inefficient method to do
 		// determination, but it works damnit
 		return $string === static::toCamelCase($string);
 	}
-	
+
 	/**
 	 * Determines if string is "underscored"
 	 */
 	public static function isUnderscore($string) {
-		return $string === static::toUnderscores($string); 
+		return $string === static::toUnderscores($string);
 	}
 
 
-	public static function toPrettyPrint( $string, $separator = '_', $ucfirst = false, $title_case = true ) {
+	public static function toPrettyPrint( $string, $separator = '_', $ucfirst = true, $title_case = true ) {
 		$chunks = explode( $separator, $string );
 
 		if ( $title_case ) {

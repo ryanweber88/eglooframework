@@ -1,9 +1,10 @@
 <?php
 namespace eGloo\DataProcessing\Connection;
 
+use \eGloo\Configuration;
 use \eGloo\DataProcessing\ConnectionManagement\DBConnectionManager;
 use \eGloo\DataProcessing\Connection\DatabaseErrorException;
-// use \eGloo\Utility\Logger     as Logger;
+use \eGloo\Utility\Logger     as Logger;
 
 /**
  * PostgreSQLDBConnection Class File
@@ -48,6 +49,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	/** @var resource connection oobject */
 	// protected $link = null;
 	protected static $link = null;
+	protected static $connection_name = 'egPrimary'; // hard-coded for now
 
 	/**
 	 * Database connection method
@@ -60,7 +62,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		if ( is_null($rawConnectionResource) && self::$link === null ) {
 			\DBConnectionManager::resetConnections();
 
-			self::$link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+			self::$link = \DBConnectionManager::getConnection(static::$connection_name)->getRawConnectionResource();
 
 			if ( null === self::$link ) {
 				throw new DatabaseErrorException('Can\'t connect to database server.');
@@ -78,7 +80,7 @@ class PostgreSQLDBConnection extends DBConnection {
 	 */
 	public function getConnection () {
 		if (self::$link === null) {
-			self::$link = \DBConnectionManager::getConnection()->getRawConnectionResource();
+			self::$link = \DBConnectionManager::getConnection(static::$connection_name)->getRawConnectionResource();
 		}
 
 		return self::$link;
@@ -315,6 +317,138 @@ class PostgreSQLDBConnection extends DBConnection {
 		if (pg_last_error(self::$link) != false) {
 			throw  new \DatabaseErrorException();
 		}
+	}
+
+	public function constraints_for_fields( $conditions, $class ) {
+		if ( ($pos = strrpos($class, '\\')) !== false ) {
+			$class = substr( $class, $pos+1 );
+		}
+
+		$fields = explode(' ', $conditions);
+
+		$sql = "SELECT
+					c.*
+				FROM
+					information_schema.constraint_column_usage c
+				WHERE
+					c.table_schema = ?
+					AND (";
+
+		for( $i = 0; $i < count($fields); $i++ ) {
+			$sql .= 'c.column_name = ?';
+
+			if ( ($i + 1) < count($fields) ) {
+				$sql .= ' or ';
+			}
+		}
+
+		$fields[] = strtolower($class);
+
+		$sql .=
+					") AND c.table_name = ?;";
+
+		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
+
+		if ( isset($connection['schema']) ) {
+			array_unshift($fields, $connection['schema']);
+		} else {
+			array_unshift($fields, 'public');
+		}
+
+		return pg_fetch_all($this->execute($sql, $fields));
+	}
+
+	public function constraints_for_table( $class ) {
+		if ( ($pos = strrpos($class, '\\')) !== false ) {
+			$class = substr( $class, $pos+1 );
+		}
+
+		$fields = [strtolower($class)];
+
+		$sql = "SELECT
+					t.*
+				FROM
+					information_schema.table_constraints t
+				WHERE
+					t.table_schema = ?
+					AND t.table_name = ?;";
+
+		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
+
+		if ( isset($connection['schema']) ) {
+			array_unshift($fields, $connection['schema']);
+		} else {
+			array_unshift($fields, 'public');
+		}
+
+		return pg_fetch_all($this->execute($sql, $fields));
+	}
+
+	public function definitions_for_fields( $conditions, $class ) {
+		if ( ($pos = strrpos($class, '\\')) !== false ) {
+			$class = substr( $class, $pos+1 );
+		}
+
+		$fields = explode(' ', $conditions);
+
+		$sql = "SELECT
+					c.*
+				FROM
+					information_schema.columns c
+				WHERE
+					c.table_schema = ?
+					AND (";
+
+		for( $i = 0; $i < count($fields); $i++ ) {
+			$sql .= 'c.column_name = ?';
+
+			if ( ($i + 1) < count($fields) ) {
+				$sql .= ' or ';
+			}
+		}
+
+		$fields[] = strtolower($class);
+
+		$sql .=
+					") AND c.table_name = ?
+				ORDER BY
+					c.ordinal_position;";
+
+		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
+
+		if ( isset($connection['schema']) ) {
+			array_unshift($fields, $connection['schema']);
+		} else {
+			array_unshift($fields, 'public');
+		}
+
+		return pg_fetch_all($this->execute($sql, $fields));
+	}
+
+	public function field_definitions( $class ) {
+		if ( ($pos = strrpos($class, '\\')) !== false ) {
+			$class = substr( $class, $pos+1 );
+		}
+
+		$sql = "SELECT
+					c.*
+				FROM
+					information_schema.columns c
+				WHERE
+					c.table_schema = ?
+					AND c.table_name = ?
+				ORDER BY
+					c.ordinal_position;";
+
+		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
+
+		if ( isset($connection['schema']) ) {
+			$schema = $connection['schema'];
+		} else {
+			$schema = 'public';
+		}
+
+		return pg_fetch_all($this->execute($sql, [$schema, strtolower($class)]));
 	}
 
 	/**
