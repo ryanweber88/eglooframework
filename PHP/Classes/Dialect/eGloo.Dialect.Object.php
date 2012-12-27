@@ -417,8 +417,6 @@ abstract class Object {
 		// to determine our correct receiver (an instance or
 		// the class context)
 		$receiver = static::receiver();
-		$instance = is_object($receiver);
-
 
 		// retrieve the messages arguments, if any.. since we
 		// allow for array passing to we do an explicit
@@ -821,6 +819,14 @@ abstract class Object {
 		
 		return "$class<$hash>";
 	}
+
+	/**
+	 * Identifies current receiver
+	 * @DualContext
+	 */
+	public function identity() {
+		return static::receiver_id();
+	}
 	
 	protected function isAliasedProperty($name) {
 		return isset($this->_aliasedProperties[$name]);
@@ -946,7 +952,16 @@ abstract class Object {
 				);
 				$method->setAccessible(true);
 
-				$lambda = $method->getClosure();
+				// bind closure to local scope variable lambda
+				$lambda = function($__mixed = null) use ($method, $instance) {
+					$receiver = $instance 
+						? $this
+						: null;
+
+					return $method->invokeArgs(
+						$receiver, func_get_args()
+					);
+				};
 				
 			// 	otherwise, we check up method hierarchy chain
 			// for dynamic method
@@ -1018,7 +1033,7 @@ abstract class Object {
 		$id = get_called_class();
 
 		if (isset($this)) {
-			$id .= '#instance<' . spl_object_hash($this) . '>';
+			$id .= '#insta nce<' . spl_object_hash($this) . '>';
 		}
 
 		return $id;

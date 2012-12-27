@@ -432,10 +432,7 @@ abstract class Model extends Delegator
 	 * @return string
 	 */
 	protected static function entity() {
-		//echo static::classnamefull();
-		var_export(debug_backtrace()); exit;
-		echo get_called_class();
-		echo static::klass();exit;
+		echo get_called_class(); exit;
 		return static::signature(static::classnamefull());
 	}
 

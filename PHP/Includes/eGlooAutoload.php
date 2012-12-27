@@ -1065,18 +1065,55 @@ function strtotime($symbol) {
 	return \strtotime($symbol);
 }
 
+
 /** Convenience method to call_user_func_array; this was
  ** meant to be abstracted within object context, but
  ** this has proven to be a failure as PHP does not
  ** provide true static scope resolution */
 function send($receiver, $message, $__mixed = null) {
-	var_export(func_get_args()); exit;
-	$arguments = array_slice(
-		func_get_args(), 2	
-	);
+	if (method_exists($receiver, 'send')) {
+		$arguments = array_slice(
+			func_get_args(), 2	
+		);
+
+		// since we are using send method, 
+		// shift message to beginning of array
+		//array_unshift($arguments, $message);
 
 
-	return $receiver::send($message, $arguments);
+		// now call send method on receiver
+		//return call_user_func_array(array(
+			//$receiver, 'send'
+		
+		//), $arguments);
+		return $receiver::send($message, $arguments);
+
+	// otherwise throw an exception as send method/message
+	// must be available to receiver
+	} else {
+		
+		// if receiver is valid, then method send does not exist
+		// on receiver
+		if (is_object($receiver) || class_exists($receiver)) {
+			$id = is_object($receiver) 
+				? $receiver->identify()
+				: $receiver::identify();
+
+			throw new \Exception(
+				"Failed to send message '$message' to receiver '$id'" . 
+				"because '$message' does not exist in receiver"
+			);
+
+		// otherwise receiver is not valid
+		} else {
+			throw new \Exception(
+				"Failed to send message '$message' to receiver '$receiver'" . 
+				"because receiver does not exist"
+			);
+		}
+	}
+
 }
 
-}
+
+} // end namespace egloo
