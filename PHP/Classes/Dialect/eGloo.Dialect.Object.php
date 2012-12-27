@@ -112,7 +112,6 @@ abstract class Object {
 	 */
 	public function defer($name, callable $lambda) {
 
-
 		if (is_object(static::receiver())) {
 			$defers = &$this->_defers;
 
@@ -213,9 +212,6 @@ abstract class Object {
 		// cache, which means this value will not be uncached at anypoint
 		} else if (isset($key[0]) && $key[0] == '*') {
 			$trace      = debug_backtrace(2)[1];
-			if (!isset($trace['file'])) {
-				var_export(debug_backtrace()); exit;
-			}
 			$key        = $trace['file'] . $trace['line'] . $key;	
 			$initialKey = substr($initialKey, 1); 		
 		}		
@@ -450,15 +446,21 @@ abstract class Object {
 				$lambda, [ $arguments ]
 			);
 
+
 		// if an exception is thrown, then we can safely determine
 		// that the method does not exist
 		} catch(\Exception $refine) { 
-			$receiver = static::receiver_id();
 
-			throw new \Exception(
-				"Failed to send method '$method' to receiver '$receiver' " . 
-				"because method does not exist"
-			);
+			//if (stripos($refine->getMessage(), 'failed to return closure') !== false) {
+				//$receiver = static::receiver_id();
+
+				throw new \Exception(
+					"Failed to send method '$method' to receiver '$receiver' " . 
+					"because method does not exist"
+				);
+			//}
+
+			//throw $refine;
 		
 		}
 
@@ -928,6 +930,7 @@ abstract class Object {
 		}
 
 		$receiver = static::receiver_id();
+
 		throw new \Exception (
 			"Call to undefined instance method '$name' on receiver '$receiver'"
 		);
@@ -964,9 +967,18 @@ abstract class Object {
 						? $this
 						: null;
 
-					return $method->invokeArgs(
-						$receiver, func_get_args()
-					);
+					// @TODO remove this catch, but for time being
+					// needed for error checking or exception essentially
+					// disapears on stack
+					try { 
+						return $method->invokeArgs(
+							$receiver, func_get_args()
+						);
+
+					} catch(\Exception $up) {
+						var_export($up); exit;
+						//throw $up;
+					}
 				};
 				
 			// 	otherwise, we check up method hierarchy chain
@@ -1039,7 +1051,7 @@ abstract class Object {
 		$id = get_called_class();
 
 		if (isset($this)) {
-			$id .= '#insta nce<' . spl_object_hash($this) . '>';
+			$id .= '#instance<' . spl_object_hash($this) . '>';
 		}
 
 		return $id;

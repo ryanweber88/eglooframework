@@ -1645,21 +1645,24 @@ abstract class Model extends Delegator
 
 			// expand on parameter matching, but for, just match on primary
 			// and tablename_id pattern
-			$arguments = func_get_args();
 			$table     = static::signature();
 			$field     = "{$table}_id";
-			$key       = $arguments[0]; 
-			
+
 			// we're GAURENTEED to throw an exception here if our by-conventions guess
 			// does not pan out; so callers will be explicitly aware
 			try {
 				
 				$result = static::selects('*')
 				                ->build();
+
+
+				if ($result instanceof Model) {
+					$result = New Model\Set($result);
+				}
 				
 				// our 'all' method should return an empty set if failed to return
 				// result
-				return $result !== false ?: new Model\Set(\get_called_class());
+				return $result ?: new Model\Set(get_called_class());
 				
 			}
 			
@@ -1870,7 +1873,7 @@ abstract class Model extends Delegator
 	 * Adds a callback of type $event, to a specific point (before, around, after)
 	 * and pushes callback $lambda on event + point stack
 	 */
-	protected static function defineCallback($event, $mixed, $lambda = null) {
+	protected function defineCallback($event, $mixed, $lambda = null) {
 	
 		$point = $mixed;
 		
@@ -1928,7 +1931,9 @@ abstract class Model extends Delegator
 			});
 		}
 
-
+		if (is_array($lambda)) {
+			var_export(debug_backtrace());exit;
+		}
 		
 	
 		if (is_callable($lambda)) {
@@ -2025,13 +2030,13 @@ abstract class Model extends Delegator
 		foreach($points as $point) {
 			if (static::hasCallbacks($event, $point)) {
 				foreach(static::callbacks($event, $point) as $callback) {
-					$callback = @$callback->bindTo($this, $this);
+					$callback = $callback->bindTo($this, $this);
+
 					try { 
-						if (($callback()) === false) {
+						if (($callback($this)) === false) {
 							return ;
 						}
-					
-					
+										
 					// @TODO this exception is not bubbling up, for now, exit 
 					// and 
 					} catch(\Exception $pass) {
@@ -2370,9 +2375,9 @@ abstract class Model extends Delegator
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
 
 			return call_user_func_array(
-				static::defineMethod($name, function($mixed) use ($match) {
+				static::defineMethod($name, function($mixed = null) use ($match) {
 
-					if (func_num_args()) {				
+					if (func_num_args()) {	
 						static::defineCallback(
 							$event = $match[2], $match[1], $mixed
 						);
@@ -2925,13 +2930,20 @@ abstract class Model extends Delegator
 		// if so, we assign value to local attribute
 		if (isset(static::domain('_sdefers')[$name])) {
 			// we need to replace lambda with bound version
-			$lambda = &static::domain('_sdefers')[$name];
-			$lambda = @$lambda->bindTo($this, $this);
+			$lambda = static::domain('_sdefers')[$name];
+			$lambda = $lambda->bindTo($this, $this);
 
 			// now we call as static method, which will take care
 			// of running deffered method and then popping from
 			// deferred stack
-			$this->$name = &static::{$name}();
+			//$this->$name = null;
+			$this->$name = &$lambda();
+
+			return $this->$name;
+
+			// @TODO defers is currently broken.. so for the time being
+			// we are unsetting manually;
+			//exit('adsf');
 		}
 
 		// @TODO this should be replaced at some point

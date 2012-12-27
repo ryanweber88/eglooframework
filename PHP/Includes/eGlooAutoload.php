@@ -1070,24 +1070,17 @@ function strtotime($symbol) {
  ** meant to be abstracted within object context, but
  ** this has proven to be a failure as PHP does not
  ** provide true static scope resolution */
-function send($receiver, $message, $__mixed = null) {
+function &send($receiver, $message, $__mixed = null) {
 	if (method_exists($receiver, 'send')) {
 		$arguments = array_slice(
 			func_get_args(), 2	
 		);
 
+		$result = is_object($receiver) 
+			? $receiver->send($message, $arguments) 
+			: $receiver::send($message, $arguments);
 
-		// since we are using send method, 
-		// shift message to beginning of array
-		//array_unshift($arguments, $message);
-
-
-		// now call send method on receiver
-		//return call_user_func_array(array(
-			//$receiver, 'send'
-		
-		//), $arguments);
-		return $receiver::send($message, $arguments);
+		return $result;
 
 	// otherwise throw an exception as send method/message
 	// must be available to receiver
