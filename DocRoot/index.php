@@ -58,7 +58,7 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
-$set = \Common\Domain\Model\TestMeSilly::find(15);
+$set = \Common\Domain\Model\TestMeSilly::all();
 var_export($set);
 exit('asdf');
 

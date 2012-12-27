@@ -15,7 +15,9 @@ use \eGloo\Performance\Caching;
  * @author Christian Calloway
  */
 class Set extends \eGloo\Dialect\Object
-	implements \ArrayAccess, \IteratorAggregate, \Countable, Utilities\ToArrayInterface, \Serializable, Caching\CacheKeyInterface {
+	implements \ArrayAccess, \IteratorAggregate, \Countable, 
+	           Utilities\ToArrayInterface, \Serializable, 
+	           Caching\CacheKeyInterface {
 	
 	
 	/**
@@ -52,8 +54,6 @@ class Set extends \eGloo\Dialect\Object
 
 			}
 
-			var_export($this->collection);
-			exit;
 			
 		}
 		

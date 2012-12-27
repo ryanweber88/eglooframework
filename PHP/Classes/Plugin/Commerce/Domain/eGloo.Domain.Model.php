@@ -1598,7 +1598,6 @@ abstract class Model extends Delegator
 									$field => $key
 								])
 								->build();
-
 																	
 								// we know that if result is not absolute false, it will be returned
 								// as a set from our process method									
@@ -1930,11 +1929,6 @@ abstract class Model extends Delegator
 				
 			});
 		}
-
-		if (is_array($lambda)) {
-			var_export(debug_backtrace());exit;
-		}
-		
 	
 		if (is_callable($lambda)) {
 			$callbacks   = &static::callbacks($event, $point);
