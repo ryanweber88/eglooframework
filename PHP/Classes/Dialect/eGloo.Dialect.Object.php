@@ -213,6 +213,9 @@ abstract class Object {
 		// cache, which means this value will not be uncached at anypoint
 		} else if (isset($key[0]) && $key[0] == '*') {
 			$trace      = debug_backtrace(2)[1];
+			if (!isset($trace['file'])) {
+				var_export(debug_backtrace()); exit;
+			}
 			$key        = $trace['file'] . $trace['line'] . $key;	
 			$initialKey = substr($initialKey, 1); 		
 		}		
@@ -429,6 +432,7 @@ abstract class Object {
 			$arguments = Utilities\Collection::flatten($arguments);
 		}
 
+
 		// first we attempt to get method, wrapped within a
 		// lambda; if we cannot find method, we know it doesnt
 		// exist and throw an exception
@@ -442,7 +446,9 @@ abstract class Object {
 			// ALREADY passed went instantiating, but what the fuck
 			// ever. Also, if method happens to be static, then
 			// passed receiver must be null @wtfphp
-			return call_user_func_array($lambda, $arguments);
+			return call_user_func_array(
+				$lambda, [ $arguments ]
+			);
 
 		// if an exception is thrown, then we can safely determine
 		// that the method does not exist

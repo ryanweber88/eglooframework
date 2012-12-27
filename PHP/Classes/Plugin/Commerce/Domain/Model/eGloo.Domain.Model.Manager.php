@@ -66,6 +66,7 @@ class Manager extends Object {
 				if (($model = $lambda($class, $key))) {
 
 					// persist found model and return to caller
+					var_export($model); exit;
 					if ($model->exists()) {
 						$this->persist($model);
 					}

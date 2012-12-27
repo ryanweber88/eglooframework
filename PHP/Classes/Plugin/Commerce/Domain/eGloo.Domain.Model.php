@@ -432,8 +432,15 @@ abstract class Model extends Delegator
 	 * @return string
 	 */
 	protected static function entity() {
-		echo get_called_class(); exit;
-		return static::signature(static::classnamefull());
+		$class = static::classnamefull();
+
+		// @TODO because this is being invoked from a closure,
+		// which is causing debug backtrace to fail; return and
+		// figure out how to overcome
+
+		//return static::cache("*$class", function($class) { 
+			return static::signature($class);
+		//});
 	}
 
 

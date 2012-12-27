@@ -269,7 +269,7 @@ class Relation extends Object
 	public function build() {
 		$model  = $this->model;
 		$result = null;
-							
+		
 		try {
 			$result = eGloo\send($model, 'process', Domain\Data::statement(
 				$this->to_sql(), $this->arguments
@@ -277,7 +277,7 @@ class Relation extends Object
 
 
 		} catch(\Exception $deferred) { }
-		
+
 		
 		// our query method should always return set, so we
 		// wrap in set if we have only returned on record, which would
