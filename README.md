@@ -24,8 +24,10 @@ Installation
 ------------
 
 eGloo makes use of continuous integration to maintain stability and consistent
-performance in its master branch.  For that reason, cloning from GitHub is
-the best way to install eGloo.
+performance in its primary branch (currently feature/conversion).  For that reason, cloning
+from GitHub is the best way to install eGloo.
+
+In the future we will be releasing *.deb packages as well as sources for homebrew and macports.
 
 ### Ubuntu 10.04 LTS
 
@@ -80,5 +82,7 @@ In exchange for rapid development and proper SE design, eGloo sacrifices speed i
 Documentation
 -------------
 
-Coming soon.  No, seriously.
+Documentation is [available via our Jenkins instance](http://jenkins.egloo.com/job/eGlooFramework/doxygen/) and is updated multiple times a day based on our CI build schedule.
+
+Testers and contributors who would like to help out on this front are greatly appreciated.
 
