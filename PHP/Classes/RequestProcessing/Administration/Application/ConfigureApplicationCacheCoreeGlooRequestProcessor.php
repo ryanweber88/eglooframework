@@ -170,18 +170,9 @@ class ConfigureApplicationCacheCoreeGlooRequestProcessor extends RequestProcesso
 		// Sort these by name, case insensitive
 		uksort($applications_info, 'strnatcasecmp');
 
-		$countries = eval('return ' . file_get_contents('../PHP/Data/Countries.php') .';');
-		$languages = eval('return ' . file_get_contents('../PHP/Data/Languages.php') .';');
-
 		$templateVariables['app'] = eGlooConfiguration::getApplicationName();
 		$templateVariables['bundle'] = eGlooConfiguration::getUIBundleName();
 		$templateVariables['applications'] = $applications_info;
-
-		$templateVariables['countries'] = $countries;
-		$templateVariables['languages'] = $languages;
-
-		$templateVariables['countries_selected'] = $countries_selected;
-		$templateVariables['languages_selected'] = $languages_selected;
 
 		$templateDirector->setTemplateVariables( $templateVariables );
 		$output = $templateDirector->processTemplate();
