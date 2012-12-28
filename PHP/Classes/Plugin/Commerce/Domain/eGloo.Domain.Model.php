@@ -699,8 +699,9 @@ abstract class Model extends Delegator
 	 * idiomatic reasons only
 	 * @type experimental the moment - will be used to indicate relationship
 	 * type if plurality rules are ineffective
+	 * @DualContext
 	 */
-	protected static function defineRelationship($name, $lambda, $singular = null, $join = null) {
+	protected function defineRelationship($name, $lambda, $singular = null, $join = null) {
 		// get model name, using inflection class
 		// @TODO this will need to be changed as it doesn't
 		// belong here
@@ -804,7 +805,7 @@ abstract class Model extends Delegator
 
 								 
 				$association = new Model\Association(array(
-					'owner'       => $self,
+					'owner'       => $this,
 					'target'      => $model,
 					'through'     => $join,
 					'cardinality' => $singular 

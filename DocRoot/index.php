@@ -59,7 +59,7 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
 $test = \Common\Domain\Model\TestMeSilly::find(15);
-var_export($test->TestMeSilly);
+echo $test->TestMeSilly->id;
 //$test->save();
 
 exit('asdf');
