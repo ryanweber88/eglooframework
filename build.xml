@@ -72,7 +72,6 @@
  <target name="pdepend"
 		 description="Generate jdepend.xml and software metrics charts using PHP_Depend">
   <exec executable="pdepend">
-    <arg value="--debug" />
    <arg value="--jdepend-xml=${basedir}/Build/logs/jdepend.xml" />
    <arg value="--jdepend-chart=${basedir}/Build/pdepend/dependencies.svg" />
    <arg value="--overview-pyramid=${basedir}/Build/pdepend/overview-pyramid.svg" />
