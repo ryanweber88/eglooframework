@@ -54,8 +54,6 @@ class ExternalMainPageBaseRequestProcessor extends RequestProcessor {
 		eGlooLogger::writeLog( eGlooLogger::DEBUG, "ExternalMainPageBaseRequestProcessor: Entered processRequest()" );
 
 		$templateVariables = array();
-		$templateVariables['app'] = eGlooConfiguration::getApplicationName();
-		$templateVariables['bundle'] = eGlooConfiguration::getUIBundleName();
 
 		eGlooResponse::outputXHTML( $templateVariables );
 
