@@ -457,8 +457,9 @@ abstract class Model extends Delegator
 	/**
 	 * Convenience method to specify 1 - 1 relationships; note that you
 	 * must still follow plurality conventions
+	 * @DualContext
 	 */
-	protected static function hasOne($name, $lambda = null) {
+	protected function hasOne($name, $lambda = null) {
 	
 	
  		// if lambda has not been defined, we provide a by-convention
@@ -601,7 +602,7 @@ abstract class Model extends Delegator
 
 	}
 	
-	protected static function hasMany($name, $lambda = null) {
+	protected function hasMany($name, $lambda = null) {
 		
 		
 		// if lambda has not been defined, we provide a by-convention
@@ -668,12 +669,28 @@ abstract class Model extends Delegator
 	protected static function &association($name, $value = null) {
 		// if value is null, we are returning association value
 		if (is_null($value)) {
-			return static::domain('sassociations')[$name];
+			if (static::hasAssociation($name)) {
+				return static::domain('sassociations')[$name];
+			
+			} else {
+				$associations        = &static::domain('sassociations');
+				$associations[$name] = null;
+
+				return $associations[$name];
+			}
+
+			return $association;
 
 		// otherwise we are setting association value
 		} else {
 			$association = &static::association($name);
 			$association = $value; 
+
+			// @TODO exception handler is balking at cases
+			// when reference is not returned, so we have to return
+			// here which is awkward to say the least - this needs
+			// to be fixed
+			return $association;
 		}
 	}
 
@@ -783,7 +800,8 @@ abstract class Model extends Delegator
 				($model, $relationshipName, $lambda, $singular, $join, $name) {
 				
 				//$self->send('runCallbacks', 'relationship', 'before');
-				$this->runCallbacks('relationship', 'before');
+				$this->before_relationship();
+
 								 
 				$association = new Model\Association(array(
 					'owner'       => $self,
@@ -1091,7 +1109,7 @@ abstract class Model extends Delegator
 			// that we are not returning false positive			
 			if (!isset($this->$attribute)   ||
 			    is_null($this->$attribute)) {
-				
+
 				$attributes[] = $attribute;
 			}
 		}

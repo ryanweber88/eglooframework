@@ -58,8 +58,9 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
-//$find = \Common\Domain\Model\TestMeSilly::find();
-$test->save();
+$test = \Common\Domain\Model\TestMeSilly::find(15);
+var_export($test->TestMeSilly);
+//$test->save();
 
 exit('asdf');
 
