@@ -58,8 +58,9 @@ if ( !$requestValidator->initializeInfoBean($requestInfoBean) ) {
 $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
-$set = \Common\Domain\Model\TestMeSilly::all();
-var_export($set);
+//$find = \Common\Domain\Model\TestMeSilly::find();
+$test->save();
+
 exit('asdf');
 
 // If the request is valid, process it.  Otherwise, log it and die

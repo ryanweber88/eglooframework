@@ -1082,14 +1082,16 @@ abstract class Model extends Delegator
 		
 		// right now just return a list of invalid fields
 		$attributes = array();
+		$validates  = &static::domain('svalidates'); 
 		
-		foreach($this->validates as $attribute) {
+		foreach($validates as $attribute) {
 			
 			// wtfphp once again!! unfortunately, motherfucking references and '0' values can be viewed 
 			// as !isset === true, so we have to check against !is_null to ensure
 			// that we are not returning false positive			
 			if (!isset($this->$attribute)   ||
 			    is_null($this->$attribute)) {
+				
 				$attributes[] = $attribute;
 			}
 		}
@@ -1598,7 +1600,7 @@ abstract class Model extends Delegator
 									$field => $key
 								])
 								->build();
-																	
+
 								// we know that if result is not absolute false, it will be returned
 								// as a set from our process method									
 								if ($result) {
@@ -1720,7 +1722,7 @@ abstract class Model extends Delegator
 		// lets see what is missing for validation and throw exception
 		else { 
 			throw new \Exception(
-				"Cannot save model '{$this->ident()}' because the attributes did not pass validation : " . print_r(
+				"Cannot save model '{$this->identity()}' because the attributes did not pass validation : " . print_r(
 					$this->whatsInvalid(), true
 			));
 		}
