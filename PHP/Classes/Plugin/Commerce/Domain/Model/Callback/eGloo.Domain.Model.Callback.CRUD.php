@@ -22,15 +22,13 @@ class CRUD extends Model\Callback {
 		// @TODO since this was added late in the lifecycle of model design, there already
 		// exist many create callbacks - until this is cleaned up, we have to specifically
 		// check for the existence of create
-		$callbacks = &$model->reference('callbacks');
-		
-		if ($model->send('hasCallbacks', 'update', 'around') && 
-		    count($callbacks['update']['around']) == 1)      {
+
+		if ($model->send('hasCallbacks', 'update', 'around')) {
 			
 			$conditions = array();
 										
-			if ($model->send('hasCompositeKeys')) {
-				foreach($model->reference('primaryKeys') as $key) {
+			if ($model::hasCompositeKeys()) {
+				foreach($model::primaryKey() as $key) {
 					$conditions[] = "$key = ?";		
 				}
 			}
@@ -50,8 +48,8 @@ class CRUD extends Model\Callback {
 			
 			// again, since this is a guess, we ignore exception and make determination that
 			// update succeeded in child classes
-			catch(\Exception $pass) {
-				throw $pass; 	
+			catch(\Exception $up) {
+				throw $up; 	
 			}		
 		}
 		
@@ -67,10 +65,8 @@ class CRUD extends Model\Callback {
 		// @TODO since this was added late in the lifecycle of model design, there already
 		// exist many create callbacks - until this is cleaned up, we have to specifically
 		// check for the existence of create
-		$callbacks = &$model->reference('callbacks');
 		
-		if ($model->send('hasCallbacks', 'create', 'around') && 
-		    count($callbacks['create']['around']) == 1)      {
+		if ($model->send('hasCallbacks', 'create', 'around')) {
 											
 			try {
 				
@@ -78,7 +74,7 @@ class CRUD extends Model\Callback {
 				// then value will be updated on true primary key
 				// @TODO composite keys? 
 				$model->id = $model::inserts(array(
-					'into'         => $model->send('entity'),
+					'into'         => $model::send('entity'),
 					'using'        => $model
 				));	
 									
@@ -109,19 +105,16 @@ class CRUD extends Model\Callback {
 		// we don't face double inserts
 		// @TODO since this was added late in the lifecycle of model design, there already
 		// exist many create callbacks - until this is cleaned up, we have to specifically
-		// check for the existence of create
-		$callbacks = &$model->reference('callbacks');
 		
-		if ($model->send('hasCallbacks', 'delete', 'around') && 
-		    count($callbacks['delete']['around']) == 1)      {
+		if ($model->send('hasCallbacks', 'delete', 'around')) {
 		    	
 			// @TODO replace with a flexible mechanism for deleting records; especially consider composite
 			// keys
-			$table = $model->send('entity');
-			$pk    = $model->primaryKeyName();
+			$table = $model::send('entity');
+			$pk    = $model::primaryKey();
 								
-			if ($model->send('hasCompositeKeys')) {
-				foreach($model->reference('primaryKeys') as $key) {
+			if ($model::send('hasCompositeKeys')) {
+				foreach($pk as $key) {
 					$conditions[] = "$key = ?";		
 				}
 			}

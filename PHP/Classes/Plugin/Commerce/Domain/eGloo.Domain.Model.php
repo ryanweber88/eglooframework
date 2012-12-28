@@ -1523,7 +1523,7 @@ abstract class Model extends Delegator
 		// upon the developer that they do not do an explicit call on create
 				
 		else if ( \eGloo\Utilities\Collection::isHash($arguments = $arguments[0]) ) {
-			$model     = new static($arguments);
+			$model = new static($arguments);
 			//$model->id = null;
 						
 
@@ -1970,7 +1970,7 @@ abstract class Model extends Delegator
 	 * Does the same as defineCallback, but first unsets an event + point callback stack and
 	 * pushes on new event
 	 */
-	protected static function setCallback($event, $mixed, $lambda = null) {
+	protected function setCallback($event, $mixed, $lambda = null) {
 		
 		// assign empty array to callback stack, effectively
 		// unsetting all callbacks	
@@ -2126,7 +2126,10 @@ abstract class Model extends Delegator
 						}
 						// attempt to retrieve instance from pool, if it is not available, return
 						// "fallback" result from pool; 
-						$set[] = $manager->find($instance, $key, function($class) use ($record) {
+
+						$set[] = $manager->find(static::singleton(), $key, function($class) 
+							use ($record) {
+
 							return new $class($record);
 						});					
 					}
@@ -2388,6 +2391,7 @@ abstract class Model extends Delegator
 		// check for callback shortcut methods; instead of running 
 		// defineCallback, we can run this->before_create 
 		if (preg_match('/^(before|after|around)_(.+?)$/i', $name, $match)) {
+
 
 			return call_user_func_array(
 				static::defineMethod($name, function($mixed = null) use ($match) {
@@ -2830,6 +2834,8 @@ abstract class Model extends Delegator
 	 */
 	public static function primaryKey() {
 
+		// @TODO below should be cached..
+		
 		// attempt to retrieve primary key from data source
 		if (($keys = Data::primaryKey(static::entity()))) {
 			

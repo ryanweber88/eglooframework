@@ -213,7 +213,18 @@ abstract class Object {
 		} else if (isset($key[0]) && $key[0] == '*') {
 			$trace      = debug_backtrace(2)[1];
 			$key        = $trace['file'] . $trace['line'] . $key;	
-			$initialKey = substr($initialKey, 1); 		
+			$initialKey = substr($initialKey, 1); 
+
+			// a second star indicates the usage of fully
+			// qualified namespace as key
+			if (isset($initialKey[0]) && $initialKey[0] == '*') {	
+				$key = $trace['file'] . $trace['line'] . 
+				       static::classnamefull() . 
+				       $key;
+
+				$initialKey = substr($initialKey, 1); 
+
+			}
 		}		
 			
 
@@ -421,12 +432,14 @@ abstract class Object {
 		// allow for array passing to we do an explicit
 		// check to see if an array was passed as second
 		// argument and flattan
+		// @TODO why are we flattening here??
 
 		$arguments = array_slice(func_get_args(), 1); 
 
 		if (count($arguments) == 1 && is_array($arguments[0])) {
-			$arguments = Utilities\Collection::flatten($arguments);
+			//$arguments = Utilities\Collection::flatten($arguments);
 		}
+
 
 
 		// first we attempt to get method, wrapped within a
@@ -443,7 +456,7 @@ abstract class Object {
 			// ever. Also, if method happens to be static, then
 			// passed receiver must be null @wtfphp
 			return call_user_func_array(
-				$lambda, [ $arguments ]
+				$lambda, $arguments
 			);
 
 

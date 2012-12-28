@@ -59,10 +59,10 @@ $isValidRequest = $requestValidator->validateAndProcess( $requestInfoBean );
 
 $test = new \Common\Domain\Model\TestMeSilly;
 $test = \Common\Domain\Model\TestMeSilly::find(15);
-echo $test->TestMeSilly->id;
+echo $test->save();
 //$test->save();
 
-exit('asdf');
+exit('asdff');
 
 // If the request is valid, process it.  Otherwise, log it and die
 if ( $isValidRequest ) {
