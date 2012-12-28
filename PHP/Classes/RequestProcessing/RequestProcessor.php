@@ -82,6 +82,15 @@ abstract class RequestProcessor {
 		echo "Please implement processErrorRequest()";
 	}
 
+	// Framework before
+	public function _internalBefore() {
+
+	}
+
+	// Framework after
+	public function _internalAfter() {
+
+	}
 
     // TODO we need to make a templated method for processing
     // both the header information and then the content information

@@ -327,15 +327,42 @@ class PostgreSQLDBConnection extends DBConnection {
 		$fields = explode(' ', $conditions);
 
 		$sql = "SELECT
-					c.*
+					*
 				FROM
-					information_schema.constraint_column_usage c
+					( -- The table that we're looking at to determine its constraints.
+						SELECT
+							tc.*,
+							ku.column_name as column_name_lcl,
+							ku.ordinal_position as ordinal_position_lcl,
+							ku.position_in_unique_constraint as position_in_unique_constraint_lcl,
+							rc.unique_constraint_catalog,
+							rc.unique_constraint_schema,
+							rc.unique_constraint_name,
+							rc.match_option,
+							rc.update_rule,
+							rc.delete_rule
+						FROM
+							information_schema.table_constraints tc
+							LEFT JOIN information_schema.key_column_usage ku
+								ON tc.constraint_name=ku.constraint_name
+							LEFT JOIN information_schema.referential_constraints rc
+								ON tc.constraint_name=rc.constraint_name
+					) lcl
+					LEFT JOIN ( -- The table FKs are referencing
+						SELECT
+							ku.*
+						FROM
+							information_schema.table_constraints tc
+							INNER JOIN information_schema.key_column_usage ku
+								ON tc.constraint_name=ku.constraint_name
+					) ref ON lcl.unique_constraint_name=ref.constraint_name
+						AND lcl.position_in_unique_constraint_lcl=ref.ordinal_position
 				WHERE
-					c.table_schema = ?
+					lcl.table_schema = ?
 					AND (";
 
 		for( $i = 0; $i < count($fields); $i++ ) {
-			$sql .= 'c.column_name = ?';
+			$sql .= 'lcl.column_name_lcl = ?';
 
 			if ( ($i + 1) < count($fields) ) {
 				$sql .= ' or ';
@@ -345,7 +372,7 @@ class PostgreSQLDBConnection extends DBConnection {
 		$fields[] = strtolower($class);
 
 		$sql .=
-					") AND c.table_name = ?;";
+					") AND lcl.table_name = ?;";
 
 		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
 
@@ -365,13 +392,46 @@ class PostgreSQLDBConnection extends DBConnection {
 
 		$fields = [strtolower($class)];
 
-		$sql = "SELECT
+/*		$sql = "SELECT
 					t.*
 				FROM
 					information_schema.table_constraints t
+				WHERE */
+		$sql = "SELECT
+					*
+				FROM
+					( -- The table that we're looking at to determine its constraints.
+						SELECT
+							tc.*,
+							ku.column_name as column_name_lcl,
+							ku.ordinal_position as ordinal_position_lcl,
+							ku.position_in_unique_constraint as position_in_unique_constraint_lcl,
+							rc.unique_constraint_catalog,
+							rc.unique_constraint_schema,
+							rc.unique_constraint_name,
+							rc.match_option,
+							rc.update_rule,
+							rc.delete_rule
+						FROM
+							information_schema.table_constraints tc
+							LEFT JOIN information_schema.key_column_usage ku
+								ON tc.constraint_name=ku.constraint_name
+							LEFT JOIN information_schema.referential_constraints rc
+								ON tc.constraint_name=rc.constraint_name
+					) lcl
+					LEFT JOIN ( -- The table FKs are referencing
+						SELECT
+							ku.*
+						FROM
+							information_schema.table_constraints tc
+							INNER JOIN information_schema.key_column_usage ku
+								ON tc.constraint_name=ku.constraint_name
+					) ref ON lcl.unique_constraint_name=ref.constraint_name
+						AND lcl.position_in_unique_constraint_lcl=ref.ordinal_position
 				WHERE
-					t.table_schema = ?
-					AND t.table_name = ?;";
+
+					lcl.table_schema = ?
+					AND lcl.table_name = ?;";
 
 		$connection = Configuration::getDatabaseConnectionInfo(static::$connection_name);
 

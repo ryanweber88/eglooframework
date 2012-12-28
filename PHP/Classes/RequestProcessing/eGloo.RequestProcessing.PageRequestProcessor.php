@@ -122,7 +122,40 @@ class PageRequestProcessor extends RequestProcessor {
 			$uri_args = preg_replace('~^/~', '', $uri_args);
 			$uri_args = preg_replace('~/$~', '', $uri_args);
 
-			$uri_args = explode('/', trim($uri_args));
+			$uri_args_to_parse = explode('/', trim($uri_args));
+			$uri_args = [];
+
+			$named_pairs = $uri_args = [];
+
+			foreach( $uri_args_to_parse as $key => $uri_arg_to_parse ) {
+				if ( strpos($uri_arg_to_parse, ':' ) !== false ) {
+					$pair_set = explode(':', $uri_arg_to_parse);
+
+					if ( isset($named_pairs[$pair_set[0]]) ) {
+						if ( !is_array($named_pairs[$pair_set[0]]) ) {
+							$named_pairs[$pair_set[0]] = [$named_pairs[$pair_set[0]]];
+						}
+
+						$named_pairs[$pair_set[0]][] = $pair_set[1];
+					} else {
+						$named_pairs[$pair_set[0]] = $pair_set[1];
+					}
+				} else {
+					$uri_args[] = $uri_arg_to_parse;
+				}
+			}
+
+			if ( !empty($named_pairs ) ) {
+				if ( ($validator_class = $this->bean->getRequestValidator()) !== null ) {
+					foreach( $named_pairs as $key => $value ) {
+						$this->bean->setUnvalidatedGET( $key, $value );
+					}
+				} else {
+					foreach( $named_pairs as $key => $value ) {
+						$this->bean->setGET( $key, $value );
+					}
+				}
+			}
 
 			$uri_pairs = $matches = [];
 
@@ -149,7 +182,12 @@ class PageRequestProcessor extends RequestProcessor {
 					foreach( $match_list[0] as $match_var ) {
 						$var_name = str_replace(':', '', $match_var);
 						$uri_pairs[$var_name] = array_shift($uri_args);
-						$this->bean->setGET( $var_name, $uri_pairs[$var_name] );
+
+						if ( ($validator_class = $this->bean->getRequestValidator()) !== null ) {
+							$this->bean->setUnvalidatedGET( $var_name, $uri_pairs[$var_name] );
+						} else {
+							$this->bean->setGET( $var_name, $uri_pairs[$var_name] );
+						}
 					}
 
 					$action = $final_action;

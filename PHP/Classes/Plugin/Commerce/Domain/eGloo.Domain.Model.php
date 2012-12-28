@@ -2591,7 +2591,7 @@ abstract class Model extends Delegator
 					$data = $class::sendStatic('data');
 
 					$result = call_user_func_array(
-						array($data, 'definitions_for_fields'), [$conditions, $class]
+						array($data, 'definitions_for_fields'), [$conditions, $class::entityName()]
 					);
 				}
 				catch(\Exception $pass) {
@@ -2615,7 +2615,7 @@ abstract class Model extends Delegator
 					$data = $class::sendStatic('data');
 
 					$result = call_user_func(
-						array($data, 'constraints_for_table'), $class
+						array($data, 'constraints_for_table'), $class::entityName()
 					);
 				}
 				catch(\Exception $pass) {
@@ -2648,7 +2648,7 @@ abstract class Model extends Delegator
 					$data = $class::sendStatic('data');
 
 					$result = call_user_func_array(
-						array($data, 'constraints_for_fields'), [$conditions, $class]
+						array($data, 'constraints_for_fields'), [$conditions, $class::entityName()]
 					);
 				}
 				catch(\Exception $pass) {
@@ -2670,7 +2670,7 @@ abstract class Model extends Delegator
 					$data = $class::sendStatic('data');
 
 					$result = call_user_func(
-						array($data, 'field_definitions'), $class
+						array($data, 'field_definitions'), $class::entityName()
 					);
 				}
 				catch(\Exception $pass) {

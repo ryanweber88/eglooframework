@@ -79,6 +79,7 @@ if ( $isValidRequest ) {
 		$controller = $rp = &$requestProcessor;
 	}
 
+	$requestProcessor->_internalBefore();
 
 	if ( !($requestProcessor instanceof \RequestProcessorDecorator) &&
 		 method_exists($requestProcessor, 'before' )) {
@@ -93,6 +94,8 @@ if ( $isValidRequest ) {
 
 		$requestProcessor->after();
 	}
+
+	$requestProcessor->_internalAfter();
 } else {
 	$errorRequestProcessor = \RequestProcessorFactory::getErrorRequestProcessor( $requestInfoBean );
 
