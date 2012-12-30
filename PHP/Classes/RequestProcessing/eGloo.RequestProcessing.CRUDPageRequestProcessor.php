@@ -4,6 +4,9 @@ namespace eGloo\RequestProcessing;
 
 use \eGloo\RequestProcessing\PageRequestProcessor;
 
+use \eGloo\Configuration as Configuration;
+use \eGloo\Utility\Logger as Logger;
+
 /**
  * CRUDPageRequestProcessor Class File
  *
@@ -48,7 +51,14 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 	protected $_build_default_form = true;
 
 	protected $_defaultFormObj = null;
+
+	protected $_default_model_base = null;
 	protected $_default_model_name = null;
+
+	public function __construct() {
+		static::attachObserver( $this, ['update_action', 'invoke_action'] );
+		parent::__construct();
+	}
 
 	protected $routes = [
 		'index' => [
@@ -77,7 +87,10 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 		],
 		'update' => [
 			'methods' => ['POST'],
-			'matches' => ['@controller/:id'],
+			'matches' => [
+				'@controller/:id',
+				'@controller/:id/update'
+			],
 		],
 		'show' => [
 			'methods' => ['GET'],
@@ -95,13 +108,13 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 	}
 
 	// create /controller/ action POST
-	protected function create( $validation_result = null )  { }
+	protected function create( $validation_result = null )  {echo_r('vagina'); }
 
 	// edit /controller/edit/:id action GET
 	protected function edit( $validation_result = null )    { }
 
 	// update /controller/:id action PUT
-	protected function update( $validation_result = null )    { }
+	protected function update( $validation_result = null )    { echo_r ('dick'); }
 
 	// show /controller/:id action GET
 	protected function show( $validation_result = null )    { }
@@ -116,13 +129,13 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 		}
 
 		if ( isset($this->_default_model_name) ) {
-			$model_base = substr($this->_default_model_name, strrpos($this->_default_model_name, '\\') +1 );
+			$this->_default_model_base = $model_base = substr($this->_default_model_name, strrpos($this->_default_model_name, '\\') +1 );
 			$model_name_space = substr($this->_default_model_name, 0, strrpos($this->_default_model_name, '\\') );
 		} else {
 			$self_name = get_called_class();
 			// $this->_default_model_name = get_called_class();
 
-			$model_base = substr( $self_name, 0, strpos($self_name, 'RequestProcessor') );
+			$this->_default_model_base = $model_base = substr( $self_name, 0, strpos($self_name, 'RequestProcessor') );
 
 			if ( class_exists( '\\' . $model_base, true) ) {
 				$this->_default_model_name = '\\' . $model_base;
@@ -139,7 +152,8 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 
 		if ( isset($this->_default_model_name) && class_exists($this->_default_model_name, true) ) {
 			$formObj = new \ValidatedForm( strtolower($model_base) );
-			$formObj->setAction( strtolower($model_base) . '/create');
+			// $formObj->setAction( strtolower($model_base) . '/create');
+			$formObj->setAction( Configuration::getRewriteBase() . strtolower($model_base) );
 
 			$form_model_class = $this->_default_model_name;
 
@@ -248,6 +262,9 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 				$formObj->addFormField( $field_name, $fieldObj );
 			}
 
+			$submitFormField = new \ValidatedFormField( 'submit' );
+			$submitFormField->setFormFieldType( 'submit' )->setValue( '' );
+
 			$this->_default_form = $formObj;
 		}
 	}
@@ -264,6 +281,53 @@ class CRUDPageRequestProcessor extends PageRequestProcessor {
 
 	protected function limitTo( $routes_allowed ) {
 		// TODO
+	}
+
+	protected function receiveSubjectUpdate( $event, $__mixed ) {
+		// echo_r('Event ' . $event . ' with value ' . $__mixed );
+
+		switch( $event ) {
+			case 'update_action' :
+				$submit = new \ValidatedFormField('submit');
+				$field_value = null;
+				$form_action = null;
+
+				switch( $__mixed ) {
+					case '_new' :
+						$field_value = 'Create';
+						$form_action = '/create';
+						break;
+					case 'edit' :
+						$field_value = 'Update';
+
+						if ( isset($this->bean['id']) ) {
+							$form_action = '/' . $this->bean['id'] . '/update';
+						} else {
+							$form_action = '/update';
+						}
+
+						break;
+					default :
+						$field_value =
+							trim(\eGlooString::toPrettyPrint( $__mixed, '_', true, true ));
+						break;
+				}
+
+				$submit->setFormFieldType('submit')->setValue( $field_value );
+
+				if ( $this->_default_form->issetFormField('submit') ) {
+					$this->_default_form->removeFormField('submit');
+				}
+
+				$this->_default_form->addFormField('submit', $submit);
+				$this->_default_form->setAction( Configuration::getRewriteBase() .
+					strtolower($this->_default_model_base) . $form_action );
+
+				break;
+			default;
+				break;
+		}
+
 	}
 
 }

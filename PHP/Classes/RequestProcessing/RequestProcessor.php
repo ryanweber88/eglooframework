@@ -41,6 +41,12 @@ abstract class RequestProcessor {
 	/* Public Static Members */
 	public static $calledClass = null;
 
+	/* Reference to all instances created of RP class or subclass */
+	protected static $_instances = [];
+
+	/* All registered event observers */
+	protected static $_event_observers = [];
+
 	/* Protected Data Members */
 	protected $decoratorInfoBean = null;
 	protected $bean              = null;
@@ -62,6 +68,9 @@ abstract class RequestProcessor {
 		// frameworks combine the concept of bean and request
 		// as request
 		$this->request = HTTP\Request::instance();
+
+		// record a reference to this
+		static::$_instances[spl_object_hash($this)] = $this;
 	}
 
 	public static function getClass() {
@@ -247,5 +256,30 @@ abstract class RequestProcessor {
 	public static function getAttributeSets() {
 		return array();
 	}
+
+	// Partial observer pattern
+	protected static function attachObserver( $observer, $events = ['all'] ) {
+		static::$_event_observers[spl_object_hash($observer)] = [
+			'observer' => $observer,
+			'events' => $events,
+		];
+	}
+
+	protected static function detachObserver( $observer ) {
+		unset(static::$_event_observers[spl_object_hash($observer)]);
+	}
+
+	protected static function sendNotifyObservers( $event, $__mixed ) {
+		foreach( static::$_event_observers as $observer_def ) {
+			$observer = $observer_def['observer'];
+			$events = $observer_def['events'];
+
+			if ( in_array($event, $events) || in_array('all', $events) ) {
+				$observer->receiveSubjectUpdate( $event, $__mixed );
+			}
+		}
+	}
+
+	protected function receiveSubjectUpdate( $event, $__mixed ) {}
 
 }

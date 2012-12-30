@@ -81,6 +81,8 @@ class PageRequestProcessor extends RequestProcessor {
 		$request_class = $this->bean->getRequestClass();
 		$action = $this->bean->getRequestID();
 
+		static::sendNotifyObservers( 'update_action', $action );
+
 		if ( Configuration::getRewriteBase() !== '/' ) {
 			$uri = str_replace( Configuration::getRewriteBase(), '', Request::getRequestURI() );
 		} else {
@@ -103,6 +105,8 @@ class PageRequestProcessor extends RequestProcessor {
 			 	 in_array($method, $this->routes[$slug]['methods']) ) {
 
 				$action = $slug;
+				static::sendNotifyObservers( 'update_action', $action );
+
 				$invoke_action = true;
 			}
 
@@ -113,6 +117,8 @@ class PageRequestProcessor extends RequestProcessor {
 			 in_array($method, $this->routes['egDefault']['methods']) ) {
 
 			$action = 'egDefault';
+			static::sendNotifyObservers( 'update_action', $action );
+
 			$invoke_action = true;
 		}
 
@@ -191,12 +197,15 @@ class PageRequestProcessor extends RequestProcessor {
 					}
 
 					$action = $final_action;
+					static::sendNotifyObservers( 'update_action', $action );
+
 					$action_matches = [];
 
 					preg_match('~#([a-zA-Z0-9_]+)~', $action, $action_matches);
 
 					if ( !empty($action_matches) ) {
 						$action = $action_matches[1];
+						static::sendNotifyObservers( 'update_action', $action );
 					}
 
 					break;
@@ -207,12 +216,16 @@ class PageRequestProcessor extends RequestProcessor {
 				$validation_result = $validator_class::validate( $this->bean, $action, $uri_pairs, $this );
 
 				$action = isset($validation_result['action']) ? $validation_result['action'] : $action;
+				static::sendNotifyObservers( 'update_action', $action );
 			} else {
 				$validation_result = null;
 			}
 
 			$this->action = $action;
+
 			$retVal = $this->$action( $validation_result );
+
+			static::sendNotifyObservers( 'invoke_action', $action );
 		}
 
 		return $retVal;
